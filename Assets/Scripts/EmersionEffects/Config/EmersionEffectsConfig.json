@@ -1,0 +1,269 @@
+{
+  "version": "1.0.0",
+  "description": "PLAGA '44 Emersion Effects Configuration - All thresholds and parameters for physiology-as-controller VR effects",
+  "targetPlatform": "Meta Quest 3/3S",
+
+  "playerState": {
+    "healthRange": { "min": 0.0, "max": 100.0, "default": 100.0 },
+    "staminaRange": { "min": 0.0, "max": 100.0, "default": 100.0 },
+    "mentalHealthRange": { "min": 0.0, "max": 100.0, "default": 100.0 },
+    "bodyTemperatureRange": { "min": 30.0, "max": 42.0, "default": 36.6, "unit": "celsius" },
+    "hydrationRange": { "min": 0.0, "max": 100.0, "default": 80.0 },
+    "hungerRange": { "min": 0.0, "max": 100.0, "default": 80.0 },
+    "fearRange": { "min": 0.0, "max": 100.0, "default": 0.0 },
+    "stressRange": { "min": 0.0, "max": 100.0, "default": 10.0 }
+  },
+
+  "audio": {
+    "masterVolume": 1.0,
+    "spatialBlend3D": 1.0,
+
+    "ambient": {
+      "crossfadeDuration": 3.0,
+      "environments": {
+        "forest": {
+          "baseVolume": 0.6,
+          "layers": ["wind_trees", "birds_distant", "insects", "leaves_rustle"],
+          "nightVariant": true,
+          "weatherResponsive": true
+        },
+        "urban": {
+          "baseVolume": 0.5,
+          "layers": ["rubble_creak", "distant_gunfire", "wind_ruins", "debris_settling"],
+          "nightVariant": true,
+          "weatherResponsive": true
+        },
+        "underground": {
+          "baseVolume": 0.4,
+          "layers": ["water_drip", "echo_ambient", "pipe_groan", "rats_scurry"],
+          "nightVariant": false,
+          "weatherResponsive": false
+        }
+      },
+      "weather": {
+        "rain": {
+          "lightVolume": 0.3,
+          "heavyVolume": 0.7,
+          "indoorDampening": 0.4
+        },
+        "wind": {
+          "lightVolume": 0.2,
+          "strongVolume": 0.6,
+          "indoorDampening": 0.3
+        },
+        "thunder": {
+          "minInterval": 8.0,
+          "maxInterval": 30.0,
+          "volume": 0.9,
+          "rumbleDuration": 2.5
+        }
+      }
+    },
+
+    "heartbeat": {
+      "restingBPM": 70,
+      "maxBPM": 180,
+      "volumeAtRest": 0.0,
+      "volumeAtMax": 0.8,
+      "hearingThresholdBPM": 100,
+      "bpmIncreasePerStressUnit": 1.2,
+      "bpmIncreasePerExertionUnit": 0.8,
+      "bpmIncreaseOnInjury": 30,
+      "recoveryRatePerSecond": 2.0,
+      "lowHealthBPMBoost": 20,
+      "lowHealthThreshold": 30.0,
+      "stereoWidening": 0.3,
+      "bassBoostAtHighBPM": true
+    },
+
+    "breathing": {
+      "restingRate": 14.0,
+      "maxRate": 35.0,
+      "volumeAtRest": 0.05,
+      "volumeAtMax": 0.7,
+      "fatigueBreathingThreshold": 40.0,
+      "coldBreathingThreshold": 34.0,
+      "panting": {
+        "staminaThreshold": 20.0,
+        "volumeMultiplier": 1.3,
+        "rateMultiplier": 1.5
+      },
+      "coldBreath": {
+        "temperatureThreshold": 5.0,
+        "visibleBreathAlpha": 0.6,
+        "breathCloudDuration": 1.5,
+        "breathCloudScale": 0.15
+      },
+      "injuredBreathing": {
+        "healthThreshold": 40.0,
+        "wheezingChance": 0.3,
+        "painGaspChance": 0.15
+      }
+    },
+
+    "stressAudio": {
+      "tinnitus": {
+        "onsetStressLevel": 60.0,
+        "maxStressLevel": 95.0,
+        "frequency": 4000.0,
+        "minVolume": 0.0,
+        "maxVolume": 0.5,
+        "fadeDuration": 2.0,
+        "pitchVariation": 0.1
+      },
+      "muffledHearing": {
+        "onsetStressLevel": 50.0,
+        "lowPassCutoffNormal": 22000.0,
+        "lowPassCutoffMuffled": 800.0,
+        "transitionSpeed": 3.0,
+        "explosionMuffleDuration": 5.0,
+        "explosionCutoff": 400.0
+      },
+      "hallucinations": {
+        "onsetMentalHealth": 25.0,
+        "criticalMentalHealth": 10.0,
+        "minInterval": 30.0,
+        "maxInterval": 120.0,
+        "criticalMinInterval": 10.0,
+        "criticalMaxInterval": 30.0,
+        "types": ["whispers", "footsteps_phantom", "name_calling", "distant_screams", "radio_static"],
+        "volume": 0.35,
+        "spatialRandomization": true,
+        "maxSimultaneous": 2
+      }
+    }
+  },
+
+  "visual": {
+    "visionEffects": {
+      "tunnelVision": {
+        "onsetHealthPercent": 40.0,
+        "maxEffectHealthPercent": 10.0,
+        "minFOVMultiplier": 0.55,
+        "vignetteIntensityMax": 0.8,
+        "transitionSpeed": 2.0
+      },
+      "blur": {
+        "onsetHealthPercent": 35.0,
+        "maxBlurRadius": 4.0,
+        "bloodLossBlurMultiplier": 1.5,
+        "concussionBlurDuration": 8.0,
+        "transitionSpeed": 1.5
+      },
+      "colorDesaturation": {
+        "onsetHealthPercent": 50.0,
+        "maxDesaturation": 0.85,
+        "nearDeathDesaturation": 0.95,
+        "nearDeathThreshold": 10.0,
+        "transitionSpeed": 1.0
+      },
+      "bloodSplatter": {
+        "onsetHealthPercent": 70.0,
+        "maxOverlayAlpha": 0.6,
+        "pulseWithHeartbeat": true,
+        "clearSpeed": 0.1
+      }
+    },
+
+    "hypothermia": {
+      "screenFrost": {
+        "onsetTemperature": 35.5,
+        "maxEffectTemperature": 31.0,
+        "frostCoverageMax": 0.7,
+        "frostEdgeStart": 0.3,
+        "crystalFormationSpeed": 0.5,
+        "breathFogOnLens": true,
+        "breathFogAlpha": 0.3,
+        "breathFogInterval": 4.0
+      },
+      "shivering": {
+        "onsetTemperature": 35.0,
+        "maxEffectTemperature": 32.0,
+        "cameraShakeAmplitude": 0.003,
+        "cameraShakeFrequency": 8.0,
+        "handShakeAmplitude": 0.005,
+        "handShakeFrequency": 10.0,
+        "intensityMultiplierMax": 3.0
+      },
+      "movementSlowdown": {
+        "onsetTemperature": 35.0,
+        "maxEffectTemperature": 32.0,
+        "minSpeedMultiplier": 0.4,
+        "turnSpeedMultiplier": 0.6,
+        "stumblingChance": 0.1,
+        "stumblingInterval": 5.0
+      },
+      "colorShift": {
+        "onsetTemperature": 35.0,
+        "blueShiftMax": 0.3,
+        "saturationReduction": 0.4
+      }
+    },
+
+    "dehydration": {
+      "visualDistortion": {
+        "onsetHydration": 40.0,
+        "maxEffectHydration": 10.0,
+        "heatHazeIntensity": 0.03,
+        "chromaticAberration": 0.005,
+        "waveDistortionAmplitude": 0.02,
+        "waveDistortionFrequency": 1.5
+      },
+      "dizziness": {
+        "onsetHydration": 30.0,
+        "maxEffectHydration": 10.0,
+        "cameraSwayAmplitude": 0.015,
+        "cameraSwayFrequency": 0.5,
+        "doubleVisionThreshold": 15.0,
+        "doubleVisionOffset": 0.03
+      },
+      "blackout": {
+        "hydrationThreshold": 5.0,
+        "warningHydration": 12.0,
+        "warningFlickerRate": 0.5,
+        "blackoutFadeDuration": 3.0,
+        "blackoutDuration": 5.0,
+        "recoveryFadeDuration": 4.0,
+        "minTimeBetweenBlackouts": 30.0
+      }
+    }
+  },
+
+  "vrTremor": {
+    "handTremor": {
+      "baseAmplitude": 0.0005,
+      "maxAmplitude": 0.008,
+      "baseFrequency": 6.0,
+      "maxFrequency": 12.0,
+      "noiseOctaves": 3,
+      "coldMultiplier": 1.5,
+      "hungerMultiplier": 1.2,
+      "injuryMultiplier": 2.0,
+      "fearMultiplier": 1.8,
+      "fatigueMultiplier": 1.3,
+      "aimingMultiplier": 0.7,
+      "holdBreathReduction": 0.4,
+      "holdBreathMaxDuration": 6.0,
+      "recoverySpeed": 0.5,
+      "dominantHandReduction": 0.15,
+      "twoHandedReduction": 0.4
+    },
+    "weaponSway": {
+      "enabled": true,
+      "baseSwayAmplitude": 0.002,
+      "maxSwayAmplitude": 0.015,
+      "swayFrequency": 0.8,
+      "fatigueSwayMultiplier": 2.0
+    }
+  },
+
+  "comfortSettings": {
+    "enableVignetteOnMovement": true,
+    "maxCameraShakeMultiplier": 1.0,
+    "reduceFlickerEffects": false,
+    "blackoutFadeOnly": true,
+    "tremorIntensityScale": 1.0,
+    "disableHallucinations": false,
+    "subtitlesForAudioEffects": false
+  }
+}
