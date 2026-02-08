@@ -1,0 +1,123 @@
+{
+  "regionName": "Jura Krakowsko-Czestochowska",
+  "regionDescription": "Upland region in southern Poland characterized by Jurassic limestone formations, caves, mixed and coniferous forests, and stream valleys. Part of the Ojcowski Park Narodowy area.",
+  "mapSizeKm": 20.0,
+  "minElevationM": 220.0,
+  "maxElevationM": 515.0,
+  "forestCoveragePercent": 55.0,
+  "limestoneCoveragePercent": 15.0,
+  "waterBodyPercent": 5.0,
+  "averageTreeDensityPerHectare": 400.0,
+  "caveFrequencyPerKm2": 2.5,
+
+  "terrainDistribution": {
+    "Forest_Mixed": 0.30,
+    "Forest_Coniferous": 0.20,
+    "LimestoneRocks": 0.12,
+    "Cave": 0.03,
+    "Stream": 0.05,
+    "Path_Forest": 0.08,
+    "Path_Mountain": 0.04,
+    "Clearing": 0.06,
+    "Marshland": 0.02,
+    "Village_Edge": 0.04,
+    "Urban_Ruins": 0.02,
+    "Field_Agricultural": 0.04
+  },
+
+  "seasonalParameters": {
+    "spring": {
+      "temperatureMinC": 2.0,
+      "temperatureMaxC": 18.0,
+      "temperatureAvgC": 10.0,
+      "sunriseHour": 5.5,
+      "sunsetHour": 19.5,
+      "rainfallProbability": 0.35,
+      "snowProbability": 0.05,
+      "fogProbability": 0.15,
+      "groundMoisture": 0.6,
+      "leafCoverage": 0.5,
+      "mosquitoDensityMultiplier": 0.3,
+      "foragingResourceMultiplier": 0.5,
+      "notes": "Wiosna: temperatury rosna, pojawiaja sie pierwsze jagody i maliny na terenach podmoklych. Latwiejsze zdobywanie chrustu i kory brzozy. Deszcze powoduja obnizenie temperatury i sliska sciolke."
+    },
+    "summer": {
+      "temperatureMinC": 15.0,
+      "temperatureMaxC": 35.0,
+      "temperatureAvgC": 22.0,
+      "sunriseHour": 4.5,
+      "sunsetHour": 21.0,
+      "rainfallProbability": 0.20,
+      "snowProbability": 0.0,
+      "fogProbability": 0.10,
+      "groundMoisture": 0.3,
+      "leafCoverage": 1.0,
+      "mosquitoDensityMultiplier": 1.0,
+      "foragingResourceMultiplier": 1.0,
+      "notes": "Lato: cieplo, jagody maliny jezyny w lasach. Ryby w czystych strumieniach (pstragi, wegorze). Marchew ziemniaki zboze jablka na polach. UWAGA: udar sloneczny, odwodnienie, komary na terenach podmoklych."
+    },
+    "autumn": {
+      "temperatureMinC": 3.0,
+      "temperatureMaxC": 18.0,
+      "temperatureAvgC": 9.0,
+      "sunriseHour": 6.5,
+      "sunsetHour": 17.5,
+      "rainfallProbability": 0.40,
+      "snowProbability": 0.05,
+      "fogProbability": 0.20,
+      "groundMoisture": 0.7,
+      "leafCoverage": 0.3,
+      "mosquitoDensityMultiplier": 0.2,
+      "foragingResourceMultiplier": 0.7,
+      "notes": "Jesien: grzyby od konca wrzesnia (RYZYKO ZATRUCIA bez znajomosci gatunkow!). Wczesniej robi sie ciemno (6:00-19:00). Sliska sciolka i kamienie wapienne. Przymrozki nocne i ranne. Deszcze ze sniegiem."
+    },
+    "winter": {
+      "temperatureMinC": -15.0,
+      "temperatureMaxC": 2.0,
+      "temperatureAvgC": -3.0,
+      "sunriseHour": 7.5,
+      "sunsetHour": 16.0,
+      "rainfallProbability": 0.15,
+      "snowProbability": 0.40,
+      "fogProbability": 0.10,
+      "groundMoisture": 0.2,
+      "leafCoverage": 0.0,
+      "mosquitoDensityMultiplier": 0.0,
+      "foragingResourceMultiplier": 0.1,
+      "notes": "Zima: najtrudniejsza pora roku do przezycia. Klopoty z znalezieniem pozywienia i rozpalaniem ognisk. Zagrozenie hipotermia i odmrozeniami. Oblodzenie skalek. Gruba pokrywa sniezna. Szukaj schronienia w lasach iglastych pod zwalonymi drzewami."
+    }
+  },
+
+  "treeSpecies": {
+    "mixed_forest": ["Buk (Beech)", "Leszczyna (Hazel)", "Brzoza (Birch)", "Grab (Hornbeam)", "Dab (Oak)"],
+    "coniferous_forest": ["Swierk (Spruce)", "Jodla (Fir)", "Sosna (Pine)"],
+    "notes": "Drzewa w lasach mieszanych powoli zaczynaja zarastac zielonymi liscmi buczyny, leszczyna, brzozy. Z wyjatkiem swierkow i jodel (iglaste - zielone caly rok)."
+  },
+
+  "waterSources": {
+    "streamDensityPerKm2": 1.5,
+    "cleanStreamProbability": 0.6,
+    "contaminatedStreamProbability": 0.25,
+    "toxicStreamProbability": 0.15,
+    "fishSpecies": ["Pstrag (Trout)", "Wegorz (Eel)"],
+    "notes": "W czystych rzekach lub strumieniach pojawiaja sie pstragi lub wegorze. UNIKAC zrodel wody w ktorych rozkladaja sie ciala zwierzat - ryzyko duru brzusznego, czerwonki, biegunki. Smierc w skrajnych przypadkach."
+  },
+
+  "hazards": {
+    "limestone_slip_wet": "Kawalki kamieni wapiennych sa sliskie po deszczu - ryzyko skrecenia kostki lub zlamania.",
+    "limestone_slip_ice": "Oblodzenie skalek zimą - ekstremalnie niebezpieczne poruszanie noca.",
+    "forest_floor_wet": "Sliska sciolka lesna po deszczu - ukryte galezie i kamienie.",
+    "snow_hidden_hazards": "Gruba pokrywa sniezna zakrywajaca sciolke lesna - przykryte galezie i resztki kamieni wapiennych.",
+    "night_movement": "Nocne poruszanie sie po lesie i terenach podgorskich utrudnione - ryzyko kontuzji.",
+    "mosquitoes_marshland": "Na terenach podmoklych latem - komary. Unikac blot i malych bagien do spania.",
+    "rabid_animals": "Zwierzeta podchodzace do ludzi bez strachu moga byc zarazone wscieklizna - biala gesta piana z pyska."
+  },
+
+  "shelterGuidelines": {
+    "winter": "Szukac miejsc w lasach mieszanych lub iglastych. Budowac szalasy z zwalonych galezi. Spac pod zwalonymi drzewami (jodly, swierki) - chronia przed deszczem i sniegiem.",
+    "spring": "Wybrac niewielki trojkat pomiedzy drzewami (40-70cm odleglosc) tak aby korony drzew laczqyly sie tworzac naturalny dach. Na sciolke polozyc galazki z liscmi.",
+    "summer": "Mozna spac w lesie bez ryzyka zamarzniecia. Unikac terenow podmoklych z komarami. Dym z ogniska odstrasza komary.",
+    "autumn": "Szukac zwolonych duzych drzew i pod nimi spac w rowach wykopanych saperka.",
+    "timing": "Szukanie miejsca do noclegu od godziny 16-tej maksymalnie."
+  }
+}
