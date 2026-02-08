@@ -1,0 +1,140 @@
+{
+  "version": "1.0.0",
+  "description": "PLAGA '44 UI Layout and Styling - CYBERNOMAD Palette",
+
+  "palette": {
+    "primary": "#00FF41",
+    "primaryDark": "#00CC33",
+    "secondary": "#FF6600",
+    "accent": "#4D99FF",
+    "danger": "#E61A1A",
+    "warning": "#FFA500",
+    "success": "#33CC33",
+    "cold": "#4D99FF",
+    "radiation": "#66FF33",
+    "background": "#0A0A0A",
+    "backgroundPanel": "#1A1A1A",
+    "backgroundOverlay": "rgba(5, 5, 5, 0.85)",
+    "textPrimary": "#00FF41",
+    "textSecondary": "#AAAAAA",
+    "textHighlight": "#FFFFFF",
+    "textDanger": "#FF3333",
+    "border": "#333333",
+    "borderActive": "#00FF41"
+  },
+
+  "fonts": {
+    "primary": "Courier",
+    "heading": "VT323",
+    "hud": "ShareTechMono",
+    "notes": {
+      "fontRecommendations": "VT323 and Share Tech Mono evoke terminal/CRT aesthetic. Fallback to Courier New."
+    }
+  },
+
+  "hud": {
+    "layout": {
+      "vitalBarsPosition": "bottom-left",
+      "compassPosition": "top-center",
+      "statusEffectsPosition": "top-right",
+      "notificationsPosition": "top-left"
+    },
+    "vitalBars": {
+      "width": 180,
+      "height": 12,
+      "spacing": 6,
+      "cornerRadius": 2,
+      "backgroundAlpha": 0.4,
+      "labelFontSize": 11,
+      "showLabels": true,
+      "showValues": true,
+      "bars": [
+        { "id": "health", "label": "HP", "icon": "icon_health", "order": 0 },
+        { "id": "hunger", "label": "GLOD", "icon": "icon_hunger", "order": 1 },
+        { "id": "thirst", "label": "WODA", "icon": "icon_thirst", "order": 2 },
+        { "id": "temperature", "label": "TEMP", "icon": "icon_temp", "order": 3 }
+      ]
+    },
+    "compass": {
+      "width": 400,
+      "height": 30,
+      "alpha": 0.7,
+      "showCardinalLabels": true,
+      "showDegrees": false,
+      "waypointMarkerSize": 16
+    },
+    "statusEffects": {
+      "iconSize": 32,
+      "spacing": 4,
+      "maxVisible": 6,
+      "criticalPulseSpeed": 3.0,
+      "showSeverityBar": true,
+      "showTimer": true
+    },
+    "animation": {
+      "barLerpSpeed": 5.0,
+      "criticalPulseSpeed": 2.0,
+      "fadeInDuration": 0.3,
+      "fadeOutDuration": 0.5
+    },
+    "warningThresholds": {
+      "critical": 20,
+      "warning": 40,
+      "temperatureNormalLow": 36.0,
+      "temperatureNormalHigh": 37.5,
+      "temperatureMin": 30.0,
+      "temperatureMax": 42.0
+    }
+  },
+
+  "menus": {
+    "mainMenu": {
+      "titleFontSize": 72,
+      "subtitleFontSize": 24,
+      "buttonFontSize": 18,
+      "buttonWidth": 300,
+      "buttonHeight": 50,
+      "buttonSpacing": 12,
+      "fadeInDuration": 1.5,
+      "scanlineEffect": true,
+      "crtCurvature": 0.02
+    },
+    "pauseMenu": {
+      "backgroundAlpha": 0.85,
+      "buttonFontSize": 16,
+      "buttonWidth": 260,
+      "buttonHeight": 44,
+      "buttonSpacing": 10,
+      "showGameInfo": true
+    },
+    "gameOverScreen": {
+      "fadeInDuration": 2.0,
+      "textRevealDelay": 1.0,
+      "statsRevealDelay": 3.0,
+      "buttonsRevealDelay": 5.0,
+      "overlayColor": "rgba(13, 0, 0, 0.9)",
+      "titleFontSize": 48,
+      "descriptionFontSize": 16,
+      "statsFontSize": 14
+    },
+    "saveLoadScreen": {
+      "entryHeight": 60,
+      "entrySpacing": 4,
+      "maxVisibleEntries": 8,
+      "showThumbnails": false,
+      "emptyMessage": "BRAK ZAPISANYCH GIER"
+    }
+  },
+
+  "vrSettings": {
+    "notes": "VR-specific overrides for HUD placement in world space",
+    "hudDistance": 2.5,
+    "hudScale": 0.001,
+    "hudFollowSpeed": 3.0,
+    "menuDistance": 3.0,
+    "menuScale": 0.002,
+    "pointerColor": "#00FF41",
+    "pointerWidth": 0.002,
+    "gazeActivationTime": 1.5
+  }
+}
