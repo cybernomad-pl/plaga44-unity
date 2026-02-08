@@ -1,0 +1,42 @@
+# Unity generated folders
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# Visual Studio / IDE
+*.csproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity meta files for generated assets
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+
+# System/crash files
+sysinfo.txt
+crashlytics-buildid.txt
+
+# Streaming assets meta
+/[Aa]ssets/[Ss]treamingAssets/*.meta
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Rider
+.idea/
