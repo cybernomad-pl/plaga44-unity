@@ -1,0 +1,295 @@
+{
+  "version": "1.0.0",
+  "description": "NPC spawn rates and behavior parameters for PLAGA '44 - per season and location type",
+
+  "globalSettings": {
+    "maxGlobalNPCs": 40,
+    "despawnDistance": 100,
+    "ambientSpawnIntervalSeconds": 20,
+    "threatScanRadiusMeters": 60,
+    "threatScanIntervalSeconds": 0.5
+  },
+
+  "npcTypes": {
+    "civilian": {
+      "maxActive": 15,
+      "spawnCooldownSeconds": 15,
+      "ambientWeight": 0.6,
+      "baseHealth": 100,
+      "moveSpeed": 2.5,
+      "detectionRadius": 10,
+      "informantChance": 0.15,
+      "suspicionGainRate": 0.05,
+      "suspicionDecayRate": 0.01,
+      "reportThreshold": 0.75,
+      "lynchThreshold": 0.90,
+      "tradeThreshold": 0.60,
+      "suspicionTriggers": {
+        "weaponVisible": 0.15,
+        "running": 0.03,
+        "nightTime": 0.05,
+        "looting": 0.10
+      }
+    },
+
+    "militaryPatrol": {
+      "maxActive": 8,
+      "spawnCooldownSeconds": 45,
+      "ambientWeight": 0.3,
+      "baseHealth": 150,
+      "moveSpeed": 2.5,
+      "combatMoveSpeed": 5.0,
+      "detectionRadius": 15,
+      "innerDetectionRadius": 8,
+      "alertRadius": 25,
+      "fieldOfViewAngle": 120,
+      "fireRate": 1.5,
+      "attackDamage": 15,
+      "attackRange": 30,
+      "investigationTimeSeconds": 10,
+      "alertEscalationTimeSeconds": 5,
+      "searchDurationSeconds": 20,
+      "callReinforcementRadius": 50,
+      "squadSize": 3
+    },
+
+    "criminal": {
+      "maxActive": 6,
+      "spawnCooldownSeconds": 40,
+      "ambientWeight": 0.25,
+      "baseHealth": 80,
+      "moveSpeed": 3.5,
+      "detectionRadius": 12,
+      "attackDamage": 12,
+      "attackRange": 2,
+      "fleeHealthThreshold": 0.3
+    },
+
+    "scavenger": {
+      "maxActive": 8,
+      "spawnCooldownSeconds": 30,
+      "ambientWeight": 0.35,
+      "baseHealth": 70,
+      "moveSpeed": 3.0,
+      "detectionRadius": 10,
+      "attackDamage": 8,
+      "attackRange": 2,
+      "fleeHealthThreshold": 0.4
+    },
+
+    "addict": {
+      "maxActive": 5,
+      "spawnCooldownSeconds": 35,
+      "ambientWeight": 0.2,
+      "baseHealth": 50,
+      "moveSpeed": 2.0,
+      "detectionRadius": 6,
+      "attackDamage": 5,
+      "attackRange": 1.5,
+      "fleeHealthThreshold": 0.5
+    },
+
+    "animals": {
+      "boar": {
+        "maxActive": 4,
+        "spawnCooldownSeconds": 60,
+        "ambientWeight": 0.2,
+        "baseHealth": 120,
+        "moveSpeed": 4.0,
+        "detectionRadius": 12,
+        "attackDamage": 25,
+        "attackRange": 2.5,
+        "aggressionBase": 0.6,
+        "fleeHealthThreshold": 0.15,
+        "territoryRadius": 20,
+        "chargeSpeed": 8,
+        "chargeCooldownSeconds": 5,
+        "rabiesChance": 0.05
+      },
+      "deer": {
+        "maxActive": 6,
+        "spawnCooldownSeconds": 40,
+        "ambientWeight": 0.35,
+        "baseHealth": 60,
+        "moveSpeed": 6.0,
+        "detectionRadius": 25,
+        "attackDamage": 5,
+        "attackRange": 1.0,
+        "aggressionBase": 0.0,
+        "fleeHealthThreshold": 0.9,
+        "territoryRadius": 25,
+        "rabiesChance": 0.02
+      },
+      "fox": {
+        "maxActive": 4,
+        "spawnCooldownSeconds": 50,
+        "ambientWeight": 0.2,
+        "baseHealth": 40,
+        "moveSpeed": 5.0,
+        "detectionRadius": 18,
+        "attackDamage": 8,
+        "attackRange": 1.5,
+        "aggressionBase": 0.1,
+        "fleeHealthThreshold": 0.5,
+        "territoryRadius": 15,
+        "rabiesChance": 0.15
+      },
+      "wolf": {
+        "maxActive": 5,
+        "spawnCooldownSeconds": 90,
+        "ambientWeight": 0.1,
+        "baseHealth": 100,
+        "moveSpeed": 5.5,
+        "detectionRadius": 20,
+        "attackDamage": 20,
+        "attackRange": 2.0,
+        "aggressionBase": 0.7,
+        "fleeHealthThreshold": 0.2,
+        "territoryRadius": 30,
+        "chargeSpeed": 7,
+        "chargeCooldownSeconds": 6,
+        "rabiesChance": 0.08
+      },
+      "dog": {
+        "maxActive": 5,
+        "spawnCooldownSeconds": 35,
+        "ambientWeight": 0.25,
+        "baseHealth": 50,
+        "moveSpeed": 4.5,
+        "detectionRadius": 15,
+        "attackDamage": 12,
+        "attackRange": 1.5,
+        "aggressionBase": "random(0.1, 0.7)",
+        "fleeHealthThreshold": 0.3,
+        "territoryRadius": 15,
+        "rabiesChance": 0.12
+      },
+      "rat": {
+        "maxActive": 10,
+        "spawnCooldownSeconds": 20,
+        "ambientWeight": 0.3,
+        "baseHealth": 10,
+        "moveSpeed": 3.0,
+        "detectionRadius": 5,
+        "attackDamage": 3,
+        "attackRange": 0.5,
+        "aggressionBase": 0.05,
+        "fleeHealthThreshold": 0.8,
+        "territoryRadius": 8,
+        "rabiesChance": 0.10
+      }
+    }
+  },
+
+  "seasonModifiers": {
+    "spring": {
+      "animalSpawnMultiplier": 1.2,
+      "militaryActivityMultiplier": 1.0,
+      "civilianActivityMultiplier": 1.1,
+      "criminalActivityMultiplier": 0.9,
+      "rabiesChanceMultiplier": 1.3,
+      "notes": "Animals more active, rabies season begins"
+    },
+    "summer": {
+      "animalSpawnMultiplier": 1.4,
+      "militaryActivityMultiplier": 1.2,
+      "civilianActivityMultiplier": 1.2,
+      "criminalActivityMultiplier": 1.0,
+      "rabiesChanceMultiplier": 1.5,
+      "notes": "Peak activity, highest rabies risk, longer patrol hours"
+    },
+    "autumn": {
+      "animalSpawnMultiplier": 1.1,
+      "militaryActivityMultiplier": 1.0,
+      "civilianActivityMultiplier": 1.0,
+      "criminalActivityMultiplier": 1.1,
+      "rabiesChanceMultiplier": 1.0,
+      "notes": "Animals preparing for winter, slight increase in crime"
+    },
+    "winter": {
+      "animalSpawnMultiplier": 0.4,
+      "militaryActivityMultiplier": 0.8,
+      "civilianActivityMultiplier": 0.7,
+      "criminalActivityMultiplier": 1.5,
+      "rabiesChanceMultiplier": 0.5,
+      "notes": "Fewer animals, reduced patrols, desperate criminals and scavengers"
+    }
+  },
+
+  "locationModifiers": {
+    "urban": {
+      "civilianMultiplier": 1.5,
+      "criminalMultiplier": 1.2,
+      "animalMultiplier": 0.3,
+      "militaryMultiplier": 1.0,
+      "dominantEncounters": ["civilian_group", "urban_scavengers", "stray_dogs"]
+    },
+    "forest": {
+      "civilianMultiplier": 0.2,
+      "criminalMultiplier": 0.3,
+      "animalMultiplier": 2.0,
+      "militaryMultiplier": 0.3,
+      "dominantEncounters": ["forest_deer", "forest_boar", "forest_fox_rabid", "forest_wolves"]
+    },
+    "industrial": {
+      "civilianMultiplier": 0.5,
+      "criminalMultiplier": 1.5,
+      "animalMultiplier": 0.5,
+      "militaryMultiplier": 0.8,
+      "dominantEncounters": ["urban_scavengers", "urban_criminals", "stray_dogs", "urban_rats"]
+    },
+    "residential": {
+      "civilianMultiplier": 2.0,
+      "criminalMultiplier": 0.8,
+      "animalMultiplier": 0.2,
+      "militaryMultiplier": 0.7,
+      "dominantEncounters": ["civilian_group"]
+    },
+    "patrolZone": {
+      "civilianMultiplier": 0.5,
+      "criminalMultiplier": 0.3,
+      "animalMultiplier": 0.1,
+      "militaryMultiplier": 3.0,
+      "dominantEncounters": ["military_patrol_small", "military_patrol_large", "scripted_checkpoint"]
+    },
+    "abandonedBuilding": {
+      "civilianMultiplier": 0.3,
+      "criminalMultiplier": 2.0,
+      "animalMultiplier": 0.8,
+      "militaryMultiplier": 0.2,
+      "dominantEncounters": ["urban_addicts", "urban_criminals", "urban_scavengers", "urban_rats", "scripted_ambush"]
+    }
+  },
+
+  "threatWeights": {
+    "proximity": 0.30,
+    "npcType": 0.35,
+    "behaviorState": 0.20,
+    "groupSize": 0.15,
+    "baseTypeThreat": {
+      "civilian": 10,
+      "militaryPatrol": 80,
+      "cityGuard": 70,
+      "police": 65,
+      "fireDept": 30,
+      "criminal": 50,
+      "scavenger": 35,
+      "addict": 20,
+      "animal": 40
+    },
+    "levelThresholds": {
+      "none": 0,
+      "low": 5,
+      "medium": 25,
+      "high": 50,
+      "critical": 75
+    }
+  },
+
+  "encounters": {
+    "defaultLifetimeSeconds": 300,
+    "maxActiveEncounters": 5,
+    "cleanupRadiusMeters": 80,
+    "randomEncounterIntervalSeconds": 30
+  }
+}
