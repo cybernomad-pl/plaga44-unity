@@ -1,0 +1,152 @@
+{
+  "_comment": "PLAGA '44 VR - Default Physiology Configuration",
+  "_version": "0.1.0",
+  "_description": "Baseline parameters for the physiology-as-controller system. Values derived from expert consultations: Dr. Anna Radlicka-Borysewska (biomedical), Lt. Mateusz Stanisz (military/survival), Swiety (field practitioner). Tunable during QA phase (IPK months 08-09).",
+
+  "timeScale": {
+    "gameHoursPerRealSecond": 0.01,
+    "realMinutesPerGameDay": 40,
+    "_note": "1 game day = ~40 real minutes. 30-60 minute session = ~0.75-1.5 game days."
+  },
+
+  "thermoregulation": {
+    "normalCoreTemp": 36.6,
+    "coreTemperatureChangeRate": 0.001,
+    "hypothermiaOnsetTemp": 35.0,
+    "hypothermiaModerateTemp": 32.0,
+    "hypothermiaSevereTemp": 28.0,
+    "hypothermiaLethalTemp": 25.0,
+    "hyperthermiaOnsetTemp": 38.5,
+    "heatStrokeTemp": 40.0,
+    "hyperthermiaLethalTemp": 42.0,
+    "wetClothingHeatLossMultiplier": 5.0,
+    "shelterTempBonus": 5.0,
+    "maxFireTempBonus": 10.0,
+    "exerciseHeatGeneration": 0.01,
+    "windChillFactor": 0.5
+  },
+
+  "hydration": {
+    "startingHydration": 1.0,
+    "baseWaterLossPerHour": 0.002,
+    "exertionWaterLossMultiplier": 0.0001,
+    "heatWaterLossMultiplier": 0.0005,
+    "heatThresholdTemp": 20.0,
+    "criticalDehydrationLevel": 0.1,
+    "lethalDehydrationLevel": 0.02,
+    "waterPerDrink": 0.15,
+    "_note_scenario": "From scenario: 2 glasses of water every hour during summer marches"
+  },
+
+  "nutrition": {
+    "startingCalories": 2000,
+    "basalMetabolicRate_kcalPerHour": 80,
+    "exertionCalorieMultiplier": 5.0,
+    "coldThermogenesisRate": 20.0,
+    "glucoseDepletionBase": 0.001,
+    "electrolyteDepletionFromSweat": 0.5,
+    "magnesiumDepletionRate": 0.0005,
+    "toxinDecayRate": 0.01,
+    "_note_scenario": "From scenario: electrolytes every 2-3 hours, magnesium 2x daily, 2-4 cereal bars per day, 1 can of food per meal break"
+  },
+
+  "fatigue": {
+    "sleepDebtOnsetHours": 16,
+    "physicalFatigueFromExertion": 0.0001,
+    "mentalFatigueBaseRate": 0.005,
+    "sleepRecoveryRate": 0.05,
+    "shelterSleepQualityBonus": 1.0,
+    "painSleepPenalty": 1.0,
+    "_note_scenario": "From scenario: recommended march breaks every 2-3 hours for 40-60 min. Sleep location search starts at 16:00."
+  },
+
+  "wounds": {
+    "infectionOnsetHours": 6,
+    "infectionProgressionRate": 0.02,
+    "healingRateMultiplier": 0.01,
+    "punctureInfectionRisk": 0.3,
+    "lacerationInfectionRisk": 0.1,
+    "gunshotBleedRate": 0.01,
+    "lacerationBleedRate": 0.005,
+    "_note_scenario": "From scenario: first aid with bandages/hydrogen peroxide for lighter wounds. Automotive first aid kits from supermarkets."
+  },
+
+  "psychology": {
+    "depressionOnsetDays": 14,
+    "survivalInstinctGrowthRate": 0.001,
+    "moraleRecoveryRate": 0.001,
+    "_note_scenario": "From scenario: after 2 weeks depression risk. Survival instinct grows with each challenge overcome. Complete loss of moral inhibitions possible for survival."
+  },
+
+  "respiration": {
+    "normalO2Saturation": 98,
+    "normalRespirationRate": 16,
+    "hypoxiaOnset_O2Percent": 90,
+    "lethal_O2Percent": 40,
+    "altitudeEffectThreshold_m": 2000,
+    "_note": "Jura is 300-500m ASL, no altitude issues. Cave systems may have reduced O2."
+  },
+
+  "footCondition": {
+    "marchDamageRate": 0.00001,
+    "wetFeetFungalRate": 0.001,
+    "bootQualityDefault": 1.0,
+    "_note_scenario": "From scenario: foot blisters, fungal infections from wet boots, anti-fungal spray needed. Boot maintenance during breaks."
+  },
+
+  "equipment": {
+    "maxBackpackWeight_kg": 25,
+    "backpackCapacities_liters": [20, 60, 80, 90],
+    "heavyLoadThreshold_kg": 15,
+    "_note_scenario": "From scenario part 4: 90L backpack max 25kg. Weight affects fatigue, calorie burn, march speed. DPM backpacks absorb water."
+  },
+
+  "emersion": {
+    "tremorOnsetCarbohydrateLevel": 0.4,
+    "maxTremorAmplitude_meters": 0.02,
+    "visualDistortionOnsetToxin": 0.2,
+    "hallucinationOnsetSleepDebt_hours": 36,
+    "maxInputLag_seconds": 0.3,
+    "hypoxiaVisualOnset_O2Percent": 90,
+    "maxFOVReduction_degrees": 30,
+    "maxChromaticAberration": 0.01,
+    "effectTransitionRate": 2.0,
+    "comfortSafety_maxCombinedIntensity": 0.85,
+    "_note_ipk": "Critical tuning during QA: threshold for tremor, duration of mushroom effects, resource scarcity curve"
+  },
+
+  "seasonal": {
+    "spring": {
+      "tempRange": [5, 18],
+      "dayLightHours": [6, 20],
+      "precipitationChance": 0.4,
+      "availableForage": ["early_berries", "birch_bark"],
+      "hazards": ["slippery_forest_floor", "rain", "cold_nights"],
+      "_note_scenario": "From scenario: easier fuel gathering, berries start appearing, slippery limestone"
+    },
+    "summer": {
+      "tempRange": [18, 35],
+      "dayLightHours": [5, 21],
+      "precipitationChance": 0.2,
+      "availableForage": ["berries", "mushrooms", "fish", "wild_plants"],
+      "hazards": ["dehydration", "heat_stroke", "mosquitoes", "UV_exposure"],
+      "_note_scenario": "From scenario: sleep possible without freezing, mosquito protection needed, clean rivers have trout/eel"
+    },
+    "autumn": {
+      "tempRange": [2, 15],
+      "dayLightHours": [6, 19],
+      "precipitationChance": 0.5,
+      "availableForage": ["mushrooms", "late_berries"],
+      "hazards": ["early_darkness", "rain_snow", "slippery_terrain", "poisonous_mushrooms"],
+      "_note_scenario": "From scenario: mushrooms appear September but deadly without knowledge, darkness by 19:00"
+    },
+    "winter": {
+      "tempRange": [-15, 5],
+      "dayLightHours": [7, 16],
+      "precipitationChance": 0.4,
+      "availableForage": ["animal_feeding_stations"],
+      "hazards": ["hypothermia", "frostbite", "snow_blindness", "limited_food", "deep_snow"],
+      "_note_scenario": "From scenario: hardest season, difficulty finding food/fire fuel, frostbite risk, need thermos with warm drinks at night"
+    }
+  }
+}
