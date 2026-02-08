@@ -1,0 +1,176 @@
+{
+    "_comment": "PLAGA '44 - Emersion Effects Configuration. All thresholds and tuning parameters externalized for designer iteration.",
+    "_version": "1.0.0",
+    "_issue": "#31 - Audio system and VR emersion effects",
+
+    "audio": {
+        "masterVolume": 0.7,
+        "crossfadeDuration": 2.0,
+        "weatherFadeDuration": 1.5,
+
+        "heartbeat": {
+            "restingBPM": 70,
+            "maxBPM": 180,
+            "elevatedThreshold": 90,
+            "racingThreshold": 130,
+            "baseVolume": 0.3,
+            "maxVolume": 0.9,
+            "bpmSmoothSpeed": 2.0,
+            "_comment_stress": "Stress adds up to 60 BPM (scenario: combat, NPC encounters)",
+            "_comment_exertion": "Exertion adds up to 50 BPM (scenario: 25kg backpack marches)",
+            "_comment_temperature": "Temperature stress adds up to 30 BPM (scenario: hypothermia, heatstroke)",
+            "_comment_dehydration": "Dehydration adds up to 25 BPM (scenario: summer marches without water)"
+        },
+
+        "breathing": {
+            "baseVolume": 0.2,
+            "maxVolume": 0.8,
+            "breathCycleMin": 3.0,
+            "breathCycleMax": 0.8,
+            "breathRateSmoothSpeed": 1.5,
+            "coldBreathThresholdCelsius": 5.0,
+            "_comment": "Cold breath particles visible below 5C, matching scenario winter conditions"
+        },
+
+        "stressAudio": {
+            "maxTinnitusVolume": 0.6,
+            "tinnitusOnsetThreshold": 0.6,
+            "muffledCutoffMin": 500,
+            "muffledCutoffMax": 22000,
+            "hallucinationThreshold": 0.8,
+            "hallucinationMinInterval": 15,
+            "hallucinationMaxInterval": 60,
+            "hallucinationVolume": 0.35,
+            "shockMuffleIntensity": 0.9,
+            "_comment": "Hallucinations at 80%+ mental health degradation, per scenario: 2+ weeks in survival causes breakdown"
+        },
+
+        "environment": {
+            "weatherVolume": 0.5,
+            "seasonalVolume": 0.3,
+            "nightAudioVolume": 0.25,
+            "_comment_rain": "Rain reduces hearing range by 40%",
+            "_comment_snow": "Snow muffles all sound (lowpass at 2000Hz)",
+            "_comment_storm": "Storm makes communication impossible (lowpass at 1500Hz)"
+        }
+    },
+
+    "tremor": {
+        "maxAmplitudeMeters": 0.02,
+        "frequencyBaseHz": 6,
+        "frequencyStressHz": 12,
+        "smoothSpeed": 2.0,
+        "hapticAmplitudeMax": 0.8,
+        "hapticFrequency": 0.1,
+        "lockoutTremorMultiplier": 3.0,
+
+        "factorWeights": {
+            "cold": 0.35,
+            "hunger": 0.15,
+            "fear": 0.25,
+            "fatigue": 0.15,
+            "dehydration": 0.10,
+            "_comment": "Cold is primary tremor source (scenario: winter frostbite), fear secondary (adrenaline)"
+        }
+    },
+
+    "vision": {
+        "tunnelVision": {
+            "maxRadius": 0.3,
+            "smoothSpeed": 2.0,
+            "_comment": "Radius of 0.3 = severe narrowing. Blood loss is primary cause."
+        },
+        "blur": {
+            "maxIntensity": 5.0,
+            "smoothSpeed": 3.0,
+            "_comment": "Poisoning causes strongest blur (scenario: poisonous mushrooms in autumn)"
+        },
+        "desaturation": {
+            "smoothSpeed": 2.0,
+            "_comment": "Hypothermia is primary desaturation cause (world goes grey as body shuts down)"
+        },
+        "vignette": {
+            "colorRGB": [0.3, 0.0, 0.0],
+            "maxIntensity": 0.8,
+            "_comment": "Dark red vignette from blood loss"
+        },
+        "snowBlindness": {
+            "maxWhiteoutIntensity": 0.7,
+            "buildRatePerSecond": 0.01,
+            "recoveryMultiplier": 0.3,
+            "_comment": "Scenario part 4: snow blindness risk without ballistic/sun glasses"
+        },
+        "hallucinations": {
+            "mentalHealthThreshold": 0.8,
+            "shadowFlickerInterval": 8.0,
+            "_comment": "Shadow movement at extreme fatigue / mental health degradation"
+        }
+    },
+
+    "hypothermia": {
+        "stages": {
+            "mild": {
+                "coreTemperatureCelsius": 35,
+                "shiverAmplitude": 0.002,
+                "_comment": "Shivering begins, cold hands, reduced dexterity"
+            },
+            "moderate": {
+                "coreTemperatureCelsius": 32,
+                "shiverAmplitude": 0.008,
+                "_comment": "Violent shivering, confusion, drowsiness"
+            },
+            "severe": {
+                "coreTemperatureCelsius": 28,
+                "shiverAmplitude": 0.0,
+                "_comment": "Paradoxical: shivering STOPS. Body shutting down. Death imminent."
+            }
+        },
+        "frostOverlay": {
+            "maxOpacity": 0.7,
+            "growthSpeed": 0.5
+        },
+        "movementSlowdown": {
+            "maxSlowdown": 0.5,
+            "smoothSpeed": 1.0,
+            "_comment": "50% slower at severe hypothermia"
+        },
+        "shiverFrequencyHz": 8.0,
+        "teethChatteringRange": [0.3, 0.8],
+        "_comment": "Teeth chattering only in mild-moderate range; stops at severe (body gives up)"
+    },
+
+    "dehydration": {
+        "heatHaze": {
+            "maxDistortion": 0.03,
+            "speed": 1.0,
+            "onsetThreshold": 0.3,
+            "_comment": "Heat haze starts at 30% dehydration, doubled in temperatures above 25C"
+        },
+        "dizziness": {
+            "maxRotationDegrees": 3.0,
+            "speed": 0.5,
+            "onsetThreshold": 0.4,
+            "exertionMultiplier": 1.5,
+            "_comment": "Dizziness worse when moving (scenario: marching in summer heat)"
+        },
+        "blackout": {
+            "threshold": 0.8,
+            "minInterval": 10,
+            "maxInterval": 30,
+            "duration": 2.0,
+            "_comment": "Blackout flashes above 80% dehydration. Scenario: fainting from heatstroke."
+        },
+        "ringingEars": {
+            "onsetThreshold": 0.5,
+            "maxVolume": 0.4
+        },
+        "_comment_scenario": "Summer: 2 glasses water per hour. Electrolytes every 2-3 hours. Magnesium 2x daily. Contaminated water accelerates via diarrhea."
+    },
+
+    "platform": {
+        "target": "Meta Quest 3 / 3S",
+        "renderingMode": "Standalone VR",
+        "hapticAPI": "OVRInput",
+        "_comment": "All effects must run within Quest 3 thermal/power budget"
+    }
+}
