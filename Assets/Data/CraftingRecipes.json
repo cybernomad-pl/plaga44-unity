@@ -1,0 +1,360 @@
+{
+  "recipes": [
+    {
+      "recipeId": "craft_plexiglass_knife",
+      "displayName": "Noz z pleksiglasu",
+      "description": "Wyostrz odlamek pleksiglasu na noz. Wymaga tasmy do uchwytu.",
+      "category": "weapon",
+      "craftTimeSeconds": 15,
+      "ingredients": [
+        { "itemId": "plexiglass_shard", "quantity": 1 },
+        { "itemId": "duct_tape", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "plexiglass_knife", "quantity": 1 }
+      ],
+      "requiredTools": [],
+      "tags": ["improvised", "weapon", "melee"]
+    },
+    {
+      "recipeId": "craft_table_leg_club",
+      "displayName": "Maczuga z nogi stolowej",
+      "description": "Oploc noge stolu tasma zeby lepiej trzymac.",
+      "category": "weapon",
+      "craftTimeSeconds": 10,
+      "ingredients": [
+        { "itemId": "table_leg", "quantity": 1 },
+        { "itemId": "duct_tape", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "table_leg_club", "quantity": 1 }
+      ],
+      "requiredTools": [],
+      "tags": ["improvised", "weapon", "melee", "blunt"]
+    },
+    {
+      "recipeId": "craft_nail_club",
+      "displayName": "Maczuga z gwodziami",
+      "description": "Wbij gwozdzie w maczuge. Wymaga mlotka.",
+      "category": "weapon",
+      "craftTimeSeconds": 25,
+      "ingredients": [
+        { "itemId": "table_leg_club", "quantity": 1 },
+        { "itemId": "nail", "quantity": 5 }
+      ],
+      "outputs": [
+        { "itemId": "nail_club", "quantity": 1 }
+      ],
+      "requiredTools": ["hammer"],
+      "tags": ["improvised", "weapon", "melee", "blunt", "advanced"]
+    },
+    {
+      "recipeId": "craft_molotov_cocktail",
+      "displayName": "Koktajl Molotova",
+      "description": "Napelnij butelke paliwem i zrob knot ze szmaty.",
+      "category": "weapon",
+      "craftTimeSeconds": 12,
+      "ingredients": [
+        { "itemId": "glass_bottle", "quantity": 1 },
+        { "itemId": "fuel_canister", "quantity": 1 },
+        { "itemId": "rag", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "molotov_cocktail", "quantity": 3 }
+      ],
+      "requiredTools": [],
+      "tags": ["improvised", "weapon", "thrown", "fire"]
+    },
+    {
+      "recipeId": "craft_molotov_oil",
+      "displayName": "Koktajl Molotova (olej)",
+      "description": "Alternatywny koktajl Molotova z olejem silnikowym.",
+      "category": "weapon",
+      "craftTimeSeconds": 12,
+      "ingredients": [
+        { "itemId": "glass_bottle", "quantity": 1 },
+        { "itemId": "motor_oil", "quantity": 1 },
+        { "itemId": "rag", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "molotov_cocktail", "quantity": 2 }
+      ],
+      "requiredTools": [],
+      "tags": ["improvised", "weapon", "thrown", "fire"]
+    },
+    {
+      "recipeId": "craft_pit_trap",
+      "displayName": "Pulapka dolkowa",
+      "description": "Wykop dol, wbij zaostrzone kijki i zamaskuj galezmi.",
+      "category": "weapon",
+      "craftTimeSeconds": 120,
+      "ingredients": [
+        { "itemId": "branch", "quantity": 3 },
+        { "itemId": "rope", "quantity": 1 },
+        { "itemId": "nail", "quantity": 5 }
+      ],
+      "outputs": [
+        { "itemId": "pit_trap", "quantity": 1 }
+      ],
+      "requiredTools": ["kitchen_knife"],
+      "tags": ["improvised", "weapon", "trap", "deployable"]
+    },
+    {
+      "recipeId": "craft_improvised_bandage",
+      "displayName": "Improwizowany bandaz",
+      "description": "Podrzyj ubranie na paski. Mozna uzyc jako bandaz.",
+      "category": "medical",
+      "craftTimeSeconds": 8,
+      "ingredients": [
+        { "itemId": "torn_clothes", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "improvised_bandage", "quantity": 3 }
+      ],
+      "requiredTools": [],
+      "tags": ["medical", "improvised", "bandage"]
+    },
+    {
+      "recipeId": "craft_improvised_bandage_scissors",
+      "displayName": "Improwizowany bandaz (nozyczkami)",
+      "description": "Przytnij ubranie nozyczkami na rowne bandaze - wiecej materialu.",
+      "category": "medical",
+      "craftTimeSeconds": 5,
+      "ingredients": [
+        { "itemId": "torn_clothes", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "improvised_bandage", "quantity": 5 }
+      ],
+      "requiredTools": ["scissors"],
+      "tags": ["medical", "improvised", "bandage", "efficient"]
+    },
+    {
+      "recipeId": "craft_improvised_splint",
+      "displayName": "Improwizowana szyna",
+      "description": "Przymocuj galaz do konczyny podartym ubraniem.",
+      "category": "medical",
+      "craftTimeSeconds": 15,
+      "ingredients": [
+        { "itemId": "branch", "quantity": 2 },
+        { "itemId": "torn_clothes", "quantity": 2 }
+      ],
+      "outputs": [
+        { "itemId": "improvised_splint", "quantity": 1 }
+      ],
+      "requiredTools": [],
+      "tags": ["medical", "improvised", "splint", "fracture"]
+    },
+    {
+      "recipeId": "craft_improvised_splint_paracord",
+      "displayName": "Improwizowana szyna (paracord)",
+      "description": "Lepsza wersja szyny z paracordem zamiast ubran.",
+      "category": "medical",
+      "craftTimeSeconds": 10,
+      "ingredients": [
+        { "itemId": "branch", "quantity": 2 },
+        { "itemId": "paracord", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "improvised_splint", "quantity": 1 }
+      ],
+      "requiredTools": [],
+      "tags": ["medical", "improvised", "splint", "fracture", "military"]
+    },
+    {
+      "recipeId": "craft_herbal_poultice",
+      "displayName": "Oklad ziolowy",
+      "description": "Rozgniec dzikie ziola i nalloz na rane jako oklad.",
+      "category": "medical",
+      "craftTimeSeconds": 10,
+      "ingredients": [
+        { "itemId": "wild_herbs", "quantity": 2 },
+        { "itemId": "torn_clothes", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "herbal_poultice", "quantity": 1 }
+      ],
+      "requiredTools": [],
+      "tags": ["medical", "herbal", "natural"]
+    },
+    {
+      "recipeId": "craft_campfire_basic",
+      "displayName": "Ognisko (galeze)",
+      "description": "Ustawy galeze i rozpal kora i zapalkami.",
+      "category": "fire",
+      "craftTimeSeconds": 30,
+      "ingredients": [
+        { "itemId": "branch", "quantity": 3 },
+        { "itemId": "bark", "quantity": 2 },
+        { "itemId": "matches", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "campfire_kit", "quantity": 1 }
+      ],
+      "requiredTools": [],
+      "tags": ["fire", "cooking", "warmth", "basic"]
+    },
+    {
+      "recipeId": "craft_campfire_gel",
+      "displayName": "Ognisko (podpalka zelowa)",
+      "description": "Szybsze rozpalanie z podpalka zelowa.",
+      "category": "fire",
+      "craftTimeSeconds": 15,
+      "ingredients": [
+        { "itemId": "branch", "quantity": 2 },
+        { "itemId": "gel_firelighter", "quantity": 1 },
+        { "itemId": "matches", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "campfire_kit", "quantity": 1 }
+      ],
+      "requiredTools": [],
+      "tags": ["fire", "cooking", "warmth", "quick"]
+    },
+    {
+      "recipeId": "craft_campfire_cubes",
+      "displayName": "Ognisko (biale kostki)",
+      "description": "Rozpalanie z bialymi kostkami parafinowymi.",
+      "category": "fire",
+      "craftTimeSeconds": 20,
+      "ingredients": [
+        { "itemId": "branch", "quantity": 2 },
+        { "itemId": "white_cube_firelighter", "quantity": 2 },
+        { "itemId": "matches", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "campfire_kit", "quantity": 1 }
+      ],
+      "requiredTools": [],
+      "tags": ["fire", "cooking", "warmth"]
+    },
+    {
+      "recipeId": "craft_campfire_lighter",
+      "displayName": "Ognisko (zapalniczka)",
+      "description": "Rozpalanie ogniska zapalniczka zamiast zapalek.",
+      "category": "fire",
+      "craftTimeSeconds": 20,
+      "ingredients": [
+        { "itemId": "branch", "quantity": 3 },
+        { "itemId": "bark", "quantity": 2 }
+      ],
+      "outputs": [
+        { "itemId": "campfire_kit", "quantity": 1 }
+      ],
+      "requiredTools": ["lighter"],
+      "tags": ["fire", "cooking", "warmth"]
+    },
+    {
+      "recipeId": "craft_improvised_torch",
+      "displayName": "Improwizowana pochodnia",
+      "description": "Owij galaz szmata nasaczona zywica. Dlugo sie pali.",
+      "category": "fire",
+      "craftTimeSeconds": 10,
+      "ingredients": [
+        { "itemId": "branch", "quantity": 1 },
+        { "itemId": "rag", "quantity": 1 },
+        { "itemId": "pine_resin", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "improvised_torch", "quantity": 1 }
+      ],
+      "requiredTools": [],
+      "tags": ["fire", "light", "improvised"]
+    },
+    {
+      "recipeId": "craft_improvised_torch_oil",
+      "displayName": "Improwizowana pochodnia (olej)",
+      "description": "Pochodnia z szmata nasaczona olejem. Alternatywa zywicy.",
+      "category": "fire",
+      "craftTimeSeconds": 10,
+      "ingredients": [
+        { "itemId": "branch", "quantity": 1 },
+        { "itemId": "rag", "quantity": 1 },
+        { "itemId": "motor_oil", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "improvised_torch", "quantity": 1 }
+      ],
+      "requiredTools": [],
+      "tags": ["fire", "light", "improvised"]
+    },
+    {
+      "recipeId": "cook_instant_noodles",
+      "displayName": "Ugotuj zupke chinczyk",
+      "description": "Zagotuj wode i zalej zupke. Wymaga zrodla ognia.",
+      "category": "food",
+      "craftTimeSeconds": 180,
+      "ingredients": [
+        { "itemId": "instant_noodles", "quantity": 1 },
+        { "itemId": "bottled_water", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "cooked_noodles", "quantity": 1 }
+      ],
+      "requiredTools": ["spirit_burner"],
+      "tags": ["food", "cooking", "noodles"]
+    },
+    {
+      "recipeId": "cook_instant_noodles_campfire",
+      "displayName": "Ugotuj zupke na ognisku",
+      "description": "Ugotuj zupke chinczyk na ognisku zamiast kuchenki.",
+      "category": "food",
+      "craftTimeSeconds": 240,
+      "ingredients": [
+        { "itemId": "instant_noodles", "quantity": 1 },
+        { "itemId": "bottled_water", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "cooked_noodles", "quantity": 1 }
+      ],
+      "requiredTools": ["campfire_kit"],
+      "tags": ["food", "cooking", "noodles", "campfire"]
+    },
+    {
+      "recipeId": "craft_rag_from_clothes",
+      "displayName": "Szmaty z ubran",
+      "description": "Podrzyj ubranie na szmaty. Przydatne do knoci i craftingu.",
+      "category": "tool",
+      "craftTimeSeconds": 5,
+      "ingredients": [
+        { "itemId": "torn_clothes", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "rag", "quantity": 2 }
+      ],
+      "requiredTools": [],
+      "tags": ["material", "cloth"]
+    },
+    {
+      "recipeId": "craft_wire_trap",
+      "displayName": "Pulapka drutowa",
+      "description": "Rozciagnij drut na sciezce. Powoduje potkniecie wroga.",
+      "category": "weapon",
+      "craftTimeSeconds": 30,
+      "ingredients": [
+        { "itemId": "wire", "quantity": 2 },
+        { "itemId": "nail", "quantity": 2 }
+      ],
+      "outputs": [
+        { "itemId": "pit_trap", "quantity": 1 }
+      ],
+      "requiredTools": ["pliers"],
+      "tags": ["improvised", "weapon", "trap"]
+    },
+    {
+      "recipeId": "craft_spirit_burner_refuel",
+      "displayName": "Uzupelnij kuchenke spirytusowa",
+      "description": "Dolej paliwa do kuchenki spirytusowej. Przywraca wytrzymalosc.",
+      "category": "tool",
+      "craftTimeSeconds": 10,
+      "ingredients": [
+        { "itemId": "fuel_canister", "quantity": 1 }
+      ],
+      "outputs": [
+        { "itemId": "spirit_burner", "quantity": 1 }
+      ],
+      "requiredTools": ["spirit_burner"],
+      "tags": ["tool", "fire", "refuel"]
+    }
+  ]
+}
