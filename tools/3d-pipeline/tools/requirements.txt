@@ -1,0 +1,28 @@
+# Python dependencies for cbrnmd.3D photogrammetry pipeline
+
+# Core libraries
+numpy>=1.24.0
+opencv-python>=4.8.0
+
+# Image processing
+Pillow>=10.0.0
+imageio>=2.31.0
+
+# 3D mesh processing
+trimesh>=3.23.0
+pymeshlab>=2022.2
+open3d>=0.17.0
+
+# Point cloud
+plyfile>=1.0.0
+
+# Configuration
+PyYAML>=6.0
+
+# Progress bars
+tqdm>=4.66.0
+
+# Optional: Advanced features
+# scikit-image>=0.21.0  # Advanced image processing
+# matplotlib>=3.7.0     # Visualization
+# scipy>=1.11.0         # Scientific computing

@@ -1,0 +1,89 @@
+# cbrnmd.3D Pipeline Configuration
+
+# Frame extraction settings
+frame_extraction:
+  fps: null  # null = auto-detect optimal, or specify: 2, 5, 10
+  target_frames: 120  # Target number of frames to extract
+  min_frames: 60
+  max_frames: 200
+  frame_quality: 95  # JPEG quality 1-100
+  resize: null  # null = keep original, or [width, height]
+
+# Image preprocessing
+preprocessing:
+  auto_crop: true  # Auto-crop to object
+  background_removal: false  # Experimental, może nie działać dobrze
+  sharpen: false
+  denoise: false
+  white_balance: false
+
+# COLMAP settings
+colmap:
+  feature_extractor:
+    camera_model: OPENCV  # OPENCV, RADIAL, SIMPLE_RADIAL
+    single_camera: true
+    gpu: true  # Use GPU if available
+
+  matcher:
+    type: exhaustive  # exhaustive, sequential, vocab_tree
+    gpu: true
+
+  mapper:
+    ba_refine_focal_length: true
+    ba_refine_principal_point: true
+    ba_refine_extra_params: true
+
+  dense:
+    quality: high  # low, medium, high
+    window_radius: 5
+    num_samples: 15
+    num_iterations: 5
+    geom_consistency: true
+
+# Meshing
+meshing:
+  method: poisson  # poisson, delaunay
+  poisson_depth: 10  # Higher = more detail but slower (8-13)
+  poisson_trim: 7
+
+# Texture baking
+texturing:
+  enabled: true
+  resolution: 2048  # 1024, 2048, 4096
+  format: PNG  # PNG, JPG
+
+# Optimization
+optimization:
+  enabled: true
+  target_triangles: 10000  # Target triangle count
+  preserve_topology: true
+  preserve_boundary: true
+
+  # LOD generation
+  generate_lods: true
+  lod_levels: 3
+  lod_ratios: [0.5, 0.25, 0.1]  # LOD0=50%, LOD1=25%, LOD2=10% of target
+
+# Export formats
+export:
+  formats:
+    - GLB  # Recommended for Unity
+    - OBJ  # Universal
+    # - FBX  # Requires FBX SDK
+    # - STL  # For 3D printing
+
+  include_textures: true
+  embed_textures: true  # Embed in GLB
+
+# Output settings
+output:
+  keep_intermediate: false  # Keep intermediate files (frames, sparse, dense)
+  verbose: true
+  log_file: true
+
+# Unity optimization
+unity:
+  target_platform: PC  # PC, Mobile, VR
+  compression: Medium  # None, Low, Medium, High
+  generate_colliders: true
+  collider_type: Convex  # Box, Sphere, Convex, Mesh

@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cbrnmd.3D - Interactive Photogrammetry Tutorial</title>
+    <link href="https://fonts.googleapis.com/css?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <style>
+        :root {
+            --cbrnmd-bg: #0a0a0a;
+            --cbrnmd-bg-light: #1a1a1a;
+            --cbrnmd-primary: #3fc99a;
+            --cbrnmd-orange: #d4713d;
+            --cbrnmd-text: #e0e0e0;
+            --cbrnmd-text-dim: #888;
+            --cbrnmd-border: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--cbrnmd-bg);
+            color: var(--cbrnmd-text);
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--cbrnmd-bg);
+            border-left: 1px solid var(--cbrnmd-border);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--cbrnmd-primary);
+            border: 2px solid var(--cbrnmd-bg);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cbrnmd-orange);
+        }
+
+        /* Layout: Sidebar + Main */
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 380px;
+            background: var(--cbrnmd-bg-light);
+            border-right: 2px solid var(--cbrnmd-primary);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 30px 20px;
+            border-bottom: 1px solid var(--cbrnmd-border);
+            text-align: center;
+        }
+
+        /* Rotating CYBERNOMAD Logo */
+        .logo-container {
+            display: inline-block;
+            margin-bottom: 15px;
+            perspective: 1000px;
+        }
+
+        .logo-img {
+            width: 100px;
+            height: auto;
+            animation: rotate-logo 10s linear infinite;
+            transform-style: preserve-3d;
+            filter: drop-shadow(0 0 10px rgba(63, 201, 154, 0.5));
+        }
+
+        @keyframes rotate-logo {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .sidebar-header h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .title-cbrnmd { color: #fff; }
+        .title-3d { color: var(--cbrnmd-orange); }
+
+        .sidebar-header p {
+            color: var(--cbrnmd-text-dim);
+            font-size: 0.75em;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Step Navigation */
+        .step-nav {
+            padding: 20px;
+            flex: 1;
+        }
+
+        .step-nav h3 {
+            color: var(--cbrnmd-primary);
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        .step-nav h3::before {
+            content: '▼ ';
+            color: var(--cbrnmd-orange);
+        }
+
+        .nav-step {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: var(--cbrnmd-bg);
+            border: 1px solid var(--cbrnmd-border);
+            border-left: 3px solid var(--cbrnmd-border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-step:hover {
+            border-left-color: var(--cbrnmd-primary);
+            background: rgba(63, 201, 154, 0.05);
+        }
+
+        .nav-step.active {
+            border-left-color: var(--cbrnmd-primary);
+            background: rgba(63, 201, 154, 0.1);
+        }
+
+        .nav-step.completed {
+            border-left-color: var(--cbrnmd-orange);
+        }
+
+        .nav-step-title {
+            font-size: 0.85em;
+            color: var(--cbrnmd-text);
+            margin-bottom: 3px;
+        }
+
+        .nav-step-status {
+            font-size: 0.7em;
+            color: var(--cbrnmd-text-dim);
+        }
+
+        .nav-step-status::before {
+            content: '▸ ';
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Tabs */
+        .tabs-header {
+            display: flex;
+            background: var(--cbrnmd-bg-light);
+            border-bottom: 2px solid var(--cbrnmd-border);
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            background: transparent;
+            border: none;
+            color: var(--cbrnmd-text-dim);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.85em;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab::before {
+            content: '▸ ';
+            opacity: 0.5;
+        }
+
+        .tab:hover {
+            color: var(--cbrnmd-text);
+            background: rgba(63, 201, 154, 0.05);
+        }
+
+        .tab.active {
+            color: var(--cbrnmd-primary);
+            border-bottom-color: var(--cbrnmd-primary);
+            background: rgba(63, 201, 154, 0.1);
+        }
+
+        .tab.active::before {
+            content: '■ ';
+            opacity: 1;
+        }
+
+        .tab.completed {
+            color: var(--cbrnmd-orange);
+        }
+
+        .tab.completed::before {
+            content: '▣ ';
+        }
+
+        /* Tab Content */
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .tab-pane h2 {
+            color: var(--cbrnmd-primary);
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .tab-pane h2::before {
+            content: '▣ ';
+            color: var(--cbrnmd-orange);
+        }
+
+        .tab-pane p {
+            color: var(--cbrnmd-text-dim);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        /* Run Button */
+        .run-btn {
+            padding: 12px 30px;
+            background: transparent;
+            color: var(--cbrnmd-primary);
+            border: 2px solid var(--cbrnmd-primary);
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95em;
+            font-weight: bold;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .run-btn::before {
+            content: '▶ ';
+        }
+
+        .run-btn:hover {
+            background: var(--cbrnmd-primary);
+            color: var(--cbrnmd-bg);
+            box-shadow: 0 0 10px rgba(63, 201, 154, 0.3);
+        }
+
+        .run-btn:disabled {
+            background: transparent;
+            color: var(--cbrnmd-border);
+            border-color: var(--cbrnmd-border);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .run-btn:disabled::before {
+            content: '■ ';
+        }
+
+        /* Processing Indicator */
+        .processing {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: var(--cbrnmd-orange);
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
+
+        .processing.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--cbrnmd-border);
+            border-top-color: var(--cbrnmd-orange);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results Section */
+        .results {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(63, 201, 154, 0.03);
+            border: 1px solid var(--cbrnmd-primary);
+            border-left: 3px solid var(--cbrnmd-primary);
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .results h3 {
+            color: var(--cbrnmd-primary);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .results h3::before {
+            content: '▣ ';
+            color: var(--cbrnmd-orange);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            padding: 12px;
+            background: var(--cbrnmd-bg);
+            border-left: 3px solid var(--cbrnmd-primary);
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            color: var(--cbrnmd-text-dim);
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-label::before {
+            content: '▸ ';
+        }
+
+        .stat-value {
+            font-size: 0.95em;
+            color: var(--cbrnmd-primary);
+            font-weight: bold;
+            word-break: break-all;
+        }
+
+        /* Console Log */
+        .console {
+            background: #000;
+            padding: 15px;
+            border: 1px solid var(--cbrnmd-border);
+            font-size: 0.8em;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .log-line {
+            margin-bottom: 5px;
+            color: var(--cbrnmd-text-dim);
+            font-family: monospace;
+        }
+
+        .log-line::before {
+            content: '> ';
+            color: var(--cbrnmd-primary);
+        }
+
+        .log-line.success { color: var(--cbrnmd-primary); }
+        .log-line.error { color: #ff5555; }
+        .log-line.warning { color: var(--cbrnmd-orange); }
+
+        /* Frames Grid */
+        .frames-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .frame-item {
+            position: relative;
+            aspect-ratio: 16/10;
+            overflow: hidden;
+            border: 2px solid var(--cbrnmd-border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .frame-item:hover {
+            border-color: var(--cbrnmd-primary);
+            box-shadow: 0 0 10px rgba(63, 201, 154, 0.3);
+        }
+
+        .frame-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .frame-number {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            color: var(--cbrnmd-primary);
+            padding: 3px;
+            text-align: center;
+            font-size: 0.7em;
+        }
+
+        .frames-title {
+            color: var(--cbrnmd-primary);
+            margin: 20px 0 15px;
+            font-size: 1em;
+        }
+
+        .frames-title::before {
+            content: '▼ ';
+            color: var(--cbrnmd-orange);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="assets/cybernomad-logo.png" alt="CYBERNOMAD" class="logo-img">
+                </div>
+                <h1>
+                    <span class="title-cbrnmd">cbrnmd</span><span class="title-3d">.3D</span>
+                </h1>
+                <p>INTERACTIVE PHOTOGRAMMETRY</p>
+            </div>
+
+            <!-- Step Navigation -->
+            <div class="step-nav">
+                <h3>PIPELINE STEPS</h3>
+                <div class="nav-step active" onclick="switchTab(1)">
+                    <div class="nav-step-title">Step 1: Feature Extraction</div>
+                    <div class="nav-step-status" id="navStatus1">READY</div>
+                </div>
+                <div class="nav-step" onclick="switchTab(2)">
+                    <div class="nav-step-title">Step 2: Feature Matching</div>
+                    <div class="nav-step-status" id="navStatus2">LOCKED</div>
+                </div>
+                <div class="nav-step" onclick="switchTab(3)">
+                    <div class="nav-step-title">Step 3: Sparse Reconstruction</div>
+                    <div class="nav-step-status" id="navStatus3">LOCKED</div>
+                </div>
+                <div class="nav-step" onclick="switchTab(4)">
+                    <div class="nav-step-title">Step 4: Dense Reconstruction</div>
+                    <div class="nav-step-status" id="navStatus4">LOCKED</div>
+                </div>
+                <div class="nav-step" onclick="switchTab(5)">
+                    <div class="nav-step-title">Step 5: Mesh Generation</div>
+                    <div class="nav-step-status" id="navStatus5">LOCKED</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Tabs Header -->
+            <div class="tabs-header">
+                <button class="tab active" onclick="switchTab(1)">STEP 1: FEATURE EXTRACTION</button>
+                <button class="tab" onclick="switchTab(2)">STEP 2: FEATURE MATCHING</button>
+                <button class="tab" onclick="switchTab(3)">STEP 3: SPARSE RECONSTRUCTION</button>
+                <button class="tab" onclick="switchTab(4)">STEP 4: DENSE RECONSTRUCTION</button>
+                <button class="tab" onclick="switchTab(5)">STEP 5: MESH GENERATION</button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Step 1 -->
+                <div class="tab-pane active" id="tabPane1">
+                    <h2>FRAME EXTRACTION + FEATURE EXTRACTION</h2>
+                    <p>Extract frames from WOLF.mp4 video (6 fps), then COLMAP detects characteristic points (features) on each image - corners, edges, textures.</p>
+
+                    <!-- Video Section -->
+                    <div style="background: var(--cbrnmd-bg); border: 1px solid var(--cbrnmd-border); padding: 20px; margin-bottom: 20px;">
+                        <h3 style="color: var(--cbrnmd-primary); margin-bottom: 15px; font-size: 0.9em; letter-spacing: 1px;">▶ SOURCE VIDEO</h3>
+
+                        <div style="display: flex; gap: 20px; align-items: flex-start;">
+                            <!-- Video Player -->
+                            <div style="flex: 1; min-width: 0; max-width: 600px;">
+                                <video id="wolfVideo" controls style="width: 100%; border: 1px solid var(--cbrnmd-border);">
+                                    <source src="assets/input/WOLF.mp4" type="video/mp4">
+                                </video>
+                                <div id="videoTimeDisplay" style="color: var(--cbrnmd-text-dim); font-size: 0.85em; margin-top: 10px; text-align: center;">
+                                    <span id="currentVideoTime">00:00</span> / <span id="totalVideoTime">00:00</span>
+                                </div>
+                            </div>
+
+                            <!-- Time Range Controls -->
+                            <div style="flex: 0 0 340px; background: rgba(63, 201, 154, 0.05); border: 1px solid var(--cbrnmd-border); padding: 15px;">
+                                <h4 style="color: var(--cbrnmd-orange); margin: 0 0 15px 0; font-size: 0.85em; letter-spacing: 1px;">■ TIME RANGE</h4>
+
+                                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px; cursor: pointer; color: var(--cbrnmd-text-secondary); font-size: 0.85em;">
+                                    <input type="checkbox" id="useFullVideo" onchange="toggleTimeRange()" style="cursor: pointer;">
+                                    <span>Use full video</span>
+                                </label>
+
+                                <div id="timeRangeInputs">
+                                    <label style="display: block; color: var(--cbrnmd-text-secondary); font-size: 0.8em; margin-bottom: 5px;">▸ Start</label>
+                                    <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                                        <input type="text" id="startTime" value="0" placeholder="0 or 00:00" style="flex: 1; background: var(--cbrnmd-bg); border: 1px solid var(--cbrnmd-border); color: var(--cbrnmd-text); padding: 8px; font-family: 'Share Tech Mono', monospace; font-size: 0.85em;">
+                                        <button onclick="setStartFromVideo()" style="background: var(--cbrnmd-secondary); border: 1px solid var(--cbrnmd-border); color: var(--cbrnmd-text); padding: 8px 12px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 0.75em; white-space: nowrap;">FROM VIDEO</button>
+                                    </div>
+
+                                    <label style="display: block; color: var(--cbrnmd-text-secondary); font-size: 0.8em; margin-bottom: 5px;">▸ End</label>
+                                    <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                                        <input type="text" id="endTime" value="00:10" placeholder="empty = to end" style="flex: 1; background: var(--cbrnmd-bg); border: 1px solid var(--cbrnmd-border); color: var(--cbrnmd-text); padding: 8px; font-family: 'Share Tech Mono', monospace; font-size: 0.85em;">
+                                        <button onclick="setEndFromVideo()" style="background: var(--cbrnmd-secondary); border: 1px solid var(--cbrnmd-border); color: var(--cbrnmd-text); padding: 8px 12px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 0.75em; white-space: nowrap;">FROM VIDEO</button>
+                                    </div>
+                                </div>
+
+                                <!-- RUN BUTTON -->
+                                <button class="run-btn" id="runBtn1" onclick="runStep(1)" style="width: 100%; margin-top: 20px; padding: 12px; background: var(--cbrnmd-primary); color: var(--cbrnmd-bg); border: none; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 0.9em; font-weight: bold; letter-spacing: 1px; transition: all 0.2s;" onmouseover="this.style.boxShadow='0 0 15px rgba(63, 201, 154, 0.5)'" onmouseout="this.style.boxShadow='none'">▶ RUN STEP 1</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="processing" id="processing1">
+                        <div class="spinner"></div>
+                        <span>PROCESSING STEP 1...</span>
+                    </div>
+
+                    <div class="results" id="results1">
+                        <h3>RESULTS</h3>
+                        <div class="stats-grid" id="stats1"></div>
+                        <div class="console" id="console1"></div>
+                        <div id="frames1"></div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="tab-pane" id="tabPane2">
+                    <h2>FEATURE MATCHING</h2>
+                    <p>COLMAP matches detected features between different images to find common points visible from multiple angles.</p>
+
+                    <button class="run-btn" id="runBtn2" onclick="runStep(2)" disabled>RUN STEP 2</button>
+
+                    <div class="processing" id="processing2">
+                        <div class="spinner"></div>
+                        <span>PROCESSING STEP 2...</span>
+                    </div>
+
+                    <div class="results" id="results2">
+                        <h3>RESULTS</h3>
+                        <div class="stats-grid" id="stats2"></div>
+                        <div class="console" id="console2"></div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="tab-pane" id="tabPane3">
+                    <h2>SPARSE RECONSTRUCTION</h2>
+                    <p>COLMAP creates a sparse 3D point cloud by triangulating matched features and estimating camera positions.</p>
+
+                    <button class="run-btn" id="runBtn3" onclick="runStep(3)" disabled>RUN STEP 3</button>
+
+                    <div class="processing" id="processing3">
+                        <div class="spinner"></div>
+                        <span>PROCESSING STEP 3...</span>
+                    </div>
+
+                    <div class="results" id="results3">
+                        <h3>RESULTS</h3>
+                        <div class="stats-grid" id="stats3"></div>
+                        <div class="console" id="console3"></div>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="tab-pane" id="tabPane4">
+                    <h2>DENSE RECONSTRUCTION</h2>
+                    <p>COLMAP creates a dense point cloud with millions of points by analyzing each pixel. This takes the longest time.</p>
+
+                    <button class="run-btn" id="runBtn4" onclick="runStep(4)" disabled>RUN STEP 4</button>
+
+                    <div class="processing" id="processing4">
+                        <div class="spinner"></div>
+                        <span>PROCESSING STEP 4... (this may take several minutes)</span>
+                    </div>
+
+                    <div class="results" id="results4">
+                        <h3>RESULTS</h3>
+                        <div class="stats-grid" id="stats4"></div>
+                        <div class="console" id="console4"></div>
+                    </div>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="tab-pane" id="tabPane5">
+                    <h2>MESH GENERATION</h2>
+                    <p>COLMAP creates a 3D mesh (surface) from the dense point cloud and exports to GLB/OBJ format.</p>
+
+                    <button class="run-btn" id="runBtn5" onclick="runStep(5)" disabled>RUN STEP 5</button>
+
+                    <div class="processing" id="processing5">
+                        <div class="spinner"></div>
+                        <span>PROCESSING STEP 5...</span>
+                    </div>
+
+                    <div class="results" id="results5">
+                        <h3>RESULTS</h3>
+                        <div class="stats-grid" id="stats5"></div>
+                        <div class="console" id="console5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiBaseUrl = 'http://localhost:5000/api';
+        const currentDataset = 'wolf';
+        let currentStep = 1;
+
+        // Switch tabs
+        function switchTab(stepNum) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach((tab, i) => {
+                tab.classList.toggle('active', i + 1 === stepNum);
+            });
+
+            // Update tab panes
+            document.querySelectorAll('.tab-pane').forEach((pane, i) => {
+                pane.classList.toggle('active', i + 1 === stepNum);
+            });
+
+            // Update nav steps
+            document.querySelectorAll('.nav-step').forEach((nav, i) => {
+                nav.classList.toggle('active', i + 1 === stepNum);
+            });
+
+            currentStep = stepNum;
+        }
+
+        // Format time
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // Update video time display
+        function updateVideoTimeDisplay() {
+            const video = document.getElementById('wolfVideo');
+            if (video && !isNaN(video.currentTime)) {
+                document.getElementById('currentVideoTime').textContent = formatTime(video.currentTime);
+                if (!isNaN(video.duration)) {
+                    document.getElementById('totalVideoTime').textContent = formatTime(video.duration);
+                }
+            }
+        }
+
+        // Set start time from video
+        function setStartFromVideo() {
+            const video = document.getElementById('wolfVideo');
+            if (video && !isNaN(video.currentTime)) {
+                document.getElementById('startTime').value = formatTime(video.currentTime);
+            }
+        }
+
+        // Set end time from video
+        function setEndFromVideo() {
+            const video = document.getElementById('wolfVideo');
+            if (video && !isNaN(video.currentTime)) {
+                document.getElementById('endTime').value = formatTime(video.currentTime);
+            }
+        }
+
+        // Toggle time range inputs
+        function toggleTimeRange() {
+            const checkbox = document.getElementById('useFullVideo');
+            const inputs = document.getElementById('timeRangeInputs');
+            inputs.style.display = checkbox.checked ? 'none' : 'block';
+        }
+
+        // Run pipeline step
+        async function runStep(stepNum) {
+            const btn = document.getElementById(`runBtn${stepNum}`);
+            const processing = document.getElementById(`processing${stepNum}`);
+            const results = document.getElementById(`results${stepNum}`);
+            const console = document.getElementById(`console${stepNum}`);
+            const stats = document.getElementById(`stats${stepNum}`);
+            const navStatus = document.getElementById(`navStatus${stepNum}`);
+
+            // Disable button and show processing
+            btn.disabled = true;
+            processing.classList.add('active');
+            results.classList.remove('active');
+            console.innerHTML = '';
+
+            // Scroll to processing section
+            setTimeout(() => {
+                processing.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+
+            const addLog = (message, type = 'log') => {
+                const line = document.createElement('div');
+                line.className = `log-line log-${type}`;
+                line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                console.appendChild(line);
+                console.scrollTop = console.scrollHeight;
+            };
+
+            try {
+                addLog(`Starting step ${stepNum}...`);
+
+                // Get time range settings
+                const useFullVideo = document.getElementById('useFullVideo').checked;
+                const requestBody = { dataset: currentDataset };
+
+                if (!useFullVideo) {
+                    const startTime = document.getElementById('startTime').value.trim();
+                    const endTime = document.getElementById('endTime').value.trim();
+                    if (startTime) {
+                        requestBody.start_time = startTime;
+                        addLog(`Start: ${startTime}`, 'info');
+                    }
+                    if (endTime) {
+                        requestBody.end_time = endTime;
+                        addLog(`End: ${endTime}`, 'info');
+                    }
+                }
+
+                const response = await fetch(`${apiBaseUrl}/pipeline/step/${stepNum}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Display all logs from backend
+                if (data.logs && data.logs.length > 0) {
+                    data.logs.forEach(log => {
+                        if (log.includes('✗') || log.includes('Błąd') || log.includes('ERROR')) {
+                            addLog(log, 'error');
+                        } else if (log.includes('✓')) {
+                            addLog(log, 'success');
+                        } else if (log.includes('⚠️')) {
+                            addLog(log, 'warning');
+                        } else {
+                            addLog(log, 'info');
+                        }
+                    });
+                }
+
+                addLog('Step completed!', 'success');
+
+                // Display stats
+                if (data.stats) {
+                    stats.innerHTML = Object.entries(data.stats).map(([key, value]) => `
+                        <div class="stat-item">
+                            <div class="stat-label">${key}</div>
+                            <div class="stat-value">${value}</div>
+                        </div>
+                    `).join('');
+                }
+
+                // Show results
+                results.classList.add('active');
+
+                // Scroll to results
+                setTimeout(() => {
+                    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+
+                // Show frames for step 1
+                if (stepNum === 1 && data.frames_preview && data.frames_preview.length > 0) {
+                    const framesContainer = document.getElementById('frames1');
+                    const totalFrames = data.stats['Liczba zdjęć'] || data.frames_preview.length;
+
+                    framesContainer.innerHTML = `
+                        <h4 class="frames-title">EXTRACTED FRAMES (${totalFrames} total)</h4>
+                        <div class="frames-grid">
+                            ${data.frames_preview.map((frame, idx) => `
+                                <div class="frame-item" onclick="window.open('${frame}', '_blank')">
+                                    <img src="${frame}" alt="Frame ${idx + 1}">
+                                    <div class="frame-number">#${idx + 1}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+
+                    // Scroll to frames after they load
+                    setTimeout(() => {
+                        framesContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 600);
+                }
+
+                // Update status
+                navStatus.textContent = 'COMPLETED';
+                document.querySelectorAll('.nav-step')[stepNum - 1].classList.add('completed');
+                document.querySelectorAll('.tab')[stepNum - 1].classList.add('completed');
+
+                // Unlock next step (NO AUTO-SWITCH!)
+                if (stepNum < 5) {
+                    const nextBtn = document.getElementById(`runBtn${stepNum + 1}`);
+                    nextBtn.disabled = false;
+                    document.getElementById(`navStatus${stepNum + 1}`).textContent = 'READY';
+                }
+
+            } catch (error) {
+                addLog(`Error: ${error.message}`, 'error');
+            } finally {
+                processing.classList.remove('active');
+            }
+        }
+
+        // Check backend connectivity
+        async function checkBackend() {
+            try {
+                const response = await fetch(`${apiBaseUrl}/health`, { method: 'GET' });
+                if (response.ok) {
+                    console.log('✅ Backend connected:', await response.json());
+                    return true;
+                } else {
+                    console.error('❌ Backend error:', response.status);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Backend not reachable:', error.message);
+                console.error('⚠️  Make sure backend is running: python backend/api.py');
+                return false;
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check backend
+            await checkBackend();
+
+            // Setup video
+            const video = document.getElementById('wolfVideo');
+            if (video) {
+                video.addEventListener('timeupdate', updateVideoTimeDisplay);
+                video.addEventListener('loadedmetadata', updateVideoTimeDisplay);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+════════════════════════════════════════════════════════════════════
+  WINDOWS ONLY - POWERSHELL & CMD ONELINERS
+════════════════════════════════════════════════════════════════════
+
+🔥 POWERSHELL - Git Fetch + Pull + Kill + Start
+────────────────────────────────────────────────────────────────────
+
+WERSJA 1 (Z ABSOLUTE PATH):
+cd C:\Users\boris\IdeaProjects\cbrnmd-content\cbrnmd.3D; git fetch; git pull; Get-NetTCPConnection -LocalPort 5000 -EA Silent | Select -Exp OwningProcess -U | % { Stop-Process -Id $_ -F }; Start-Sleep 1; & "C:\Users\boris\IdeaProjects\cbrnmd-content\cbrnmd.3D\backend\start_server.ps1"
+
+WERSJA 2 (Z RELATIVE PATH):
+cd cbrnmd.3D; git fetch; git pull; Get-NetTCPConnection -LocalPort 5000 -EA Silent | Select -Exp OwningProcess -U | % { Stop-Process -Id $_ -F }; Start-Sleep 1; & "$PWD\backend\start_server.ps1"
+
+WERSJA 3 (INLINE - BEZ .ps1):
+cd cbrnmd.3D; git fetch; git pull; Get-NetTCPConnection -LocalPort 5000 -EA Silent | Select -Exp OwningProcess -U | % { Stop-Process -Id $_ -F }; if(-not(Test-Path venv)){python -m venv venv}; & venv\Scripts\Activate.ps1; pip install -q -r backend\requirements.txt; Start-Sleep 1; python backend\api.py
+
+────────────────────────────────────────────────────────────────────
+
+🔥 CMD (BATCH) - Git Fetch + Pull + Kill + Start
+────────────────────────────────────────────────────────────────────
+
+cd cbrnmd.3D && git fetch && git pull && powershell -Command "Get-NetTCPConnection -LocalPort 5000 -EA Silent | Select -Exp OwningProcess -U | ForEach-Object { Stop-Process -Id $_ -F }" && timeout /t 1 /nobreak && backend\start_server.bat
+
+────────────────────────────────────────────────────────────────────
+
+💀 KILL PORT 5000 ONLY (POWERSHELL)
+────────────────────────────────────────────────────────────────────
+
+Get-NetTCPConnection -LocalPort 5000 -EA Silent | Select -Exp OwningProcess -U | % { Stop-Process -Id $_ -F }
+
+────────────────────────────────────────────────────────────────────
+
+💀 KILL PORT 5000 ONLY (CMD)
+────────────────────────────────────────────────────────────────────
+
+powershell -Command "Get-NetTCPConnection -LocalPort 5000 -EA Silent | Select -Exp OwningProcess -U | % { Stop-Process -Id $_ -F }"
+
+────────────────────────────────────────────────────────────────────
+
+⚡ MANUAL START (POWERSHELL)
+────────────────────────────────────────────────────────────────────
+
+cd C:\Users\boris\IdeaProjects\cbrnmd-content\cbrnmd.3D
+& .\backend\start_server.ps1
+
+────────────────────────────────────────────────────────────────────
+
+⚡ MANUAL START (CMD)
+────────────────────────────────────────────────────────────────────
+
+cd C:\Users\boris\IdeaProjects\cbrnmd-content\cbrnmd.3D
+backend\start_server.bat
+
+════════════════════════════════════════════════════════════════════
+
+TROUBLESHOOTING:
+
+1. Jeśli .\backend\start_server.ps1 nie działa:
+   - Użyj: & "$PWD\backend\start_server.ps1"
+   - Lub absolute path: & "C:\full\path\to\backend\start_server.ps1"
+
+2. Jeśli PowerShell blokuje skrypty:
+   - Uruchom: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+   - Lub użyj CMD z .bat zamiast PowerShell
+
+3. Jeśli plików .ps1 nie ma:
+   - git fetch origin claude/create-3d-module-01N7aUvjoVbhyMzQKSb2an4b
+   - git pull origin claude/create-3d-module-01N7aUvjoVbhyMzQKSb2an4b
+   - Sprawdź: dir backend\*.ps1
+
+════════════════════════════════════════════════════════════════════

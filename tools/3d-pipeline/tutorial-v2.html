@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cbrnmd.3D - Interactive Tutorial</title>
+    <link href="https://fonts.googleapis.com/css?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+
+    <style>
+        :root {
+            --cbrnmd-background: #111;
+            --cbrnmd-background-dark: #000;
+            --cbrnmd-primary: #3fc99a;
+            --cbrnmd-primary-light: #43D079;
+            --cbrnmd-secondary: #2A2A2A;
+            --cbrnmd-text: #3fc99a;
+            --cbrnmd-text-secondary: #AAAAAA;
+            --cbrnmd-text-dim: #666;
+            --cbrnmd-text-very-dim: #444;
+            --cbrnmd-orange: #d4713d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--cbrnmd-background);
+            color: var(--cbrnmd-text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: var(--cbrnmd-background-dark);
+            border-bottom: 1px solid var(--cbrnmd-text-very-dim);
+        }
+
+        h1 {
+            font-size: 3em;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .title-cbrnmd { color: #fff; }
+        .title-3d { color: var(--cbrnmd-orange); }
+
+        .subtitle {
+            color: var(--cbrnmd-text-secondary);
+            font-size: 0.9em;
+            letter-spacing: 1px;
+        }
+
+        /* Main Tutorial Area */
+        .tutorial-container {
+            background: var(--cbrnmd-background-dark);
+            border: 1px solid var(--cbrnmd-text-very-dim);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Dataset Selection */
+        .section {
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid var(--cbrnmd-text-very-dim);
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: var(--cbrnmd-orange);
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .section-description {
+            color: var(--cbrnmd-text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .dataset-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .dataset-card {
+            flex: 1;
+            background: var(--cbrnmd-secondary);
+            border: 2px solid var(--cbrnmd-text-very-dim);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .dataset-card:hover {
+            border-color: var(--cbrnmd-primary);
+            transform: translateY(-2px);
+        }
+
+        .dataset-card.selected {
+            border-color: var(--cbrnmd-orange);
+            background: rgba(212, 113, 61, 0.1);
+        }
+
+        .dataset-card h3 {
+            color: var(--cbrnmd-primary);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .dataset-card p {
+            color: var(--cbrnmd-text-secondary);
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .dataset-card .dataset-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        /* Image Carousel */
+        .carousel-container {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .carousel-container.active {
+            display: block;
+        }
+
+        .carousel {
+            position: relative;
+            background: var(--cbrnmd-background);
+            border: 1px solid var(--cbrnmd-text-very-dim);
+            padding: 20px;
+        }
+
+        .carousel-viewport {
+            overflow: hidden;
+            border: 1px solid var(--cbrnmd-text-very-dim);
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.3s ease;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+            height: 400px;
+        }
+
+        .carousel-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .carousel-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .carousel-btn {
+            background: var(--cbrnmd-primary);
+            color: var(--cbrnmd-background);
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .carousel-btn:hover:not(:disabled) {
+            background: var(--cbrnmd-primary-light);
+        }
+
+        .carousel-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .carousel-counter {
+            color: var(--cbrnmd-text-secondary);
+        }
+
+        .carousel-thumbnails {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .carousel-thumbnail {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--cbrnmd-text-very-dim);
+            cursor: pointer;
+            transition: all 0.3s;
+            object-fit: cover;
+        }
+
+        .carousel-thumbnail:hover {
+            border-color: var(--cbrnmd-primary);
+        }
+
+        .carousel-thumbnail.active {
+            border-color: var(--cbrnmd-orange);
+        }
+
+        /* Pipeline Steps */
+        .pipeline-steps {
+            display: none;
+        }
+
+        .pipeline-steps.active {
+            display: block;
+        }
+
+        .step {
+            background: var(--cbrnmd-secondary);
+            border: 1px solid var(--cbrnmd-text-very-dim);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .step.completed {
+            border-color: var(--cbrnmd-primary);
+            opacity: 0.7;
+        }
+
+        .step.active {
+            border-color: var(--cbrnmd-orange);
+        }
+
+        .step.locked {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .step-title {
+            color: var(--cbrnmd-primary);
+            font-size: 1.1em;
+        }
+
+        .step-status {
+            color: var(--cbrnmd-text-dim);
+            font-size: 0.85em;
+        }
+
+        .step-status.completed {
+            color: var(--cbrnmd-primary);
+        }
+
+        .step-status.processing {
+            color: var(--cbrnmd-orange);
+        }
+
+        .step-description {
+            color: var(--cbrnmd-text-secondary);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .step-action {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            background: var(--cbrnmd-primary);
+            color: var(--cbrnmd-background);
+            border: none;
+            padding: 12px 30px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: var(--cbrnmd-primary-light);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--cbrnmd-secondary);
+            color: var(--cbrnmd-primary);
+            border: 1px solid var(--cbrnmd-primary);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(63, 201, 154, 0.1);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--cbrnmd-background);
+            border: 1px solid var(--cbrnmd-text-very-dim);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--cbrnmd-primary);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.processing {
+            background: linear-gradient(90deg, var(--cbrnmd-primary), var(--cbrnmd-orange), var(--cbrnmd-primary));
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .progress-text {
+            margin-top: 8px;
+            color: var(--cbrnmd-text-secondary);
+            font-size: 0.85em;
+        }
+
+        /* Results Display */
+        .step-result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--cbrnmd-background);
+            border: 1px solid var(--cbrnmd-primary);
+        }
+
+        .step-result.active {
+            display: block;
+        }
+
+        .result-title {
+            color: var(--cbrnmd-orange);
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        .result-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            background: var(--cbrnmd-secondary);
+            padding: 15px;
+            border-left: 3px solid var(--cbrnmd-primary);
+        }
+
+        .stat-label {
+            color: var(--cbrnmd-text-dim);
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: var(--cbrnmd-primary);
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .result-preview {
+            margin-top: 15px;
+            border: 1px solid var(--cbrnmd-text-very-dim);
+            background: #000;
+            padding: 10px;
+        }
+
+        .result-preview img {
+            max-width: 100%;
+            display: block;
+        }
+
+        /* 3D Model Viewer */
+        .model-viewer-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .model-viewer-container.active {
+            display: block;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 500px;
+            background-color: #000;
+            border: 1px solid var(--cbrnmd-primary);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--cbrnmd-text-very-dim);
+            border-top-color: var(--cbrnmd-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Welcome Screen */
+        .welcome-screen {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .welcome-screen.hidden {
+            display: none;
+        }
+
+        .welcome-logo {
+            font-size: 5em;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .welcome-title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .welcome-subtitle {
+            color: var(--cbrnmd-text-secondary);
+            font-size: 1.1em;
+            margin-bottom: 40px;
+            max-width: 600px;
+            line-height: 1.8;
+        }
+
+        .welcome-btn {
+            background: var(--cbrnmd-orange);
+            color: #fff;
+            border: none;
+            padding: 20px 60px;
+            font-size: 1.2em;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(212, 113, 61, 0.3);
+        }
+
+        .welcome-btn:hover {
+            background: var(--cbrnmd-primary);
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(63, 201, 154, 0.5);
+        }
+
+        .welcome-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 60px;
+            max-width: 800px;
+        }
+
+        .welcome-feature {
+            padding: 20px;
+            background: rgba(63, 201, 154, 0.05);
+            border: 1px solid var(--cbrnmd-text-very-dim);
+        }
+
+        .welcome-feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .welcome-feature-text {
+            color: var(--cbrnmd-text-secondary);
+            font-size: 0.9em;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: none;
+        }
+
+        .main-content.active {
+            display: block;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: rgba(63, 201, 154, 0.1);
+            border: 1px solid var(--cbrnmd-primary);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box-title {
+            color: var(--cbrnmd-primary);
+            font-size: 0.95em;
+            margin-bottom: 8px;
+        }
+
+        .info-box-text {
+            color: var(--cbrnmd-text-secondary);
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+
+        /* Console Log */
+        .console-log {
+            background: #000;
+            border: 1px solid var(--cbrnmd-text-very-dim);
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+
+        .console-log .log-line {
+            color: var(--cbrnmd-text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .console-log .log-success {
+            color: var(--cbrnmd-primary);
+        }
+
+        .console-log .log-error {
+            color: #ff5555;
+        }
+
+        .console-log .log-warning {
+            color: var(--cbrnmd-orange);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Main Content -->
+        <div class="main-content active" id="mainContent">
+            <header>
+                <h1>
+                    <span class="title-cbrnmd">cbrnmd</span><span class="title-3d">.3D</span>
+                </h1>
+                <p class="subtitle">INTERACTIVE PHOTOGRAMMETRY TUTORIAL</p>
+            </header>
+
+            <div class="info-box">
+                <div class="info-box-title">🐺 WOLF VIDEO TURNTABLE - Fotogrametria krok po kroku</div>
+                <div class="info-box-text">
+                    Pipeline przetworzy wideo WOLF.mp4 i stworzy model 3D. Kliknij "URUCHOM" dla każdego kroku i obserwuj postęp.
+                    Czas przetwarzania: ~10-15 minut (zależy od hardware).
+                </div>
+            </div>
+
+        <div class="tutorial-container">
+            <!-- Video Preview -->
+            <div class="section">
+                <h2 class="section-title">📹 Źródło: WOLF.mp4</h2>
+                <video id="wolfVideo" controls style="width: 100%; max-width: 600px; display: block; margin: 20px auto; border: 2px solid var(--cbrnmd-primary);">
+                    <source src="assets/input/WOLF.mp4" type="video/mp4">
+                    Twoja przeglądarka nie obsługuje video.
+                </video>
+                <div id="videoTimeDisplay" style="text-align: center; color: var(--cbrnmd-primary); font-size: 1.1em; margin-top: -10px; margin-bottom: 10px; font-family: monospace;">
+                    ⏱️ Bieżący czas: <span id="currentVideoTime">00:00</span> / <span id="totalVideoTime">00:00</span>
+                </div>
+                <p style="text-align: center; color: var(--cbrnmd-text-secondary); margin-top: 10px;">
+                    Pipeline automatycznie ekstraktuje klatki z video podczas pierwszego kroku.
+                </p>
+
+                <!-- Time Range Selection -->
+                <div style="margin-top: 30px; padding: 20px; background: rgba(63, 201, 154, 0.08); border: 2px solid var(--cbrnmd-primary); border-radius: 5px;">
+                    <h3 style="color: var(--cbrnmd-primary); margin-bottom: 15px; font-size: 1.1em;">
+                        ⏱️ Zakres Czasowy Ekstrakcji Klatek
+                    </h3>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--cbrnmd-text-secondary);">
+                            <input type="checkbox" id="useFullVideo" onchange="toggleTimeRange()">
+                            <span style="font-size: 1em;">Użyj całego wideo</span>
+                        </label>
+                    </div>
+
+                    <div id="timeRangeInputs" style="display: block; margin-top: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; color: var(--cbrnmd-text-dim); margin-bottom: 5px; font-size: 0.9em;">
+                                    ⏮️ Start (sekundy lub MM:SS)
+                                </label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" id="startTime" value="0" placeholder="0 lub 00:00"
+                                           style="flex: 1; padding: 10px; background: var(--cbrnmd-background); border: 1px solid var(--cbrnmd-text-very-dim); border-radius: 3px; color: var(--cbrnmd-text); font-size: 1em;">
+                                    <button onclick="setStartFromVideo()"
+                                            style="padding: 10px 15px; background: var(--cbrnmd-primary); color: var(--cbrnmd-background); border: none; border-radius: 3px; cursor: pointer; font-weight: bold; white-space: nowrap; font-size: 0.9em;">
+                                        📹 Z video
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label style="display: block; color: var(--cbrnmd-text-dim); margin-bottom: 5px; font-size: 0.9em;">
+                                    ⏭️ Koniec (sekundy lub MM:SS, puste = do końca)
+                                </label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" id="endTime" value="00:10" placeholder="puste = do końca"
+                                           style="flex: 1; padding: 10px; background: var(--cbrnmd-background); border: 1px solid var(--cbrnmd-text-very-dim); border-radius: 3px; color: var(--cbrnmd-text); font-size: 1em;">
+                                    <button onclick="setEndFromVideo()"
+                                            style="padding: 10px 15px; background: var(--cbrnmd-orange); color: var(--cbrnmd-background); border: none; border-radius: 3px; cursor: pointer; font-weight: bold; white-space: nowrap; font-size: 0.9em;">
+                                        📹 Z video
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 3px; margin-top: 15px;">
+                        <p style="color: var(--cbrnmd-text-dim); font-size: 0.9em; margin: 0;">
+                            💡 <strong style="color: var(--cbrnmd-primary);">Jak używać:</strong><br>
+                            • <strong>Cały film:</strong> Zaznacz checkbox "Użyj całego wideo" (domyślnie)<br>
+                            • <strong>Fragment:</strong> Odznacz checkbox, a potem:<br>
+                            &nbsp;&nbsp;1️⃣ Odtwórz video i zatrzymaj na żądanym momencie<br>
+                            &nbsp;&nbsp;2️⃣ Kliknij <strong style="color: var(--cbrnmd-primary);">"📹 Z video"</strong> przy Start/End aby skopiować bieżący czas<br>
+                            &nbsp;&nbsp;3️⃣ Możesz też wpisać ręcznie: <code style="color: var(--cbrnmd-orange);">5</code> (sekundy) lub <code style="color: var(--cbrnmd-orange);">00:05</code> (MM:SS)<br>
+                            • <strong>Od X do końca:</strong> Ustaw Start, pozostaw Koniec pusty<br>
+                            • <strong>Tip:</strong> Przydatne gdy film ma intro/outro które nie nadają się do fotogrametrii!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pipeline Steps -->
+            <div class="pipeline-steps active">
+                <!-- Step 1: Frame Extraction + Feature Extraction -->
+                <div class="step" id="step1">
+                    <div class="step-header">
+                        <h3 class="step-title">KROK 1: Ekstrakcja Klatek + Detekcja Cech</h3>
+                        <span class="step-status" id="step1Status">▶️ Gotowy</span>
+                    </div>
+                    <p class="step-description">
+                        Pipeline ekstraktuje klatki z video WOLF.mp4 (6 fps), a następnie COLMAP wykrywa charakterystyczne punkty (features) na każdym zdjęciu - rogi, krawędzie, tekstury.
+                    </p>
+                    <div class="step-action">
+                        <button class="btn" id="step1Btn" onclick="runStep(1)">URUCHOM EKSTRAKCJĘ</button>
+                        <span id="step1Spinner" style="display: none;"><span class="spinner"></span> Przetwarzanie...</span>
+                    </div>
+                    <div class="progress-container" id="step1Progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="step1ProgressFill"></div>
+                        </div>
+                        <div class="progress-text" id="step1ProgressText"></div>
+                    </div>
+                    <div class="step-result" id="step1Result" style="display: none; margin-top: 20px; padding: 20px; background: rgba(63, 201, 154, 0.05); border: 2px solid var(--cbrnmd-primary); border-radius: 5px;">
+                        <h4 class="result-title" style="color: var(--cbrnmd-primary); font-size: 1.3em; margin-bottom: 15px;">✓ Wyniki Ekstrakcji</h4>
+                        <div class="result-stats" id="step1Stats" style="margin-bottom: 15px;"></div>
+                        <div class="console-log" id="step1Console" style="background: #000; padding: 10px; border-radius: 3px; font-family: monospace; font-size: 0.85em; max-height: 200px; overflow-y: auto; margin-bottom: 20px;"></div>
+                        <div id="step1Frames"></div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Feature Matching -->
+                <div class="step locked" id="step2">
+                    <div class="step-header">
+                        <h3 class="step-title">KROK 2: Dopasowanie Cech (Feature Matching)</h3>
+                        <span class="step-status" id="step2Status">🔒 Zablokowany</span>
+                    </div>
+                    <p class="step-description">
+                        COLMAP porównuje wykryte cechy między wszystkimi parami zdjęć, szukając tych samych punktów w różnych ujęciach.
+                    </p>
+                    <div class="step-action">
+                        <button class="btn" id="step2Btn" onclick="runStep(2)" disabled>URUCHOM DOPASOWANIE</button>
+                        <span id="step2Spinner" style="display: none;"><span class="spinner"></span> Przetwarzanie...</span>
+                    </div>
+                    <div class="progress-container" id="step2Progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="step2ProgressFill"></div>
+                        </div>
+                        <div class="progress-text" id="step2ProgressText"></div>
+                    </div>
+                    <div class="step-result" id="step2Result" style="display: none;">
+                        <h4 class="result-title">✓ Wyniki</h4>
+                        <div class="result-stats" id="step2Stats"></div>
+                        <div class="console-log" id="step2Console"></div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Sparse Reconstruction -->
+                <div class="step locked" id="step3">
+                    <div class="step-header">
+                        <h3 class="step-title">KROK 3: Rekonstrukcja Rzadka (Sparse)</h3>
+                        <span class="step-status" id="step3Status">🔒 Zablokowany</span>
+                    </div>
+                    <p class="step-description">
+                        COLMAP oblicza pozycje kamer i tworzy rzadką chmurę punktów 3D - szkielet modelu.
+                    </p>
+                    <div class="step-action">
+                        <button class="btn" id="step3Btn" onclick="runStep(3)" disabled>URUCHOM REKONSTRUKCJĘ</button>
+                        <span id="step3Spinner" style="display: none;"><span class="spinner"></span> Przetwarzanie...</span>
+                    </div>
+                    <div class="progress-container" id="step3Progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="step3ProgressFill"></div>
+                        </div>
+                        <div class="progress-text" id="step3ProgressText"></div>
+                    </div>
+                    <div class="step-result" id="step3Result" style="display: none;">
+                        <h4 class="result-title">✓ Wyniki</h4>
+                        <div class="result-stats" id="step3Stats"></div>
+                        <div class="console-log" id="step3Console"></div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Dense Reconstruction -->
+                <div class="step locked" id="step4">
+                    <div class="step-header">
+                        <h3 class="step-title">KROK 4: Rekonstrukcja Gęsta (Dense)</h3>
+                        <span class="step-status" id="step4Status">🔒 Zablokowany</span>
+                    </div>
+                    <p class="step-description">
+                        COLMAP tworzy bardzo gęstą chmurę punktów - szczegółową reprezentację powierzchni.
+                    </p>
+                    <div class="step-action">
+                        <button class="btn" id="step4Btn" onclick="runStep(4)" disabled>URUCHOM DENSE</button>
+                        <span id="step4Spinner" style="display: none;"><span class="spinner"></span> Przetwarzanie...</span>
+                    </div>
+                    <div class="progress-container" id="step4Progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="step4ProgressFill"></div>
+                        </div>
+                        <div class="progress-text" id="step4ProgressText"></div>
+                    </div>
+                    <div class="step-result" id="step4Result" style="display: none;">
+                        <h4 class="result-title">✓ Wyniki</h4>
+                        <div class="result-stats" id="step4Stats"></div>
+                        <div class="console-log" id="step4Console"></div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Meshing -->
+                <div class="step locked" id="step5">
+                    <div class="step-header">
+                        <h3 class="step-title">KROK 5: Generowanie Mesh + Export GLB</h3>
+                        <span class="step-status" id="step5Status">🔒 Zablokowany</span>
+                    </div>
+                    <p class="step-description">
+                        COLMAP łączy punkty w trójkąty, tworząc siatkę 3D. Następnie eksport do GLB gotowy do Unity!
+                    </p>
+                    <div class="step-action">
+                        <button class="btn" id="step5Btn" onclick="runStep(5)" disabled>URUCHOM MESHING</button>
+                        <span id="step5Spinner" style="display: none;"><span class="spinner"></span> Przetwarzanie...</span>
+                    </div>
+                    <div class="progress-container" id="step5Progress" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="step5ProgressFill"></div>
+                        </div>
+                        <div class="progress-text" id="step5ProgressText"></div>
+                    </div>
+                    <div class="step-result" id="step5Result" style="display: none;">
+                        <h4 class="result-title">✓ Wyniki</h4>
+                        <div class="result-stats" id="step5Stats"></div>
+                        <div class="console-log" id="step5Console"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- End tutorial-container -->
+        </div><!-- End main-content -->
+    </div>
+
+    <script>
+        // Global state
+        let currentDataset = 'wolf';  // Auto-load WOLF
+        let currentSlide = 0;
+        let datasetImages = [];
+        let currentStep = 0;
+        let apiBaseUrl = 'http://localhost:5000/api';
+        let extractedFrames = [];
+
+        // Unlock step
+        function unlockStep(stepNum) {
+            const step = document.getElementById(`step${stepNum}`);
+            const btn = document.getElementById(`step${stepNum}Btn`);
+            const status = document.getElementById(`step${stepNum}Status`);
+
+            step.classList.remove('locked');
+            btn.disabled = false;
+            status.textContent = '▶️ Gotowy';
+        }
+
+        async function runStep(stepNum) {
+            const step = document.getElementById(`step${stepNum}`);
+            const btn = document.getElementById(`step${stepNum}Btn`);
+            const spinner = document.getElementById(`step${stepNum}Spinner`);
+            const status = document.getElementById(`step${stepNum}Status`);
+            const progress = document.getElementById(`step${stepNum}Progress`);
+            const progressFill = document.getElementById(`step${stepNum}ProgressFill`);
+            const progressText = document.getElementById(`step${stepNum}ProgressText`);
+            const result = document.getElementById(`step${stepNum}Result`);
+            const consoleLog = document.getElementById(`step${stepNum}Console`);
+
+            // Update UI
+            btn.disabled = true;
+            spinner.style.display = 'inline-block';
+            status.textContent = '⚙️ Przetwarzanie...';
+            status.classList.add('processing');
+            progress.classList.add('active');
+            progressFill.classList.add('processing');
+
+            // Add log
+            const addLog = (message, type = 'log') => {
+                const line = document.createElement('div');
+                line.className = `log-line log-${type}`;
+                line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                consoleLog.appendChild(line);
+                consoleLog.scrollTop = consoleLog.scrollHeight;
+            };
+
+            try {
+                // Call API
+                addLog(`Rozpoczynam krok ${stepNum}...`);
+
+                // Get time range settings
+                const useFullVideo = document.getElementById('useFullVideo').checked;
+                const requestBody = { dataset: currentDataset };
+
+                if (!useFullVideo) {
+                    const startTime = document.getElementById('startTime').value.trim();
+                    const endTime = document.getElementById('endTime').value.trim();
+
+                    if (startTime) {
+                        requestBody.start_time = startTime;
+                        addLog(`⏮️ Start: ${startTime}`, 'info');
+                    }
+                    if (endTime) {
+                        requestBody.end_time = endTime;
+                        addLog(`⏭️ Koniec: ${endTime}`, 'info');
+                    }
+                }
+
+                const response = await fetch(`${apiBaseUrl}/pipeline/step/${stepNum}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+
+                // Simulate progress
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    progressFill.style.width = `${progress}%`;
+                    progressText.textContent = `${progress}%`;
+
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        completeStep(stepNum, data, addLog);
+                    }
+                }, 200);
+
+            } catch (error) {
+                addLog(`Błąd: ${error.message}`, 'error');
+                spinner.style.display = 'none';
+                status.textContent = '❌ Błąd';
+                status.classList.remove('processing');
+                progressFill.classList.remove('processing');
+                btn.disabled = false;
+            }
+        }
+
+        // Complete step
+        function completeStep(stepNum, data, addLog) {
+            const step = document.getElementById(`step${stepNum}`);
+            const btn = document.getElementById(`step${stepNum}Btn`);
+            const spinner = document.getElementById(`step${stepNum}Spinner`);
+            const status = document.getElementById(`step${stepNum}Status`);
+            const progressFill = document.getElementById(`step${stepNum}ProgressFill`);
+            const result = document.getElementById(`step${stepNum}Result`);
+            const stats = document.getElementById(`step${stepNum}Stats`);
+
+            // Update UI
+            spinner.style.display = 'none';
+            status.textContent = '✓ Ukończony';
+            status.classList.remove('processing');
+            status.classList.add('completed');
+            step.classList.remove('active');
+            step.classList.add('completed');
+            progressFill.classList.remove('processing');
+            progressFill.style.width = '100%';
+
+            // Show results - display block instead of using 'active' class
+            result.style.display = 'block';
+
+            // Display stats
+            if (data.stats) {
+                stats.innerHTML = Object.entries(data.stats).map(([key, value]) => `
+                    <div class="stat-item">
+                        <div class="stat-label">${key}</div>
+                        <div class="stat-value">${value}</div>
+                    </div>
+                `).join('');
+            }
+
+            // Display ALL logs from backend first
+            if (data.logs && data.logs.length > 0) {
+                data.logs.forEach(log => {
+                    if (log.includes('✗') || log.includes('Błąd') || log.includes('ERROR')) {
+                        addLog(log, 'error');
+                    } else if (log.includes('✓')) {
+                        addLog(log, 'success');
+                    } else if (log.includes('⚠️')) {
+                        addLog(log, 'warning');
+                    } else {
+                        addLog(log, 'info');
+                    }
+                });
+            }
+
+            addLog('Krok zakończony pomyślnie!', 'success');
+
+            // ===== DEBUG LOGGING =====
+            console.log('=== BACKEND RESPONSE DEBUG ===');
+            console.log('stepNum:', stepNum);
+            console.log('data:', JSON.stringify(data, null, 2));
+            console.log('data.frames_preview:', data.frames_preview);
+            console.log('frames_preview exists?:', data.frames_preview !== undefined);
+            console.log('frames_preview length:', data.frames_preview ? data.frames_preview.length : 'UNDEFINED');
+
+            addLog(`🔍 DEBUG: stepNum = ${stepNum}`, 'warning');
+            addLog(`🔍 DEBUG: frames_preview = ${data.frames_preview ? data.frames_preview.length + ' klatek' : 'BRAK DANYCH!'}`, 'warning');
+
+            if (data.frames_preview && data.frames_preview.length > 0) {
+                addLog(`🔍 DEBUG: First frame path: ${data.frames_preview[0]}`, 'info');
+            }
+            // ===== END DEBUG =====
+
+            // Show extracted frames for step 1 - IN THE SAME STEP BOX
+            if (stepNum === 1 && data.frames_preview && data.frames_preview.length > 0) {
+                const framesContainer = document.getElementById('step1Frames');
+                const totalFrames = data.stats['Liczba zdjęć'] || data.frames_preview.length;
+                
+                framesContainer.innerHTML = `
+                    <div style="margin-top: 20px; padding: 20px; background: rgba(63, 201, 154, 0.15); border: 2px solid var(--cbrnmd-primary); border-radius: 5px;">
+                        <h4 style="color: var(--cbrnmd-primary); margin-bottom: 15px; font-size: 1.3em;">
+                            📸 Wyekstraktowane Klatki z WOLF.mp4
+                        </h4>
+                        <p style="color: var(--cbrnmd-text-secondary); margin-bottom: 20px; font-size: 1em;">
+                            Łącznie wyekstraktowano: <strong style="color: var(--cbrnmd-primary);">${totalFrames} klatek</strong> z wideo. 
+                            Poniżej podgląd wszystkich ${data.frames_preview.length} klatek:
+                        </p>
+                        <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; max-height: 600px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 3px;">
+                            ${data.frames_preview.map((frame, idx) => `
+                                <div style="text-align: center; padding: 5px;">
+                                    <img src="${frame}" 
+                                         style="width: 100%; border: 2px solid var(--cbrnmd-text-very-dim); border-radius: 3px; cursor: pointer; transition: all 0.2s;"
+                                         alt="Frame ${idx + 1}"
+                                         onclick="window.open('${frame}', '_blank')"
+                                         onmouseover="this.style.borderColor='var(--cbrnmd-primary)'; this.style.transform='scale(1.05)'"
+                                         onmouseout="this.style.borderColor='var(--cbrnmd-text-very-dim)'; this.style.transform='scale(1)'">
+                                    <div style="color: var(--cbrnmd-text-dim); font-size: 0.75em; margin-top: 3px;">
+                                        #${idx + 1}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <p style="color: var(--cbrnmd-text-dim); margin-top: 15px; font-size: 0.85em; text-align: center;">
+                            💡 Kliknij na klatkę aby zobaczyć w pełnym rozmiarze
+                        </p>
+                    </div>
+                `;
+                addLog(`📸 Wyświetlam ${data.frames_preview.length} klatek w podglądzie`, 'success');
+            }
+
+            // Unlock next step
+            if (stepNum < 5) {
+                setTimeout(() => {
+                    unlockStep(stepNum + 1);
+                    document.getElementById(`step${stepNum + 1}`).scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 1000);
+            } else {
+                // Show final model
+                setTimeout(() => {
+                    showFinalModel(data.modelPath);
+                }, 1000);
+            }
+        }
+
+        // Show final 3D model
+        function showFinalModel(modelPath) {
+            const container = document.getElementById('modelViewerContainer');
+            const viewer = document.getElementById('modelViewer');
+
+            viewer.src = modelPath || 'examples/turntable_example/demo_model.glb';
+            container.classList.add('active');
+
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Download model
+        function downloadModel() {
+            const viewer = document.getElementById('modelViewer');
+            const link = document.createElement('a');
+            link.href = viewer.src;
+            link.download = `cbrnmd_3d_model_${currentDataset}.glb`;
+            link.click();
+        }
+
+        // Format seconds to MM:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // Update video time display
+        function updateVideoTimeDisplay() {
+            const video = document.getElementById('wolfVideo');
+            if (video && !isNaN(video.currentTime)) {
+                document.getElementById('currentVideoTime').textContent = formatTime(video.currentTime);
+                if (!isNaN(video.duration)) {
+                    document.getElementById('totalVideoTime').textContent = formatTime(video.duration);
+                }
+            }
+        }
+
+        // Set start time from current video position
+        function setStartFromVideo() {
+            const video = document.getElementById('wolfVideo');
+            if (video && !isNaN(video.currentTime)) {
+                const time = formatTime(video.currentTime);
+                document.getElementById('startTime').value = time;
+                // Visual feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Ustawiono!';
+                btn.style.background = 'var(--cbrnmd-orange)';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = 'var(--cbrnmd-primary)';
+                }, 1000);
+            }
+        }
+
+        // Set end time from current video position
+        function setEndFromVideo() {
+            const video = document.getElementById('wolfVideo');
+            if (video && !isNaN(video.currentTime)) {
+                const time = formatTime(video.currentTime);
+                document.getElementById('endTime').value = time;
+                // Visual feedback
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Ustawiono!';
+                btn.style.background = 'var(--cbrnmd-primary)';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = 'var(--cbrnmd-orange)';
+                }, 1000);
+            }
+        }
+
+        // Toggle time range inputs
+        function toggleTimeRange() {
+            const checkbox = document.getElementById('useFullVideo');
+            const inputs = document.getElementById('timeRangeInputs');
+            inputs.style.display = checkbox.checked ? 'none' : 'block';
+        }
+
+        // Initialize video player
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('wolfVideo');
+            if (video) {
+                // Update time display while playing
+                video.addEventListener('timeupdate', updateVideoTimeDisplay);
+                video.addEventListener('loadedmetadata', updateVideoTimeDisplay);
+            }
+        });
+
+        // Reset tutorial
+        function resetTutorial() {
+            if (confirm('Czy na pewno chcesz zacząć od początku?')) {
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
