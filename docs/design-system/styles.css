@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css?family=Share+Tech+Mono&display=swap');
+@import url('./main-layout.css');
+@import url('./wiki-styles.css');
+
+/* CYBERNOMAD BRANDING - Dark theme with cyber aesthetic */
+:root {
+  /* Colors from cybernomad.pl */
+  --cbrnmd-background: #111;
+  --cbrnmd-background-dark: #000;
+  --cbrnmd-primary: #3fc99a;
+  --cbrnmd-primary-light: #43D079;
+  --cbrnmd-cursor: #1fd1c1;
+  --cbrnmd-secondary: #2A2A2A;
+  --cbrnmd-text: #3fc99a;
+  --cbrnmd-text-secondary: #AAAAAA;
+  --cbrnmd-text-dim: #666;
+  --cbrnmd-text-very-dim: #444;
+}
+
+html {
+  --lumo-base-color: var(--cbrnmd-background);
+  --lumo-body-text-color: var(--cbrnmd-text);
+  --lumo-secondary-text-color: var(--cbrnmd-text-secondary);
+  --lumo-tertiary-text-color: var(--cbrnmd-text-dim);
+  --lumo-primary-color: var(--cbrnmd-primary);
+  --lumo-primary-color-50pct: rgba(63, 201, 154, 0.5);
+  --lumo-primary-color-10pct: rgba(63, 201, 154, 0.1);
+  --lumo-primary-text-color: var(--cbrnmd-primary);
+  --lumo-contrast: var(--cbrnmd-text);
+  --lumo-contrast-90pct: rgba(63, 201, 154, 0.9);
+  --lumo-contrast-80pct: rgba(63, 201, 154, 0.8);
+  --lumo-contrast-70pct: rgba(63, 201, 154, 0.7);
+  --lumo-contrast-60pct: rgba(63, 201, 154, 0.6);
+  --lumo-contrast-50pct: rgba(63, 201, 154, 0.5);
+  --lumo-contrast-40pct: rgba(63, 201, 154, 0.4);
+  --lumo-contrast-30pct: rgba(63, 201, 154, 0.3);
+  --lumo-contrast-20pct: rgba(63, 201, 154, 0.2);
+  --lumo-contrast-10pct: rgba(63, 201, 154, 0.1);
+  --lumo-contrast-5pct: rgba(63, 201, 154, 0.05);
+}
+
+html, body {
+  background: #111 !important;
+  color: var(--cbrnmd-text);
+  font-family: 'Share Tech Mono', monospace;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}

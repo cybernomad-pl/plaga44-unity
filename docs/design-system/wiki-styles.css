@@ -1,0 +1,197 @@
+/* FANDOM-STYLE WIKI LAYOUT */
+
+.wiki-view {
+  background: var(--cbrnmd-background);
+  min-height: 100vh;
+}
+
+/* LEFT SIDEBAR - Navigation */
+.wiki-sidebar {
+  background: var(--cbrnmd-background-dark);
+  border-right: 1px solid var(--cbrnmd-text-very-dim);
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.wiki-nav-title {
+  color: var(--cbrnmd-primary);
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--cbrnmd-text-very-dim);
+}
+
+.wiki-category-section {
+  margin-bottom: 1.5rem;
+}
+
+.wiki-section-title {
+  color: var(--cbrnmd-text-secondary);
+  font-size: 0.75rem;
+  margin: 0 0 0.5rem 0;
+  text-transform: uppercase;
+}
+
+.wiki-category-item {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem;
+  margin: 0.15rem 0;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  font-size: 0.85rem;
+}
+
+.wiki-category-item:hover {
+  background: rgba(63, 201, 154, 0.1);
+  border-left-color: var(--cbrnmd-primary);
+}
+
+.wiki-category-icon {
+  color: var(--cbrnmd-primary);
+  margin-right: 0.5rem;
+  font-size: 0.7rem;
+}
+
+/* MAIN CONTENT AREA */
+.wiki-content {
+  background: var(--cbrnmd-background);
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+}
+
+.wiki-article-title {
+  color: var(--cbrnmd-primary);
+  font-size: 1.6rem;
+  margin: 0 0 0.8rem 0;
+  font-weight: bold;
+}
+
+.wiki-article-metadata {
+  color: var(--cbrnmd-text-secondary);
+  font-size: 0.75rem;
+  padding: 0.4rem 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--cbrnmd-text-very-dim);
+}
+
+.wiki-article-content {
+  color: var(--cbrnmd-text);
+  line-height: 1.6;
+}
+
+.wiki-article-content h2 {
+  color: var(--cbrnmd-primary);
+  font-size: 1.2rem;
+  margin: 1.5rem 0 0.8rem 0;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--cbrnmd-text-very-dim);
+}
+
+.wiki-article-content h3 {
+  color: var(--cbrnmd-primary-light);
+  font-size: 1rem;
+  margin: 1rem 0 0.5rem 0;
+}
+
+.wiki-article-content p {
+  color: var(--cbrnmd-text-secondary);
+  margin: 0.8rem 0;
+  font-size: 0.9rem;
+}
+
+/* RIGHT SIDEBAR - TOC & Info */
+.wiki-right-sidebar {
+  background: var(--cbrnmd-background-dark);
+  border-left: 1px solid var(--cbrnmd-text-very-dim);
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.wiki-toc-title {
+  color: var(--cbrnmd-primary);
+  font-size: 0.85rem;
+  margin: 0 0 0.8rem 0;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--cbrnmd-text-very-dim);
+}
+
+.wiki-toc-list {
+  margin-bottom: 1.5rem;
+}
+
+.wiki-toc-item {
+  padding: 0.4rem;
+  margin: 0.15rem 0;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  color: var(--cbrnmd-text-secondary);
+  font-size: 0.8rem;
+}
+
+.wiki-toc-item:hover {
+  background: rgba(63, 201, 154, 0.1);
+  border-left-color: var(--cbrnmd-primary);
+  color: var(--cbrnmd-primary);
+}
+
+/* INFO BOX */
+.wiki-info-box {
+  background: rgba(63, 201, 154, 0.05);
+  border: 1px solid var(--cbrnmd-text-very-dim);
+  padding: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.wiki-info-title {
+  color: var(--cbrnmd-primary);
+  font-size: 0.8rem;
+  margin: 0 0 0.6rem 0;
+}
+
+.wiki-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--cbrnmd-text-very-dim);
+  font-size: 0.75rem;
+}
+
+.wiki-info-row:last-child {
+  border-bottom: none;
+}
+
+.wiki-info-label {
+  color: var(--cbrnmd-text-dim);
+}
+
+.wiki-info-value {
+  color: var(--cbrnmd-primary-light);
+}
+
+/* Scrollbar styling */
+.wiki-sidebar::-webkit-scrollbar,
+.wiki-content::-webkit-scrollbar,
+.wiki-right-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.wiki-sidebar::-webkit-scrollbar-track,
+.wiki-content::-webkit-scrollbar-track,
+.wiki-right-sidebar::-webkit-scrollbar-track {
+  background: var(--cbrnmd-background-dark);
+}
+
+.wiki-sidebar::-webkit-scrollbar-thumb,
+.wiki-content::-webkit-scrollbar-thumb,
+.wiki-right-sidebar::-webkit-scrollbar-thumb {
+  background: var(--cbrnmd-primary);
+  border-radius: 4px;
+}
+
+.wiki-sidebar::-webkit-scrollbar-thumb:hover,
+.wiki-content::-webkit-scrollbar-thumb:hover,
+.wiki-right-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--cbrnmd-primary-light);
+}

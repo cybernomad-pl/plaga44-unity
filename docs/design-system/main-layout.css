@@ -1,0 +1,103 @@
+vaadin-scroller[slot="drawer"] {
+  padding: var(--lumo-space-s);
+}
+
+vaadin-side-nav-item vaadin-icon {
+  padding: 0;
+}
+
+[slot="drawer"]:is(header, footer) {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+  min-height: var(--lumo-size-xl);
+  box-sizing: border-box;
+}
+
+[slot="drawer"]:is(header, footer):is(:empty) {
+  display: none;
+}
+
+/* Hide hamburger menu when drawer is open */
+vaadin-app-layout[drawer-opened] vaadin-drawer-toggle {
+  display: none;
+}
+
+/* CAŁKOWICIE UKRYJ LINIĘ POD NAVBAREM - ZAWSZE - AGRESYWNIE */
+vaadin-app-layout::part(navbar) {
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+vaadin-app-layout [slot="navbar"] {
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+header[slot="navbar"] {
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* Hide navbar content on click, keep hamburger */
+vaadin-app-layout.hide-title .view-title {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.view-title {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* CAŁKOWICIE UKRYJ SCROLLBAR - NUKLEARNA OPCJA */
+::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-track {
+  display: none !important;
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+  display: none !important;
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-button {
+  display: none !important;
+}
+
+::-webkit-scrollbar-corner {
+  display: none !important;
+  background: transparent !important;
+}
+
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+html, body {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  overflow: -moz-scrollbars-none !important;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+div::-webkit-scrollbar,
+vaadin-scroller::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  background: transparent !important;
+}
