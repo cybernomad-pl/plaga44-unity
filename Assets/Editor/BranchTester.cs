@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// PLAGA44 > Branch Tester
+/// CYBERNOMAD > Branch Tester
 /// Przelacza branche git z poziomu Unity Editor.
 /// Workflow: wybierz branch -> Unity refreshuje -> testujesz -> wracasz do main.
 /// </summary>
@@ -16,7 +16,7 @@ public class BranchTester : EditorWindow
     private Vector2 scrollPos;
     private string lastOutput = "";
 
-    [MenuItem("PLAGA44/Branch Tester")]
+    [MenuItem("CYBERNOMAD/Branch Tester")]
     static void ShowWindow()
     {
         var win = GetWindow<BranchTester>("Branch Tester");

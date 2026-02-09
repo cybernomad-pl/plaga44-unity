@@ -2,7 +2,7 @@
 // PLAGA '44 -- Reset project to Unity defaults.
 // Removes Meta XR packages and reverts all settings changed by MetaQuestSetup.cs.
 //
-// Usage: Unity Editor menu -> PLAGA44 -> Reset to Unity Defaults
+// Usage: Unity Editor menu -> CYBERNOMAD -> Reset to Unity Defaults
 //
 // This will:
 // - Remove all Meta XR SDK packages
@@ -44,9 +44,9 @@ namespace Plaga44.Editor
         private static int _removedCount;
 
         // ==================================================================
-        // MENU: PLAGA44 > Reset to Unity Defaults
+        // MENU: CYBERNOMAD > Reset to Unity Defaults
         // ==================================================================
-        [MenuItem("PLAGA44/Reset to Unity Defaults")]
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/Reset to Unity Defaults", false, 300)]
         public static void ResetToDefaults()
         {
             bool confirm = EditorUtility.DisplayDialog(
@@ -76,9 +76,9 @@ namespace Plaga44.Editor
 
             if (!reallyConfirm) return;
 
-            Debug.Log("[PLAGA44] ============================================");
-            Debug.Log("[PLAGA44] Starting reset to Unity defaults...");
-            Debug.Log("[PLAGA44] ============================================");
+            Debug.Log("[CYBERNOMAD] ============================================");
+            Debug.Log("[CYBERNOMAD] Starting reset to Unity defaults...");
+            Debug.Log("[CYBERNOMAD] ============================================");
 
             // 1. Revert Player Settings (immediate)
             ResetPlayerSettings();
@@ -92,7 +92,7 @@ namespace Plaga44.Editor
             // 4. Remove packages (async -- queued)
             StartPackageRemoval();
 
-            Debug.Log("[PLAGA44] Settings reverted. Packages removing in background...");
+            Debug.Log("[CYBERNOMAD] Settings reverted. Packages removing in background...");
         }
 
         // ==================================================================
@@ -134,7 +134,7 @@ namespace Plaga44.Editor
             PlayerSettings.allowedAutorotateToLandscapeLeft = true;
             PlayerSettings.allowedAutorotateToLandscapeRight = true;
 
-            Debug.Log("[PLAGA44] Player Settings reverted to Unity defaults.");
+            Debug.Log("[CYBERNOMAD] Player Settings reverted to Unity defaults.");
         }
 
         // ==================================================================
@@ -163,7 +163,7 @@ namespace Plaga44.Editor
             // Pixel light count: Unity default
             QualitySettings.pixelLightCount = 4;
 
-            Debug.Log("[PLAGA44] Quality Settings reverted to Unity defaults.");
+            Debug.Log("[CYBERNOMAD] Quality Settings reverted to Unity defaults.");
         }
 
         // ==================================================================
@@ -178,7 +178,7 @@ namespace Plaga44.Editor
 
             if (!manifest.Contains("npm.developer.oculus.com"))
             {
-                Debug.Log("[PLAGA44] No Meta scoped registry found.");
+                Debug.Log("[CYBERNOMAD] No Meta scoped registry found.");
                 return;
             }
 
@@ -246,7 +246,7 @@ namespace Plaga44.Editor
 
             File.WriteAllText(manifestPath, manifest);
             Client.Resolve();
-            Debug.Log("[PLAGA44] Removed Meta scoped registry and package entries from manifest.json.");
+            Debug.Log("[CYBERNOMAD] Removed Meta scoped registry and package entries from manifest.json.");
         }
 
         // ==================================================================
@@ -267,19 +267,19 @@ namespace Plaga44.Editor
             if (_removeQueue.Count == 0)
             {
                 EditorApplication.update -= PackageRemoveTick;
-                Debug.Log($"[PLAGA44] All {_totalPackages} packages processed.");
-                Debug.Log("[PLAGA44] ============================================");
-                Debug.Log("[PLAGA44] RESET COMPLETE.");
-                Debug.Log("[PLAGA44] Project is now a clean Unity 6 project.");
-                Debug.Log("[PLAGA44] Run 'PLAGA44 > Setup Meta Quest Settings' to reconfigure.");
-                Debug.Log("[PLAGA44] ============================================");
+                Debug.Log($"[CYBERNOMAD] All {_totalPackages} packages processed.");
+                Debug.Log("[CYBERNOMAD] ============================================");
+                Debug.Log("[CYBERNOMAD] RESET COMPLETE.");
+                Debug.Log("[CYBERNOMAD] Project is now a clean Unity 6 project.");
+                Debug.Log("[CYBERNOMAD] Run 'CYBERNOMAD > Setup Meta Quest Settings' to reconfigure.");
+                Debug.Log("[CYBERNOMAD] ============================================");
 
                 EditorUtility.DisplayDialog(
                     "PLAGA '44 -- Reset Complete",
                     "All Meta Quest configuration removed.\n" +
                     "Project is now a clean Unity 6 project.\n\n" +
                     "To reconfigure for Meta Quest, run:\n" +
-                    "PLAGA44 > Setup Meta Quest Settings",
+                    "CYBERNOMAD > Setup Meta Quest Settings",
                     "OK"
                 );
                 return;
@@ -288,7 +288,7 @@ namespace Plaga44.Editor
             var pkg = _removeQueue.Dequeue();
             _removedCount++;
 
-            Debug.Log($"[PLAGA44] [{_removedCount}/{_totalPackages}] Removing {pkg}...");
+            Debug.Log($"[CYBERNOMAD] [{_removedCount}/{_totalPackages}] Removing {pkg}...");
             _removeRequest = Client.Remove(pkg);
         }
 
@@ -298,12 +298,12 @@ namespace Plaga44.Editor
 
             if (_removeRequest.Status == StatusCode.Success)
             {
-                Debug.Log($"[PLAGA44] Removed: {_removeRequest.PackageIdOrName}");
+                Debug.Log($"[CYBERNOMAD] Removed: {_removeRequest.PackageIdOrName}");
             }
             else if (_removeRequest.Status >= StatusCode.Failure)
             {
                 // Not an error -- package might not have been installed
-                Debug.Log($"[PLAGA44] Skip (not installed): {_removeRequest.Error?.message ?? "ok"}");
+                Debug.Log($"[CYBERNOMAD] Skip (not installed): {_removeRequest.Error?.message ?? "ok"}");
             }
 
             _removeRequest = null;
@@ -318,7 +318,7 @@ namespace Plaga44.Editor
             string path = Path.Combine(Application.dataPath, "..", "Packages", "manifest.json");
             if (!File.Exists(path))
             {
-                Debug.LogError("[PLAGA44] Packages/manifest.json not found!");
+                Debug.LogError("[CYBERNOMAD] Packages/manifest.json not found!");
                 return null;
             }
             return path;

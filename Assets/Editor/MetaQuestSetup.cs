@@ -2,7 +2,7 @@
 // PLAGA '44 -- Full automated Meta Quest project setup.
 // Installs Meta XR SDK packages AND configures all project settings.
 //
-// Usage: Unity Editor menu -> PLAGA44 -> Setup Meta Quest Settings
+// Usage: Unity Editor menu -> CYBERNOMAD -> Setup Meta Quest Settings
 //
 // Installs Meta XR SDK v81 (v83 has license bug on Unity 6.3).
 // Bug: https://communityforums.atmeta.com/discussions/Questions_Discussions/unity-6-3---meta-xr-core-license-error/1357387
@@ -64,9 +64,9 @@ namespace Plaga44.Editor
         private static int _installedCount;
 
         // ==================================================================
-        // MENU: PLAGA44 > Setup Meta Quest Settings
+        // MENU: CYBERNOMAD > Setup Meta Quest Settings
         // ==================================================================
-        [MenuItem("PLAGA44/Setup Meta Quest Settings")]
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/0. Install Packages + Settings", false, 0)]
         public static void SetupMetaQuestSettings()
         {
             string packageList = "";
@@ -91,9 +91,9 @@ namespace Plaga44.Editor
 
             if (!confirm) return;
 
-            Debug.Log("[PLAGA44] ============================================");
-            Debug.Log("[PLAGA44] Starting Meta Quest setup...");
-            Debug.Log("[PLAGA44] ============================================");
+            Debug.Log("[CYBERNOMAD] ============================================");
+            Debug.Log("[CYBERNOMAD] Starting Meta Quest setup...");
+            Debug.Log("[CYBERNOMAD] ============================================");
 
             // 1. Ensure scoped registry in manifest.json
             EnsureScopedRegistry();
@@ -107,8 +107,8 @@ namespace Plaga44.Editor
             // 4. Quality Settings (immediate)
             SetQualitySettings();
 
-            Debug.Log("[PLAGA44] Settings applied. Packages installing in background...");
-            Debug.Log("[PLAGA44] Watch Console for install progress.");
+            Debug.Log("[CYBERNOMAD] Settings applied. Packages installing in background...");
+            Debug.Log("[CYBERNOMAD] Watch Console for install progress.");
         }
 
         // ==================================================================
@@ -123,7 +123,7 @@ namespace Plaga44.Editor
 
             if (manifest.Contains("npm.developer.oculus.com"))
             {
-                Debug.Log("[PLAGA44] Scoped registry already present.");
+                Debug.Log("[CYBERNOMAD] Scoped registry already present.");
                 return;
             }
 
@@ -131,7 +131,7 @@ namespace Plaga44.Editor
             int depsIdx = manifest.IndexOf("\"dependencies\"");
             if (depsIdx < 0)
             {
-                Debug.LogError("[PLAGA44] Cannot find 'dependencies' in manifest.json");
+                Debug.LogError("[CYBERNOMAD] Cannot find 'dependencies' in manifest.json");
                 return;
             }
 
@@ -145,7 +145,7 @@ namespace Plaga44.Editor
                      + manifest.Substring(lineStart);
 
             File.WriteAllText(manifestPath, manifest);
-            Debug.Log("[PLAGA44] Added Meta XR scoped registry to manifest.json.");
+            Debug.Log("[CYBERNOMAD] Added Meta XR scoped registry to manifest.json.");
         }
 
         // ==================================================================
@@ -166,15 +166,15 @@ namespace Plaga44.Editor
             if (_installQueue.Count == 0)
             {
                 EditorApplication.update -= PackageInstallTick;
-                Debug.Log($"[PLAGA44] All {_totalPackages} packages processed.");
-                Debug.Log("[PLAGA44] ============================================");
-                Debug.Log("[PLAGA44] SETUP COMPLETE. Remaining manual steps:");
-                Debug.Log("[PLAGA44] 1. File > Build Profiles > Meta Quest > Switch Platform");
-                Debug.Log("[PLAGA44] 2. Edit > Project Settings > XR Plug-in Management > Android > Enable OpenXR");
-                Debug.Log("[PLAGA44] 3. Under OpenXR > Add Meta Quest Feature Group");
-                Debug.Log("[PLAGA44] 4. Scene: Meta > Tools > Building Blocks > Camera Rig + Controllers");
-                Debug.Log("[PLAGA44] See docs/META_SDK_SETUP.md for details.");
-                Debug.Log("[PLAGA44] ============================================");
+                Debug.Log($"[CYBERNOMAD] All {_totalPackages} packages processed.");
+                Debug.Log("[CYBERNOMAD] ============================================");
+                Debug.Log("[CYBERNOMAD] SETUP COMPLETE. Remaining manual steps:");
+                Debug.Log("[CYBERNOMAD] 1. File > Build Profiles > Meta Quest > Switch Platform");
+                Debug.Log("[CYBERNOMAD] 2. Edit > Project Settings > XR Plug-in Management > Android > Enable OpenXR");
+                Debug.Log("[CYBERNOMAD] 3. Under OpenXR > Add Meta Quest Feature Group");
+                Debug.Log("[CYBERNOMAD] 4. Scene: Meta > Tools > Building Blocks > Camera Rig + Controllers");
+                Debug.Log("[CYBERNOMAD] See docs/META_SDK_SETUP.md for details.");
+                Debug.Log("[CYBERNOMAD] ============================================");
 
                 EditorUtility.DisplayDialog(
                     "PLAGA '44 -- Setup Complete",
@@ -194,7 +194,7 @@ namespace Plaga44.Editor
             string identifier = $"{pkg[0]}@{pkg[1]}";
             _installedCount++;
 
-            Debug.Log($"[PLAGA44] [{_installedCount}/{_totalPackages}] Installing {identifier}...");
+            Debug.Log($"[CYBERNOMAD] [{_installedCount}/{_totalPackages}] Installing {identifier}...");
             _addRequest = Client.Add(identifier);
         }
 
@@ -204,11 +204,11 @@ namespace Plaga44.Editor
 
             if (_addRequest.Status == StatusCode.Success)
             {
-                Debug.Log($"[PLAGA44] OK: {_addRequest.Result.packageId}");
+                Debug.Log($"[CYBERNOMAD] OK: {_addRequest.Result.packageId}");
             }
             else if (_addRequest.Status >= StatusCode.Failure)
             {
-                Debug.LogWarning($"[PLAGA44] FAILED: {_addRequest.Error?.message ?? "unknown error"}");
+                Debug.LogWarning($"[CYBERNOMAD] FAILED: {_addRequest.Error?.message ?? "unknown error"}");
             }
 
             _addRequest = null;
@@ -257,7 +257,7 @@ namespace Plaga44.Editor
             PlayerSettings.allowedAutorotateToLandscapeLeft = true;
             PlayerSettings.allowedAutorotateToLandscapeRight = false;
 
-            Debug.Log("[PLAGA44] Player Settings configured.");
+            Debug.Log("[CYBERNOMAD] Player Settings configured.");
         }
 
         // ==================================================================
@@ -286,13 +286,13 @@ namespace Plaga44.Editor
             // Pixel light count: keep low for mobile
             QualitySettings.pixelLightCount = 2;
 
-            Debug.Log("[PLAGA44] Quality Settings configured.");
+            Debug.Log("[CYBERNOMAD] Quality Settings configured.");
         }
 
         // ==================================================================
         // DIAGNOSTICS
         // ==================================================================
-        [MenuItem("PLAGA44/Print Setup Status")]
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/Print Setup Status", false, 200)]
         public static void PrintSetupStatus()
         {
             Debug.Log("=== PLAGA '44 Setup Status ===");
@@ -318,39 +318,39 @@ namespace Plaga44.Editor
         // MANUAL STEPS -- menu navigation helpers
         // Each opens the correct Unity window for that step.
         // ==================================================================
-        [MenuItem("PLAGA44/Manual Steps/1. Switch Platform to Android", false, 100)]
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/1. Switch Platform to Android", false, 100)]
         public static void ManualStep1_SwitchPlatform()
         {
-            Debug.Log("[PLAGA44] Step 1: File > Build Profiles > Meta Quest > Switch Platform");
-            Debug.Log("[PLAGA44] Select 'Android' platform, then click 'Switch Platform'.");
+            Debug.Log("[CYBERNOMAD] Step 1: File > Build Profiles > Meta Quest > Switch Platform");
+            Debug.Log("[CYBERNOMAD] Select 'Android' platform, then click 'Switch Platform'.");
             EditorApplication.ExecuteMenuItem("File/Build Profiles");
         }
 
-        [MenuItem("PLAGA44/Manual Steps/2. Enable OpenXR (XR Plug-in Management)", false, 101)]
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/2. Enable OpenXR (XR Plug-in Management)", false, 101)]
         public static void ManualStep2_EnableOpenXR()
         {
-            Debug.Log("[PLAGA44] Step 2: Enable OpenXR for Android");
-            Debug.Log("[PLAGA44] In the Android tab, tick 'OpenXR'.");
+            Debug.Log("[CYBERNOMAD] Step 2: Enable OpenXR for Android");
+            Debug.Log("[CYBERNOMAD] In the Android tab, tick 'OpenXR'.");
             SettingsService.OpenProjectSettings("Project/XR Plug-in Management");
         }
 
-        [MenuItem("PLAGA44/Manual Steps/3. Add Meta Quest Feature Group", false, 102)]
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/3. Add Meta Quest Feature Group", false, 102)]
         public static void ManualStep3_MetaQuestFeature()
         {
-            Debug.Log("[PLAGA44] Step 3: Under OpenXR settings, enable Meta Quest Feature Group");
-            Debug.Log("[PLAGA44] Click the Android tab > OpenXR > tick 'Meta Quest Feature Group'.");
-            Debug.Log("[PLAGA44] Also add 'Oculus Touch Controller Profile' under Interaction Profiles.");
+            Debug.Log("[CYBERNOMAD] Step 3: Under OpenXR settings, enable Meta Quest Feature Group");
+            Debug.Log("[CYBERNOMAD] Click the Android tab > OpenXR > tick 'Meta Quest Feature Group'.");
+            Debug.Log("[CYBERNOMAD] Also add 'Oculus Touch Controller Profile' under Interaction Profiles.");
             SettingsService.OpenProjectSettings("Project/XR Plug-in Management");
         }
 
-        [MenuItem("PLAGA44/Manual Steps/4. Add OVRCameraRig to Scene", false, 103)]
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/4. Add OVRCameraRig to Scene", false, 103)]
         public static void ManualStep4_SceneSetup()
         {
-            Debug.Log("[PLAGA44] Step 4: Scene setup");
-            Debug.Log("[PLAGA44] 1. Delete the default 'Main Camera' from your scene");
-            Debug.Log("[PLAGA44] 2. Meta > Tools > Building Blocks > (+) Camera Rig");
-            Debug.Log("[PLAGA44] 3. (+) Controller Tracking");
-            Debug.Log("[PLAGA44] 4. Optionally: (+) Hand Tracking, (+) Passthrough");
+            Debug.Log("[CYBERNOMAD] Step 4: Scene setup");
+            Debug.Log("[CYBERNOMAD] 1. Delete the default 'Main Camera' from your scene");
+            Debug.Log("[CYBERNOMAD] 2. Meta > Tools > Building Blocks > (+) Camera Rig");
+            Debug.Log("[CYBERNOMAD] 3. (+) Controller Tracking");
+            Debug.Log("[CYBERNOMAD] 4. Optionally: (+) Hand Tracking, (+) Passthrough");
 
             EditorUtility.DisplayDialog(
                 "PLAGA '44 -- Scene Setup",
@@ -373,7 +373,7 @@ namespace Plaga44.Editor
             string path = Path.Combine(Application.dataPath, "..", "Packages", "manifest.json");
             if (!File.Exists(path))
             {
-                Debug.LogError("[PLAGA44] Packages/manifest.json not found!");
+                Debug.LogError("[CYBERNOMAD] Packages/manifest.json not found!");
                 return null;
             }
             return path;
