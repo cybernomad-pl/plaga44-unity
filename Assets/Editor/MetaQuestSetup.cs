@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
@@ -228,7 +229,7 @@ namespace Plaga44.Editor
 
             // Android package identifier
             PlayerSettings.SetApplicationIdentifier(
-                BuildTargetGroup.Android, "com.cybernomad.plaga44");
+                NamedBuildTarget.Android, "com.cybernomad.plaga44");
 
             // Graphics API: Vulkan only (required for Quest)
             PlayerSettings.SetGraphicsAPIs(
@@ -238,7 +239,7 @@ namespace Plaga44.Editor
 
             // Scripting backend: IL2CPP (required for ARM64)
             PlayerSettings.SetScriptingBackend(
-                BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
+                NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
 
             // Architecture: ARM64 only (Quest is ARM64)
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
@@ -298,8 +299,8 @@ namespace Plaga44.Editor
             Debug.Log($"Color Space: {PlayerSettings.colorSpace}");
             Debug.Log($"Company: {PlayerSettings.companyName}");
             Debug.Log($"Product: {PlayerSettings.productName}");
-            Debug.Log($"Android Package: {PlayerSettings.GetApplicationIdentifier(BuildTargetGroup.Android)}");
-            Debug.Log($"Scripting Backend (Android): {PlayerSettings.GetScriptingBackend(BuildTargetGroup.Android)}");
+            Debug.Log($"Android Package: {PlayerSettings.GetApplicationIdentifier(NamedBuildTarget.Android)}");
+            Debug.Log($"Scripting Backend (Android): {PlayerSettings.GetScriptingBackend(NamedBuildTarget.Android)}");
             Debug.Log($"Target Architecture: {PlayerSettings.Android.targetArchitectures}");
             Debug.Log($"Min SDK: {PlayerSettings.Android.minSdkVersion}");
             Debug.Log($"Target SDK: {PlayerSettings.Android.targetSdkVersion}");

@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
@@ -108,21 +109,20 @@ namespace Plaga44.Editor
 
             // Android package -- generic default
             PlayerSettings.SetApplicationIdentifier(
-                BuildTargetGroup.Android, "com.DefaultCompany.Myproject");
+                NamedBuildTarget.Android, "com.DefaultCompany.Myproject");
 
             // Graphics API: back to Auto (Unity decides)
             PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, true);
 
             // Scripting backend: Mono (Unity default for editor)
             PlayerSettings.SetScriptingBackend(
-                BuildTargetGroup.Android, ScriptingImplementation.Mono2x);
+                NamedBuildTarget.Android, ScriptingImplementation.Mono2x);
 
-            // Architecture: ARMv7 + ARM64 (Unity default)
-            PlayerSettings.Android.targetArchitectures =
-                AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
+            // Architecture: ARM64 (Unity 6 default)
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
 
-            // API levels -- Unity 6 defaults
-            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel22;
+            // API levels -- Unity 6 defaults (min supported is 25)
+            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel25;
             PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
 
             // Orientation: Auto Rotation (Unity default)
