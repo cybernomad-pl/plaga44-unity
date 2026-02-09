@@ -182,24 +182,67 @@ namespace Plaga44.Editor
                 return;
             }
 
-            // Remove the entire scopedRegistries block
-            // Pattern: "scopedRegistries": [ ... ], (with optional trailing comma/whitespace)
-            string pattern = @"""scopedRegistries""\s*:\s*\[[\s\S]*?\]\s*,?\s*\n?";
-            manifest = Regex.Replace(manifest, pattern, "");
+            // Line-by-line removal -- regex can't handle nested JSON brackets safely.
+            // Strategy: find "scopedRegistries" line, track bracket depth, remove
+            // everything from that line until depth returns to 0, plus trailing comma.
+            var lines = new List<string>(manifest.Split('\n'));
+            var output = new List<string>();
+            bool inScopedBlock = false;
+            int bracketDepth = 0;
+
+            for (int i = 0; i < lines.Count; i++)
+            {
+                string line = lines[i];
+
+                if (!inScopedBlock && line.Contains("\"scopedRegistries\""))
+                {
+                    inScopedBlock = true;
+                    bracketDepth = 0;
+                    // Count brackets on this line
+                    foreach (char c in line)
+                    {
+                        if (c == '[') bracketDepth++;
+                        if (c == ']') bracketDepth--;
+                    }
+                    // If closed on same line (unlikely), we're done
+                    if (bracketDepth <= 0) inScopedBlock = false;
+                    continue; // skip this line
+                }
+
+                if (inScopedBlock)
+                {
+                    foreach (char c in line)
+                    {
+                        if (c == '[') bracketDepth++;
+                        if (c == ']') bracketDepth--;
+                    }
+                    if (bracketDepth <= 0)
+                    {
+                        inScopedBlock = false;
+                        // Check if next non-empty line starts with comma (clean it)
+                        // Also handle "], " on this line -- skip it entirely
+                    }
+                    continue; // skip lines inside scopedRegistries block
+                }
+
+                output.Add(line);
+            }
+
+            manifest = string.Join("\n", output);
 
             // Also remove any Meta XR package entries from dependencies
             foreach (var pkg in PackagesToRemove)
             {
-                string pkgPattern = $@"\s*""{Regex.Escape(pkg)}""\s*:\s*""[^""]*""\s*,?\n?";
+                // Remove line containing this package key
+                string pkgPattern = $@"[ \t]*""{Regex.Escape(pkg)}""[ \t]*:[ \t]*""[^""]*""[ \t]*,?[ \t]*\n?";
                 manifest = Regex.Replace(manifest, pkgPattern, "");
             }
 
-            // Clean up: fix trailing commas in dependencies block
-            // Remove comma before closing brace: ,\n  }  ->  \n  }
+            // Fix trailing commas before closing brace: ,\n  }  ->  \n  }
             manifest = Regex.Replace(manifest, @",(\s*\n\s*\})", "$1");
 
-            // Clean up: remove double newlines
-            manifest = Regex.Replace(manifest, @"\n\n\n+", "\n\n");
+            // Remove empty lines
+            manifest = Regex.Replace(manifest, @"\n\n+", "\n");
 
             File.WriteAllText(manifestPath, manifest);
             Client.Resolve();
