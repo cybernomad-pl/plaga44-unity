@@ -315,6 +315,57 @@ namespace Plaga44.Editor
         }
 
         // ==================================================================
+        // MANUAL STEPS -- menu navigation helpers
+        // Each opens the correct Unity window for that step.
+        // ==================================================================
+        [MenuItem("PLAGA44/Manual Steps/1. Switch Platform to Android", false, 100)]
+        public static void ManualStep1_SwitchPlatform()
+        {
+            Debug.Log("[PLAGA44] Step 1: File > Build Profiles > Meta Quest > Switch Platform");
+            Debug.Log("[PLAGA44] Select 'Android' platform, then click 'Switch Platform'.");
+            EditorApplication.ExecuteMenuItem("File/Build Profiles");
+        }
+
+        [MenuItem("PLAGA44/Manual Steps/2. Enable OpenXR (XR Plug-in Management)", false, 101)]
+        public static void ManualStep2_EnableOpenXR()
+        {
+            Debug.Log("[PLAGA44] Step 2: Enable OpenXR for Android");
+            Debug.Log("[PLAGA44] In the Android tab, tick 'OpenXR'.");
+            SettingsService.OpenProjectSettings("Project/XR Plug-in Management");
+        }
+
+        [MenuItem("PLAGA44/Manual Steps/3. Add Meta Quest Feature Group", false, 102)]
+        public static void ManualStep3_MetaQuestFeature()
+        {
+            Debug.Log("[PLAGA44] Step 3: Under OpenXR settings, enable Meta Quest Feature Group");
+            Debug.Log("[PLAGA44] Click the Android tab > OpenXR > tick 'Meta Quest Feature Group'.");
+            Debug.Log("[PLAGA44] Also add 'Oculus Touch Controller Profile' under Interaction Profiles.");
+            SettingsService.OpenProjectSettings("Project/XR Plug-in Management");
+        }
+
+        [MenuItem("PLAGA44/Manual Steps/4. Add OVRCameraRig to Scene", false, 103)]
+        public static void ManualStep4_SceneSetup()
+        {
+            Debug.Log("[PLAGA44] Step 4: Scene setup");
+            Debug.Log("[PLAGA44] 1. Delete the default 'Main Camera' from your scene");
+            Debug.Log("[PLAGA44] 2. Meta > Tools > Building Blocks > (+) Camera Rig");
+            Debug.Log("[PLAGA44] 3. (+) Controller Tracking");
+            Debug.Log("[PLAGA44] 4. Optionally: (+) Hand Tracking, (+) Passthrough");
+
+            EditorUtility.DisplayDialog(
+                "PLAGA '44 -- Scene Setup",
+                "In your scene:\n\n" +
+                "1. Delete 'Main Camera'\n" +
+                "2. Menu: Meta > Tools > Building Blocks\n" +
+                "3. Add: Camera Rig\n" +
+                "4. Add: Controller Tracking\n" +
+                "5. Optional: Hand Tracking, Passthrough\n\n" +
+                "See docs/META_SDK_SETUP.md for details.",
+                "OK"
+            );
+        }
+
+        // ==================================================================
         // HELPERS
         // ==================================================================
         private static string GetManifestPath()
