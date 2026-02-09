@@ -15,7 +15,6 @@ public class BranchTester : EditorWindow
     private string currentBranch = "";
     private Vector2 scrollPos;
     private string lastOutput = "";
-    private bool fetching = false;
 
     [MenuItem("PLAGA44/Branch Tester")]
     static void ShowWindow()
