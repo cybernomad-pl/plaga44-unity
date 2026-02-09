@@ -1,4 +1,13 @@
 {
+  "scopedRegistries": [
+    {
+      "name": "Meta XR",
+      "url": "https://npm.developer.oculus.com",
+      "scopes": [
+        "com.meta.xr"
+      ]
+    }
+  ],
   "dependencies": {
     "com.unity.ide.rider": "3.0.31",
     "com.unity.ide.visualstudio": "2.0.22",
