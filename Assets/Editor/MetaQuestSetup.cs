@@ -284,6 +284,7 @@ namespace Plaga44.Editor
             if (_installQueue.Count == 0)
             {
                 EditorApplication.update -= PackageInstallTick;
+                SetActiveInputHandlerBoth();
                 Debug.Log($"[CYBERNOMAD] All {_totalPackages} packages installed.");
                 Debug.Log("[CYBERNOMAD] ============================================");
                 Debug.Log("[CYBERNOMAD] PHASE 1 COMPLETE.");
@@ -1094,6 +1095,45 @@ namespace Plaga44.Editor
         }
 
         // ==================================================================
+        // INPUT HANDLER (file-based, runs after packages are installed)
+        // ==================================================================
+        private static void SetActiveInputHandlerBoth()
+        {
+            // Directly patch ProjectSettings.asset YAML to set activeInputHandler: 2 (Both)
+            // This avoids the forced editor restart that PlayerSettings reflection causes.
+            string path = Path.Combine(Application.dataPath, "..", "ProjectSettings", "ProjectSettings.asset");
+            if (!File.Exists(path))
+            {
+                Debug.LogWarning("[CYBERNOMAD] ProjectSettings.asset not found, skipping Input Handler.");
+                return;
+            }
+
+            string content = File.ReadAllText(path);
+            if (content.Contains("activeInputHandler: 2"))
+            {
+                Debug.Log("[CYBERNOMAD] Active Input Handler already set to 'Both'.");
+                return;
+            }
+
+            if (content.Contains("activeInputHandler:"))
+            {
+                content = System.Text.RegularExpressions.Regex.Replace(
+                    content, @"activeInputHandler:\s*\d+", "activeInputHandler: 2");
+            }
+            else
+            {
+                // Append after PlayerSettings header
+                content = content.Replace(
+                    "PlayerSettings:",
+                    "PlayerSettings:\n  activeInputHandler: 2");
+            }
+
+            File.WriteAllText(path, content);
+            Debug.Log("[CYBERNOMAD] Set Active Input Handler to 'Both' (Input Manager + Input System).");
+            Debug.Log("[CYBERNOMAD] Editor restart required for change to take effect.");
+        }
+
+        // ==================================================================
         // PLAYER SETTINGS
         // ==================================================================
         private static void SetPlayerSettings()
@@ -1116,23 +1156,6 @@ namespace Plaga44.Editor
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
             PlayerSettings.allowedAutorotateToLandscapeLeft = true;
             PlayerSettings.allowedAutorotateToLandscapeRight = false;
-
-            // Input System: "Both" = old Input Manager + new Input System (Meta SDK needs both)
-            try
-            {
-                var prop = typeof(PlayerSettings).GetProperty("activeInputHandler",
-                    BindingFlags.Public | BindingFlags.Static);
-                if (prop != null)
-                {
-                    // 0 = Input Manager, 1 = Input System, 2 = Both
-                    prop.SetValue(null, 2);
-                    Debug.Log("[CYBERNOMAD] Set Active Input Handler to 'Both'.");
-                }
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogWarning($"[CYBERNOMAD] Could not set Input Handler: {e.Message}");
-            }
 
             // GameActivity (required on Unity 6+)
             try
