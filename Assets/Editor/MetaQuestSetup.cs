@@ -49,7 +49,8 @@ namespace Plaga44.Editor
 
         private static readonly string[][] PackagesToInstall = new[]
         {
-            new[] { "com.unity.xr.openxr",          "1.14.0" },
+            new[] { "com.unity.inputsystem",         "1.11.2" },
+            new[] { "com.unity.xr.openxr",           "1.14.0" },
             new[] { "com.unity.xr.meta-openxr",      "2.4.0"  },
             new[] { "com.meta.xr.sdk.core",           META_SDK_VERSION },
             new[] { "com.meta.xr.sdk.interaction",    META_SDK_VERSION },
@@ -1115,6 +1116,23 @@ namespace Plaga44.Editor
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
             PlayerSettings.allowedAutorotateToLandscapeLeft = true;
             PlayerSettings.allowedAutorotateToLandscapeRight = false;
+
+            // Input System: "Both" = old Input Manager + new Input System (Meta SDK needs both)
+            try
+            {
+                var prop = typeof(PlayerSettings).GetProperty("activeInputHandler",
+                    BindingFlags.Public | BindingFlags.Static);
+                if (prop != null)
+                {
+                    // 0 = Input Manager, 1 = Input System, 2 = Both
+                    prop.SetValue(null, 2);
+                    Debug.Log("[CYBERNOMAD] Set Active Input Handler to 'Both'.");
+                }
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"[CYBERNOMAD] Could not set Input Handler: {e.Message}");
+            }
 
             // GameActivity (required on Unity 6+)
             try
