@@ -1185,7 +1185,7 @@ namespace Plaga44.Editor
         {
             QualitySettings.antiAliasing = 4;
             QualitySettings.vSyncCount = 0;
-            QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
+            QualitySettings.anisotropicFiltering = AnisotropicFiltering.Enable;
             QualitySettings.globalTextureMipmapLimit = 0;
             QualitySettings.shadowDistance = 20f;
             QualitySettings.lodBias = 1.0f;
