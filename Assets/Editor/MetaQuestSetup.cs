@@ -134,7 +134,7 @@ namespace Plaga44.Editor
         }
 
         // ==================================================================
-        // PHASE 2: Switch platform + enable XR
+        // STEP 3: Switch platform + enable XR
         // ==================================================================
         [MenuItem("CYBERNOMAD/Meta SDK Setup/3. Switch to Android + Enable XR", false, 3)]
         public static void Phase2_SwitchAndEnableXR()
@@ -144,7 +144,7 @@ namespace Plaga44.Editor
             if (openXRType == null)
             {
                 EditorUtility.DisplayDialog(
-                    "CYBERNOMAD -- Phase 2 Error",
+                    "CYBERNOMAD -- Step 3 Error",
                     "OpenXR package not found!\n\n" +
                     "Run Phase 1 first and wait for packages to install.",
                     "OK"
@@ -180,7 +180,7 @@ namespace Plaga44.Editor
             }
 
             bool confirm = EditorUtility.DisplayDialog(
-                "CYBERNOMAD -- Phase 2: Android + XR",
+                "CYBERNOMAD -- Step 3: Android + XR",
                 "Switch to Android platform + enable OpenXR.\n\n" +
                 "This will:\n" +
                 "- Switch build target to Android (causes editor reload)\n" +
@@ -194,7 +194,7 @@ namespace Plaga44.Editor
             if (!confirm) return;
 
             Debug.Log("[CYBERNOMAD] ============================================");
-            Debug.Log("[CYBERNOMAD] PHASE 2: SWITCHING TO ANDROID...");
+            Debug.Log("[CYBERNOMAD] STEP 3: SWITCHING TO ANDROID...");
             Debug.Log("[CYBERNOMAD] ============================================");
 
             // Set phase 1 -- after domain reload, ContinueFromPhase(1) enables XR
@@ -218,7 +218,7 @@ namespace Plaga44.Editor
         }
 
         // ==================================================================
-        // PHASE 3: Setup VR Scene (OVRCameraRig + controllers)
+        // STEP 4: Setup VR Scene (OVRCameraRig + controllers)
         // ==================================================================
         [MenuItem("CYBERNOMAD/Meta SDK Setup/4. Setup VR Scene", false, 4)]
         public static void Phase3_SetupVRScene()
@@ -275,9 +275,9 @@ namespace Plaga44.Editor
                 case 1: // Platform switched to Android, now enable XR
                     EnableOpenXR();
                     break;
-                case 2: // Unity reopened after Android module install, run Phase 2
+                case 2: // Unity reopened after Android module install, run Step 3
                     MetaQuestSetupPhaser.ClearPhase();
-                    Debug.Log("[CYBERNOMAD] Android module should be installed. Running Phase 2...");
+                    Debug.Log("[CYBERNOMAD] Android module should be installed. Running Step 3...");
                     EditorApplication.delayCall += Phase2_SwitchAndEnableXR;
                     break;
                 case 3: // SDK Core packages installed, run scene setup
@@ -289,7 +289,7 @@ namespace Plaga44.Editor
                         if (guids.Length > 0)
                             DoSceneSetup(guids);
                         else
-                            Debug.LogWarning("[CYBERNOMAD] OVRCameraRig still not found. Try Step 3 again.");
+                            Debug.LogWarning("[CYBERNOMAD] OVRCameraRig still not found. Try Step 4 again.");
                     };
                     break;
             }
@@ -351,7 +351,7 @@ namespace Plaga44.Editor
         }
 
         // ==================================================================
-        // Scene package install (Phase 3 helper)
+        // Scene package install (Step 4 helper)
         // ==================================================================
         private static Queue<string[]> _sceneInstallQueue;
         private static AddRequest _sceneAddRequest;
@@ -410,12 +410,12 @@ namespace Plaga44.Editor
             if (ok)
             {
                 Debug.Log("[CYBERNOMAD] ============================================");
-                Debug.Log("[CYBERNOMAD] PHASE 2 COMPLETE!");
+                Debug.Log("[CYBERNOMAD] STEP 3 COMPLETE!");
                 Debug.Log("[CYBERNOMAD] XR configured. Now run Step 4 to setup VR scene.");
                 Debug.Log("[CYBERNOMAD] ============================================");
 
                 EditorUtility.DisplayDialog(
-                    "CYBERNOMAD -- Phase 2 Complete!",
+                    "CYBERNOMAD -- Step 3 Complete!",
                     "Platform + XR configured.\n\n" +
                     "Now run Step 4:\n" +
                     "CYBERNOMAD > Meta SDK Setup >\n" +
@@ -425,7 +425,7 @@ namespace Plaga44.Editor
             }
             else
             {
-                Debug.LogWarning("[CYBERNOMAD] Some XR steps failed. Check Console. Try running Step 3 again.");
+                Debug.LogWarning("[CYBERNOMAD] Some XR steps failed. Check Console. Try running Step 3 again or check logs.");
             }
         }
 
@@ -909,7 +909,7 @@ namespace Plaga44.Editor
         private static void DoSceneSetup(string[] ovrCameraRigGuids)
         {
             Debug.Log("[CYBERNOMAD] ============================================");
-            Debug.Log("[CYBERNOMAD] PHASE 3: SETTING UP VR SCENE");
+            Debug.Log("[CYBERNOMAD] STEP 4: SETTING UP VR SCENE");
             Debug.Log("[CYBERNOMAD] ============================================");
 
             string prefabPath = AssetDatabase.GUIDToAssetPath(ovrCameraRigGuids[0]);
