@@ -1037,7 +1037,7 @@ namespace Plaga44.Editor
 
             foreach (var go in toDestroy)
             {
-                Object.DestroyImmediate(go);
+                UnityEngine.Object.DestroyImmediate(go);
                 Debug.Log($"[CYBERNOMAD] Removed non-Quest 2 model: {go.name}");
             }
 
