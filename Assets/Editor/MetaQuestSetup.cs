@@ -988,8 +988,9 @@ namespace Plaga44.Editor
 
                 // Set controller type to LTouch via reflection (OVRControllerPrefab.m_controller)
                 SetControllerType(leftCtrl, "LTouch");
+                StripNonQuest2Models(leftCtrl);
                 Undo.RegisterCreatedObjectUndo(leftCtrl, "Add Left Controller");
-                Debug.Log("[CYBERNOMAD] Left controller added to LeftControllerAnchor.");
+                Debug.Log("[CYBERNOMAD] Left controller added to LeftControllerAnchor (Quest 2 only).");
             }
             else
             {
@@ -1004,13 +1005,44 @@ namespace Plaga44.Editor
                 rightCtrl.transform.localRotation = UnityEngine.Quaternion.identity;
 
                 SetControllerType(rightCtrl, "RTouch");
+                StripNonQuest2Models(rightCtrl);
                 Undo.RegisterCreatedObjectUndo(rightCtrl, "Add Right Controller");
-                Debug.Log("[CYBERNOMAD] Right controller added to RightControllerAnchor.");
+                Debug.Log("[CYBERNOMAD] Right controller added to RightControllerAnchor (Quest 2 only).");
             }
             else
             {
                 Debug.LogWarning("[CYBERNOMAD] RightControllerAnchor not found in OVRCameraRig.");
             }
+        }
+
+        // --- Strip non-Quest 2 controller models from OVRControllerPrefab ---
+        private static void StripNonQuest2Models(GameObject ctrlObj)
+        {
+            // OVRControllerPrefab contains child models for all controller types.
+            // Keep only Quest 2 models, remove everything else.
+            // Quest 2 model names contain "Quest2" or "quest2".
+            var toDestroy = new List<GameObject>();
+            foreach (Transform child in ctrlObj.transform)
+            {
+                // Keep Quest 2 models, ControllerInHand anchor, and any non-model objects
+                string name = child.gameObject.name;
+                bool isControllerModel = name.Contains("Oculus") || name.Contains("Touch")
+                    || name.Contains("Meta") || name.Contains("touch_controller")
+                    || name.Contains("_skel");
+                bool isQuest2 = name.Contains("Quest2") || name.Contains("quest2");
+
+                if (isControllerModel && !isQuest2)
+                    toDestroy.Add(child.gameObject);
+            }
+
+            foreach (var go in toDestroy)
+            {
+                Object.DestroyImmediate(go);
+                Debug.Log($"[CYBERNOMAD] Removed non-Quest 2 model: {go.name}");
+            }
+
+            if (toDestroy.Count > 0)
+                Debug.Log($"[CYBERNOMAD] Stripped {toDestroy.Count} non-Quest 2 controller models.");
         }
 
         // --- Set OVRInput.Controller type on OVRControllerPrefab component ---
