@@ -106,9 +106,37 @@ namespace Plaga44.Editor
         }
 
         // ==================================================================
+        // RESUME: Re-run Phase 1 after editor restart
+        // ==================================================================
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/1b. Resume Setup After Restart", false, 1)]
+        public static void Phase1b_ResumeAfterRestart()
+        {
+            bool confirm = EditorUtility.DisplayDialog(
+                "CYBERNOMAD -- Resume After Restart",
+                "Re-run Phase 1 setup after editor restart.\n\n" +
+                "This will re-apply all packages and settings\n" +
+                "that may have been interrupted by the restart.\n\n" +
+                "Continue?",
+                "Resume",
+                "Cancel"
+            );
+
+            if (!confirm) return;
+
+            Debug.Log("[CYBERNOMAD] ============================================");
+            Debug.Log("[CYBERNOMAD] RESUMING PHASE 1 AFTER RESTART");
+            Debug.Log("[CYBERNOMAD] ============================================");
+
+            EnsureScopedRegistry();
+            SetPlayerSettings();
+            SetQualitySettings();
+            StartPackageInstall();
+        }
+
+        // ==================================================================
         // PHASE 2: Switch platform + enable XR
         // ==================================================================
-        [MenuItem("CYBERNOMAD/Meta SDK Setup/2. Switch to Android + Enable XR", false, 1)]
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/2. Switch to Android + Enable XR", false, 2)]
         public static void Phase2_SwitchAndEnableXR()
         {
             // Check if packages are installed first
@@ -192,7 +220,7 @@ namespace Plaga44.Editor
         // ==================================================================
         // PHASE 3: Setup VR Scene (OVRCameraRig + controllers)
         // ==================================================================
-        [MenuItem("CYBERNOMAD/Meta SDK Setup/3. Setup VR Scene", false, 2)]
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/3. Setup VR Scene", false, 3)]
         public static void Phase3_SetupVRScene()
         {
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
