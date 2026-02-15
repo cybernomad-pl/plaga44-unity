@@ -3,6 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Plaga44.Editor
 {
@@ -27,6 +28,7 @@ namespace Plaga44.Editor
 
             AddScopedRegistry();
             AddPackagesToManifest();
+            SetPlayerSettings();
 
             Debug.Log($"{LOG} === DONE -- Unity will now resolve packages ===");
         }
@@ -111,6 +113,41 @@ namespace Plaga44.Editor
             {
                 Debug.Log($"{LOG} All packages already in manifest.");
             }
+        }
+
+        static void SetPlayerSettings()
+        {
+            PlayerSettings.companyName = "Cybernomad";
+            PlayerSettings.productName = "PLAGA 44";
+            PlayerSettings.colorSpace = ColorSpace.Linear;
+
+            PlayerSettings.SetApplicationIdentifier(
+                BuildTargetGroup.Android, "com.cybernomad.plaga44");
+
+            PlayerSettings.SetGraphicsAPIs(
+                BuildTarget.Android, new[] { GraphicsDeviceType.Vulkan });
+            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
+
+            PlayerSettings.SetScriptingBackend(
+                BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+
+            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
+            PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)32;
+
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
+            PlayerSettings.allowedAutorotateToPortrait = false;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = false;
+
+            QualitySettings.antiAliasing = 4;
+            QualitySettings.vSyncCount = 0;
+            QualitySettings.shadowDistance = 20f;
+            QualitySettings.lodBias = 1.0f;
+            QualitySettings.pixelLightCount = 2;
+
+            Debug.Log($"{LOG} Player/Quality settings configured.");
         }
 
         static string GetManifestPath()
