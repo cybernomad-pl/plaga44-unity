@@ -21,7 +21,7 @@ namespace Plaga44.Editor
             new[] { "com.meta.xr.sdk.audio",        META_SDK_VERSION },
         };
 
-        [MenuItem("CYBERNOMAD/Meta SDK Setup/Setup Meta SDK")]
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/1. Setup Meta SDK", false, 1)]
         public static void SetupMetaSDK()
         {
             Debug.Log($"{LOG} === Setup Meta SDK ===");
@@ -148,6 +148,27 @@ namespace Plaga44.Editor
             QualitySettings.pixelLightCount = 2;
 
             Debug.Log($"{LOG} Player/Quality settings configured.");
+        }
+
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/2. Switch to Android", false, 2)]
+        public static void SwitchToAndroid()
+        {
+            if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
+            {
+                Debug.Log($"{LOG} Already on Android.");
+                return;
+            }
+
+            bool confirm = EditorUtility.DisplayDialog(
+                "Switch to Android",
+                "Switch build target to Android.\n" +
+                "This causes an editor reload.",
+                "Switch", "Cancel");
+            if (!confirm) return;
+
+            Debug.Log($"{LOG} Switching to Android...");
+            EditorUserBuildSettings.SwitchActiveBuildTarget(
+                BuildTargetGroup.Android, BuildTarget.Android);
         }
 
         static string GetManifestPath()
