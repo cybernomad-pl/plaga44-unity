@@ -122,14 +122,14 @@ namespace Plaga44.Editor
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             PlayerSettings.SetApplicationIdentifier(
-                BuildTargetGroup.Android, "com.cybernomad.plaga44");
+                NamedBuildTarget.Android, "com.cybernomad.plaga44");
 
             PlayerSettings.SetGraphicsAPIs(
                 BuildTarget.Android, new[] { GraphicsDeviceType.Vulkan });
             PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
 
             PlayerSettings.SetScriptingBackend(
-                BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
+                NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
 
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
