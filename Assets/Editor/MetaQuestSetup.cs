@@ -160,13 +160,6 @@ namespace Plaga44.Editor
                 return;
             }
 
-            bool confirm = EditorUtility.DisplayDialog(
-                "Switch to Android",
-                "Switch build target to Android.\n" +
-                "This causes an editor reload.",
-                "Switch", "Cancel");
-            if (!confirm) return;
-
             Debug.Log($"{LOG} Switching to Android...");
             EditorUserBuildSettings.SwitchActiveBuildTarget(
                 BuildTargetGroup.Android, BuildTarget.Android);
