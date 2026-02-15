@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.PackageManager;
@@ -163,6 +165,167 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} Switching to Android...");
             EditorUserBuildSettings.SwitchActiveBuildTarget(
                 BuildTargetGroup.Android, BuildTarget.Android);
+        }
+
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/3. Setup VR Scene", false, 3)]
+        public static void SetupVRScene()
+        {
+            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
+            {
+                Debug.LogError($"{LOG} Build target is not Android. Run Step 2 first.");
+                return;
+            }
+
+            string[] guids = AssetDatabase.FindAssets("OVRCameraRig t:prefab");
+            if (guids.Length == 0)
+            {
+                Debug.LogError($"{LOG} OVRCameraRig prefab not found. Run Step 1 first.");
+                return;
+            }
+
+            string prefabPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab == null)
+            {
+                Debug.LogError($"{LOG} Could not load OVRCameraRig at: {prefabPath}");
+                return;
+            }
+
+            var existing = GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None);
+            foreach (var t in existing)
+            {
+                if (t.name == "OVRCameraRig" || t.name == "XROrigin")
+                {
+                    Debug.LogWarning($"{LOG} {t.name} already in scene. Skipping.");
+                    return;
+                }
+            }
+
+            var cameras = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None);
+            foreach (var cam in cameras)
+            {
+                if (cam.gameObject.name == "Main Camera")
+                {
+                    Undo.DestroyObjectImmediate(cam.gameObject);
+                    Debug.Log($"{LOG} Deleted Main Camera.");
+                    break;
+                }
+            }
+
+            var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            rig.transform.position = Vector3.zero;
+            rig.transform.rotation = Quaternion.identity;
+            Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
+
+            AddControllerPrefabs(rig);
+
+            Selection.activeGameObject = rig;
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+
+            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + controllers at origin.");
+        }
+
+        static void AddControllerPrefabs(GameObject rig)
+        {
+            string[] ctrlGuids = AssetDatabase.FindAssets("OVRControllerPrefab t:prefab");
+            if (ctrlGuids.Length == 0)
+            {
+                Debug.LogWarning($"{LOG} OVRControllerPrefab not found.");
+                return;
+            }
+
+            string ctrlPath = AssetDatabase.GUIDToAssetPath(ctrlGuids[0]);
+            var ctrlPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ctrlPath);
+            if (ctrlPrefab == null)
+            {
+                Debug.LogWarning($"{LOG} Could not load OVRControllerPrefab.");
+                return;
+            }
+
+            Transform leftAnchor = FindChildRecursive(rig.transform, "LeftControllerAnchor")
+                                ?? FindChildRecursive(rig.transform, "LeftHandAnchor");
+            Transform rightAnchor = FindChildRecursive(rig.transform, "RightControllerAnchor")
+                                 ?? FindChildRecursive(rig.transform, "RightHandAnchor");
+
+            if (leftAnchor != null)
+            {
+                var left = (GameObject)PrefabUtility.InstantiatePrefab(ctrlPrefab, leftAnchor);
+                left.name = "LeftControllerModel";
+                left.transform.localPosition = Vector3.zero;
+                left.transform.localRotation = Quaternion.identity;
+                SetControllerType(left, "LTouch");
+                Undo.RegisterCreatedObjectUndo(left, "Add Left Controller");
+                Debug.Log($"{LOG} Left controller added.");
+            }
+
+            if (rightAnchor != null)
+            {
+                var right = (GameObject)PrefabUtility.InstantiatePrefab(ctrlPrefab, rightAnchor);
+                right.name = "RightControllerModel";
+                right.transform.localPosition = Vector3.zero;
+                right.transform.localRotation = Quaternion.identity;
+                SetControllerType(right, "RTouch");
+                Undo.RegisterCreatedObjectUndo(right, "Add Right Controller");
+                Debug.Log($"{LOG} Right controller added.");
+            }
+        }
+
+        static void SetControllerType(GameObject ctrlObj, string controllerName)
+        {
+            var components = ctrlObj.GetComponents<MonoBehaviour>();
+            foreach (var comp in components)
+            {
+                if (comp == null) continue;
+                var compType = comp.GetType();
+                if (!compType.Name.Contains("Controller")) continue;
+
+                var field = compType.GetField("m_controller",
+                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if (field == null)
+                    field = compType.GetField("m_controllerType",
+                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+                if (field != null && field.FieldType.IsEnum)
+                {
+                    try
+                    {
+                        var enumVal = System.Enum.Parse(field.FieldType, controllerName);
+                        field.SetValue(comp, enumVal);
+                        Debug.Log($"{LOG} Set controller type: {controllerName}");
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"{LOG} Could not set controller type: {e.Message}");
+                    }
+                    return;
+                }
+
+                try
+                {
+                    var so = new SerializedObject(comp);
+                    var prop = so.FindProperty("m_controller") ?? so.FindProperty("m_controllerType");
+                    if (prop != null && prop.propertyType == SerializedPropertyType.Enum)
+                    {
+                        prop.enumValueIndex = controllerName == "LTouch" ? 1 : 2;
+                        so.ApplyModifiedProperties();
+                        Debug.Log($"{LOG} Set controller type: {controllerName} (serialized)");
+                        return;
+                    }
+                }
+                catch { }
+            }
+        }
+
+        static Transform FindChildRecursive(Transform parent, string name)
+        {
+            foreach (Transform child in parent)
+            {
+                if (child.name == name) return child;
+                var found = FindChildRecursive(child, name);
+                if (found != null) return found;
+            }
+            return null;
         }
 
         static string GetManifestPath()
