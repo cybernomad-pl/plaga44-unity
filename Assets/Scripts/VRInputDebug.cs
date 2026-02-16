@@ -108,21 +108,16 @@ public class VRInputDebug : MonoBehaviour
 
     private void UpdateTexts()
     {
-        _leftText.text = $"FPS: {(1f / Time.unscaledDeltaTime):F0}\nFrame: {Time.frameCount}";
+        _leftText.text = $"FPS: {(1f / Time.unscaledDeltaTime):F0}  F:{Time.frameCount}";
 
-        string status = "";
-#if HAS_META_XR
-        var ac = OVRInput.GetActiveController();
-        string cc = ac != OVRInput.Controller.None ? "#0f0" : "#f00";
-        status += $"OVR: <color={cc}>{ac}</color>\n";
-        var mgr = FindFirstObjectByType<OVRManager>();
-        status += $"Mgr: {(mgr != null ? "<color=#0f0>OK</color>" : "<color=#f00>NO</color>")}";
-#else
-        status += "<color=#f00>NO META XR</color>";
-#endif
         var devices = new List<InputDevice>();
         InputDevices.GetDevices(devices);
-        status += $"\nXR: {devices.Count} dev";
+        string status = $"XR:{devices.Count}";
+#if HAS_META_XR
+        var ac = OVRInput.GetActiveController();
+        string cc = ac != OVRInput.Controller.None ? "#0f0" : "#888";
+        status += $" OVR:<color={cc}>{ac}</color>";
+#endif
         _rightText.text = status;
 
         _leftCtrlText.text = GetControllerState("LEFT", true);
@@ -354,10 +349,10 @@ public class VRInputDebug : MonoBehaviour
         _labelText.text = "<color=#0f0>DEBUG ON</color>";
 
         _leftText = CreateText(canvasGO.transform, "HudLeft",
-            new Vector2(-350, 30), new Vector2(350, 200), TextAnchor.UpperRight, 18);
+            new Vector2(-300, 15), new Vector2(400, 40), TextAnchor.MiddleRight, 18);
 
         _rightText = CreateText(canvasGO.transform, "HudRight",
-            new Vector2(350, 30), new Vector2(350, 200), TextAnchor.UpperLeft, 18);
+            new Vector2(300, 15), new Vector2(400, 40), TextAnchor.MiddleLeft, 18);
 
         _headerText = CreateText(canvasGO.transform, "Header",
             Vector2.zero, Vector2.zero, TextAnchor.UpperCenter, 1);
