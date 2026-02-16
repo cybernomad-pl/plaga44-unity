@@ -74,7 +74,7 @@ namespace Plaga44.Editor
 
         private static void CreateLighting()
         {
-            Light[] existingLights = Object.FindObjectsOfType<Light>();
+            Light[] existingLights = Object.FindObjectsByType<Light>(FindObjectsSortMode.None);
             if (existingLights.Length > 0)
             {
                 Debug.Log($"{LOG} Lighting already exists in scene, skipping.");

@@ -204,11 +204,12 @@ namespace Plaga44.Editor
             rig.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
             Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
 
-            // Enable hand tracking on OVRManager
-            var mgr = rig.GetComponent<OVRManager>();
-            if (mgr != null)
+            // Enable hand tracking in project config
+            var projectConfig = OVRProjectConfig.CachedProjectConfig;
+            if (projectConfig != null)
             {
-                mgr.m_HandTrackingSupport = OVRManager.HandTrackingSupport.ControllersAndHands;
+                projectConfig.handTrackingSupport = OVRProjectConfig.HandTrackingSupport.ControllersAndHands;
+                OVRProjectConfig.CommitProjectConfig(projectConfig);
                 Debug.Log($"{LOG} Hand tracking: Controllers and Hands.");
             }
 
