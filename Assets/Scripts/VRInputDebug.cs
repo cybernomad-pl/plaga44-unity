@@ -52,11 +52,19 @@ public class VRInputDebug : MonoBehaviour
     private Text _leftText;
     private Text _rightText;
     private Text _headerText;
+    private Text _reticleText;
+    private Text _labelText;
     private Transform _centerEye;
+
+    private Canvas _leftCtrlCanvas;
+    private Text _leftCtrlText;
+    private Transform _leftCtrl;
+    private GameObject _leftFollower;
 
     void Start()
     {
         CreateDebugCanvas();
+        CreateLeftCtrlCanvas();
     }
 
     void Update()
@@ -75,6 +83,9 @@ public class VRInputDebug : MonoBehaviour
         _canvas.transform.position = _centerEye.position + _centerEye.forward * displayDistance;
         _canvas.transform.rotation = _centerEye.rotation;
 
+        FindLeftController();
+        PositionLeftCtrlCanvas();
+
         UpdateTexts();
     }
 
@@ -87,40 +98,7 @@ public class VRInputDebug : MonoBehaviour
 
     private void UpdateTexts()
     {
-        // --- Header: diagnostics ---
-        string header = "<b>VR INPUT DEBUG HUD</b>\n";
-        header += $"FPS: {(1f / Time.unscaledDeltaTime):F0}  Frame: {Time.frameCount}\n";
-
-#if HAS_META_XR
-        var activeCtrl = OVRInput.GetActiveController();
-        string connColor = activeCtrl != OVRInput.Controller.None ? "#0f0" : "#f00";
-        header += $"OVR Active: <color={connColor}>{activeCtrl}</color>\n";
-
-        // OVRManager check
-        var ovrMgr = FindFirstObjectByType<OVRManager>();
-        header += $"OVRManager: {(ovrMgr != null ? "<color=#0f0>YES</color>" : "<color=#f00>NO</color>")}\n";
-#else
-        header += "OVR: <color=#f00>NO HAS_META_XR</color>\n";
-#endif
-
-        // Unity XR device list
-        var devices = new List<InputDevice>();
-        InputDevices.GetDevices(devices);
-        header += $"XR Devices: {devices.Count}\n";
-        foreach (var dev in devices)
-        {
-            string role = "";
-            if ((dev.characteristics & InputDeviceCharacteristics.Left) != 0) role = "L";
-            else if ((dev.characteristics & InputDeviceCharacteristics.Right) != 0) role = "R";
-            else if ((dev.characteristics & InputDeviceCharacteristics.HeadMounted) != 0) role = "HMD";
-            header += $"  <color=#0f0>[{role}]</color> {dev.name}\n";
-        }
-
-        _headerText.text = header;
-
-        // --- Controllers ---
-        _leftText.text = GetControllerState("LEFT", true);
-        _rightText.text = GetControllerState("RIGHT", false);
+        _leftCtrlText.text = GetControllerState("LEFT", true);
     }
 
     // ── Controller state (dual: OVRInput + Unity XR) ────────────────────
@@ -278,6 +256,50 @@ public class VRInputDebug : MonoBehaviour
         if (cam != null) _centerEye = cam.transform;
     }
 
+    private void FindLeftController()
+    {
+#if HAS_META_XR
+        if (_leftCtrl == null)
+        {
+            var rig = FindFirstObjectByType<OVRCameraRig>();
+            if (rig != null) { _leftCtrl = rig.leftControllerAnchor; return; }
+        }
+#endif
+        var devs = new List<InputDevice>();
+        InputDevices.GetDevicesWithCharacteristics(
+            InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Left, devs);
+        if (devs.Count == 0) { _leftCtrl = null; return; }
+
+        Vector3 pos; Quaternion rot;
+        if (!devs[0].TryGetFeatureValue(CommonUsages.devicePosition, out pos) ||
+            !devs[0].TryGetFeatureValue(CommonUsages.deviceRotation, out rot))
+        { _leftCtrl = null; return; }
+
+        if (_leftFollower == null)
+        {
+            _leftFollower = new GameObject("XRFollow_Left");
+            _leftFollower.transform.SetParent(transform);
+        }
+        _leftFollower.transform.position = pos;
+        _leftFollower.transform.rotation = rot;
+        _leftCtrl = _leftFollower.transform;
+    }
+
+    private void PositionLeftCtrlCanvas()
+    {
+        if (_leftCtrl == null) { _leftCtrlCanvas.gameObject.SetActive(false); return; }
+
+        _leftCtrlCanvas.gameObject.SetActive(true);
+        _leftCtrlCanvas.transform.position = _leftCtrl.position
+            + Vector3.up * 0.12f + Vector3.right * -0.06f;
+
+        if (_centerEye != null)
+            _leftCtrlCanvas.transform.rotation = Quaternion.LookRotation(
+                _leftCtrlCanvas.transform.position - _centerEye.position, Vector3.up);
+        else
+            _leftCtrlCanvas.transform.rotation = _leftCtrl.rotation;
+    }
+
     private void CreateDebugCanvas()
     {
         var canvasGO = new GameObject("VRInputDebug_Canvas");
@@ -286,20 +308,45 @@ public class VRInputDebug : MonoBehaviour
         _canvas.renderMode = RenderMode.WorldSpace;
 
         var rect = _canvas.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(1000, 900);
+        rect.sizeDelta = new Vector2(300, 200);
         rect.localScale = Vector3.one * displayScale;
 
-        var bg = canvasGO.AddComponent<Image>();
-        bg.color = new Color(0, 0, 0, 0.3f);
+        _reticleText = CreateText(canvasGO.transform, "Reticle",
+            new Vector2(0, 20), new Vector2(100, 60), TextAnchor.MiddleCenter, 32);
+        _reticleText.text = "<color=#0f0>+</color>";
+
+        _labelText = CreateText(canvasGO.transform, "Label",
+            new Vector2(0, -30), new Vector2(300, 40), TextAnchor.UpperCenter, 18);
+        _labelText.text = "<color=#0f0>DEBUG ON</color>";
 
         _headerText = CreateText(canvasGO.transform, "Header",
-            new Vector2(0, 380), new Vector2(880, 250), TextAnchor.UpperCenter, 18);
+            Vector2.zero, Vector2.zero, TextAnchor.UpperCenter, 1);
+        _headerText.gameObject.SetActive(false);
 
         _leftText = CreateText(canvasGO.transform, "Left",
-            new Vector2(-230, 200), new Vector2(420, 600), TextAnchor.UpperLeft, 16);
+            Vector2.zero, Vector2.zero, TextAnchor.UpperLeft, 1);
+        _leftText.gameObject.SetActive(false);
 
         _rightText = CreateText(canvasGO.transform, "Right",
-            new Vector2(230, 200), new Vector2(420, 600), TextAnchor.UpperLeft, 16);
+            Vector2.zero, Vector2.zero, TextAnchor.UpperLeft, 1);
+        _rightText.gameObject.SetActive(false);
+    }
+
+    private void CreateLeftCtrlCanvas()
+    {
+        var go = new GameObject("VRDebug_LeftCtrl");
+        go.transform.SetParent(transform);
+        _leftCtrlCanvas = go.AddComponent<Canvas>();
+        _leftCtrlCanvas.renderMode = RenderMode.WorldSpace;
+
+        var rect = _leftCtrlCanvas.GetComponent<RectTransform>();
+        rect.sizeDelta = new Vector2(450, 750);
+        rect.localScale = Vector3.one * 0.00028f;
+
+        _leftCtrlText = CreateText(go.transform, "LeftCtrlTxt",
+            Vector2.zero, new Vector2(430, 730), TextAnchor.UpperLeft, 19);
+
+        go.SetActive(false);
     }
 
     private Text CreateText(Transform parent, string name,
@@ -320,6 +367,10 @@ public class VRInputDebug : MonoBehaviour
         text.supportRichText = true;
         text.horizontalOverflow = HorizontalWrapMode.Overflow;
         text.verticalOverflow = VerticalWrapMode.Overflow;
+
+        var outline = go.AddComponent<Outline>();
+        outline.effectColor = new Color(0, 0, 0, 0.8f);
+        outline.effectDistance = new Vector2(1, -1);
 
         return text;
     }
