@@ -108,6 +108,23 @@ public class VRInputDebug : MonoBehaviour
 
     private void UpdateTexts()
     {
+        _leftText.text = $"FPS: {(1f / Time.unscaledDeltaTime):F0}\nFrame: {Time.frameCount}";
+
+        string status = "";
+#if HAS_META_XR
+        var ac = OVRInput.GetActiveController();
+        string cc = ac != OVRInput.Controller.None ? "#0f0" : "#f00";
+        status += $"OVR: <color={cc}>{ac}</color>\n";
+        var mgr = FindFirstObjectByType<OVRManager>();
+        status += $"Mgr: {(mgr != null ? "<color=#0f0>OK</color>" : "<color=#f00>NO</color>")}";
+#else
+        status += "<color=#f00>NO META XR</color>";
+#endif
+        var devices = new List<InputDevice>();
+        InputDevices.GetDevices(devices);
+        status += $"\nXR: {devices.Count} dev";
+        _rightText.text = status;
+
         _leftCtrlText.text = GetControllerState("LEFT", true);
         _rightCtrlText.text = GetControllerState("RIGHT", false);
     }
@@ -306,7 +323,7 @@ public class VRInputDebug : MonoBehaviour
         if (ctrl == null) { canvas.gameObject.SetActive(false); return; }
 
         canvas.gameObject.SetActive(true);
-        float inward = isLeft ? 0.08f : -0.08f;
+        float inward = isLeft ? 0.08f : 0f;
         canvas.transform.position = ctrl.position
             + Vector3.up * 0.15f + Vector3.right * inward;
 
@@ -325,7 +342,7 @@ public class VRInputDebug : MonoBehaviour
         _canvas.renderMode = RenderMode.WorldSpace;
 
         var rect = _canvas.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(300, 200);
+        rect.sizeDelta = new Vector2(1000, 300);
         rect.localScale = Vector3.one * displayScale;
 
         _reticleText = CreateText(canvasGO.transform, "Reticle",
@@ -336,17 +353,15 @@ public class VRInputDebug : MonoBehaviour
             new Vector2(0, -30), new Vector2(300, 40), TextAnchor.UpperCenter, 18);
         _labelText.text = "<color=#0f0>DEBUG ON</color>";
 
+        _leftText = CreateText(canvasGO.transform, "HudLeft",
+            new Vector2(-350, 30), new Vector2(350, 200), TextAnchor.UpperRight, 18);
+
+        _rightText = CreateText(canvasGO.transform, "HudRight",
+            new Vector2(350, 30), new Vector2(350, 200), TextAnchor.UpperLeft, 18);
+
         _headerText = CreateText(canvasGO.transform, "Header",
             Vector2.zero, Vector2.zero, TextAnchor.UpperCenter, 1);
         _headerText.gameObject.SetActive(false);
-
-        _leftText = CreateText(canvasGO.transform, "Left",
-            Vector2.zero, Vector2.zero, TextAnchor.UpperLeft, 1);
-        _leftText.gameObject.SetActive(false);
-
-        _rightText = CreateText(canvasGO.transform, "Right",
-            Vector2.zero, Vector2.zero, TextAnchor.UpperLeft, 1);
-        _rightText.gameObject.SetActive(false);
     }
 
     private Canvas CreateCtrlCanvas(string name, ref Text text)
