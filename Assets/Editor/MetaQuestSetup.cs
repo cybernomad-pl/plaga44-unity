@@ -196,22 +196,23 @@ namespace Plaga44.Editor
 
             AddScriptingDefine("HAS_META_XR");
 
-            // --- OVRPlayerController (prefab: rig + locomotion + CharacterController) ---
-            var playerPrefab = FindPrefab("OVRPlayerController");
-            if (playerPrefab == null) { Debug.LogError($"{LOG} OVRPlayerController prefab not found."); return; }
+            // --- OVRCameraRig ---
+            var rigPrefab = FindPrefab("OVRCameraRig");
+            if (rigPrefab == null) { Debug.LogError($"{LOG} OVRCameraRig not found."); return; }
 
-            var playerCtrl = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab);
-            playerCtrl.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
-            Undo.RegisterCreatedObjectUndo(playerCtrl, "Add OVRPlayerController");
+            var rig = (GameObject)PrefabUtility.InstantiatePrefab(rigPrefab);
+            rig.transform.SetPositionAndRotation(new Vector3(0f, 0.05f, 0f), Quaternion.identity);
+            Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
 
-            // Find OVRCameraRig inside prefab
-            var rig = FindChildRecursive(playerCtrl.transform, "OVRCameraRig");
-            if (rig == null)
-            {
-                Debug.LogError($"{LOG} OVRCameraRig not found inside OVRPlayerController prefab.");
-                return;
-            }
-            var rigGo = rig.gameObject;
+            // CharacterController + VRLocomotion on the rig
+            var cc = Undo.AddComponent<CharacterController>(rig);
+            cc.height = 1.8f;
+            cc.radius = 0.25f;
+            cc.center = new Vector3(0f, 0.9f, 0f);
+            cc.skinWidth = 0.02f;
+            cc.minMoveDistance = 0f;
+
+            Undo.AddComponent<VRLocomotion>(rig);
 
             // Enable hand tracking in project config
             var projectConfig = OVRProjectConfig.CachedProjectConfig;
@@ -223,14 +224,16 @@ namespace Plaga44.Editor
             }
 
             // --- Hands ---
-            AddHandPrefab(rigGo, true);
-            AddHandPrefab(rigGo, false);
+            AddHandPrefab(rig, true);
+            AddHandPrefab(rig, false);
 
             // --- Controllers (fallback) ---
-            AddControllerPrefabs(rigGo);
+            AddControllerPrefabs(rig);
 
             // --- VRInputDebug ---
-            Undo.AddComponent<VRInputDebug>(rigGo);
+            Undo.AddComponent<VRInputDebug>(rig);
+
+            var playerCtrl = rig;
 
             // --- LocomotionEnvironment (Meta test room) ---
             var envPrefab = FindPrefab("LocomotionEnvironment");
