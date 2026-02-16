@@ -19,7 +19,7 @@ public class SplashScreen : MonoBehaviour
     private CanvasGroup _group;
 
     // World-space params (similar to VRInputDebug)
-    private float displayDistance = 0.35f;
+    private float displayDistance = 0.8f;
     private float displayScale = 0.0005f;
 
     void Start()

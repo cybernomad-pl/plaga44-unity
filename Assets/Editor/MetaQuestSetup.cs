@@ -167,7 +167,7 @@ namespace Plaga44.Editor
                 BuildTargetGroup.Android, BuildTarget.Android);
         }
 
-        [MenuItem("CYBERNOMAD/Meta SDK Setup/3. Setup VR Scene", false, 3)]
+        [MenuItem("CYBERNOMAD/Scene Setup/Setup VR Rig", false, 50)]
         public static void SetupVRScene()
         {
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
@@ -176,133 +176,54 @@ namespace Plaga44.Editor
                 return;
             }
 
-            foreach (var t in GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None))
+            string[] guids = AssetDatabase.FindAssets("OVRCameraRig t:prefab");
+            if (guids.Length == 0)
             {
-                if (t.name == "OVRPlayerController" || t.name == "OVRCameraRig")
+                Debug.LogError($"{LOG} OVRCameraRig prefab not found. Run Step 1 first.");
+                return;
+            }
+
+            string prefabPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab == null)
+            {
+                Debug.LogError($"{LOG} Could not load OVRCameraRig at: {prefabPath}");
+                return;
+            }
+
+            var existing = GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None);
+            foreach (var t in existing)
+            {
+                if (t.name == "OVRCameraRig" || t.name == "XROrigin")
                 {
                     Debug.LogWarning($"{LOG} {t.name} already in scene. Skipping.");
                     return;
                 }
             }
 
-            foreach (var cam in GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None))
+            var cameras = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None);
+            foreach (var cam in cameras)
             {
                 if (cam.gameObject.name == "Main Camera")
                 {
                     Undo.DestroyObjectImmediate(cam.gameObject);
+                    Debug.Log($"{LOG} Deleted Main Camera.");
                     break;
                 }
             }
 
-            AddScriptingDefine("HAS_META_XR");
-
-            // --- OVRCameraRig ---
-            var rigPrefab = FindPrefab("OVRCameraRig");
-            if (rigPrefab == null) { Debug.LogError($"{LOG} OVRCameraRig not found."); return; }
-
-            var rig = (GameObject)PrefabUtility.InstantiatePrefab(rigPrefab);
-            rig.transform.SetPositionAndRotation(new Vector3(0f, 0.05f, 0f), Quaternion.identity);
+            var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            rig.transform.position = new Vector3(0f, 1.2f, 0f);
+            rig.transform.rotation = Quaternion.identity;
             Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
 
-            // CharacterController + VRLocomotion on the rig
-            var cc = Undo.AddComponent<CharacterController>(rig);
-            cc.height = 1.8f;
-            cc.radius = 0.25f;
-            cc.center = new Vector3(0f, 0.9f, 0f);
-            cc.skinWidth = 0.02f;
-            cc.minMoveDistance = 0f;
-
-            Undo.AddComponent<VRLocomotion>(rig);
-
-            // Enable hand tracking in project config
-            var projectConfig = OVRProjectConfig.CachedProjectConfig;
-            if (projectConfig != null)
-            {
-                projectConfig.handTrackingSupport = OVRProjectConfig.HandTrackingSupport.ControllersAndHands;
-                OVRProjectConfig.CommitProjectConfig(projectConfig);
-                Debug.Log($"{LOG} Hand tracking: Controllers and Hands.");
-            }
-
-            // --- Hands ---
-            AddHandPrefab(rig, true);
-            AddHandPrefab(rig, false);
-
-            // --- Controllers (fallback) ---
             AddControllerPrefabs(rig);
 
-            // --- VRInputDebug ---
-            Undo.AddComponent<VRInputDebug>(rig);
-
-            var playerCtrl = rig;
-
-            // --- LocomotionEnvironment (Meta test room) ---
-            var envPrefab = FindPrefab("LocomotionEnvironment");
-            if (envPrefab != null)
-            {
-                var env = (GameObject)PrefabUtility.InstantiatePrefab(envPrefab);
-                env.transform.position = Vector3.zero;
-                Undo.RegisterCreatedObjectUndo(env, "Add LocomotionEnvironment");
-            }
-
-            Selection.activeGameObject = playerCtrl;
+            Selection.activeGameObject = rig;
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
-            Debug.Log($"{LOG} VR Scene ready: locomotion + hands + controllers + debug + Meta test room.");
-        }
-
-        static void AddHandPrefab(GameObject rig, bool isLeft)
-        {
-            string anchorName = isLeft ? "LeftHandAnchor" : "RightHandAnchor";
-            Transform anchor = FindChildRecursive(rig.transform, anchorName);
-            if (anchor == null) return;
-
-            var handPrefab = FindPrefab("OVRHandPrefab");
-            if (handPrefab == null) return;
-
-            var hand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, anchor);
-            hand.name = isLeft ? "LeftHand" : "RightHand";
-            hand.transform.localPosition = Vector3.zero;
-            hand.transform.localRotation = Quaternion.identity;
-
-            var ovrHand = hand.GetComponent<OVRHand>();
-            if (ovrHand != null)
-            {
-                var field = typeof(OVRHand).GetField("HandType",
-                    BindingFlags.Public | BindingFlags.Instance);
-                if (field != null)
-                    field.SetValue(ovrHand, isLeft ? OVRHand.Hand.HandLeft : OVRHand.Hand.HandRight);
-            }
-
-            var ovrSkeleton = hand.GetComponent<OVRSkeleton>();
-            if (ovrSkeleton != null)
-            {
-                var field = typeof(OVRSkeleton).GetField("_skeletonType",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-                if (field != null)
-                    field.SetValue(ovrSkeleton, isLeft
-                        ? OVRSkeleton.SkeletonType.HandLeft
-                        : OVRSkeleton.SkeletonType.HandRight);
-            }
-
-            Undo.RegisterCreatedObjectUndo(hand, $"Add {hand.name}");
-            Debug.Log($"{LOG} {hand.name} added.");
-        }
-
-        static GameObject FindPrefab(string name)
-        {
-            string[] guids = AssetDatabase.FindAssets($"{name} t:prefab");
-            if (guids.Length == 0) return null;
-            return AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guids[0]));
-        }
-
-        static void AddScriptingDefine(string define)
-        {
-            string defines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Android);
-            if (defines.Contains(define)) return;
-            defines = string.IsNullOrEmpty(defines) ? define : defines + ";" + define;
-            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Android, defines);
-            Debug.Log($"{LOG} Added scripting define: {define}");
+            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + controllers at origin.");
         }
 
         static void AddControllerPrefabs(GameObject rig)

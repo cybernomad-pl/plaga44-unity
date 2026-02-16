@@ -8,10 +8,17 @@ using UnityEngine;
 
 namespace Plaga44.Editor
 {
+    [InitializeOnLoad]
     public static class VRInputDebugMenu
     {
         private const string MENU_PATH = "CYBERNOMAD/Debug/VR Input Debug HUD";
         private const string ENABLED_KEY = "CYBERNOMAD_VRInputDebug";
+
+        // Force off on editor startup -- must be enabled manually each session
+        static VRInputDebugMenu()
+        {
+            EditorPrefs.SetBool(ENABLED_KEY, false);
+        }
 
         [MenuItem(MENU_PATH, false, 500)]
         private static void ToggleDebugHUD()
