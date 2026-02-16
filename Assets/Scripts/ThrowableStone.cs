@@ -83,5 +83,32 @@ namespace PLAGA44
         {
             return rb.mass;
         }
+
+        /// <summary>
+        /// Called when stone collides with something.
+        /// Checks for HitZone components and calculates impact force.
+        /// </summary>
+        private void OnCollisionEnter(Collision collision)
+        {
+            // Check if the collided object has a HitZone
+            HitZone hitZone = collision.collider.GetComponent<HitZone>();
+            if (hitZone != null && isThrown)
+            {
+                // Calculate impact force: velocity magnitude * mass
+                float impactForce = rb.linearVelocity.magnitude * rb.mass;
+
+                // Get the character root (parent with health/damage component)
+                Transform characterRoot = hitZone.transform.parent;
+                if (characterRoot != null)
+                {
+                    // Try to find MorsCerebri component on character root
+                    MorsCerebri morsCerebri = characterRoot.GetComponent<MorsCerebri>();
+                    if (morsCerebri != null)
+                    {
+                        morsCerebri.OnHit(hitZone.GetZoneType(), impactForce, lastThrower);
+                    }
+                }
+            }
+        }
     }
 }
