@@ -24,6 +24,8 @@ namespace Plaga44.Editor
             CreateCeiling(roomParent.transform);
             CreateLighting();
 
+            AddLocomotionToRig();
+
             Selection.activeGameObject = roomParent;
             Debug.Log($"{LOG} Test room created successfully.");
         }
@@ -89,6 +91,23 @@ namespace Plaga44.Editor
             lightObj.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
             Undo.RegisterCreatedObjectUndo(lightObj, "Create Directional Light");
+        }
+
+        private static void AddLocomotionToRig()
+        {
+            foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
+            {
+                if (t.name == "OVRCameraRig")
+                {
+                    if (t.GetComponent<SimpleLocomotion>() == null)
+                    {
+                        Undo.AddComponent<SimpleLocomotion>(t.gameObject);
+                        Debug.Log($"{LOG} SimpleLocomotion added to OVRCameraRig.");
+                    }
+                    return;
+                }
+            }
+            Debug.LogWarning($"{LOG} OVRCameraRig not found -- add SimpleLocomotion manually.");
         }
 
         private static void SetMaterial(GameObject obj, Color color)

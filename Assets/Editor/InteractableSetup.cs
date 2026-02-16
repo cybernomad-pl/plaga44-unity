@@ -13,7 +13,19 @@ namespace Plaga44.Editor
         {
             Debug.Log($"{LOG} Adding test interactables...");
 
+            Vector3 origin = Vector3.zero;
+            var rig = GameObject.FindFirstObjectByType<Transform>();
+            foreach (var t in GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None))
+            {
+                if (t.name == "OVRCameraRig" || t.name == "XROrigin")
+                {
+                    origin = t.position;
+                    break;
+                }
+            }
+
             GameObject interactablesParent = new GameObject("TestInteractables");
+            interactablesParent.transform.position = origin;
             Undo.RegisterCreatedObjectUndo(interactablesParent, "Create Test Interactables");
 
             CreateGrabbableCube(interactablesParent.transform);
