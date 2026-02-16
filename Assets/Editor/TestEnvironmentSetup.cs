@@ -144,6 +144,23 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} OVRPlayerController wraps existing OVRCameraRig. VRInputDebug + all components preserved.");
         }
 
+        [MenuItem("CYBERNOMAD/Scene Setup/Add Splash Screen", false, 103)]
+        public static void AddSplashScreen()
+        {
+            var existing = Object.FindObjectsByType<SplashScreen>(FindObjectsSortMode.None);
+            if (existing.Length > 0)
+            {
+                Debug.Log($"{LOG} SplashScreen already in scene.");
+                return;
+            }
+
+            GameObject splashGO = new GameObject("SplashScreen");
+            splashGO.AddComponent<SplashScreen>();
+            Undo.RegisterCreatedObjectUndo(splashGO, "Add Splash Screen");
+
+            Debug.Log($"{LOG} SplashScreen added. Black screen + PLAGA '44 title, fades on controller input.");
+        }
+
         private static void SetMaterial(GameObject obj, Color color)
         {
             Renderer renderer = obj.GetComponent<Renderer>();
