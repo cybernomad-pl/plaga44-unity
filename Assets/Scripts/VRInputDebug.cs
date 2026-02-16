@@ -61,10 +61,18 @@ public class VRInputDebug : MonoBehaviour
     private Transform _leftCtrl;
     private GameObject _leftFollower;
 
+    private Canvas _rightCtrlCanvas;
+    private Text _rightCtrlText;
+    private Transform _rightCtrl;
+    private GameObject _rightFollower;
+
+    private float ctrlPanelOffset = 0.315f;
+
     void Start()
     {
         CreateDebugCanvas();
-        CreateLeftCtrlCanvas();
+        _leftCtrlCanvas = CreateCtrlCanvas("Left", ref _leftCtrlText);
+        _rightCtrlCanvas = CreateCtrlCanvas("Right", ref _rightCtrlText);
     }
 
     void Update()
@@ -83,8 +91,10 @@ public class VRInputDebug : MonoBehaviour
         _canvas.transform.position = _centerEye.position + _centerEye.forward * displayDistance;
         _canvas.transform.rotation = _centerEye.rotation;
 
-        FindLeftController();
-        PositionLeftCtrlCanvas();
+        FindController(true, ref _leftCtrl, ref _leftFollower);
+        FindController(false, ref _rightCtrl, ref _rightFollower);
+        PositionCtrlCanvas(_leftCtrlCanvas, _leftCtrl, true);
+        PositionCtrlCanvas(_rightCtrlCanvas, _rightCtrl, false);
 
         UpdateTexts();
     }
@@ -99,6 +109,7 @@ public class VRInputDebug : MonoBehaviour
     private void UpdateTexts()
     {
         _leftCtrlText.text = GetControllerState("LEFT", true);
+        _rightCtrlText.text = GetControllerState("RIGHT", false);
     }
 
     // ── Controller state (dual: OVRInput + Unity XR) ────────────────────
@@ -256,48 +267,54 @@ public class VRInputDebug : MonoBehaviour
         if (cam != null) _centerEye = cam.transform;
     }
 
-    private void FindLeftController()
+    private void FindController(bool isLeft, ref Transform ctrl, ref GameObject follower)
     {
 #if HAS_META_XR
-        if (_leftCtrl == null)
+        if (ctrl == null)
         {
             var rig = FindFirstObjectByType<OVRCameraRig>();
-            if (rig != null) { _leftCtrl = rig.leftControllerAnchor; return; }
+            if (rig != null)
+            {
+                ctrl = isLeft ? rig.leftControllerAnchor : rig.rightControllerAnchor;
+                return;
+            }
         }
 #endif
+        var side = isLeft ? InputDeviceCharacteristics.Left : InputDeviceCharacteristics.Right;
         var devs = new List<InputDevice>();
         InputDevices.GetDevicesWithCharacteristics(
-            InputDeviceCharacteristics.Controller | InputDeviceCharacteristics.Left, devs);
-        if (devs.Count == 0) { _leftCtrl = null; return; }
+            InputDeviceCharacteristics.Controller | side, devs);
+        if (devs.Count == 0) { ctrl = null; return; }
 
         Vector3 pos; Quaternion rot;
         if (!devs[0].TryGetFeatureValue(CommonUsages.devicePosition, out pos) ||
             !devs[0].TryGetFeatureValue(CommonUsages.deviceRotation, out rot))
-        { _leftCtrl = null; return; }
+        { ctrl = null; return; }
 
-        if (_leftFollower == null)
+        if (follower == null)
         {
-            _leftFollower = new GameObject("XRFollow_Left");
-            _leftFollower.transform.SetParent(transform);
+            follower = new GameObject($"XRFollow_{(isLeft ? "L" : "R")}");
+            follower.transform.SetParent(transform);
         }
-        _leftFollower.transform.position = pos;
-        _leftFollower.transform.rotation = rot;
-        _leftCtrl = _leftFollower.transform;
+        follower.transform.position = pos;
+        follower.transform.rotation = rot;
+        ctrl = follower.transform;
     }
 
-    private void PositionLeftCtrlCanvas()
+    private void PositionCtrlCanvas(Canvas canvas, Transform ctrl, bool isLeft)
     {
-        if (_leftCtrl == null) { _leftCtrlCanvas.gameObject.SetActive(false); return; }
+        if (ctrl == null) { canvas.gameObject.SetActive(false); return; }
 
-        _leftCtrlCanvas.gameObject.SetActive(true);
-        _leftCtrlCanvas.transform.position = _leftCtrl.position
-            + Vector3.up * 0.12f + Vector3.right * -0.06f;
+        canvas.gameObject.SetActive(true);
+        float side = isLeft ? 1f : -1f;
+        canvas.transform.position = ctrl.position
+            + Vector3.up * 0.12f + Vector3.right * (ctrlPanelOffset * side);
 
         if (_centerEye != null)
-            _leftCtrlCanvas.transform.rotation = Quaternion.LookRotation(
-                _leftCtrlCanvas.transform.position - _centerEye.position, Vector3.up);
+            canvas.transform.rotation = Quaternion.LookRotation(
+                canvas.transform.position - _centerEye.position, Vector3.up);
         else
-            _leftCtrlCanvas.transform.rotation = _leftCtrl.rotation;
+            canvas.transform.rotation = ctrl.rotation;
     }
 
     private void CreateDebugCanvas()
@@ -332,21 +349,22 @@ public class VRInputDebug : MonoBehaviour
         _rightText.gameObject.SetActive(false);
     }
 
-    private void CreateLeftCtrlCanvas()
+    private Canvas CreateCtrlCanvas(string name, ref Text text)
     {
-        var go = new GameObject("VRDebug_LeftCtrl");
+        var go = new GameObject($"VRDebug_{name}Ctrl");
         go.transform.SetParent(transform);
-        _leftCtrlCanvas = go.AddComponent<Canvas>();
-        _leftCtrlCanvas.renderMode = RenderMode.WorldSpace;
+        var canvas = go.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.WorldSpace;
 
-        var rect = _leftCtrlCanvas.GetComponent<RectTransform>();
+        var rect = canvas.GetComponent<RectTransform>();
         rect.sizeDelta = new Vector2(450, 750);
         rect.localScale = Vector3.one * 0.00028f;
 
-        _leftCtrlText = CreateText(go.transform, "LeftCtrlTxt",
+        text = CreateText(go.transform, $"{name}CtrlTxt",
             Vector2.zero, new Vector2(430, 730), TextAnchor.UpperLeft, 19);
 
         go.SetActive(false);
+        return canvas;
     }
 
     private Text CreateText(Transform parent, string name,
