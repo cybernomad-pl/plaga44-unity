@@ -1,8 +1,10 @@
 // SplashScreen.cs
 // CYBERNOMAD -- Black plane in front of face with PLAGA '44 title.
 // Stays until both index triggers are pressed simultaneously.
+// Hides controller/hand models while active (input still works).
 // Uses world-space canvas following CenterEyeAnchor (same as VRInputDebug).
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,10 +19,11 @@ public class SplashScreen : MonoBehaviour
     private bool _fading;
     private float _fadeTimer;
     private CanvasGroup _group;
+    private List<Renderer> _hiddenRenderers = new List<Renderer>();
 
-    // World-space params (similar to VRInputDebug)
-    private float displayDistance = 0.8f;
-    private float displayScale = 0.0005f;
+    // World-space params
+    private float displayDistance = 0.55f;
+    private float displayScale = 0.001f;
 
     void Start()
     {
@@ -40,6 +43,12 @@ public class SplashScreen : MonoBehaviour
         _canvas.transform.position = _centerEye.position + _centerEye.forward * displayDistance;
         _canvas.transform.rotation = _centerEye.rotation;
 
+        // Hide controllers while splash is showing
+        if (!_fading)
+        {
+            HideControllers();
+        }
+
         if (_fading)
         {
             _fadeTimer += Time.deltaTime;
@@ -48,6 +57,7 @@ public class SplashScreen : MonoBehaviour
 
             if (t >= 1f)
             {
+                ShowControllers();
                 Destroy(gameObject);
             }
             return;
@@ -61,6 +71,12 @@ public class SplashScreen : MonoBehaviour
         }
     }
 
+    void OnDestroy()
+    {
+        // Safety -- always restore controllers
+        ShowControllers();
+    }
+
     private bool BothTriggersPressed()
     {
 #if HAS_META_XR
@@ -70,6 +86,45 @@ public class SplashScreen : MonoBehaviour
 #else
         return false;
 #endif
+    }
+
+    private void HideControllers()
+    {
+#if HAS_META_XR
+        var rig = FindFirstObjectByType<OVRCameraRig>();
+        if (rig == null) return;
+
+        Transform[] anchors = new Transform[]
+        {
+            rig.leftControllerAnchor,
+            rig.rightControllerAnchor,
+            rig.leftHandAnchor,
+            rig.rightHandAnchor
+        };
+
+        foreach (var anchor in anchors)
+        {
+            if (anchor == null) continue;
+            foreach (var r in anchor.GetComponentsInChildren<Renderer>(true))
+            {
+                if (r.enabled)
+                {
+                    r.enabled = false;
+                    if (!_hiddenRenderers.Contains(r))
+                        _hiddenRenderers.Add(r);
+                }
+            }
+        }
+#endif
+    }
+
+    private void ShowControllers()
+    {
+        foreach (var r in _hiddenRenderers)
+        {
+            if (r != null) r.enabled = true;
+        }
+        _hiddenRenderers.Clear();
     }
 
     private void FindCenterEye()
@@ -88,7 +143,7 @@ public class SplashScreen : MonoBehaviour
 
     private void CreateWorldCanvas()
     {
-        // World-space canvas -- big black plane close to face
+        // World-space canvas -- big black plane covering full FOV
         var canvasGO = new GameObject("SplashCanvas");
         canvasGO.transform.SetParent(transform);
         _canvas = canvasGO.AddComponent<Canvas>();
@@ -96,7 +151,7 @@ public class SplashScreen : MonoBehaviour
         _canvas.sortingOrder = 9999;
 
         var rect = _canvas.GetComponent<RectTransform>();
-        rect.sizeDelta = new Vector2(3000, 3000);
+        rect.sizeDelta = new Vector2(4000, 4000);
         rect.localScale = Vector3.one * displayScale;
 
         // CanvasGroup for clean fade
@@ -128,7 +183,7 @@ public class SplashScreen : MonoBehaviour
         titleRect.anchoredPosition = Vector2.zero;
         titleRect.sizeDelta = new Vector2(2000, 600);
 
-        // Outline for readability (matching VRInputDebug style)
+        // Outline for readability
         var outline = titleGO.AddComponent<Outline>();
         outline.effectColor = new Color(0.2f, 0.2f, 0.2f, 1f);
         outline.effectDistance = new Vector2(2, -2);
