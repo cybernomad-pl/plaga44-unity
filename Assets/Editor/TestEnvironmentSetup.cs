@@ -24,8 +24,6 @@ namespace Plaga44.Editor
             CreateCeiling(roomParent.transform);
             CreateLighting();
 
-            AddLocomotionToRig();
-
             Selection.activeGameObject = roomParent;
             Debug.Log($"{LOG} Test room created successfully.");
         }
@@ -93,27 +91,10 @@ namespace Plaga44.Editor
             Undo.RegisterCreatedObjectUndo(lightObj, "Create Directional Light");
         }
 
-        private static void AddLocomotionToRig()
+        [MenuItem("CYBERNOMAD/Scene Setup/Add Locomotion", false, 102)]
+        public static void AddLocomotion()
         {
-            // Find existing OVRCameraRig and replace with OVRPlayerController
             GameObject existingRig = null;
-            foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
-            {
-                if (t.name == "OVRCameraRig")
-                {
-                    existingRig = t.gameObject;
-                    break;
-                }
-            }
-
-            string[] guids = AssetDatabase.FindAssets("OVRPlayerController t:prefab");
-            if (guids.Length == 0)
-            {
-                Debug.LogWarning($"{LOG} OVRPlayerController prefab not found in SDK.");
-                return;
-            }
-
-            // Check if already using OVRPlayerController
             foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
             {
                 if (t.name == "OVRPlayerController")
@@ -121,15 +102,20 @@ namespace Plaga44.Editor
                     Debug.Log($"{LOG} OVRPlayerController already in scene.");
                     return;
                 }
+                if (t.name == "OVRCameraRig")
+                    existingRig = t.gameObject;
+            }
+
+            string[] guids = AssetDatabase.FindAssets("OVRPlayerController t:prefab");
+            if (guids.Length == 0)
+            {
+                Debug.LogWarning($"{LOG} OVRPlayerController prefab not found.");
+                return;
             }
 
             string prefabPath = AssetDatabase.GUIDToAssetPath(guids[0]);
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            if (prefab == null)
-            {
-                Debug.LogWarning($"{LOG} Could not load OVRPlayerController prefab.");
-                return;
-            }
+            if (prefab == null) return;
 
             Vector3 pos = existingRig != null ? existingRig.transform.position : Vector3.zero;
             Quaternion rot = existingRig != null ? existingRig.transform.rotation : Quaternion.identity;
@@ -137,14 +123,14 @@ namespace Plaga44.Editor
             if (existingRig != null)
             {
                 Undo.DestroyObjectImmediate(existingRig);
-                Debug.Log($"{LOG} Removed old OVRCameraRig.");
+                Debug.Log($"{LOG} Replaced OVRCameraRig.");
             }
 
-            var playerCtrl = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            playerCtrl.transform.position = pos;
-            playerCtrl.transform.rotation = rot;
-            Undo.RegisterCreatedObjectUndo(playerCtrl, "Add OVRPlayerController");
-            Debug.Log($"{LOG} OVRPlayerController added (includes locomotion + camera rig).");
+            var ctrl = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            ctrl.transform.position = pos;
+            ctrl.transform.rotation = rot;
+            Undo.RegisterCreatedObjectUndo(ctrl, "Add OVRPlayerController");
+            Debug.Log($"{LOG} OVRPlayerController added (thumbstick move + snap turn).");
         }
 
         private static void SetMaterial(GameObject obj, Color color)
