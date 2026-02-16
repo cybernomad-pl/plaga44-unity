@@ -53,6 +53,30 @@ namespace Plaga44.Editor
             Undo.RegisterCreatedObjectUndo(floor, "Create Infinite Floor");
             Debug.Log($"{LOG} InfiniteFloor created (1000x1000m plane).");
         }
+
+        [MenuItem("CYBERNOMAD/Scene Setup/Clean Scene", false, 200)]
+        public static void CleanScene()
+        {
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
+            var roots = scene.GetRootGameObjects();
+            int removed = 0;
+
+            foreach (var root in roots)
+            {
+                string n = root.name;
+
+                // Keep lighting and volume -- remove everything else
+                if (n == "Directional Light" || n == "Global Volume")
+                    continue;
+
+                Debug.Log($"{LOG} Removing: {n}");
+                Undo.DestroyObjectImmediate(root);
+                removed++;
+            }
+
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(scene);
+            Debug.Log($"{LOG} Scene cleaned. Removed {removed} objects. Undo available.");
+        }
     }
 }
 #endif
