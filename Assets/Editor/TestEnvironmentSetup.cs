@@ -94,7 +94,6 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Scene Setup/Add Locomotion", false, 102)]
         public static void AddLocomotion()
         {
-            GameObject existingRig = null;
             foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
             {
                 if (t.name == "OVRPlayerController")
@@ -102,35 +101,47 @@ namespace Plaga44.Editor
                     Debug.Log($"{LOG} OVRPlayerController already in scene.");
                     return;
                 }
-                if (t.name == "OVRCameraRig")
-                    existingRig = t.gameObject;
             }
 
-            string[] guids = AssetDatabase.FindAssets("OVRPlayerController t:prefab");
-            if (guids.Length == 0)
+            GameObject existingRig = null;
+            foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
             {
-                Debug.LogWarning($"{LOG} OVRPlayerController prefab not found.");
+                if (t.name == "OVRCameraRig")
+                {
+                    existingRig = t.gameObject;
+                    break;
+                }
+            }
+
+            if (existingRig == null)
+            {
+                Debug.LogError($"{LOG} OVRCameraRig not found. Add it first (Step 3).");
                 return;
             }
 
-            string prefabPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            if (prefab == null) return;
+            // Wrap existing rig -- don't destroy it
+            Vector3 pos = existingRig.transform.position;
+            Quaternion rot = existingRig.transform.rotation;
 
-            Vector3 pos = existingRig != null ? existingRig.transform.position : Vector3.zero;
-            Quaternion rot = existingRig != null ? existingRig.transform.rotation : Quaternion.identity;
+            GameObject wrapper = new GameObject("OVRPlayerController");
+            wrapper.transform.position = pos;
+            wrapper.transform.rotation = rot;
+            Undo.RegisterCreatedObjectUndo(wrapper, "Add OVRPlayerController");
 
-            if (existingRig != null)
-            {
-                Undo.DestroyObjectImmediate(existingRig);
-                Debug.Log($"{LOG} Replaced OVRCameraRig.");
-            }
+            var cc = Undo.AddComponent<CharacterController>(wrapper);
+            cc.height = 1.8f;
+            cc.radius = 0.3f;
+            cc.center = new Vector3(0f, 0.9f, 0f);
 
-            var ctrl = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            ctrl.transform.position = pos;
-            ctrl.transform.rotation = rot;
-            Undo.RegisterCreatedObjectUndo(ctrl, "Add OVRPlayerController");
-            Debug.Log($"{LOG} OVRPlayerController added (thumbstick move + snap turn).");
+            // OVRPlayerController expects OVRCameraRig as child
+            Undo.SetTransformParent(existingRig.transform, wrapper.transform, "Reparent OVRCameraRig");
+            existingRig.transform.localPosition = Vector3.zero;
+            existingRig.transform.localRotation = Quaternion.identity;
+
+            // Add OVRPlayerController component (searches for child OVRCameraRig)
+            Undo.AddComponent(wrapper, typeof(OVRPlayerController));
+
+            Debug.Log($"{LOG} OVRPlayerController wraps existing OVRCameraRig. VRInputDebug + all components preserved.");
         }
 
         private static void SetMaterial(GameObject obj, Color color)
