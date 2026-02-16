@@ -95,19 +95,56 @@ namespace Plaga44.Editor
 
         private static void AddLocomotionToRig()
         {
+            // Find existing OVRCameraRig and replace with OVRPlayerController
+            GameObject existingRig = null;
             foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
             {
                 if (t.name == "OVRCameraRig")
                 {
-                    if (t.GetComponent<SimpleLocomotion>() == null)
-                    {
-                        Undo.AddComponent<SimpleLocomotion>(t.gameObject);
-                        Debug.Log($"{LOG} SimpleLocomotion added to OVRCameraRig.");
-                    }
+                    existingRig = t.gameObject;
+                    break;
+                }
+            }
+
+            string[] guids = AssetDatabase.FindAssets("OVRPlayerController t:prefab");
+            if (guids.Length == 0)
+            {
+                Debug.LogWarning($"{LOG} OVRPlayerController prefab not found in SDK.");
+                return;
+            }
+
+            // Check if already using OVRPlayerController
+            foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
+            {
+                if (t.name == "OVRPlayerController")
+                {
+                    Debug.Log($"{LOG} OVRPlayerController already in scene.");
                     return;
                 }
             }
-            Debug.LogWarning($"{LOG} OVRCameraRig not found -- add SimpleLocomotion manually.");
+
+            string prefabPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"{LOG} Could not load OVRPlayerController prefab.");
+                return;
+            }
+
+            Vector3 pos = existingRig != null ? existingRig.transform.position : Vector3.zero;
+            Quaternion rot = existingRig != null ? existingRig.transform.rotation : Quaternion.identity;
+
+            if (existingRig != null)
+            {
+                Undo.DestroyObjectImmediate(existingRig);
+                Debug.Log($"{LOG} Removed old OVRCameraRig.");
+            }
+
+            var playerCtrl = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            playerCtrl.transform.position = pos;
+            playerCtrl.transform.rotation = rot;
+            Undo.RegisterCreatedObjectUndo(playerCtrl, "Add OVRPlayerController");
+            Debug.Log($"{LOG} OVRPlayerController added (includes locomotion + camera rig).");
         }
 
         private static void SetMaterial(GameObject obj, Color color)
