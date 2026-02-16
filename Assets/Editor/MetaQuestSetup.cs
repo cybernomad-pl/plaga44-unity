@@ -225,13 +225,14 @@ namespace Plaga44.Editor
 
             // --- OVRPlayerController wrapper (locomotion) ---
             GameObject playerCtrl = new GameObject("OVRPlayerController");
-            playerCtrl.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+            playerCtrl.transform.SetPositionAndRotation(new Vector3(0f, 0.1f, 0f), Quaternion.identity);
             Undo.RegisterCreatedObjectUndo(playerCtrl, "Add OVRPlayerController");
 
             var cc = Undo.AddComponent<CharacterController>(playerCtrl);
-            cc.height = 1.8f;
-            cc.radius = 0.3f;
-            cc.center = new Vector3(0f, 0.9f, 0f);
+            cc.height = 2.0f;
+            cc.radius = 0.25f;
+            cc.center = new Vector3(0f, 1.0f, 0f);
+            cc.skinWidth = 0.02f;
 
             Undo.SetTransformParent(rig.transform, playerCtrl.transform, "Reparent rig");
             rig.transform.localPosition = Vector3.zero;
