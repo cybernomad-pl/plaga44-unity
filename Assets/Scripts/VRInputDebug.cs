@@ -306,9 +306,7 @@ public class VRInputDebug : MonoBehaviour
         if (ctrl == null) { canvas.gameObject.SetActive(false); return; }
 
         canvas.gameObject.SetActive(true);
-        float side = isLeft ? 1f : -1f;
-        canvas.transform.position = ctrl.position
-            + Vector3.up * 0.12f + Vector3.right * (ctrlPanelOffset * side);
+        canvas.transform.position = ctrl.position + Vector3.up * 0.15f;
 
         if (_centerEye != null)
             canvas.transform.rotation = Quaternion.LookRotation(
