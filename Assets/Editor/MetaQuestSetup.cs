@@ -176,54 +176,135 @@ namespace Plaga44.Editor
                 return;
             }
 
-            string[] guids = AssetDatabase.FindAssets("OVRCameraRig t:prefab");
-            if (guids.Length == 0)
+            foreach (var t in GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None))
             {
-                Debug.LogError($"{LOG} OVRCameraRig prefab not found. Run Step 1 first.");
-                return;
-            }
-
-            string prefabPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            if (prefab == null)
-            {
-                Debug.LogError($"{LOG} Could not load OVRCameraRig at: {prefabPath}");
-                return;
-            }
-
-            var existing = GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None);
-            foreach (var t in existing)
-            {
-                if (t.name == "OVRCameraRig" || t.name == "XROrigin")
+                if (t.name == "OVRPlayerController" || t.name == "OVRCameraRig")
                 {
                     Debug.LogWarning($"{LOG} {t.name} already in scene. Skipping.");
                     return;
                 }
             }
 
-            var cameras = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None);
-            foreach (var cam in cameras)
+            foreach (var cam in GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None))
             {
                 if (cam.gameObject.name == "Main Camera")
                 {
                     Undo.DestroyObjectImmediate(cam.gameObject);
-                    Debug.Log($"{LOG} Deleted Main Camera.");
                     break;
                 }
             }
 
-            var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            rig.transform.position = Vector3.zero;
-            rig.transform.rotation = Quaternion.identity;
+            AddScriptingDefine("HAS_META_XR");
+
+            // --- OVRCameraRig ---
+            var rigPrefab = FindPrefab("OVRCameraRig");
+            if (rigPrefab == null) { Debug.LogError($"{LOG} OVRCameraRig not found."); return; }
+
+            var rig = (GameObject)PrefabUtility.InstantiatePrefab(rigPrefab);
+            rig.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
             Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
 
+            // Enable hand tracking on OVRManager
+            var mgr = rig.GetComponent<OVRManager>();
+            if (mgr != null)
+            {
+                mgr.m_HandTrackingSupport = OVRManager.HandTrackingSupport.ControllersAndHands;
+                Debug.Log($"{LOG} Hand tracking: Controllers and Hands.");
+            }
+
+            // --- Hands (OVRHandPrefab on each anchor) ---
+            AddHandPrefab(rig, true);
+            AddHandPrefab(rig, false);
+
+            // --- Controllers (fallback) ---
             AddControllerPrefabs(rig);
 
-            Selection.activeGameObject = rig;
+            // --- VRInputDebug ---
+            Undo.AddComponent<VRInputDebug>(rig);
+
+            // --- OVRPlayerController wrapper (locomotion) ---
+            GameObject playerCtrl = new GameObject("OVRPlayerController");
+            playerCtrl.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
+            Undo.RegisterCreatedObjectUndo(playerCtrl, "Add OVRPlayerController");
+
+            var cc = Undo.AddComponent<CharacterController>(playerCtrl);
+            cc.height = 1.8f;
+            cc.radius = 0.3f;
+            cc.center = new Vector3(0f, 0.9f, 0f);
+
+            Undo.SetTransformParent(rig.transform, playerCtrl.transform, "Reparent rig");
+            rig.transform.localPosition = Vector3.zero;
+            rig.transform.localRotation = Quaternion.identity;
+            Undo.AddComponent(playerCtrl, typeof(OVRPlayerController));
+
+            // --- LocomotionEnvironment (Meta test room) ---
+            var envPrefab = FindPrefab("LocomotionEnvironment");
+            if (envPrefab != null)
+            {
+                var env = (GameObject)PrefabUtility.InstantiatePrefab(envPrefab);
+                env.transform.position = Vector3.zero;
+                Undo.RegisterCreatedObjectUndo(env, "Add LocomotionEnvironment");
+            }
+
+            Selection.activeGameObject = playerCtrl;
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
-            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + controllers at origin.");
+            Debug.Log($"{LOG} VR Scene ready: locomotion + hands + controllers + debug + Meta test room.");
+        }
+
+        static void AddHandPrefab(GameObject rig, bool isLeft)
+        {
+            string anchorName = isLeft ? "LeftHandAnchor" : "RightHandAnchor";
+            Transform anchor = FindChildRecursive(rig.transform, anchorName);
+            if (anchor == null) return;
+
+            var handPrefab = FindPrefab("OVRHandPrefab");
+            if (handPrefab == null) return;
+
+            var hand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, anchor);
+            hand.name = isLeft ? "LeftHand" : "RightHand";
+            hand.transform.localPosition = Vector3.zero;
+            hand.transform.localRotation = Quaternion.identity;
+
+            var ovrHand = hand.GetComponent<OVRHand>();
+            if (ovrHand != null)
+            {
+                var field = typeof(OVRHand).GetField("HandType",
+                    BindingFlags.Public | BindingFlags.Instance);
+                if (field != null)
+                    field.SetValue(ovrHand, isLeft ? OVRHand.Hand.HandLeft : OVRHand.Hand.HandRight);
+            }
+
+            var ovrSkeleton = hand.GetComponent<OVRSkeleton>();
+            if (ovrSkeleton != null)
+            {
+                var field = typeof(OVRSkeleton).GetField("_skeletonType",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                if (field != null)
+                    field.SetValue(ovrSkeleton, isLeft
+                        ? OVRSkeleton.SkeletonType.HandLeft
+                        : OVRSkeleton.SkeletonType.HandRight);
+            }
+
+            Undo.RegisterCreatedObjectUndo(hand, $"Add {hand.name}");
+            Debug.Log($"{LOG} {hand.name} added.");
+        }
+
+        static GameObject FindPrefab(string name)
+        {
+            string[] guids = AssetDatabase.FindAssets($"{name} t:prefab");
+            if (guids.Length == 0) return null;
+            return AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guids[0]));
+        }
+
+        static void AddScriptingDefine(string define)
+        {
+            string defines = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.Android);
+            if (defines.Contains(define)) return;
+            defines = string.IsNullOrEmpty(defines) ? define : defines + ";" + define;
+            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.Android, defines);
+            Debug.Log($"{LOG} Added scripting define: {define}");
         }
 
         static void AddControllerPrefabs(GameObject rig)
