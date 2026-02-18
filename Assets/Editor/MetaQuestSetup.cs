@@ -167,7 +167,7 @@ namespace Plaga44.Editor
                 BuildTargetGroup.Android, BuildTarget.Android);
         }
 
-        [MenuItem("CYBERNOMAD/Meta SDK Setup/3. Setup VR Scene", false, 3)]
+        [MenuItem("CYBERNOMAD/Scene Setup/Setup VR Rig", false, 50)]
         public static void SetupVRScene()
         {
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
@@ -213,9 +213,31 @@ namespace Plaga44.Editor
             }
 
             var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            rig.transform.position = Vector3.zero;
+            rig.transform.position = new Vector3(0f, 1.2f, 0f);
             rig.transform.rotation = Quaternion.identity;
             Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
+
+            // Enable controller-driven hand poses on OVRManager
+            // (hands rendered instead of controllers, fingers driven by triggers/buttons)
+            var mgr = rig.GetComponent<OVRManager>();
+            if (mgr != null)
+            {
+                var so = new SerializedObject(mgr);
+                var pEnabled = so.FindProperty("_controllerDrivenHandPoses");
+                if (pEnabled != null) pEnabled.boolValue = true;
+                var pType = so.FindProperty("controllerDrivenHandPosesType");
+                if (pType != null) pType.intValue = 1; // ConformingToController
+                so.ApplyModifiedProperties();
+                Debug.Log($"{LOG} Controller-driven hand poses enabled.");
+            }
+
+            // Add OVRHandPrefab under hand anchors (from Meta sample pattern)
+            var ovrRig = rig.GetComponent<OVRCameraRig>();
+            if (ovrRig != null)
+            {
+                AddHandPrefab(ovrRig.leftHandAnchor, "LeftHand", 0);
+                AddHandPrefab(ovrRig.rightHandAnchor, "RightHand", 1);
+            }
 
             AddControllerPrefabs(rig);
 
@@ -223,7 +245,45 @@ namespace Plaga44.Editor
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
-            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + controllers at origin.");
+            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + controller-driven hands.");
+        }
+
+        static void AddHandPrefab(Transform anchor, string name, int handType)
+        {
+            if (anchor == null) return;
+
+            string[] guids = AssetDatabase.FindAssets("OVRHandPrefab t:prefab");
+            GameObject prefab = null;
+            foreach (var guid in guids)
+            {
+                string p = AssetDatabase.GUIDToAssetPath(guid);
+                if (p.Contains("BuildingBlock")) continue;
+                prefab = AssetDatabase.LoadAssetAtPath<GameObject>(p);
+                if (prefab != null) break;
+            }
+            if (prefab == null) { Debug.LogWarning($"{LOG} OVRHandPrefab not found."); return; }
+
+            var inst = (GameObject)PrefabUtility.InstantiatePrefab(prefab, anchor);
+            inst.name = name;
+            inst.transform.localPosition = Vector3.zero;
+            inst.transform.localRotation = Quaternion.identity;
+
+            // Set HandType, SkeletonType, MeshType via SerializedObject
+            SetPropInt(inst, typeof(OVRHand), "HandType", handType);
+            SetPropInt(inst, typeof(OVRSkeleton), "_skeletonType", handType);
+            SetPropInt(inst, typeof(OVRMesh), "_meshType", handType);
+
+            Undo.RegisterCreatedObjectUndo(inst, $"Add {name}");
+            Debug.Log($"{LOG} {name} added under {anchor.name}.");
+        }
+
+        static void SetPropInt(GameObject go, System.Type type, string prop, int val)
+        {
+            var comp = go.GetComponent(type);
+            if (comp == null) return;
+            var so = new SerializedObject(comp);
+            var p = so.FindProperty(prop);
+            if (p != null) { p.intValue = val; so.ApplyModifiedProperties(); }
         }
 
         static void AddControllerPrefabs(GameObject rig)
