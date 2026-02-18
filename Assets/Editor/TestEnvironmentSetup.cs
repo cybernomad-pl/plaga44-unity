@@ -1,12 +1,15 @@
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.PackageManager.UI;
 using UnityEngine;
+using System.Linq;
 
 namespace Plaga44.Editor
 {
     public static class TestEnvironmentSetup
     {
         private const string LOG = "[PLAGA44]";
+        private const string META_CORE_PKG = "com.meta.xr.sdk.core";
 
         [MenuItem("CYBERNOMAD/Scene Setup/Add Splash Screen", false, 100)]
         public static void AddSplashScreen()
@@ -52,6 +55,53 @@ namespace Plaga44.Editor
 
             Undo.RegisterCreatedObjectUndo(floor, "Create Infinite Floor");
             Debug.Log($"{LOG} InfiniteFloor created (1000x1000m plane).");
+        }
+
+        [MenuItem("CYBERNOMAD/Scene Setup/Import Controller Hands Sample", false, 102)]
+        public static void ImportControllerHandsSample()
+        {
+            var samples = Sample.FindByPackage(META_CORE_PKG, "");
+            if (samples == null || !samples.Any())
+            {
+                // Try without version -- find any version
+                var listReq = UnityEditor.PackageManager.Client.List(true);
+                while (!listReq.IsCompleted) { }
+                var pkg = listReq.Result?.FirstOrDefault(p => p.name == META_CORE_PKG);
+                if (pkg != null)
+                    samples = Sample.FindByPackage(META_CORE_PKG, pkg.version);
+            }
+
+            if (samples == null || !samples.Any())
+            {
+                Debug.LogError($"{LOG} No samples found for {META_CORE_PKG}. Is Meta XR SDK installed?");
+                return;
+            }
+
+            foreach (var sample in samples)
+            {
+                Debug.Log($"{LOG} Available sample: '{sample.displayName}'");
+            }
+
+            if (!samples.Any(s => s.displayName.Contains("Controller") && s.displayName.Contains("Hand")))
+            {
+                Debug.LogError($"{LOG} 'Controller Driven Hand Poses' sample not found. Available samples logged above.");
+                return;
+            }
+
+            var handsSample = samples.First(s =>
+                s.displayName.Contains("Controller") && s.displayName.Contains("Hand"));
+
+            if (handsSample.isImported)
+            {
+                Debug.Log($"{LOG} Sample '{handsSample.displayName}' already imported at: {handsSample.importPath}");
+                return;
+            }
+
+            bool ok = handsSample.Import(Sample.ImportOptions.OverridePreviousImports);
+            if (ok)
+                Debug.Log($"{LOG} Imported '{handsSample.displayName}' to: {handsSample.importPath}");
+            else
+                Debug.LogError($"{LOG} Failed to import sample '{handsSample.displayName}'.");
         }
 
         [MenuItem("CYBERNOMAD/Scene Setup/Clean Scene", false, 200)]
