@@ -1,7 +1,6 @@
 #if UNITY_EDITOR
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.PackageManager;
@@ -213,168 +212,64 @@ namespace Plaga44.Editor
             }
 
             var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            rig.transform.position = new Vector3(0f, 1.2f, 0f);
+            rig.transform.position = Vector3.zero;
             rig.transform.rotation = Quaternion.identity;
             Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
 
-            // Enable controller-driven hand poses on OVRManager
-            // (hands rendered instead of controllers, fingers driven by triggers/buttons)
+            // Enable hand tracking support on OVRManager (Controllers and Hands)
             var mgr = rig.GetComponent<OVRManager>();
             if (mgr != null)
             {
                 var so = new SerializedObject(mgr);
-                var pEnabled = so.FindProperty("_controllerDrivenHandPoses");
-                if (pEnabled != null) pEnabled.boolValue = true;
-                var pType = so.FindProperty("controllerDrivenHandPosesType");
-                if (pType != null) pType.intValue = 1; // ConformingToController
+                // Hand Tracking Support = Controllers and Hands (2)
+                var pHandSupport = so.FindProperty("_handTrackingSupport");
+                if (pHandSupport != null) pHandSupport.intValue = 2;
                 so.ApplyModifiedProperties();
-                Debug.Log($"{LOG} Controller-driven hand poses enabled.");
+                Debug.Log($"{LOG} Hand tracking support set to Controllers and Hands.");
             }
 
-            // Add OVRHandPrefab under hand anchors (from Meta sample pattern)
-            var ovrRig = rig.GetComponent<OVRCameraRig>();
-            if (ovrRig != null)
-            {
-                AddHandPrefab(ovrRig.leftHandAnchor, "LeftHand", 0);
-                AddHandPrefab(ovrRig.rightHandAnchor, "RightHand", 1);
-            }
-
-            AddControllerPrefabs(rig);
+            // Add ControllerHands from Interaction SDK (controller-driven hand visuals + interactors)
+            AddInteractionSDKHands(rig);
 
             Selection.activeGameObject = rig;
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
-            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + controller-driven hands.");
+            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + Interaction SDK controller hands.");
         }
 
-        static void AddHandPrefab(Transform anchor, string name, int handType)
+        static void AddInteractionSDKHands(GameObject rig)
         {
-            if (anchor == null) return;
-
-            string[] guids = AssetDatabase.FindAssets("OVRHandPrefab t:prefab");
-            GameObject prefab = null;
+            // ControllerHands.prefab from Meta Interaction SDK
+            // Contains: LeftControllerHand + RightControllerHand with visuals and interactors
+            string[] guids = AssetDatabase.FindAssets("ControllerHands t:prefab");
+            GameObject handsPrefab = null;
             foreach (var guid in guids)
             {
                 string p = AssetDatabase.GUIDToAssetPath(guid);
-                if (p.Contains("BuildingBlock")) continue;
-                prefab = AssetDatabase.LoadAssetAtPath<GameObject>(p);
-                if (prefab != null) break;
+                // Must be from interaction SDK package, not from BuildingBlocks or samples
+                if (p.Contains("com.meta.xr.sdk.interaction") && p.Contains("Runtime/Prefabs"))
+                {
+                    handsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(p);
+                    if (handsPrefab != null)
+                    {
+                        Debug.Log($"{LOG} Found ControllerHands prefab: {p}");
+                        break;
+                    }
+                }
             }
-            if (prefab == null) { Debug.LogWarning($"{LOG} OVRHandPrefab not found."); return; }
 
-            var inst = (GameObject)PrefabUtility.InstantiatePrefab(prefab, anchor);
-            inst.name = name;
-            inst.transform.localPosition = Vector3.zero;
-            inst.transform.localRotation = Quaternion.identity;
-
-            // Set HandType, SkeletonType, MeshType via SerializedObject
-            SetPropInt(inst, typeof(OVRHand), "HandType", handType);
-            SetPropInt(inst, typeof(OVRSkeleton), "_skeletonType", handType);
-            SetPropInt(inst, typeof(OVRMesh), "_meshType", handType);
-
-            Undo.RegisterCreatedObjectUndo(inst, $"Add {name}");
-            Debug.Log($"{LOG} {name} added under {anchor.name}.");
-        }
-
-        static void SetPropInt(GameObject go, System.Type type, string prop, int val)
-        {
-            var comp = go.GetComponent(type);
-            if (comp == null) return;
-            var so = new SerializedObject(comp);
-            var p = so.FindProperty(prop);
-            if (p != null) { p.intValue = val; so.ApplyModifiedProperties(); }
-        }
-
-        static void AddControllerPrefabs(GameObject rig)
-        {
-            string[] ctrlGuids = AssetDatabase.FindAssets("OVRControllerPrefab t:prefab");
-            if (ctrlGuids.Length == 0)
+            if (handsPrefab == null)
             {
-                Debug.LogWarning($"{LOG} OVRControllerPrefab not found.");
+                Debug.LogError($"{LOG} ControllerHands.prefab not found in Interaction SDK. Is com.meta.xr.sdk.interaction installed?");
                 return;
             }
 
-            string ctrlPath = AssetDatabase.GUIDToAssetPath(ctrlGuids[0]);
-            var ctrlPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ctrlPath);
-            if (ctrlPrefab == null)
-            {
-                Debug.LogWarning($"{LOG} Could not load OVRControllerPrefab.");
-                return;
-            }
-
-            Transform leftAnchor = FindChildRecursive(rig.transform, "LeftControllerAnchor")
-                                ?? FindChildRecursive(rig.transform, "LeftHandAnchor");
-            Transform rightAnchor = FindChildRecursive(rig.transform, "RightControllerAnchor")
-                                 ?? FindChildRecursive(rig.transform, "RightHandAnchor");
-
-            if (leftAnchor != null)
-            {
-                var left = (GameObject)PrefabUtility.InstantiatePrefab(ctrlPrefab, leftAnchor);
-                left.name = "LeftControllerModel";
-                left.transform.localPosition = Vector3.zero;
-                left.transform.localRotation = Quaternion.identity;
-                SetControllerType(left, "LTouch");
-                Undo.RegisterCreatedObjectUndo(left, "Add Left Controller");
-                Debug.Log($"{LOG} Left controller added.");
-            }
-
-            if (rightAnchor != null)
-            {
-                var right = (GameObject)PrefabUtility.InstantiatePrefab(ctrlPrefab, rightAnchor);
-                right.name = "RightControllerModel";
-                right.transform.localPosition = Vector3.zero;
-                right.transform.localRotation = Quaternion.identity;
-                SetControllerType(right, "RTouch");
-                Undo.RegisterCreatedObjectUndo(right, "Add Right Controller");
-                Debug.Log($"{LOG} Right controller added.");
-            }
-        }
-
-        static void SetControllerType(GameObject ctrlObj, string controllerName)
-        {
-            var components = ctrlObj.GetComponents<MonoBehaviour>();
-            foreach (var comp in components)
-            {
-                if (comp == null) continue;
-                var compType = comp.GetType();
-                if (!compType.Name.Contains("Controller")) continue;
-
-                var field = compType.GetField("m_controller",
-                    BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                if (field == null)
-                    field = compType.GetField("m_controllerType",
-                        BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-                if (field != null && field.FieldType.IsEnum)
-                {
-                    try
-                    {
-                        var enumVal = System.Enum.Parse(field.FieldType, controllerName);
-                        field.SetValue(comp, enumVal);
-                        Debug.Log($"{LOG} Set controller type: {controllerName}");
-                    }
-                    catch (System.Exception e)
-                    {
-                        Debug.LogWarning($"{LOG} Could not set controller type: {e.Message}");
-                    }
-                    return;
-                }
-
-                try
-                {
-                    var so = new SerializedObject(comp);
-                    var prop = so.FindProperty("m_controller") ?? so.FindProperty("m_controllerType");
-                    if (prop != null && prop.propertyType == SerializedPropertyType.Enum)
-                    {
-                        prop.enumValueIndex = controllerName == "LTouch" ? 1 : 2;
-                        so.ApplyModifiedProperties();
-                        Debug.Log($"{LOG} Set controller type: {controllerName} (serialized)");
-                        return;
-                    }
-                }
-                catch { }
-            }
+            var hands = (GameObject)PrefabUtility.InstantiatePrefab(handsPrefab, rig.transform);
+            hands.transform.localPosition = Vector3.zero;
+            hands.transform.localRotation = Quaternion.identity;
+            Undo.RegisterCreatedObjectUndo(hands, "Add Controller Hands");
+            Debug.Log($"{LOG} ControllerHands added (Interaction SDK) -- L+R with visuals and interactors.");
         }
 
         static Transform FindChildRecursive(Transform parent, string name)
