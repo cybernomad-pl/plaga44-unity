@@ -171,7 +171,8 @@ public class SplashScreen : MonoBehaviour
         var titleGO = new GameObject("Title");
         titleGO.transform.SetParent(canvasGO.transform, false);
         _title = titleGO.AddComponent<Text>();
-        _title.text = "PLAGA '44\n<size=36>(testbed)</size>";
+        string projectName = Application.productName;
+        _title.text = $"TESTBED: {projectName}";
         _title.font = Font.CreateDynamicFontFromOSFont("Consolas", 72);
         _title.fontSize = 72;
         _title.color = Color.white;
