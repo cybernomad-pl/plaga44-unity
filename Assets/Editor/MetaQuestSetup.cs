@@ -216,7 +216,7 @@ namespace Plaga44.Editor
             rig.transform.rotation = Quaternion.identity;
             Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
 
-            // Enable hand tracking support on OVRManager (Controllers and Hands)
+            // Configure OVRManager for controller-driven hand poses
             var mgr = rig.GetComponent<OVRManager>();
             if (mgr != null)
             {
@@ -224,8 +224,14 @@ namespace Plaga44.Editor
                 // Hand Tracking Support = Controllers and Hands (2)
                 var pHandSupport = so.FindProperty("_handTrackingSupport");
                 if (pHandSupport != null) pHandSupport.intValue = 2;
+                // Controller-driven hand poses: show hands instead of controller models,
+                // finger poses driven by trigger/grip input
+                var pEnabled = so.FindProperty("_controllerDrivenHandPoses");
+                if (pEnabled != null) pEnabled.boolValue = true;
+                var pType = so.FindProperty("controllerDrivenHandPosesType");
+                if (pType != null) pType.intValue = 1; // ConformingToController
                 so.ApplyModifiedProperties();
-                Debug.Log($"{LOG} Hand tracking support set to Controllers and Hands.");
+                Debug.Log($"{LOG} Controller-driven hand poses enabled (ConformingToController).");
             }
 
             // Add ControllerHands from Interaction SDK (controller-driven hand visuals + interactors)
