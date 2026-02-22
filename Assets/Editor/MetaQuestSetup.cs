@@ -217,66 +217,119 @@ namespace Plaga44.Editor
             rig.transform.rotation = Quaternion.identity;
             Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
 
-            // Configure OVRManager for controller-driven hand poses
+            // Configure OVRManager -- exact copy of Meta's ControllerDrivenHandPoses sample
             var mgr = rig.GetComponent<OVRManager>();
             if (mgr != null)
             {
                 var so = new SerializedObject(mgr);
-                // Hand Tracking Support = Controllers and Hands (2)
                 var pHandSupport = so.FindProperty("_handTrackingSupport");
-                if (pHandSupport != null) pHandSupport.intValue = 2;
-                // Controller-driven hand poses: show hands instead of controller models,
-                // finger poses driven by trigger/grip input
+                if (pHandSupport != null) pHandSupport.intValue = 2; // Controllers and Hands
                 var pEnabled = so.FindProperty("_controllerDrivenHandPoses");
                 if (pEnabled != null) pEnabled.boolValue = true;
                 var pType = so.FindProperty("controllerDrivenHandPosesType");
                 if (pType != null) pType.intValue = 1; // ConformingToController
+                var pNatural = so.FindProperty("_controllerDrivenHandPosesAreNatural");
+                if (pNatural != null) pNatural.boolValue = false;
+                var pMultimodal = so.FindProperty("isMultimodalHandsControllersEnabled");
+                if (pMultimodal != null) pMultimodal.boolValue = true;
                 so.ApplyModifiedProperties();
-                Debug.Log($"{LOG} Controller-driven hand poses enabled (ConformingToController).");
+                Debug.Log($"{LOG} OVRManager configured (controller-driven hand poses).");
             }
 
-            // Add ControllerHands from Interaction SDK (controller-driven hand visuals + interactors)
-            AddInteractionSDKHands(rig);
+            // Add OVRHandPrefab under LeftHandAnchor and RightHandAnchor
+            // (exactly like Meta's ControllerDrivenHandPoses sample scene)
+            AddOVRHandPrefabs(rig);
 
             Selection.activeGameObject = rig;
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
-            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + Interaction SDK controller hands.");
+            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + OVRHandPrefab (controller-driven).");
         }
 
-        static void AddInteractionSDKHands(GameObject rig)
+        static void AddOVRHandPrefabs(GameObject rig)
         {
-            // ControllerHands.prefab from Meta Interaction SDK
-            // Contains: LeftControllerHand + RightControllerHand with visuals and interactors
-            string[] guids = AssetDatabase.FindAssets("ControllerHands t:prefab");
-            GameObject handsPrefab = null;
+            // OVRHandPrefab from com.meta.xr.sdk.core -- same as Meta's sample
+            string[] guids = AssetDatabase.FindAssets("OVRHandPrefab t:prefab");
+            GameObject handPrefab = null;
             foreach (var guid in guids)
             {
                 string p = AssetDatabase.GUIDToAssetPath(guid);
-                // Must be from interaction SDK package, not from BuildingBlocks or samples
-                if (p.Contains("com.meta.xr.sdk.interaction") && p.Contains("Runtime/Prefabs"))
+                // Use the one from Prefabs/, not BuildingBlocks
+                if (p.Contains("Prefabs/OVRHandPrefab.prefab"))
                 {
-                    handsPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(p);
-                    if (handsPrefab != null)
+                    handPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(p);
+                    if (handPrefab != null)
                     {
-                        Debug.Log($"{LOG} Found ControllerHands prefab: {p}");
+                        Debug.Log($"{LOG} Found OVRHandPrefab: {p}");
                         break;
                     }
                 }
             }
 
-            if (handsPrefab == null)
+            if (handPrefab == null)
             {
-                Debug.LogError($"{LOG} ControllerHands.prefab not found in Interaction SDK. Is com.meta.xr.sdk.interaction installed?");
+                Debug.LogError($"{LOG} OVRHandPrefab.prefab not found. Is com.meta.xr.sdk.core installed?");
                 return;
             }
 
-            var hands = (GameObject)PrefabUtility.InstantiatePrefab(handsPrefab, rig.transform);
-            hands.transform.localPosition = Vector3.zero;
-            hands.transform.localRotation = Quaternion.identity;
-            Undo.RegisterCreatedObjectUndo(hands, "Add Controller Hands");
-            Debug.Log($"{LOG} ControllerHands added (Interaction SDK) -- L+R with visuals and interactors.");
+            // Find anchors in the instantiated rig
+            Transform leftAnchor = FindChildRecursive(rig.transform, "LeftHandAnchor");
+            Transform rightAnchor = FindChildRecursive(rig.transform, "RightHandAnchor");
+
+            if (leftAnchor == null || rightAnchor == null)
+            {
+                Debug.LogError($"{LOG} LeftHandAnchor or RightHandAnchor not found in OVRCameraRig!");
+                return;
+            }
+
+            // Left hand
+            var leftHand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, leftAnchor);
+            leftHand.name = "OVRHandPrefab";
+            leftHand.transform.localPosition = Vector3.zero;
+            leftHand.transform.localRotation = Quaternion.identity;
+            var leftOVRHand = leftHand.GetComponent<OVRHand>();
+            if (leftOVRHand != null) leftOVRHand.HandType = OVRHand.Hand.HandLeft;
+            var leftSkeleton = leftHand.GetComponent<OVRSkeleton>();
+            if (leftSkeleton != null)
+            {
+                var so = new SerializedObject(leftSkeleton);
+                var prop = so.FindProperty("_skeletonType");
+                if (prop != null) { prop.intValue = (int)OVRSkeleton.SkeletonType.HandLeft; so.ApplyModifiedProperties(); }
+            }
+            var leftMesh = leftHand.GetComponent<OVRMesh>();
+            if (leftMesh != null)
+            {
+                var so = new SerializedObject(leftMesh);
+                var prop = so.FindProperty("_meshType");
+                if (prop != null) { prop.intValue = (int)OVRMesh.MeshType.HandLeft; so.ApplyModifiedProperties(); }
+            }
+            Undo.RegisterCreatedObjectUndo(leftHand, "Add Left OVRHandPrefab");
+
+            // Right hand
+            var rightHand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, rightAnchor);
+            rightHand.name = "OVRHandPrefab";
+            rightHand.transform.localPosition = Vector3.zero;
+            rightHand.transform.localRotation = Quaternion.identity;
+            var rightOVRHand = rightHand.GetComponent<OVRHand>();
+            if (rightOVRHand != null) rightOVRHand.HandType = OVRHand.Hand.HandRight;
+            var rightSkeleton = rightHand.GetComponent<OVRSkeleton>();
+            if (rightSkeleton != null)
+            {
+                var so = new SerializedObject(rightSkeleton);
+                var prop = so.FindProperty("_skeletonType");
+                if (prop != null) { prop.intValue = (int)OVRSkeleton.SkeletonType.HandRight; so.ApplyModifiedProperties(); }
+            }
+            var rightMesh = rightHand.GetComponent<OVRMesh>();
+            if (rightMesh != null)
+            {
+                var so = new SerializedObject(rightMesh);
+                var prop = so.FindProperty("_meshType");
+                if (prop != null) { prop.intValue = (int)OVRMesh.MeshType.HandRight; so.ApplyModifiedProperties(); }
+            }
+            Undo.RegisterCreatedObjectUndo(rightHand, "Add Right OVRHandPrefab");
+
+            Debug.Log($"{LOG} OVRHandPrefab added under LeftHandAnchor + RightHandAnchor.");
         }
 
         static Transform FindChildRecursive(Transform parent, string name)
