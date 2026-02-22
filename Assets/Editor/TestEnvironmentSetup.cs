@@ -104,6 +104,17 @@ namespace Plaga44.Editor
                 Debug.LogError($"{LOG} Failed to import sample '{handsSample.displayName}'.");
         }
 
+        [MenuItem("CYBERNOMAD/Scene Setup/Setup TESTBED", false, 150)]
+        public static void SetupTestbed()
+        {
+            Debug.Log($"{LOG} === Setup TESTBED ===");
+            CleanScene();
+            CreateInfiniteFloor();
+            MetaQuestSetup.SetupVRScene();
+            AddSplashScreen();
+            Debug.Log($"{LOG} === TESTBED READY ===");
+        }
+
         [MenuItem("CYBERNOMAD/Scene Setup/Clean Scene", false, 200)]
         public static void CleanScene()
         {
