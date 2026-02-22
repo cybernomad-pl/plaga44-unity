@@ -167,26 +167,48 @@ public class SplashScreen : MonoBehaviour
         bgRect.anchorMax = Vector2.one;
         bgRect.sizeDelta = Vector2.zero;
 
-        // Title text -- centered
+        // "TESTBED:" label -- small, above project name
+        var labelGO = new GameObject("TestbedLabel");
+        labelGO.transform.SetParent(canvasGO.transform, false);
+        var label = labelGO.AddComponent<Text>();
+        label.text = "TESTBED:";
+        label.font = Font.CreateDynamicFontFromOSFont("Consolas", 28);
+        label.fontSize = 28;
+        label.color = new Color(0.6f, 0.6f, 0.6f);
+        label.alignment = TextAnchor.MiddleCenter;
+        label.horizontalOverflow = HorizontalWrapMode.Overflow;
+        label.verticalOverflow = VerticalWrapMode.Overflow;
+        var labelRect = labelGO.GetComponent<RectTransform>();
+        labelRect.anchoredPosition = new Vector2(0, 80);
+        labelRect.sizeDelta = new Vector2(2000, 100);
+
+        // Project name -- e.g. "PLAGA '44" with '44 in red
+        // Uses Application.productName from PlayerSettings
         var titleGO = new GameObject("Title");
         titleGO.transform.SetParent(canvasGO.transform, false);
         _title = titleGO.AddComponent<Text>();
         string projectName = Application.productName;
-        _title.text = $"TESTBED: {projectName}";
-        _title.font = Font.CreateDynamicFontFromOSFont("Consolas", 72);
-        _title.fontSize = 72;
+        // Color the numeric suffix red (e.g. "'44" in "PLAGA '44")
+        int apoIdx = projectName.IndexOf('\'');
+        if (apoIdx >= 0)
+        {
+            string before = projectName.Substring(0, apoIdx);
+            string after = projectName.Substring(apoIdx);
+            _title.text = $"{before}<color=#CC3333>{after}</color>";
+        }
+        else
+        {
+            _title.text = projectName;
+        }
+        _title.font = Font.CreateDynamicFontFromOSFont("Consolas", 52);
+        _title.fontSize = 52;
         _title.color = Color.white;
         _title.alignment = TextAnchor.MiddleCenter;
         _title.supportRichText = true;
         _title.horizontalOverflow = HorizontalWrapMode.Overflow;
         _title.verticalOverflow = VerticalWrapMode.Overflow;
         var titleRect = titleGO.GetComponent<RectTransform>();
-        titleRect.anchoredPosition = Vector2.zero;
-        titleRect.sizeDelta = new Vector2(2000, 600);
-
-        // Outline for readability
-        var outline = titleGO.AddComponent<Outline>();
-        outline.effectColor = new Color(0.2f, 0.2f, 0.2f, 1f);
-        outline.effectDistance = new Vector2(2, -2);
+        titleRect.anchoredPosition = new Vector2(0, -10);
+        titleRect.sizeDelta = new Vector2(2000, 200);
     }
 }
