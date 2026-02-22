@@ -19,8 +19,9 @@ namespace Plaga44.Editor
             new[] { "com.unity.xr.openxr",       "1.14.0" },
             new[] { "com.unity.xr.meta-openxr",   "2.4.0"  },
             new[] { "com.meta.xr.sdk.core",        META_SDK_VERSION },
-            new[] { "com.meta.xr.sdk.interaction",  META_SDK_VERSION },
-            new[] { "com.meta.xr.sdk.audio",        META_SDK_VERSION },
+            new[] { "com.meta.xr.sdk.interaction",      META_SDK_VERSION },
+            new[] { "com.meta.xr.sdk.interaction.ovr", META_SDK_VERSION },
+            new[] { "com.meta.xr.sdk.audio",            META_SDK_VERSION },
         };
 
         [MenuItem("CYBERNOMAD/Meta SDK Setup/1. Setup Meta SDK", false, 1)]
@@ -212,7 +213,7 @@ namespace Plaga44.Editor
             }
 
             var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            rig.transform.position = Vector3.zero;
+            rig.transform.position = new Vector3(0f, 1.2f, 0f);
             rig.transform.rotation = Quaternion.identity;
             Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
 
