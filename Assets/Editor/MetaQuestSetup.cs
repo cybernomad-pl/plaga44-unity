@@ -288,22 +288,7 @@ namespace Plaga44.Editor
             leftHand.name = "OVRHandPrefab";
             leftHand.transform.localPosition = Vector3.zero;
             leftHand.transform.localRotation = Quaternion.identity;
-            var leftOVRHand = leftHand.GetComponent<OVRHand>();
-            if (leftOVRHand != null) leftOVRHand.HandType = OVRHand.Hand.HandLeft;
-            var leftSkeleton = leftHand.GetComponent<OVRSkeleton>();
-            if (leftSkeleton != null)
-            {
-                var so = new SerializedObject(leftSkeleton);
-                var prop = so.FindProperty("_skeletonType");
-                if (prop != null) { prop.intValue = (int)OVRSkeleton.SkeletonType.HandLeft; so.ApplyModifiedProperties(); }
-            }
-            var leftMesh = leftHand.GetComponent<OVRMesh>();
-            if (leftMesh != null)
-            {
-                var so = new SerializedObject(leftMesh);
-                var prop = so.FindProperty("_meshType");
-                if (prop != null) { prop.intValue = (int)OVRMesh.MeshType.HandLeft; so.ApplyModifiedProperties(); }
-            }
+            ConfigureOVRHand(leftHand, 0); // 0 = HandLeft
             Undo.RegisterCreatedObjectUndo(leftHand, "Add Left OVRHandPrefab");
 
             // Right hand
@@ -311,25 +296,39 @@ namespace Plaga44.Editor
             rightHand.name = "OVRHandPrefab";
             rightHand.transform.localPosition = Vector3.zero;
             rightHand.transform.localRotation = Quaternion.identity;
-            var rightOVRHand = rightHand.GetComponent<OVRHand>();
-            if (rightOVRHand != null) rightOVRHand.HandType = OVRHand.Hand.HandRight;
-            var rightSkeleton = rightHand.GetComponent<OVRSkeleton>();
-            if (rightSkeleton != null)
-            {
-                var so = new SerializedObject(rightSkeleton);
-                var prop = so.FindProperty("_skeletonType");
-                if (prop != null) { prop.intValue = (int)OVRSkeleton.SkeletonType.HandRight; so.ApplyModifiedProperties(); }
-            }
-            var rightMesh = rightHand.GetComponent<OVRMesh>();
-            if (rightMesh != null)
-            {
-                var so = new SerializedObject(rightMesh);
-                var prop = so.FindProperty("_meshType");
-                if (prop != null) { prop.intValue = (int)OVRMesh.MeshType.HandRight; so.ApplyModifiedProperties(); }
-            }
+            ConfigureOVRHand(rightHand, 1); // 1 = HandRight
             Undo.RegisterCreatedObjectUndo(rightHand, "Add Right OVRHandPrefab");
 
             Debug.Log($"{LOG} OVRHandPrefab added under LeftHandAnchor + RightHandAnchor.");
+        }
+
+        static void ConfigureOVRHand(GameObject handGO, int handIndex)
+        {
+            // All fields are internal so we use SerializedObject
+            // handIndex: 0=HandLeft, 1=HandRight
+            var hand = handGO.GetComponent<OVRHand>();
+            if (hand != null)
+            {
+                var so = new SerializedObject(hand);
+                var prop = so.FindProperty("HandType");
+                if (prop != null) { prop.intValue = handIndex; so.ApplyModifiedProperties(); }
+            }
+
+            var skeleton = handGO.GetComponent<OVRSkeleton>();
+            if (skeleton != null)
+            {
+                var so = new SerializedObject(skeleton);
+                var prop = so.FindProperty("_skeletonType");
+                if (prop != null) { prop.intValue = handIndex; so.ApplyModifiedProperties(); }
+            }
+
+            var mesh = handGO.GetComponent<OVRMesh>();
+            if (mesh != null)
+            {
+                var so = new SerializedObject(mesh);
+                var prop = so.FindProperty("_meshType");
+                if (prop != null) { prop.intValue = handIndex; so.ApplyModifiedProperties(); }
+            }
         }
 
         static Transform FindChildRecursive(Transform parent, string name)
