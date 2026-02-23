@@ -1,0 +1,46 @@
+[
+  {
+    "name": "Stone_Head_Fatal",
+    "source": "Stone",
+    "hitZone": "Head",
+    "threshold": 10.0,
+    "effect": "MorsCerebri",
+    "stunDuration": 0.0,
+    "knockBackForce": 0.0,
+    "woundDamage": 0.0,
+    "description": "Stone hits head with force >= 10N = mors cerebri (instant death)"
+  },
+  {
+    "name": "Stone_Torso_Wound",
+    "source": "Stone",
+    "hitZone": "Torso",
+    "threshold": 5.0,
+    "effect": "Wound",
+    "stunDuration": 0.0,
+    "knockBackForce": 0.0,
+    "woundDamage": 25.0,
+    "description": "Stone hits torso with force >= 5N = wound"
+  },
+  {
+    "name": "Fist_Head_Stun",
+    "source": "Fist",
+    "hitZone": "Head",
+    "threshold": 8.0,
+    "effect": "Stun",
+    "stunDuration": 3.0,
+    "knockBackForce": 0.0,
+    "woundDamage": 0.0,
+    "description": "Fist hits head with force >= 8N = stun 3s"
+  },
+  {
+    "name": "Any_Any_KnockBack",
+    "source": "Any",
+    "hitZone": "Any",
+    "threshold": 15.0,
+    "effect": "KnockBack",
+    "stunDuration": 0.0,
+    "knockBackForce": 8.0,
+    "woundDamage": 0.0,
+    "description": "Any hit with force >= 15N = knockback (fallback rule)"
+  }
+]
