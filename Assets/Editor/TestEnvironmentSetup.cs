@@ -240,12 +240,14 @@ namespace Plaga44.Editor
             stone.transform.localScale = new Vector3(size[0], size[1], size[2]);
             SetUnlitMaterial(stone, new Color(gray, gray - 0.03f, gray - 0.05f));
 
-            // Default SphereCollider radius 0.5 -- matches mesh boundary on max axis.
-            // Near-uniform scales minimize mismatch on other axes.
-            var sphereCol = stone.GetComponent<SphereCollider>();
+            // Replace SphereCollider with BoxCollider -- flat faces = natural stacking.
+            // Spheres roll off each other no matter the friction. Boxes have flat surfaces
+            // that create stable contact points, like real irregular stones.
+            Object.DestroyImmediate(stone.GetComponent<SphereCollider>());
+            var box = stone.AddComponent<BoxCollider>();
+            box.material = mat;
 
-            // Physics -- heavy + high damping = stable stacking, won't slide off
-            sphereCol.material = mat;
+            // Physics -- heavy + high damping = stable stacking
             var rb = stone.AddComponent<Rigidbody>();
             rb.mass = 1.0f;
             rb.linearDamping = 1.0f;
@@ -260,16 +262,13 @@ namespace Plaga44.Editor
             if (grabPointsProp != null)
             {
                 grabPointsProp.arraySize = 1;
-                grabPointsProp.GetArrayElementAtIndex(0).objectReferenceValue = stone.GetComponent<Collider>();
+                grabPointsProp.GetArrayElementAtIndex(0).objectReferenceValue = box;
             }
             gso.ApplyModifiedProperties();
 
             // ThrowBoost -- amplifies release velocity for satisfying throws
             var tb = stone.AddComponent<ThrowBoost>();
             tb.multiplier = 5.0f;
-
-            // StoneCohesion -- gentle attraction to nearby stones for stable piles
-            stone.AddComponent<GrabbableCohesion>();
         }
 
         // ---- SPAWNER ----

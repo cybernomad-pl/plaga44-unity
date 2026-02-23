@@ -1,6 +1,7 @@
 // StoneSpawner.cs
 // CYBERNOMAD -- Spawns a new grabbable stone on the table every N seconds.
 // Stone appears at random position on the table surface with random size/color.
+// Uses BoxCollider (not Sphere) so stones have flat faces and stack naturally.
 
 using UnityEngine;
 
@@ -21,6 +22,9 @@ public class StoneSpawner : MonoBehaviour
     private float _timer;
     private PhysicsMaterial _stoneMat;
 
+    // Cached reflection field for OVRGrabbable.m_grabPoints (protected, no public setter)
+    private static System.Reflection.FieldInfo _grabPointsField;
+
     void Start()
     {
         _timer = interval;
@@ -31,6 +35,9 @@ public class StoneSpawner : MonoBehaviour
             bounciness = 0f,
             frictionCombine = PhysicsMaterialCombine.Maximum
         };
+
+        _grabPointsField = typeof(OVRGrabbable).GetField("m_grabPoints",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
     }
 
     void Update()
@@ -73,9 +80,10 @@ public class StoneSpawner : MonoBehaviour
             r.sharedMaterial = new Material(shader) { color = new Color(gray, gray - 0.03f, gray - 0.05f) };
         }
 
-        // Collider
-        var col = stone.GetComponent<SphereCollider>();
-        col.material = _stoneMat;
+        // Replace SphereCollider with BoxCollider -- flat faces = natural stacking
+        Object.Destroy(stone.GetComponent<SphereCollider>());
+        var box = stone.AddComponent<BoxCollider>();
+        box.material = _stoneMat;
 
         // Rigidbody
         var rb = stone.AddComponent<Rigidbody>();
@@ -84,12 +92,23 @@ public class StoneSpawner : MonoBehaviour
         rb.angularDamping = 2.0f;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
-        // Grabbable
+        // OVRGrabbable -- must disable GO first so Awake() doesn't fire with null m_grabPoints
+        stone.SetActive(false);
         var grabbable = stone.AddComponent<OVRGrabbable>();
+        if (_grabPointsField != null)
+        {
+            _grabPointsField.SetValue(grabbable, new Collider[] { box });
+        }
+        // Also set m_allowOffhandGrab
+        var allowField = typeof(OVRGrabbable).GetField("m_allowOffhandGrab",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        if (allowField != null)
+            allowField.SetValue(grabbable, true);
+        stone.SetActive(true); // Now Awake runs safely
 
-        // ThrowBoost + Cohesion
-        stone.AddComponent<ThrowBoost>();
-        stone.AddComponent<GrabbableCohesion>();
+        // ThrowBoost
+        var tb = stone.AddComponent<ThrowBoost>();
+        tb.multiplier = 5.0f;
 
         Debug.Log("[PLAGA44] StoneSpawner: new stone spawned.");
     }
