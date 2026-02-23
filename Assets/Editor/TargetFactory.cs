@@ -168,7 +168,7 @@ namespace Plaga44.Editor
             Renderer rend = go.GetComponent<Renderer>();
             if (rend == null) return;
 
-            var shader = Shader.Find("Universal Render Pipeline/Unlit");
+            var shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null) shader = Shader.Find("Standard");
             Material mat = new Material(shader);
             mat.color = TargetColor;
