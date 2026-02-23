@@ -174,8 +174,8 @@ public class SplashScreen : MonoBehaviour
         labelGO.transform.SetParent(canvasGO.transform, false);
         var label = labelGO.AddComponent<Text>();
         label.text = "TESTBED:";
-        label.font = Font.CreateDynamicFontFromOSFont("Consolas", 18);
-        label.fontSize = 18;
+        label.font = Font.CreateDynamicFontFromOSFont("Consolas", 14);
+        label.fontSize = 14;
         label.color = new Color(0.5f, 0.5f, 0.5f);
         label.alignment = TextAnchor.LowerLeft;
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
@@ -185,7 +185,7 @@ public class SplashScreen : MonoBehaviour
         labelRect.pivot = new Vector2(0f, 0.5f);
         // "PLAGA '44" at fontSize 52 Consolas monospace: ~31px/char, 9 chars = ~280px
         // Centered title left edge = -140px from center
-        labelRect.anchoredPosition = new Vector2(-140, 40);
+        labelRect.anchoredPosition = new Vector2(-78, 40);
         labelRect.sizeDelta = new Vector2(400, 30);
 
         // Project name -- configurable via displayName field in Inspector
