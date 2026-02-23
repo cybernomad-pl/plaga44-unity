@@ -182,43 +182,45 @@ namespace Plaga44.Editor
                 SetUnlitMaterial(leg, new Color(0.35f, 0.22f, 0.1f));
             }
 
-            // Stones -- pile of grabbable rocks with friction
+            // Stones -- scattered on table, STACKABLE by player
+            // High friction + zero bounce so they grip when placed on each other.
             var stoneMat = new PhysicsMaterial("StoneMat")
             {
-                dynamicFriction = 0.8f,
-                staticFriction = 0.9f,
-                bounciness = 0.05f,
+                dynamicFriction = 1.0f,
+                staticFriction = 1.0f,
+                bounciness = 0f,
                 frictionCombine = PhysicsMaterialCombine.Maximum
             };
 
-            // Stacked pile -- bottom layer of 3, then 2, then 1 on top
-            // Y positions: table top is at 0.75, stone half-height ~0.045
-            float baseY = 0.82f;
-            float layerH = 0.10f;
+            // Table top at Y=0.775 (0.75 + half of 0.05). Scatter on surface, no overlaps.
+            // Near-uniform scales so SphereCollider matches visual closely.
+            float tableY = 0.82f;
             Vector3[] stonePositions =
             {
-                // Bottom layer (3 stones)
-                new Vector3(-0.06f, baseY,            -0.04f),
-                new Vector3( 0.06f, baseY,            -0.04f),
-                new Vector3( 0.00f, baseY,             0.05f),
-                // Middle layer (2 stones)
-                new Vector3(-0.03f, baseY + layerH,    0.00f),
-                new Vector3( 0.04f, baseY + layerH,    0.02f),
-                // Top (1 stone)
-                new Vector3( 0.00f, baseY + layerH*2,  0.01f),
+                new Vector3(-0.15f, tableY,  0.00f),
+                new Vector3(-0.02f, tableY, -0.08f),
+                new Vector3( 0.12f, tableY, -0.02f),
+                new Vector3( 0.00f, tableY,  0.10f),
+                new Vector3(-0.10f, tableY,  0.12f),
+                new Vector3( 0.15f, tableY,  0.10f),
+                new Vector3( 0.02f, tableY,  0.00f),
+                new Vector3(-0.08f, tableY, -0.10f),
             };
 
+            // Near-uniform scales -- SphereCollider matches visual well
             float[][] stoneSizes =
             {
-                new[] { 0.12f, 0.09f, 0.10f },
-                new[] { 0.10f, 0.08f, 0.11f },
-                new[] { 0.11f, 0.08f, 0.09f },
-                new[] { 0.09f, 0.07f, 0.10f },
-                new[] { 0.10f, 0.07f, 0.08f },
-                new[] { 0.08f, 0.06f, 0.07f },
+                new[] { 0.08f, 0.07f, 0.08f },
+                new[] { 0.07f, 0.06f, 0.07f },
+                new[] { 0.09f, 0.08f, 0.08f },
+                new[] { 0.06f, 0.06f, 0.07f },
+                new[] { 0.07f, 0.07f, 0.06f },
+                new[] { 0.08f, 0.07f, 0.07f },
+                new[] { 0.10f, 0.09f, 0.09f },
+                new[] { 0.06f, 0.05f, 0.06f },
             };
 
-            float[] stoneGrays = { 0.45f, 0.38f, 0.50f, 0.42f, 0.35f, 0.48f };
+            float[] stoneGrays = { 0.45f, 0.38f, 0.50f, 0.42f, 0.35f, 0.48f, 0.40f, 0.52f };
 
             for (int s = 0; s < stonePositions.Length; s++)
             {
@@ -237,19 +239,17 @@ namespace Plaga44.Editor
             stone.transform.localScale = new Vector3(size[0], size[1], size[2]);
             SetUnlitMaterial(stone, new Color(gray, gray - 0.03f, gray - 0.05f));
 
-            // SphereCollider on non-uniform scale uses MAX axis -- too big on smaller axes.
-            // Shrink radius to match the SMALLEST axis so collider fits tight. Some clipping OK.
-            float minSize = Mathf.Min(size[0], size[1], size[2]);
-            float maxSize = Mathf.Max(size[0], size[1], size[2]);
+            // SphereCollider uses MAX scale axis. With near-uniform scales the mismatch
+            // is minimal. Radius 0.43 = slight shrink for tighter fit, still stable physics.
             var sphereCol = stone.GetComponent<SphereCollider>();
-            sphereCol.radius = 0.5f * minSize / maxSize;
+            sphereCol.radius = 0.43f;
 
-            // Physics -- light stones with friction, low drag for satisfying throws
+            // Physics -- stackable + throwable
             sphereCol.material = mat;
             var rb = stone.AddComponent<Rigidbody>();
-            rb.mass = 0.15f;
-            rb.linearDamping = 0.2f;
-            rb.angularDamping = 0.3f;
+            rb.mass = 0.25f;
+            rb.linearDamping = 0.5f;
+            rb.angularDamping = 1.0f;
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
             // OVRGrabbable
