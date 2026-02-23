@@ -16,6 +16,7 @@ namespace Plaga44.Editor
             CreateInfiniteFloor();
             AddSplashScreen();
             MetaQuestSetup.SetupVRSceneHands();
+            LocomotionSetup.SetupLocomotion();
             Debug.Log($"{LOG} === TESTBED READY ===");
         }
 
