@@ -1,18 +1,15 @@
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace Plaga44.Editor
 {
     /// <summary>
-    /// One-click TESTBED setup. Uses OVRInteractionComprehensive prefab from Meta SDK
-    /// which is the same rig used in ALL Meta example scenes. It includes:
-    /// - OVRCameraRig (camera, tracking)
-    /// - Hand + controller tracking (simultaneous)
-    /// - HandGrabInteractor on both hands (grab objects)
-    /// - Locomotion: left thumbstick = slide, right thumbstick = snap turn
-    /// - Teleport, ray, poke interactors
-    /// Everything pre-wired, zero custom code.
+    /// TESTBED setup: copies Meta SDK's LocomotionExamples scene (which has
+    /// OVRCameraRig + OVRInteractionComprehensive correctly wired) and opens it.
+    /// That scene has working: camera, hands, controllers, locomotion (slide+teleport+turn),
+    /// grab interactors, ray, poke -- all pre-configured by Meta.
     /// </summary>
     public static class TestEnvironmentSetup
     {
@@ -23,32 +20,46 @@ namespace Plaga44.Editor
         {
             Debug.Log($"{LOG} === Setup TESTBED ===");
 
-            // 1. Clean scene (keep lights)
-            CleanScene();
+            // Copy LocomotionExamples from SDK -- it has everything wired correctly
+            string sourceScene = FindSDKScene("LocomotionExamples");
+            if (sourceScene == null)
+            {
+                Debug.LogError($"{LOG} LocomotionExamples.unity not found in SDK Samples~!");
+                Debug.LogError($"{LOG} Is com.meta.xr.sdk.interaction.ovr installed?");
+                return;
+            }
 
-            // 2. Add comprehensive interaction rig (camera + hands + locomotion + grab)
-            AddComprehensiveRig();
+            // Copy to Assets/Scenes/testbed.unity
+            string destDir = System.IO.Path.Combine(Application.dataPath, "Scenes");
+            if (!System.IO.Directory.Exists(destDir))
+                System.IO.Directory.CreateDirectory(destDir);
 
-            // 3. Floor (Unlit, no VR flicker)
-            AddFloor();
+            string destPath = System.IO.Path.Combine(destDir, "testbed.unity");
+            System.IO.File.Copy(sourceScene, destPath, true);
+            AssetDatabase.Refresh();
 
-            // 4. Table with test objects
+            // Open the scene
+            EditorSceneManager.OpenScene("Assets/Scenes/testbed.unity");
+            Debug.Log($"{LOG} Opened testbed (based on LocomotionExamples).");
+
+            // Add our extras to the running scene
+            AddSplashScreen();
+            AddDebugHUD();
             AddTestTable();
 
-            // 5. Splash screen
-            AddSplashScreen();
-
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
-                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
 
             Debug.Log($"{LOG} === TESTBED READY ===");
-            Debug.Log($"{LOG} Controls: L-stick = move, R-stick = snap turn, grip = grab objects");
+            Debug.Log($"{LOG} Camera: OVRCameraRig (from SDK sample)");
+            Debug.Log($"{LOG} Locomotion: L-stick = move, R-stick = snap turn, A = teleport");
+            Debug.Log($"{LOG} Grab: grip button grabs objects");
         }
 
         [MenuItem("CYBERNOMAD/Scene Setup/Clean Scene", false, 200)]
         public static void CleanScene()
         {
-            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
+            var scene = EditorSceneManager.GetActiveScene();
             var roots = scene.GetRootGameObjects();
             int removed = 0;
 
@@ -63,98 +74,49 @@ namespace Plaga44.Editor
                 removed++;
             }
 
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.MarkSceneDirty(scene);
             Debug.Log($"{LOG} Scene cleaned. Removed {removed} objects.");
         }
 
-        static void AddComprehensiveRig()
+        static string FindSDKScene(string sceneName)
         {
-            // Step 1: OVRCameraRig (the CAMERA + tracking origin)
-            // This is required -- OVRInteractionComprehensive references it, doesn't contain it
-            MetaQuestSetup.SetupVRSceneHands();
+            string packageCache = System.IO.Path.Combine(Application.dataPath, "..", "Library", "PackageCache");
+            if (!System.IO.Directory.Exists(packageCache)) return null;
 
-            // Step 2: OVRInteractionComprehensive (ISDK overlay: grab, locomotion, ray, poke)
-            // It hooks into the OVRCameraRig that's already in scene
-            var interactionPrefab = FindPrefab("OVRInteractionComprehensive");
-            if (interactionPrefab != null)
+            var files = System.IO.Directory.GetFiles(packageCache, sceneName + ".unity", System.IO.SearchOption.AllDirectories);
+            foreach (var f in files)
             {
-                var interaction = (GameObject)PrefabUtility.InstantiatePrefab(interactionPrefab);
-                interaction.transform.position = Vector3.zero;
-                interaction.transform.rotation = Quaternion.identity;
-                Undo.RegisterCreatedObjectUndo(interaction, "Add ISDK Interactions");
-                Debug.Log($"{LOG} OVRInteractionComprehensive added (grab + locomotion + ray + poke).");
-            }
-            else
-            {
-                Debug.LogWarning($"{LOG} OVRInteractionComprehensive not found -- no grab/locomotion.");
-                Debug.LogWarning($"{LOG} Is com.meta.xr.sdk.interaction.ovr installed?");
-            }
-
-            // Step 3: VRInputDebug HUD
-            AddDebugHUD();
-        }
-
-        static void AddDebugHUD()
-        {
-            // Find existing VRInputDebug or add new one
-            var existing = GameObject.FindFirstObjectByType<VRInputDebug>();
-            if (existing != null)
-            {
-                Debug.Log($"{LOG} VRInputDebug already in scene.");
-                return;
-            }
-
-            var debugGO = new GameObject("VRInputDebug");
-            debugGO.AddComponent<VRInputDebug>();
-            Undo.RegisterCreatedObjectUndo(debugGO, "Add VRInputDebug");
-            Debug.Log($"{LOG} VRInputDebug HUD added.");
-        }
-
-        static GameObject FindPrefab(string name)
-        {
-            string[] guids = AssetDatabase.FindAssets(name + " t:prefab");
-            foreach (var guid in guids)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.Contains(name + ".prefab"))
-                {
-                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                    if (prefab != null)
-                    {
-                        Debug.Log($"{LOG} Found {name}: {path}");
-                        return prefab;
-                    }
-                }
+                if (f.Contains("interaction") && f.Contains("Samples~"))
+                    return f;
             }
             return null;
         }
 
-        static void AddFloor()
+        static void AddSplashScreen()
         {
-            var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            floor.name = "Floor";
-            floor.transform.position = Vector3.zero;
-            floor.transform.localScale = new Vector3(100f, 1f, 100f);
+            if (GameObject.Find("SplashScreen") != null) return;
+            var go = new GameObject("SplashScreen");
+            go.AddComponent<SplashScreen>();
+            Undo.RegisterCreatedObjectUndo(go, "Add SplashScreen");
+            Debug.Log($"{LOG} SplashScreen added.");
+        }
 
-            // Unlit material -- no lighting artifacts in VR
-            var shader = Shader.Find("Universal Render Pipeline/Unlit");
-            if (shader == null) shader = Shader.Find("Unlit/Color");
-            if (shader != null)
-            {
-                var mat = new Material(shader);
-                mat.color = new Color(0.22f, 0.22f, 0.25f);
-                floor.GetComponent<Renderer>().sharedMaterial = mat;
-            }
-
-            Undo.RegisterCreatedObjectUndo(floor, "Add Floor");
-            Debug.Log($"{LOG} Floor (Unlit).");
+        static void AddDebugHUD()
+        {
+            if (GameObject.FindFirstObjectByType<VRInputDebug>() != null) return;
+            var go = new GameObject("VRInputDebug");
+            go.AddComponent<VRInputDebug>();
+            Undo.RegisterCreatedObjectUndo(go, "Add VRInputDebug");
+            Debug.Log($"{LOG} VRInputDebug HUD added.");
         }
 
         static void AddTestTable()
         {
+            if (GameObject.Find("TestTable") != null) return;
+
             var table = new GameObject("TestTable");
-            table.transform.position = new Vector3(0f, 0f, 1.2f);
-            Undo.RegisterCreatedObjectUndo(table, "Add Test Table");
+            table.transform.position = new Vector3(0f, 0f, 1.5f);
+            Undo.RegisterCreatedObjectUndo(table, "Add TestTable");
 
             // Table top
             var top = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -179,62 +141,42 @@ namespace Plaga44.Editor
                 SetMat(leg, new Color(0.35f, 0.22f, 0.1f));
             }
 
-            // Test objects on table -- these have Rigidbody + Collider (from primitives).
-            // HandGrabInteractable must be added at runtime or via Building Blocks
-            // because it requires ISDK assembly references.
-            // For now: physics objects that the comprehensive rig's grab can interact with.
+            // Physics objects on the table
             float y = 0.85f;
+            AddObj(table.transform, "RedCube", PrimitiveType.Cube,
+                new Vector3(-0.3f, y, 0f), Vector3.one * 0.12f, new Color(0.8f, 0.2f, 0.2f), 0.3f);
+            AddObj(table.transform, "GreenSphere", PrimitiveType.Sphere,
+                new Vector3(0f, y, 0f), Vector3.one * 0.1f, new Color(0.2f, 0.7f, 0.2f), 0.15f);
+            AddObj(table.transform, "Stone", PrimitiveType.Sphere,
+                new Vector3(0.3f, y, 0f), new Vector3(0.08f, 0.06f, 0.08f), new Color(0.5f, 0.5f, 0.5f), 0.4f);
 
-            AddPhysicsObject(table.transform, "RedCube", PrimitiveType.Cube,
-                new Vector3(-0.3f, y, 0f), Vector3.one * 0.12f,
-                new Color(0.8f, 0.2f, 0.2f), 0.3f);
-
-            AddPhysicsObject(table.transform, "GreenSphere", PrimitiveType.Sphere,
-                new Vector3(0f, y, 0f), Vector3.one * 0.1f,
-                new Color(0.2f, 0.7f, 0.2f), 0.15f);
-
-            AddPhysicsObject(table.transform, "Stone", PrimitiveType.Sphere,
-                new Vector3(0.3f, y, 0f), new Vector3(0.08f, 0.06f, 0.08f),
-                new Color(0.5f, 0.5f, 0.5f), 0.4f);
-
-            Debug.Log($"{LOG} TestTable with 3 physics objects at hand height.");
-            Debug.Log($"{LOG} NOTE: To make objects grabbable, add HandGrabInteractable via");
-            Debug.Log($"{LOG}   Meta > Quick Actions > Grab, or use Building Blocks.");
+            Debug.Log($"{LOG} TestTable + 3 physics objects at hand height.");
         }
 
-        static void AddPhysicsObject(Transform parent, string name, PrimitiveType type,
-            Vector3 localPos, Vector3 localScale, Color color, float mass)
+        static void AddObj(Transform parent, string name, PrimitiveType type,
+            Vector3 pos, Vector3 scale, Color color, float mass)
         {
             var obj = GameObject.CreatePrimitive(type);
             obj.name = name;
             obj.transform.SetParent(parent);
-            obj.transform.localPosition = localPos;
-            obj.transform.localScale = localScale;
+            obj.transform.localPosition = pos;
+            obj.transform.localScale = scale;
             SetMat(obj, color);
-
             var rb = obj.AddComponent<Rigidbody>();
             rb.mass = mass;
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         }
 
-        static void AddSplashScreen()
-        {
-            var splashGO = new GameObject("SplashScreen");
-            splashGO.AddComponent<SplashScreen>();
-            Undo.RegisterCreatedObjectUndo(splashGO, "Add Splash Screen");
-            Debug.Log($"{LOG} SplashScreen.");
-        }
-
         static void SetMat(GameObject obj, Color color)
         {
-            var renderer = obj.GetComponent<Renderer>();
-            if (renderer == null) return;
+            var r = obj.GetComponent<Renderer>();
+            if (r == null) return;
             var shader = Shader.Find("Universal Render Pipeline/Unlit");
             if (shader == null) shader = Shader.Find("Unlit/Color");
             if (shader == null) return;
             var mat = new Material(shader);
             mat.color = color;
-            renderer.sharedMaterial = mat;
+            r.sharedMaterial = mat;
         }
     }
 }
