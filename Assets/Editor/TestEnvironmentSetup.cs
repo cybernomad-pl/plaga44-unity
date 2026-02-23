@@ -13,10 +13,13 @@ namespace Plaga44.Editor
         {
             Debug.Log($"{LOG} === Setup TESTBED ===");
             CleanScene();
-            CreateInfiniteFloor();
             AddSplashScreen();
-            MetaQuestSetup.SetupVRSceneHands();
+
+            // LocomotionSetup does EVERYTHING: OVRPlayerController (camera + hands + movement + gravity) + ground + table
+            // Do NOT call SetupVRSceneHands -- LocomotionSetup handles camera rig internally
             LocomotionSetup.SetupLocomotion();
+
+            AddDebugHUD();
             Debug.Log($"{LOG} === TESTBED READY ===");
         }
 
@@ -42,31 +45,20 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} Scene cleaned. Removed {removed} objects.");
         }
 
-        static void CreateInfiniteFloor()
-        {
-            GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            floor.name = "InfiniteFloor";
-            floor.transform.position = Vector3.zero;
-            floor.transform.localScale = new Vector3(100f, 1f, 100f);
-
-            Renderer renderer = floor.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-                mat.color = new Color(0.25f, 0.25f, 0.28f);
-                renderer.sharedMaterial = mat;
-            }
-
-            Undo.RegisterCreatedObjectUndo(floor, "Create Infinite Floor");
-            Debug.Log($"{LOG} InfiniteFloor created.");
-        }
-
         static void AddSplashScreen()
         {
             GameObject splashGO = new GameObject("SplashScreen");
             splashGO.AddComponent<SplashScreen>();
             Undo.RegisterCreatedObjectUndo(splashGO, "Add Splash Screen");
             Debug.Log($"{LOG} SplashScreen added.");
+        }
+
+        static void AddDebugHUD()
+        {
+            var go = new GameObject("VRInputDebug");
+            go.AddComponent<VRInputDebug>();
+            Undo.RegisterCreatedObjectUndo(go, "Add VRInputDebug");
+            Debug.Log($"{LOG} VRInputDebug added.");
         }
     }
 }

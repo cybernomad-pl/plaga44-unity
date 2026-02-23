@@ -128,14 +128,14 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} CharacterController: h=1.8, r=0.3, gravity via OVRPlayerController.");
             }
 
-            // Ensure ground plane exists for gravity -- reuse existing floor from TESTBED
-            var ground = GameObject.Find("InfiniteFloor") ?? GameObject.Find("Ground");
+            // Ensure ground plane exists for gravity -- Unlit to avoid VR flicker
+            var ground = GameObject.Find("Ground");
             if (ground == null)
             {
                 ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
                 ground.name = "Ground";
                 ground.transform.position = Vector3.zero;
-                ground.transform.localScale = new Vector3(100f, 1f, 100f);
+                ground.transform.localScale = new Vector3(10f, 1f, 10f);
                 SetUnlitMaterial(ground, new Color(0.25f, 0.25f, 0.25f));
                 Undo.RegisterCreatedObjectUndo(ground, "Add Ground");
                 Debug.Log($"{LOG} Ground plane added (Unlit material).");
@@ -144,7 +144,7 @@ namespace Plaga44.Editor
             {
                 // Fix existing ground material to Unlit
                 SetUnlitMaterial(ground, new Color(0.25f, 0.25f, 0.25f));
-                Debug.Log($"{LOG} Reusing existing floor: {ground.name} (switched to Unlit).");
+                Debug.Log($"{LOG} Ground material switched to Unlit.");
             }
 
             // Add table with test objects at hand height
@@ -194,13 +194,35 @@ namespace Plaga44.Editor
                 SetUnlitMaterial(leg, new Color(0.35f, 0.22f, 0.1f));
             }
 
-            // Stone on the table (grabbable height ~0.85m)
+            // Objects ON the table (grabbable height ~0.85m)
+            float tableY = 0.85f;
+
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.name = "GrabbableCube";
+            cube.transform.SetParent(table.transform);
+            cube.transform.localPosition = new Vector3(-0.3f, tableY, 0f);
+            cube.transform.localScale = Vector3.one * 0.12f;
+            SetUnlitMaterial(cube, new Color(0.8f, 0.2f, 0.2f));
+            var rbCube = cube.AddComponent<Rigidbody>();
+            rbCube.mass = 0.3f;
+            rbCube.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+            var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.name = "GrabbableSphere";
+            sphere.transform.SetParent(table.transform);
+            sphere.transform.localPosition = new Vector3(0f, tableY, 0f);
+            sphere.transform.localScale = Vector3.one * 0.1f;
+            SetUnlitMaterial(sphere, new Color(0.2f, 0.7f, 0.2f));
+            var rbSphere = sphere.AddComponent<Rigidbody>();
+            rbSphere.mass = 0.15f;
+            rbSphere.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
             var stone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             stone.name = "Stone";
             stone.transform.SetParent(table.transform);
-            stone.transform.localPosition = new Vector3(0f, 0.85f, 0f);
-            stone.transform.localScale = new Vector3(0.12f, 0.09f, 0.10f);
-            SetUnlitMaterial(stone, new Color(0.45f, 0.42f, 0.40f));
+            stone.transform.localPosition = new Vector3(0.3f, tableY, 0f);
+            stone.transform.localScale = new Vector3(0.08f, 0.06f, 0.08f);
+            SetUnlitMaterial(stone, new Color(0.5f, 0.5f, 0.5f));
             var rbStone = stone.AddComponent<Rigidbody>();
             rbStone.mass = 0.4f;
             rbStone.collisionDetectionMode = CollisionDetectionMode.Continuous;
