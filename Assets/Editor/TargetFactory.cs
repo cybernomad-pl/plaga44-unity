@@ -6,84 +6,88 @@ using UnityEngine;
 namespace Plaga44.Editor
 {
     /// <summary>
-    /// Creates a humanoid test target in the scene with capsule/sphere colliders
-    /// and HitZone components on each body part.
+    /// Creates humanoid test targets in the scene with capsule/sphere colliders
+    /// and HitZone components on each body part. Body parts detach on hit.
     ///
-    /// Menu: CYBERNOMAD / Scene Setup / Add Test Target
+    /// Menu: CYBERNOMAD / Scene Setup / Add Test Targets
     /// </summary>
     public static class TargetFactory
     {
         private const string LOG = "[PLAGA44]";
 
-        // Visual material color for the target.
         private static readonly Color TargetColor = new Color(0.85f, 0.55f, 0.2f);
 
-        [MenuItem("CYBERNOMAD/Scene Setup/Add Test Target", false, 102)]
-        public static void AddTestTarget()
+        [MenuItem("CYBERNOMAD/Scene Setup/Add Test Targets", false, 102)]
+        public static void AddTestTargets()
         {
-            Debug.Log($"{LOG} Creating humanoid test target...");
+            Debug.Log($"{LOG} Creating 10 test targets...");
 
-            // Root object carries the HitTarget component.
-            GameObject root = new GameObject("TestTarget");
-            Undo.RegisterCreatedObjectUndo(root, "Create Test Target");
+            // 10 targets spread in an arc, 3-7m away, varied X positions
+            Vector3[] positions =
+            {
+                new Vector3(-3.0f, 0f,  4.0f),
+                new Vector3(-1.5f, 0f,  3.5f),
+                new Vector3(-0.5f, 0f,  5.0f),
+                new Vector3( 0.5f, 0f,  4.0f),
+                new Vector3( 1.5f, 0f,  3.5f),
+                new Vector3( 3.0f, 0f,  4.5f),
+                new Vector3(-2.0f, 0f,  6.0f),
+                new Vector3( 0.0f, 0f,  7.0f),
+                new Vector3( 2.0f, 0f,  6.0f),
+                new Vector3( 0.0f, 0f,  3.0f),
+            };
+
+            for (int i = 0; i < positions.Length; i++)
+            {
+                CreateTarget($"Target_{i}", positions[i]);
+            }
+
+            Debug.Log($"{LOG} 10 test targets created.");
+        }
+
+        static void CreateTarget(string name, Vector3 position)
+        {
+            GameObject root = new GameObject(name);
+            Undo.RegisterCreatedObjectUndo(root, $"Create {name}");
 
             root.AddComponent<HitTarget>();
+            root.transform.position = position;
 
-            // Position it 4 m in front of scene origin (away from table).
-            root.transform.position = new Vector3(0f, 0f, 4f);
+            // HEAD -- sphere, detaches on hit
+            CreateZoneSphere(root.transform, "Head", HitZoneType.Head,
+                position: new Vector3(0f, 1.65f, 0f), radius: 0.12f);
 
-            // Build body parts as children.
-            // All dimensions approximate a 1.75 m standing humanoid.
-
-            // HEAD -- sphere collider, radius 0.12 m, centre at ~1.65 m
-            CreateZoneSphere(root.transform, "Head",    HitZoneType.Head,
-                position: new Vector3(0f, 1.65f, 0f),
-                radius: 0.12f);
-
-            // TORSO -- capsule collider, height 0.60 m, centre at ~1.20 m
-            CreateZoneCapsule(root.transform, "Body",   HitZoneType.Body,
+            // TORSO -- capsule (does NOT detach -- it's the core)
+            CreateZoneCapsule(root.transform, "Body", HitZoneType.Body,
                 position: new Vector3(0f, 1.20f, 0f),
-                radius: 0.18f, height: 0.60f,
-                direction: 1 /* Y-axis */);
+                radius: 0.18f, height: 0.60f, direction: 1);
 
-            // LEFT ARM -- capsule, along Y, centre at ~1.20 m, offset -0.35 m on X
-            CreateZoneCapsule(root.transform, "LeftArm",  HitZoneType.LeftArm,
+            // LEFT ARM
+            CreateZoneCapsule(root.transform, "LeftArm", HitZoneType.LeftArm,
                 position: new Vector3(-0.35f, 1.20f, 0f),
-                radius: 0.06f, height: 0.55f,
-                direction: 1);
+                radius: 0.06f, height: 0.55f, direction: 1);
 
             // RIGHT ARM
             CreateZoneCapsule(root.transform, "RightArm", HitZoneType.RightArm,
                 position: new Vector3(0.35f, 1.20f, 0f),
-                radius: 0.06f, height: 0.55f,
-                direction: 1);
+                radius: 0.06f, height: 0.55f, direction: 1);
 
-            // LEFT LEG -- capsule, centre at ~0.50 m, offset -0.12 m on X
-            CreateZoneCapsule(root.transform, "LeftLeg",  HitZoneType.LeftLeg,
+            // LEFT LEG
+            CreateZoneCapsule(root.transform, "LeftLeg", HitZoneType.LeftLeg,
                 position: new Vector3(-0.12f, 0.50f, 0f),
-                radius: 0.08f, height: 0.80f,
-                direction: 1);
+                radius: 0.08f, height: 0.80f, direction: 1);
 
             // RIGHT LEG
             CreateZoneCapsule(root.transform, "RightLeg", HitZoneType.RightLeg,
                 position: new Vector3(0.12f, 0.50f, 0f),
-                radius: 0.08f, height: 0.80f,
-                direction: 1);
-
-            Selection.activeGameObject = root;
-            Debug.Log($"{LOG} TestTarget created at {root.transform.position}. HitTarget + 6 HitZones ready.");
+                radius: 0.08f, height: 0.80f, direction: 1);
         }
 
         // -------------------------------------------------------------------------
-        // Helpers
-        // -------------------------------------------------------------------------
 
         private static void CreateZoneSphere(
-            Transform parent,
-            string partName,
-            HitZoneType zoneType,
-            Vector3 position,
-            float radius)
+            Transform parent, string partName, HitZoneType zoneType,
+            Vector3 position, float radius)
         {
             GameObject go = new GameObject(partName);
             go.transform.SetParent(parent);
@@ -100,13 +104,8 @@ namespace Plaga44.Editor
         }
 
         private static void CreateZoneCapsule(
-            Transform parent,
-            string partName,
-            HitZoneType zoneType,
-            Vector3 position,
-            float radius,
-            float height,
-            int direction)
+            Transform parent, string partName, HitZoneType zoneType,
+            Vector3 position, float radius, float height, int direction)
         {
             GameObject go = new GameObject(partName);
             go.transform.SetParent(parent);
@@ -124,16 +123,10 @@ namespace Plaga44.Editor
             Undo.RegisterCreatedObjectUndo(go, $"Create {partName}");
         }
 
-        /// <summary>
-        /// Creates a visible sphere child so the zones are easy to see in Scene view.
-        /// Uses isTrigger=false on the collider above -- the visual is a separate
-        /// child mesh so it doesn't interfere with physics.
-        /// </summary>
         private static void AddVisualSphere(GameObject parent, float radius)
         {
             GameObject vis = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             vis.name = "Visual";
-            // Remove the collider added by CreatePrimitive -- we already have one on the parent.
             Object.DestroyImmediate(vis.GetComponent<Collider>());
             vis.transform.SetParent(parent.transform);
             vis.transform.localPosition = Vector3.zero;
@@ -149,22 +142,20 @@ namespace Plaga44.Editor
             vis.transform.SetParent(parent.transform);
             vis.transform.localPosition = Vector3.zero;
 
-            // Unity's Capsule primitive is 2 m tall (height=2, radius=0.5) along Y by default.
-            // Scale it to match the requested dimensions.
             float scaleXZ = radius / 0.5f;
             float scaleY  = height / 2f;
 
             switch (direction)
             {
-                case 0: // X-axis
+                case 0:
                     vis.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
                     vis.transform.localScale = new Vector3(scaleY, scaleXZ, scaleXZ);
                     break;
-                case 2: // Z-axis
+                case 2:
                     vis.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
                     vis.transform.localScale = new Vector3(scaleXZ, scaleY, scaleXZ);
                     break;
-                default: // Y-axis (1)
+                default:
                     vis.transform.localScale = new Vector3(scaleXZ, scaleY, scaleXZ);
                     break;
             }
@@ -177,12 +168,9 @@ namespace Plaga44.Editor
             Renderer rend = go.GetComponent<Renderer>();
             if (rend == null) return;
 
-            Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            if (mat.shader.name == "Hidden/InternalErrorShader")
-            {
-                // Fallback when URP is not present (e.g., plain 3D project)
-                mat = new Material(Shader.Find("Standard"));
-            }
+            var shader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (shader == null) shader = Shader.Find("Standard");
+            Material mat = new Material(shader);
             mat.color = TargetColor;
             rend.sharedMaterial = mat;
         }

@@ -119,6 +119,9 @@ public class StoneSpawner : MonoBehaviour
         var tb = stone.AddComponent<ThrowBoost>();
         tb.multiplier = 5.0f;
 
+        // HitDetector -- registers hits on target zones
+        stone.AddComponent<Plaga44.Gameplay.HitDetector>();
+
         Debug.Log("[PLAGA44] StoneSpawner: new stone spawned.");
     }
 }

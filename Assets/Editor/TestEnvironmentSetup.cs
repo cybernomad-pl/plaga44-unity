@@ -282,6 +282,9 @@ namespace Plaga44.Editor
             // ThrowBoost -- amplifies release velocity for satisfying throws
             var tb = stone.AddComponent<ThrowBoost>();
             tb.multiplier = 5.0f;
+
+            // HitDetector -- registers hits on HitTarget zones
+            stone.AddComponent<Plaga44.Gameplay.HitDetector>();
         }
 
         // ---- SPAWNER ----

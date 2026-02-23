@@ -6,8 +6,6 @@ namespace Plaga44.Gameplay
     /// Attach to a projectile (stone, rock, etc.) that has a Rigidbody.
     /// On collision, checks whether the struck object is part of a HitTarget,
     /// calculates impact force (velocity * mass) and calls HitTarget.RegisterHit.
-    ///
-    /// Optionally assign Thrower so HitTarget knows who threw the projectile.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class HitDetector : MonoBehaviour
@@ -26,15 +24,9 @@ namespace Plaga44.Gameplay
 
         private void OnCollisionEnter(Collision collision)
         {
-            // Check the collider we hit -- does it (or its parents) have a HitZone?
             HitZone zone = collision.collider.GetComponent<HitZone>();
-            if (zone == null)
-            {
-                // No zone on this hit -- not a target collider.
-                return;
-            }
+            if (zone == null) return;
 
-            // Walk up to find the owning HitTarget.
             HitTarget target = zone.GetOwner();
             if (target == null)
             {
@@ -42,11 +34,10 @@ namespace Plaga44.Gameplay
                 return;
             }
 
-            // Impact force = momentum magnitude at the moment of collision.
-            // Using velocity magnitude * mass (units: kg*m/s, approximates N in impulse terms).
             float force = _rb.linearVelocity.magnitude * _rb.mass;
+            Vector3 impactDir = _rb.linearVelocity.normalized;
 
-            target.RegisterHit(zone, force, thrower);
+            target.RegisterHit(zone, force, thrower, impactDir);
         }
     }
 }
