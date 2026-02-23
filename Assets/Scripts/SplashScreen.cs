@@ -172,7 +172,7 @@ public class SplashScreen : MonoBehaviour
         labelRect.pivot = new Vector2(0f, 0.5f);
         // "PLAGA '44" at fontSize 52 Consolas monospace: ~31px/char, 9 chars = ~280px
         // Centered title left edge = -140px from center
-        labelRect.anchoredPosition = new Vector2(-156, 40);
+        labelRect.anchoredPosition = new Vector2(-124, 40);
         labelRect.sizeDelta = new Vector2(400, 30);
 
         // Project name -- configurable via displayName field in Inspector
