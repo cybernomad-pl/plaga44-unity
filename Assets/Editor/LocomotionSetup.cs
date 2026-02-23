@@ -128,7 +128,7 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} CharacterController: h=1.8, r=0.3, gravity via OVRPlayerController.");
             }
 
-            // Ensure ground plane exists for gravity
+            // Ensure ground plane exists for gravity -- Unlit to avoid VR flicker
             var ground = GameObject.Find("Ground");
             if (ground == null)
             {
@@ -136,16 +136,19 @@ namespace Plaga44.Editor
                 ground.name = "Ground";
                 ground.transform.position = Vector3.zero;
                 ground.transform.localScale = new Vector3(10f, 1f, 10f);
-                var renderer = ground.GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-                    mat.color = new Color(0.3f, 0.3f, 0.3f);
-                    renderer.sharedMaterial = mat;
-                }
+                SetUnlitMaterial(ground, new Color(0.25f, 0.25f, 0.25f));
                 Undo.RegisterCreatedObjectUndo(ground, "Add Ground");
-                Debug.Log($"{LOG} Ground plane added.");
+                Debug.Log($"{LOG} Ground plane added (Unlit material).");
             }
+            else
+            {
+                // Fix existing ground material to Unlit
+                SetUnlitMaterial(ground, new Color(0.25f, 0.25f, 0.25f));
+                Debug.Log($"{LOG} Ground material switched to Unlit.");
+            }
+
+            // Add table with test objects at hand height
+            AddTestTable(player.transform.position);
 
             Selection.activeGameObject = player;
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
@@ -154,6 +157,92 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} === MVP Locomotion DONE ===");
             Debug.Log($"{LOG} Controls: Left thumbstick = move, Right thumbstick = snap turn 45deg");
             Debug.Log($"{LOG} Gravity is handled by CharacterController + OVRPlayerController.");
+        }
+
+        private static void AddTestTable(Vector3 playerPos)
+        {
+            // Table 1m in front of player, at waist height
+            var existing = GameObject.Find("TestTable");
+            if (existing != null)
+            {
+                Debug.Log($"{LOG} TestTable already exists, skipping.");
+                return;
+            }
+
+            var table = new GameObject("TestTable");
+            table.transform.position = playerPos + new Vector3(0f, 0f, 1.2f);
+            Undo.RegisterCreatedObjectUndo(table, "Add Test Table");
+
+            // Table top
+            var top = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            top.name = "TableTop";
+            top.transform.SetParent(table.transform);
+            top.transform.localPosition = new Vector3(0f, 0.75f, 0f);
+            top.transform.localScale = new Vector3(1.2f, 0.05f, 0.6f);
+            SetUnlitMaterial(top, new Color(0.45f, 0.3f, 0.15f));
+
+            // Table legs
+            for (int i = 0; i < 4; i++)
+            {
+                var leg = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                leg.name = $"Leg{i}";
+                leg.transform.SetParent(table.transform);
+                float x = (i % 2 == 0) ? -0.5f : 0.5f;
+                float z = (i < 2) ? -0.25f : 0.25f;
+                leg.transform.localPosition = new Vector3(x, 0.375f, z);
+                leg.transform.localScale = new Vector3(0.05f, 0.75f, 0.05f);
+                SetUnlitMaterial(leg, new Color(0.35f, 0.22f, 0.1f));
+            }
+
+            // Objects ON the table (grabbable height ~0.85m)
+            float tableY = 0.85f;
+
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.name = "GrabbableCube";
+            cube.transform.SetParent(table.transform);
+            cube.transform.localPosition = new Vector3(-0.3f, tableY, 0f);
+            cube.transform.localScale = Vector3.one * 0.12f;
+            SetUnlitMaterial(cube, new Color(0.8f, 0.2f, 0.2f));
+            var rbCube = cube.AddComponent<Rigidbody>();
+            rbCube.mass = 0.3f;
+            rbCube.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+            var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.name = "GrabbableSphere";
+            sphere.transform.SetParent(table.transform);
+            sphere.transform.localPosition = new Vector3(0f, tableY, 0f);
+            sphere.transform.localScale = Vector3.one * 0.1f;
+            SetUnlitMaterial(sphere, new Color(0.2f, 0.7f, 0.2f));
+            var rbSphere = sphere.AddComponent<Rigidbody>();
+            rbSphere.mass = 0.15f;
+            rbSphere.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+            var stone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            stone.name = "Stone";
+            stone.transform.SetParent(table.transform);
+            stone.transform.localPosition = new Vector3(0.3f, tableY, 0f);
+            stone.transform.localScale = new Vector3(0.08f, 0.06f, 0.08f);
+            SetUnlitMaterial(stone, new Color(0.5f, 0.5f, 0.5f));
+            var rbStone = stone.AddComponent<Rigidbody>();
+            rbStone.mass = 0.4f;
+            rbStone.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+            Debug.Log($"{LOG} TestTable with 3 objects added at hand height.");
+        }
+
+        private static void SetUnlitMaterial(GameObject obj, Color color)
+        {
+            var renderer = obj.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                // Use Unlit shader to avoid VR lighting flicker
+                var shader = Shader.Find("Universal Render Pipeline/Unlit");
+                if (shader == null) shader = Shader.Find("Unlit/Color");
+                if (shader == null) shader = Shader.Find("Universal Render Pipeline/Lit");
+                var mat = new Material(shader);
+                mat.color = color;
+                renderer.sharedMaterial = mat;
+            }
         }
 
         private static void RemoveExisting(string name)
