@@ -270,7 +270,7 @@ namespace Plaga44.Editor
             tb.multiplier = 5.0f;
 
             // StoneCohesion -- gentle attraction to nearby stones for stable piles
-            stone.AddComponent<StoneCohesion>();
+            stone.AddComponent<GrabbableCohesion>();
         }
 
         // ---- SPAWNER ----

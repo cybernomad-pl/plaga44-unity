@@ -90,7 +90,7 @@ public class StoneSpawner : MonoBehaviour
 
         // ThrowBoost + Cohesion
         stone.AddComponent<ThrowBoost>();
-        stone.AddComponent<StoneCohesion>();
+        stone.AddComponent<GrabbableCohesion>();
 
         Debug.Log("[PLAGA44] StoneSpawner: new stone spawned.");
     }
