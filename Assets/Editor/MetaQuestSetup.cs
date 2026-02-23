@@ -370,13 +370,10 @@ namespace Plaga44.Editor
             if (hand != null)
             {
                 var so = new SerializedObject(hand);
-                var prop = so.FindProperty("HandType");
-                if (prop != null)
-                {
-                    prop.intValue = handIndex;
-                    so.ApplyModifiedProperties();
-                }
-                else Debug.LogError($"{LOG} OVRHand.HandType property NOT FOUND!");
+                SetProperty(so, "HandType", handIndex, $"OVRHand.HandType ({handGO.name})");
+                // m_showState: Always=0 so hands are always visible
+                SetProperty(so, "m_showState", 0, $"OVRHand.m_showState=Always ({handGO.name})");
+                so.ApplyModifiedProperties();
             }
             else Debug.LogError($"{LOG} OVRHand component NOT FOUND on {handGO.name}!");
 
