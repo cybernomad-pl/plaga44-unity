@@ -350,14 +350,14 @@ namespace Plaga44.Editor
             var leftHand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, leftAnchor);
             leftHand.name = "OVRHandPrefab";
             leftHand.transform.localPosition = Vector3.zero;
-            leftHand.transform.localRotation = Quaternion.identity;
+            leftHand.transform.localRotation = Quaternion.Euler(0f, 0f, 60f);
             ConfigureOVRHand(leftHand, 0); // 0 = HandLeft
             Undo.RegisterCreatedObjectUndo(leftHand, "Add Left OVRHandPrefab");
 
             var rightHand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, rightAnchor);
             rightHand.name = "OVRHandPrefab";
             rightHand.transform.localPosition = Vector3.zero;
-            rightHand.transform.localRotation = Quaternion.identity;
+            rightHand.transform.localRotation = Quaternion.Euler(0f, 0f, -60f);
             ConfigureOVRHand(rightHand, 1); // 1 = HandRight
             Undo.RegisterCreatedObjectUndo(rightHand, "Add Right OVRHandPrefab");
 
