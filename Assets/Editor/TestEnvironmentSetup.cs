@@ -14,9 +14,8 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} === Setup TESTBED ===");
             CleanScene();
             CreateInfiniteFloor();
-            MetaQuestSetup.SetupVRSceneControllers();
             AddSplashScreen();
-            Debug.Log($"{LOG} === TESTBED READY ===");
+            Debug.Log($"{LOG} === TESTBED READY -- now pick a VR Rig from menu ===");
         }
 
         [MenuItem("CYBERNOMAD/Scene Setup/Clean Scene", false, 200)]
