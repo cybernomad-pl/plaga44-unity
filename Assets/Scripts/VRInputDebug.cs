@@ -288,9 +288,11 @@ public class VRInputDebug : MonoBehaviour
             if (rig != null)
             {
                 ctrl = isLeft ? rig.leftControllerAnchor : rig.rightControllerAnchor;
-                return;
             }
         }
+        // OVR anchor tracks in world space -- don't fall through to XR fallback
+        // (XR fallback uses tracking space which doesn't move with locomotion)
+        if (ctrl != null) return;
 #endif
         var side = isLeft ? InputDeviceCharacteristics.Left : InputDeviceCharacteristics.Right;
         var devs = new List<InputDevice>();
