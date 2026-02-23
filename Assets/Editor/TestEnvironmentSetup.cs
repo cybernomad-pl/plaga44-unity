@@ -191,24 +191,31 @@ namespace Plaga44.Editor
                 frictionCombine = PhysicsMaterialCombine.Maximum
             };
 
+            // Stacked pile -- bottom layer of 3, then 2, then 1 on top
+            // Y positions: table top is at 0.75, stone half-height ~0.045
+            float baseY = 0.82f;
+            float layerH = 0.10f;
             Vector3[] stonePositions =
             {
-                new Vector3( 0.00f, 0.85f,  0.00f),
-                new Vector3(-0.15f, 0.85f,  0.05f),
-                new Vector3( 0.18f, 0.85f, -0.03f),
-                new Vector3(-0.05f, 0.85f, -0.10f),
-                new Vector3( 0.10f, 0.85f,  0.12f),
-                new Vector3( 0.00f, 0.95f,  0.02f), // on top of pile
+                // Bottom layer (3 stones)
+                new Vector3(-0.06f, baseY,            -0.04f),
+                new Vector3( 0.06f, baseY,            -0.04f),
+                new Vector3( 0.00f, baseY,             0.05f),
+                // Middle layer (2 stones)
+                new Vector3(-0.03f, baseY + layerH,    0.00f),
+                new Vector3( 0.04f, baseY + layerH,    0.02f),
+                // Top (1 stone)
+                new Vector3( 0.00f, baseY + layerH*2,  0.01f),
             };
 
             float[][] stoneSizes =
             {
                 new[] { 0.12f, 0.09f, 0.10f },
-                new[] { 0.10f, 0.07f, 0.09f },
-                new[] { 0.08f, 0.06f, 0.11f },
-                new[] { 0.11f, 0.08f, 0.07f },
-                new[] { 0.09f, 0.07f, 0.08f },
-                new[] { 0.07f, 0.05f, 0.06f },
+                new[] { 0.10f, 0.08f, 0.11f },
+                new[] { 0.11f, 0.08f, 0.09f },
+                new[] { 0.09f, 0.07f, 0.10f },
+                new[] { 0.10f, 0.07f, 0.08f },
+                new[] { 0.08f, 0.06f, 0.07f },
             };
 
             float[] stoneGrays = { 0.45f, 0.38f, 0.50f, 0.42f, 0.35f, 0.48f };
@@ -230,12 +237,12 @@ namespace Plaga44.Editor
             stone.transform.localScale = new Vector3(size[0], size[1], size[2]);
             SetUnlitMaterial(stone, new Color(gray, gray - 0.03f, gray - 0.05f));
 
-            // Physics -- heavy friction, high drag so stones don't slide/roll away
+            // Physics -- friction so stones don't slide, moderate drag so they respond to touch
             stone.GetComponent<Collider>().material = mat;
             var rb = stone.AddComponent<Rigidbody>();
             rb.mass = 0.4f;
-            rb.drag = 2f;
-            rb.angularDrag = 3f;
+            rb.linearDamping = 0.5f;
+            rb.angularDamping = 0.8f;
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
             // OVRGrabbable
