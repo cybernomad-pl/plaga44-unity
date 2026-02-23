@@ -213,17 +213,24 @@ namespace Plaga44.Editor
             }
 
             var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            rig.transform.position = new Vector3(0f, 1.2f, 0f);
+            // With FloorLevel tracking origin, rig should be at Y=0
+            // (headset height is handled by tracking system)
+            rig.transform.position = Vector3.zero;
             rig.transform.rotation = Quaternion.identity;
             Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
 
-            // Configure OVRManager -- exact copy of Meta's ControllerDrivenHandPoses sample
+            // Configure OVRManager -- per Meta docs + ControllerDrivenHandPoses sample
             var mgr = rig.GetComponent<OVRManager>();
             if (mgr != null)
             {
                 var so = new SerializedObject(mgr);
+                // Tracking Origin = Floor Level (doc step 4)
+                var pTrackingOrigin = so.FindProperty("_trackingOriginType");
+                if (pTrackingOrigin != null) pTrackingOrigin.intValue = 1; // FloorLevel
+                // Hand Tracking Support = Controllers and Hands (doc step)
                 var pHandSupport = so.FindProperty("_handTrackingSupport");
-                if (pHandSupport != null) pHandSupport.intValue = 2; // Controllers and Hands
+                if (pHandSupport != null) pHandSupport.intValue = 2;
+                // Controller-driven hand poses (sample settings)
                 var pEnabled = so.FindProperty("_controllerDrivenHandPoses");
                 if (pEnabled != null) pEnabled.boolValue = true;
                 var pType = so.FindProperty("controllerDrivenHandPosesType");
@@ -233,7 +240,7 @@ namespace Plaga44.Editor
                 var pMultimodal = so.FindProperty("isMultimodalHandsControllersEnabled");
                 if (pMultimodal != null) pMultimodal.boolValue = true;
                 so.ApplyModifiedProperties();
-                Debug.Log($"{LOG} OVRManager configured (controller-driven hand poses).");
+                Debug.Log($"{LOG} OVRManager configured (FloorLevel + controller-driven hand poses).");
             }
 
             // Add OVRHandPrefab under LeftHandAnchor and RightHandAnchor
