@@ -1,81 +1,63 @@
 // GrabbableCohesion.cs
-// CYBERNOMAD -- Attraction force between nearby grabbable objects.
-// Keeps piles stable. Works on ANY OVRGrabbable, not just stones.
-// Grabbed objects are completely excluded (no force on or toward them).
+// CYBERNOMAD -- Contact-only cohesion for stacking grabbable objects.
+// NO distance-based attraction (no magnet effect). Only works when
+// two grabbables are physically touching (OnCollisionStay).
+// Disabled when grabbed or for 1s after release (so throws work).
 
 using UnityEngine;
 
 public class GrabbableCohesion : MonoBehaviour
 {
-    [Tooltip("Max distance for attraction.")]
-    public float attractRadius = 0.15f;
+    [Tooltip("Extra damping applied to relative motion when two grabbables touch.")]
+    public float contactDamping = 8.0f;
 
-    [Tooltip("Base attraction strength.")]
-    public float attractForce = 3.0f;
-
-    [Tooltip("Close-range multiplier. Force ramps up sharply when touching.")]
-    public float closeBoost = 4.0f;
-
-    [Tooltip("Distance below which close-range boost kicks in.")]
-    public float closeRange = 0.05f;
-
-    [Tooltip("Velocity threshold -- only attract when nearly still.")]
-    public float restThreshold = 0.2f;
+    [Tooltip("Seconds after release where cohesion is disabled (protects throw).")]
+    public float releaseCooldown = 1.0f;
 
     private Rigidbody _rb;
     private OVRGrabbable _grabbable;
-
-    // Global list of all grabbables for fast iteration
-    private static OVRGrabbable[] _allGrabbables;
-    private static int _lastRefreshFrame = -1;
+    private bool _wasGrabbed;
+    private float _releaseTime = -10f;
 
     void Start()
     {
         _rb = GetComponent<Rigidbody>();
         _grabbable = GetComponent<OVRGrabbable>();
+
+        // More solver iterations = more stable stacking
+        if (Physics.defaultSolverIterations < 12)
+            Physics.defaultSolverIterations = 12;
     }
 
     void FixedUpdate()
     {
-        // HARD STOP if grabbed or kinematic -- zero cohesion
+        // Track grab/release for cooldown
+        bool grabbed = _grabbable != null && _grabbable.isGrabbed;
+        if (_wasGrabbed && !grabbed)
+            _releaseTime = Time.time;
+        _wasGrabbed = grabbed;
+    }
+
+    void OnCollisionStay(Collision collision)
+    {
+        // HARD STOP: grabbed or kinematic = no cohesion
         if (_grabbable != null && _grabbable.isGrabbed) return;
         if (_rb == null || _rb.isKinematic) return;
-        if (_rb.linearVelocity.magnitude > restThreshold) return;
 
-        // Refresh grabbable list once per frame (shared across all instances)
-        if (_lastRefreshFrame != Time.frameCount)
-        {
-            _allGrabbables = FindObjectsByType<OVRGrabbable>(FindObjectsSortMode.None);
-            _lastRefreshFrame = Time.frameCount;
-        }
+        // HARD STOP: recently released = no cohesion (protect throw velocity)
+        if (Time.time - _releaseTime < releaseCooldown) return;
 
-        Vector3 myPos = transform.position;
+        // Only between grabbables (not hand colliders, not table, not ground)
+        var otherGrabbable = collision.gameObject.GetComponent<OVRGrabbable>();
+        if (otherGrabbable == null) return;
+        if (otherGrabbable.isGrabbed) return;
 
-        for (int i = 0; i < _allGrabbables.Length; i++)
-        {
-            var other = _allGrabbables[i];
-            if (other == null || other.gameObject == gameObject) continue;
+        // Extra contact damping: oppose relative sliding motion
+        // Acts like super-friction between touching grabbables
+        var otherRb = collision.rigidbody;
+        if (otherRb == null) return;
 
-            // Skip grabbed neighbors completely
-            if (other.isGrabbed) continue;
-
-            Vector3 delta = other.transform.position - myPos;
-            float dist = delta.magnitude;
-
-            if (dist < 0.005f || dist > attractRadius) continue;
-
-            // Force ramps up when closer. Quadratic near contact.
-            float t = 1f - dist / attractRadius;
-            float strength = attractForce * t;
-
-            // Extra boost at very close range (simulates contact adhesion)
-            if (dist < closeRange)
-            {
-                float closeFactor = 1f - dist / closeRange;
-                strength += closeBoost * closeFactor * closeFactor;
-            }
-
-            _rb.AddForce(delta.normalized * strength, ForceMode.Force);
-        }
+        Vector3 relativeVel = _rb.linearVelocity - otherRb.linearVelocity;
+        _rb.AddForce(-relativeVel * contactDamping, ForceMode.Force);
     }
 }
