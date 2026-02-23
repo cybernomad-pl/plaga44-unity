@@ -6,10 +6,11 @@ using UnityEngine;
 namespace Plaga44.Editor
 {
     /// <summary>
-    /// TESTBED setup: copies Meta SDK's LocomotionExamples scene (which has
-    /// OVRCameraRig + OVRInteractionComprehensive correctly wired) and opens it.
-    /// That scene has working: camera, hands, controllers, locomotion (slide+teleport+turn),
-    /// grab interactors, ray, poke -- all pre-configured by Meta.
+    /// One-click TESTBED. Creates:
+    /// 1. OVRCameraRig (CAMERA + tracking) with hands
+    /// 2. OVRInteractionComprehensive (ISDK: grab, locomotion, ray, poke)
+    ///    -- wired to OVRCameraRig via OVRCameraRigRef._ovrCameraRig
+    /// 3. Floor, table, debug HUD, splash screen
     /// </summary>
     public static class TestEnvironmentSetup
     {
@@ -20,105 +21,184 @@ namespace Plaga44.Editor
         {
             Debug.Log($"{LOG} === Setup TESTBED ===");
 
-            // Copy LocomotionExamples from SDK -- it has everything wired correctly
-            string sourceScene = FindSDKScene("LocomotionExamples");
-            if (sourceScene == null)
-            {
-                Debug.LogError($"{LOG} LocomotionExamples.unity not found in SDK Samples~!");
-                Debug.LogError($"{LOG} Is com.meta.xr.sdk.interaction.ovr installed?");
-                return;
-            }
+            CleanScene();
 
-            // Copy to Assets/Scenes/testbed.unity
-            string destDir = System.IO.Path.Combine(Application.dataPath, "Scenes");
-            if (!System.IO.Directory.Exists(destDir))
-                System.IO.Directory.CreateDirectory(destDir);
+            // 1. Camera rig + hands
+            var cameraRig = AddCameraRig();
 
-            string destPath = System.IO.Path.Combine(destDir, "testbed.unity");
-            System.IO.File.Copy(sourceScene, destPath, true);
-            AssetDatabase.Refresh();
+            // 2. ISDK interactions (grab + locomotion) wired to camera rig
+            if (cameraRig != null)
+                AddInteractions(cameraRig);
 
-            // Open the scene
-            EditorSceneManager.OpenScene("Assets/Scenes/testbed.unity");
-            Debug.Log($"{LOG} Opened testbed (based on LocomotionExamples).");
-
-            // Add our extras to the running scene
-            AddSplashScreen();
-            AddDebugHUD();
+            // 3. Environment
+            AddFloor();
             AddTestTable();
 
+            // 4. Extras
+            AddSplashScreen();
+            AddDebugHUD();
+
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-            EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
 
             Debug.Log($"{LOG} === TESTBED READY ===");
-            Debug.Log($"{LOG} Camera: OVRCameraRig (from SDK sample)");
-            Debug.Log($"{LOG} Locomotion: L-stick = move, R-stick = snap turn, A = teleport");
-            Debug.Log($"{LOG} Grab: grip button grabs objects");
+            Debug.Log($"{LOG} L-stick = move, R-stick = snap turn, grip = grab");
         }
 
         [MenuItem("CYBERNOMAD/Scene Setup/Clean Scene", false, 200)]
         public static void CleanScene()
         {
             var scene = EditorSceneManager.GetActiveScene();
-            var roots = scene.GetRootGameObjects();
-            int removed = 0;
-
-            foreach (var root in roots)
+            foreach (var root in scene.GetRootGameObjects())
             {
-                string n = root.name;
-                if (n == "Directional Light" || n == "Global Volume")
+                if (root.name == "Directional Light" || root.name == "Global Volume")
                     continue;
-
-                Debug.Log($"{LOG} Removing: {n}");
                 Undo.DestroyObjectImmediate(root);
-                removed++;
             }
-
             EditorSceneManager.MarkSceneDirty(scene);
-            Debug.Log($"{LOG} Scene cleaned. Removed {removed} objects.");
+            Debug.Log($"{LOG} Scene cleaned.");
         }
 
-        static string FindSDKScene(string sceneName)
-        {
-            string packageCache = System.IO.Path.Combine(Application.dataPath, "..", "Library", "PackageCache");
-            if (!System.IO.Directory.Exists(packageCache)) return null;
+        // ---- CAMERA RIG ----
 
-            var files = System.IO.Directory.GetFiles(packageCache, sceneName + ".unity", System.IO.SearchOption.AllDirectories);
-            foreach (var f in files)
+        static OVRCameraRig AddCameraRig()
+        {
+            // Use MetaQuestSetup which adds OVRCameraRig + OVRHandPrefabs + configures OVRManager
+            MetaQuestSetup.SetupVRSceneHands();
+
+            // Find the OVRCameraRig that was just added
+            var rig = GameObject.FindFirstObjectByType<OVRCameraRig>();
+            if (rig == null)
             {
-                if (f.Contains("interaction") && f.Contains("Samples~"))
-                    return f;
+                Debug.LogError($"{LOG} OVRCameraRig not found after setup!");
+                return null;
             }
-            return null;
+            Debug.Log($"{LOG} OVRCameraRig ready (camera + hands).");
+            return rig;
         }
 
-        static void AddSplashScreen()
+        // ---- ISDK INTERACTIONS ----
+
+        static void AddInteractions(OVRCameraRig cameraRig)
         {
-            if (GameObject.Find("SplashScreen") != null) return;
-            var go = new GameObject("SplashScreen");
-            go.AddComponent<SplashScreen>();
-            Undo.RegisterCreatedObjectUndo(go, "Add SplashScreen");
-            Debug.Log($"{LOG} SplashScreen added.");
+            var prefab = FindPrefab("OVRInteractionComprehensive");
+            if (prefab == null)
+            {
+                Debug.LogWarning($"{LOG} OVRInteractionComprehensive not found. No grab/locomotion.");
+                return;
+            }
+
+            var interaction = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            interaction.transform.position = Vector3.zero;
+            interaction.transform.rotation = Quaternion.identity;
+            Undo.RegisterCreatedObjectUndo(interaction, "Add ISDK Interactions");
+
+            // WIRE: find OVRCameraRigRef component and set _ovrCameraRig
+            WireCameraRigRef(interaction, cameraRig);
+
+            // WIRE: find PlayerLocomotor and set _playerOrigin + _playerHead
+            WirePlayerOrigin(interaction, cameraRig);
+
+            Debug.Log($"{LOG} OVRInteractionComprehensive wired to OVRCameraRig.");
         }
 
-        static void AddDebugHUD()
+        static void WireCameraRigRef(GameObject interactionRoot, OVRCameraRig cameraRig)
         {
-            if (GameObject.FindFirstObjectByType<VRInputDebug>() != null) return;
-            var go = new GameObject("VRInputDebug");
-            go.AddComponent<VRInputDebug>();
-            Undo.RegisterCreatedObjectUndo(go, "Add VRInputDebug");
-            Debug.Log($"{LOG} VRInputDebug HUD added.");
+            // OVRCameraRigRef is the central config point -- has _ovrCameraRig field
+            var rigRefs = interactionRoot.GetComponentsInChildren<MonoBehaviour>(true);
+            foreach (var mb in rigRefs)
+            {
+                if (mb == null) continue;
+                if (mb.GetType().Name != "OVRCameraRigRef") continue;
+
+                var so = new SerializedObject(mb);
+                var prop = so.FindProperty("_ovrCameraRig");
+                if (prop != null)
+                {
+                    prop.objectReferenceValue = cameraRig;
+                    so.ApplyModifiedProperties();
+                    Debug.Log($"{LOG} Wired OVRCameraRigRef._ovrCameraRig -> {cameraRig.name}");
+                }
+
+                // Also wire _leftHand and _rightHand if we can find them
+                var leftHandProp = so.FindProperty("_leftHand");
+                var rightHandProp = so.FindProperty("_rightHand");
+                if (leftHandProp != null || rightHandProp != null)
+                {
+                    var hands = cameraRig.GetComponentsInChildren<OVRHand>(true);
+                    foreach (var hand in hands)
+                    {
+                        var handSo = new SerializedObject(hand);
+                        var handType = handSo.FindProperty("HandType");
+                        if (handType != null)
+                        {
+                            if (handType.intValue == 0 && leftHandProp != null) // HandLeft
+                            {
+                                leftHandProp.objectReferenceValue = hand;
+                                Debug.Log($"{LOG} Wired _leftHand -> {hand.name}");
+                            }
+                            else if (handType.intValue == 1 && rightHandProp != null) // HandRight
+                            {
+                                rightHandProp.objectReferenceValue = hand;
+                                Debug.Log($"{LOG} Wired _rightHand -> {hand.name}");
+                            }
+                        }
+                    }
+                    so.ApplyModifiedProperties();
+                }
+                break; // Only one OVRCameraRigRef expected
+            }
+        }
+
+        static void WirePlayerOrigin(GameObject interactionRoot, OVRCameraRig cameraRig)
+        {
+            // Find any component with _playerOrigin or _playerEyes fields
+            var allMBs = interactionRoot.GetComponentsInChildren<MonoBehaviour>(true);
+            foreach (var mb in allMBs)
+            {
+                if (mb == null) continue;
+                var so = new SerializedObject(mb);
+
+                var originProp = so.FindProperty("_playerOrigin");
+                if (originProp != null && originProp.propertyType == SerializedPropertyType.ObjectReference)
+                {
+                    originProp.objectReferenceValue = cameraRig.transform;
+                    so.ApplyModifiedProperties();
+                    Debug.Log($"{LOG} Wired _playerOrigin -> {cameraRig.name} on {mb.GetType().Name}");
+                }
+
+                var eyesProp = so.FindProperty("_playerEyes");
+                if (eyesProp != null && eyesProp.propertyType == SerializedPropertyType.ObjectReference)
+                {
+                    var centerEye = cameraRig.centerEyeAnchor;
+                    if (centerEye != null)
+                    {
+                        eyesProp.objectReferenceValue = centerEye;
+                        so.ApplyModifiedProperties();
+                        Debug.Log($"{LOG} Wired _playerEyes -> {centerEye.name} on {mb.GetType().Name}");
+                    }
+                }
+            }
+        }
+
+        // ---- ENVIRONMENT ----
+
+        static void AddFloor()
+        {
+            var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            floor.name = "Floor";
+            floor.transform.position = Vector3.zero;
+            floor.transform.localScale = new Vector3(100f, 1f, 100f);
+            floor.isStatic = true;
+            SetMat(floor, new Color(0.22f, 0.22f, 0.25f));
+            Undo.RegisterCreatedObjectUndo(floor, "Add Floor");
         }
 
         static void AddTestTable()
         {
-            if (GameObject.Find("TestTable") != null) return;
-
             var table = new GameObject("TestTable");
             table.transform.position = new Vector3(0f, 0f, 1.5f);
             Undo.RegisterCreatedObjectUndo(table, "Add TestTable");
 
-            // Table top
             var top = GameObject.CreatePrimitive(PrimitiveType.Cube);
             top.name = "TableTop";
             top.transform.SetParent(table.transform);
@@ -127,7 +207,6 @@ namespace Plaga44.Editor
             top.isStatic = true;
             SetMat(top, new Color(0.45f, 0.3f, 0.15f));
 
-            // Legs
             float[] xs = { -0.5f, 0.5f, -0.5f, 0.5f };
             float[] zs = { -0.25f, -0.25f, 0.25f, 0.25f };
             for (int i = 0; i < 4; i++)
@@ -141,7 +220,6 @@ namespace Plaga44.Editor
                 SetMat(leg, new Color(0.35f, 0.22f, 0.1f));
             }
 
-            // Physics objects on the table
             float y = 0.85f;
             AddObj(table.transform, "RedCube", PrimitiveType.Cube,
                 new Vector3(-0.3f, y, 0f), Vector3.one * 0.12f, new Color(0.8f, 0.2f, 0.2f), 0.3f);
@@ -149,9 +227,25 @@ namespace Plaga44.Editor
                 new Vector3(0f, y, 0f), Vector3.one * 0.1f, new Color(0.2f, 0.7f, 0.2f), 0.15f);
             AddObj(table.transform, "Stone", PrimitiveType.Sphere,
                 new Vector3(0.3f, y, 0f), new Vector3(0.08f, 0.06f, 0.08f), new Color(0.5f, 0.5f, 0.5f), 0.4f);
-
-            Debug.Log($"{LOG} TestTable + 3 physics objects at hand height.");
         }
+
+        // ---- EXTRAS ----
+
+        static void AddSplashScreen()
+        {
+            var go = new GameObject("SplashScreen");
+            go.AddComponent<SplashScreen>();
+            Undo.RegisterCreatedObjectUndo(go, "Add SplashScreen");
+        }
+
+        static void AddDebugHUD()
+        {
+            var go = new GameObject("VRInputDebug");
+            go.AddComponent<VRInputDebug>();
+            Undo.RegisterCreatedObjectUndo(go, "Add VRInputDebug");
+        }
+
+        // ---- HELPERS ----
 
         static void AddObj(Transform parent, string name, PrimitiveType type,
             Vector3 pos, Vector3 scale, Color color, float mass)
@@ -167,16 +261,28 @@ namespace Plaga44.Editor
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         }
 
+        static GameObject FindPrefab(string name)
+        {
+            foreach (var guid in AssetDatabase.FindAssets(name + " t:prefab"))
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.Contains(name + ".prefab"))
+                {
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                    if (prefab != null) return prefab;
+                }
+            }
+            return null;
+        }
+
         static void SetMat(GameObject obj, Color color)
         {
             var r = obj.GetComponent<Renderer>();
             if (r == null) return;
-            var shader = Shader.Find("Universal Render Pipeline/Unlit");
-            if (shader == null) shader = Shader.Find("Unlit/Color");
+            var shader = Shader.Find("Universal Render Pipeline/Unlit")
+                      ?? Shader.Find("Unlit/Color");
             if (shader == null) return;
-            var mat = new Material(shader);
-            mat.color = color;
-            r.sharedMaterial = mat;
+            r.sharedMaterial = new Material(shader) { color = color };
         }
     }
 }
