@@ -18,7 +18,7 @@ public class VRLocomotion : MonoBehaviour
     void Start()
     {
         var centerEye = transform.Find("TrackingSpace/CenterEyeAnchor");
-        _head = centerEye != null ? centerEye : Camera.main?.transform;
+        _head = centerEye;
     }
 
     void Update()

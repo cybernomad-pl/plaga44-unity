@@ -81,18 +81,13 @@ public class SplashScreen : MonoBehaviour
 
     private bool BothTriggersPressed()
     {
-#if HAS_META_XR
         float left = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.LTouch);
         float right = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
         return left > 0.5f && right > 0.5f;
-#else
-        return false;
-#endif
     }
 
     private void HideControllers()
     {
-#if HAS_META_XR
         var rig = FindFirstObjectByType<OVRCameraRig>();
         if (rig == null) return;
 
@@ -117,7 +112,6 @@ public class SplashScreen : MonoBehaviour
                 }
             }
         }
-#endif
     }
 
     private void ShowControllers()
@@ -131,16 +125,9 @@ public class SplashScreen : MonoBehaviour
 
     private void FindCenterEye()
     {
-#if HAS_META_XR
         var rig = FindFirstObjectByType<OVRCameraRig>();
         if (rig != null)
-        {
             _centerEye = rig.centerEyeAnchor;
-            return;
-        }
-#endif
-        var cam = Camera.main;
-        if (cam != null) _centerEye = cam.transform;
     }
 
     private void CreateWorldCanvas()
