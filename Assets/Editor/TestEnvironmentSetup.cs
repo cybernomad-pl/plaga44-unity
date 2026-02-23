@@ -237,13 +237,20 @@ namespace Plaga44.Editor
             stone.transform.localScale = new Vector3(size[0], size[1], size[2]);
             SetUnlitMaterial(stone, new Color(gray, gray - 0.03f, gray - 0.05f));
 
+            // SphereCollider on non-uniform scale uses MAX axis -- too big on smaller axes.
+            // Shrink radius to match the SMALLEST axis so collider fits tight. Some clipping OK.
+            float minSize = Mathf.Min(size[0], size[1], size[2]);
+            float maxSize = Mathf.Max(size[0], size[1], size[2]);
+            var sphereCol = stone.GetComponent<SphereCollider>();
+            sphereCol.radius = 0.5f * minSize / maxSize;
+
             // Physics -- light stones with friction, low drag for satisfying throws
-            stone.GetComponent<Collider>().material = mat;
+            sphereCol.material = mat;
             var rb = stone.AddComponent<Rigidbody>();
             rb.mass = 0.15f;
             rb.linearDamping = 0.2f;
             rb.angularDamping = 0.3f;
-            rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
             // OVRGrabbable
             var grabbable = stone.AddComponent<OVRGrabbable>();
@@ -319,7 +326,9 @@ namespace Plaga44.Editor
             var so = new SerializedObject(grabber);
 
             SetInt(so, "m_controller", controllerValue);
-            SetBool(so, "m_parentHeldObject", true);
+            // parentHeldObject=false -> OVRGrabber uses Rigidbody.MovePosition instead of
+            // transform parenting. MovePosition preserves physics collision with other objects.
+            SetBool(so, "m_parentHeldObject", false);
 
             // Grip transform = this anchor (where grabbed objects snap to)
             var gripProp = so.FindProperty("m_gripTransform");
