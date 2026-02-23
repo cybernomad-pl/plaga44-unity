@@ -181,8 +181,11 @@ public class SplashScreen : MonoBehaviour
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
         label.verticalOverflow = VerticalWrapMode.Overflow;
         var labelRect = labelGO.GetComponent<RectTransform>();
-        // Position just above the "P" in PLAGA -- roughly left edge of centered title
-        labelRect.anchoredPosition = new Vector2(-130, 40);
+        // Pivot left-center so anchoredPosition.x = left edge of text
+        labelRect.pivot = new Vector2(0f, 0.5f);
+        // "PLAGA '44" at fontSize 52 Consolas monospace: ~31px/char, 9 chars = ~280px
+        // Centered title left edge = -140px from center
+        labelRect.anchoredPosition = new Vector2(-140, 40);
         labelRect.sizeDelta = new Vector2(400, 30);
 
         // Project name -- configurable via displayName field in Inspector
