@@ -167,7 +167,6 @@ namespace Plaga44.Editor
                 BuildTargetGroup.Android, BuildTarget.Android);
         }
 
-        [MenuItem("CYBERNOMAD/Scene Setup/Setup VR Rig (Controllers)", false, 51)]
         public static void SetupVRSceneControllers()
         {
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
@@ -234,7 +233,6 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} VR Scene ready: OVRCameraRig (controllers).");
         }
 
-        [MenuItem("CYBERNOMAD/Scene Setup/Setup VR Rig (Hands)", false, 52)]
         public static void SetupVRSceneHands()
         {
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
