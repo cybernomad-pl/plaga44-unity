@@ -121,6 +121,29 @@ public class SplashScreen : MonoBehaviour
             if (r != null) r.enabled = true;
         }
         _hiddenRenderers.Clear();
+
+        // Also actively find and enable ALL renderers under controller/hand anchors.
+        // OVR SDK spawns controller models dynamically -- we may have hidden renderers
+        // that weren't in our tracking list (spawned after initial hide).
+        var rig = FindFirstObjectByType<OVRCameraRig>();
+        if (rig == null) return;
+
+        Transform[] anchors = new Transform[]
+        {
+            rig.leftControllerAnchor,
+            rig.rightControllerAnchor,
+            rig.leftHandAnchor,
+            rig.rightHandAnchor
+        };
+
+        foreach (var anchor in anchors)
+        {
+            if (anchor == null) continue;
+            foreach (var r in anchor.GetComponentsInChildren<Renderer>(true))
+            {
+                r.enabled = true;
+            }
+        }
     }
 
     private void FindCenterEye()

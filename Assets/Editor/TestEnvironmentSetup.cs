@@ -279,9 +279,9 @@ namespace Plaga44.Editor
             }
             gso.ApplyModifiedProperties();
 
-            // ThrowBoost -- amplifies release velocity for satisfying throws
-            var tb = stone.AddComponent<ThrowBoost>();
-            tb.multiplier = 5.0f;
+            // GazeThrow -- gaze-corrected throwing with velocity boost
+            var gt = stone.AddComponent<GazeThrow>();
+            gt.boostMultiplier = 5.0f;
 
             // HitDetector -- registers hits on HitTarget zones
             stone.AddComponent<Plaga44.Gameplay.HitDetector>();

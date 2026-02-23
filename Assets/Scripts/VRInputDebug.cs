@@ -61,11 +61,17 @@ public class VRInputDebug : MonoBehaviour
     private OVRCameraRig _rig;
 #endif
 
+    // Gaze throw zone indicators
+    private Image _outerZone, _middleZone, _innerZone;
+    private Image _leftDot, _rightDot;
+    private Text _zoneText;
+
     void Start()
     {
         CreateDebugCanvas();
         _leftCtrlCanvas = CreateCtrlCanvas("Left", ref _leftCtrlText);
         _rightCtrlCanvas = CreateCtrlCanvas("Right", ref _rightCtrlText);
+        CreateGazeZones();
     }
 
     void Update()
@@ -90,6 +96,7 @@ public class VRInputDebug : MonoBehaviour
         PositionCtrlCanvas(_rightCtrlCanvas, _rig.rightControllerAnchor, centerEye, false);
 
         UpdateTexts();
+        UpdateGazeZones(centerEye);
 #endif
     }
 
@@ -164,6 +171,113 @@ public class VRInputDebug : MonoBehaviour
 
         return s;
     }
+#endif
+
+    // -- Gaze Zone HUD --
+
+    private void CreateGazeZones()
+    {
+        var parent = _canvas.transform;
+
+        // Three concentric zone circles (behind text -- added first)
+        // Outer = faint, middle = slightly brighter, inner = brightest
+        _outerZone = CreateCircle(parent, "OuterZone", 240f, new Color(0.3f, 0.9f, 0.3f, 0.06f));
+        _middleZone = CreateCircle(parent, "MiddleZone", 160f, new Color(0.3f, 0.9f, 0.3f, 0.08f));
+        _innerZone = CreateCircle(parent, "InnerZone", 80f, new Color(0.3f, 1f, 0.3f, 0.10f));
+
+        // Controller position dots (small, bright)
+        _leftDot = CreateCircle(parent, "LDot", 14f, new Color(1f, 0.5f, 0f, 0.85f));
+        _rightDot = CreateCircle(parent, "RDot", 14f, new Color(0f, 0.6f, 1f, 0.85f));
+
+        // Zone label -- small text below reticle
+        _zoneText = CreateText(parent, "ZoneLabel",
+            new Vector2(0, -55), new Vector2(300, 30), TextAnchor.UpperCenter, 14);
+        _zoneText.text = "";
+    }
+
+    private Image CreateCircle(Transform parent, string name, float diameter, Color color)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+
+        var rect = go.AddComponent<RectTransform>();
+        rect.anchoredPosition = new Vector2(0, 20); // centered on reticle Y offset
+        rect.sizeDelta = new Vector2(diameter, diameter);
+
+        var img = go.AddComponent<Image>();
+        img.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/Knob.psd");
+        img.color = color;
+        img.raycastTarget = false;
+
+        return img;
+    }
+
+#if HAS_META_XR
+    private void UpdateGazeZones(Transform centerEye)
+    {
+        if (centerEye == null || _rig == null) return;
+
+        // Update controller dots and determine active zones
+        var leftInfo = GazeThrow.GetControllerZone(_rig, OVRInput.Controller.LTouch);
+        var rightInfo = GazeThrow.GetControllerZone(_rig, OVRInput.Controller.RTouch);
+
+        UpdateDot(_leftDot, leftInfo, OVRInput.Controller.LTouch);
+        UpdateDot(_rightDot, rightInfo, OVRInput.Controller.RTouch);
+
+        // Highlight active zone (use right hand as primary, fallback to left)
+        bool rightConnected = OVRInput.IsControllerConnected(OVRInput.Controller.RTouch);
+        var activeInfo = rightConnected ? rightInfo : leftInfo;
+        HighlightZone(activeInfo.zone);
+
+        // Zone label
+        if (_zoneText != null)
+        {
+            string[] names = { "INNER", "MIDDLE", "OUTER" };
+            string[] colors = { "#0f0", "#ff0", "#888" };
+            int z = activeInfo.zone;
+            _zoneText.text = $"<color={colors[z]}>{names[z]} {activeInfo.angle:F0}°</color>";
+        }
+    }
+
+    private void UpdateDot(Image dot, GazeThrow.GazeZoneInfo info, OVRInput.Controller ctrl)
+    {
+        if (dot == null) return;
+
+        bool connected = OVRInput.IsControllerConnected(ctrl);
+        dot.enabled = connected;
+        if (!connected) return;
+
+        // Map angle to canvas: scale so inner zone (15°) = 40px radius
+        float scale = 40f / 15f; // ~2.67 px per degree
+        float canvasX = info.hudX * scale;
+        float canvasY = info.hudY * scale;
+
+        var rect = dot.GetComponent<RectTransform>();
+        rect.anchoredPosition = new Vector2(canvasX, canvasY + 20f); // +20 = reticle Y offset
+    }
+
+    private void HighlightZone(int zone)
+    {
+        // Pulse the active zone brighter
+        float t = Mathf.PingPong(Time.time * 2f, 1f) * 0.04f;
+
+        if (_outerZone != null)
+            _outerZone.color = zone == 2
+                ? new Color(0.9f, 0.9f, 0.3f, 0.12f + t)
+                : new Color(0.3f, 0.9f, 0.3f, 0.06f);
+
+        if (_middleZone != null)
+            _middleZone.color = zone == 1
+                ? new Color(0.9f, 0.9f, 0.3f, 0.14f + t)
+                : new Color(0.3f, 0.9f, 0.3f, 0.08f);
+
+        if (_innerZone != null)
+            _innerZone.color = zone == 0
+                ? new Color(0.3f, 1f, 0.3f, 0.18f + t)
+                : new Color(0.3f, 1f, 0.3f, 0.10f);
+    }
+#else
+    private void UpdateGazeZones(Transform centerEye) { }
 #endif
 
     // -- Formatting --
