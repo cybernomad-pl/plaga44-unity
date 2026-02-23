@@ -288,20 +288,21 @@ namespace Plaga44.Editor
             if (mgr != null)
             {
                 var so = new SerializedObject(mgr);
-                var pTrackingOrigin = so.FindProperty("_trackingOriginType");
-                if (pTrackingOrigin != null) pTrackingOrigin.intValue = 1; // FloorLevel
-                var pHandSupport = so.FindProperty("_handTrackingSupport");
-                if (pHandSupport != null) pHandSupport.intValue = 2; // ControllersAndHands
-                var pEnabled = so.FindProperty("_controllerDrivenHandPoses");
-                if (pEnabled != null) pEnabled.boolValue = true;
-                var pType = so.FindProperty("controllerDrivenHandPosesType");
-                if (pType != null) pType.intValue = 1; // ConformingToController
-                var pNatural = so.FindProperty("_controllerDrivenHandPosesAreNatural");
-                if (pNatural != null) pNatural.boolValue = false;
-                var pMultimodal = so.FindProperty("isMultimodalHandsControllersEnabled");
-                if (pMultimodal != null) pMultimodal.boolValue = true;
+
+                // Tracking origin -- FloorLevel
+                SetProperty(so, "_trackingOriginType", 1, "FloorLevel");
+
+                // Controller-driven hand poses type -- ConformingToController
+                SetProperty(so, "controllerDrivenHandPosesType", 1, "ConformingToController");
+
+                // Enable simultaneous hands+controllers at startup
+                SetProperty(so, "launchSimultaneousHandsControllersOnStartup", true, "SimultaneousHandsControllers");
+
+                // Runtime flag for simultaneous hands+controllers
+                SetProperty(so, "SimultaneousHandsAndControllersEnabled", true, "SimultaneousEnabled");
+
                 so.ApplyModifiedProperties();
-                Debug.Log($"{LOG} OVRManager configured (FloorLevel + controller-driven hand poses).");
+                Debug.Log($"{LOG} OVRManager configured (FloorLevel + controller-driven hand poses + simultaneous hands&controllers).");
             }
 
             AddOVRHandPrefabs(rig);
@@ -417,6 +418,30 @@ namespace Plaga44.Editor
                 if (found != null) return found;
             }
             return null;
+        }
+
+        static void SetProperty(SerializedObject so, string name, int value, string label)
+        {
+            var prop = so.FindProperty(name);
+            if (prop != null)
+            {
+                prop.intValue = value;
+                Debug.Log($"{LOG} {label}: {name} = {value}");
+            }
+            else
+                Debug.LogError($"{LOG} Property NOT FOUND: {name} -- SDK field name may have changed!");
+        }
+
+        static void SetProperty(SerializedObject so, string name, bool value, string label)
+        {
+            var prop = so.FindProperty(name);
+            if (prop != null)
+            {
+                prop.boolValue = value;
+                Debug.Log($"{LOG} {label}: {name} = {value}");
+            }
+            else
+                Debug.LogError($"{LOG} Property NOT FOUND: {name} -- SDK field name may have changed!");
         }
 
         static string GetManifestPath()
