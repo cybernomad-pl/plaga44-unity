@@ -5,130 +5,133 @@ using UnityEngine;
 namespace Plaga44.Editor
 {
     /// <summary>
-    /// MVP Locomotion setup using Meta's OVRPlayerController prefab.
-    /// OVRPlayerController has built-in: CharacterController + thumbstick movement + snap turn + gravity.
-    /// This replaces standalone OVRCameraRig with OVRPlayerController (which contains OVRCameraRig as child).
+    /// MVP scene setup using Meta's OVRInteractionComprehensive prefab.
+    /// This is the SAME prefab used in ALL Meta SDK example scenes (HandGrabExamples,
+    /// LocomotionExamples, etc). It includes: OVRCameraRig + hand/controller tracking +
+    /// HandGrabInteractor + locomotion (slide + snap turn + teleport) + ray + poke.
+    /// Everything wired and ready to go.
     /// </summary>
     public static class LocomotionSetup
     {
         private const string LOG = "[PLAGA44]";
 
-        [MenuItem("CYBERNOMAD/Scene Setup/Add Locomotion (MVP)", false, 102)]
-        public static void SetupLocomotion()
+        [MenuItem("CYBERNOMAD/Scene Setup/Setup TESTBED (Comprehensive Rig)", false, 100)]
+        public static void SetupTestbed()
         {
-            Debug.Log($"{LOG} === MVP Locomotion Setup ===");
+            Debug.Log($"{LOG} === TESTBED Setup (OVRInteractionComprehensive) ===");
 
-            // Find OVRPlayerController prefab in SDK
-            string[] guids = AssetDatabase.FindAssets("OVRPlayerController t:prefab");
-            GameObject playerPrefab = null;
-            foreach (var guid in guids)
+            // Find OVRInteractionComprehensive prefab -- the full ISDK rig
+            var rigPrefab = FindPrefab("OVRInteractionComprehensive");
+            if (rigPrefab == null)
             {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.Contains("OVRPlayerController.prefab"))
-                {
-                    playerPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                    if (playerPrefab != null)
-                    {
-                        Debug.Log($"{LOG} Found OVRPlayerController: {path}");
-                        break;
-                    }
-                }
-            }
-
-            if (playerPrefab == null)
-            {
-                Debug.LogError($"{LOG} OVRPlayerController.prefab not found! Is com.meta.xr.sdk.core installed?");
+                Debug.LogError($"{LOG} OVRInteractionComprehensive.prefab not found! Is com.meta.xr.sdk.interaction.ovr installed?");
                 return;
             }
 
-            // Remove existing OVRCameraRig / OVRPlayerController / Main Camera
+            // Clean scene
+            RemoveExisting("OVRInteractionComprehensive");
             RemoveExisting("OVRPlayerController");
             RemoveExisting("OVRCameraRig");
             RemoveExisting("Main Camera");
 
-            // Instantiate OVRPlayerController
-            var player = (GameObject)PrefabUtility.InstantiatePrefab(playerPrefab);
-            player.transform.position = new Vector3(0f, 0f, 0f);
-            player.transform.rotation = Quaternion.identity;
-            Undo.RegisterCreatedObjectUndo(player, "Add OVRPlayerController");
+            // Instantiate comprehensive rig
+            var rig = (GameObject)PrefabUtility.InstantiatePrefab(rigPrefab);
+            rig.transform.position = Vector3.zero;
+            rig.transform.rotation = Quaternion.identity;
+            Undo.RegisterCreatedObjectUndo(rig, "Add OVRInteractionComprehensive");
+            Debug.Log($"{LOG} OVRInteractionComprehensive instantiated.");
 
-            // Configure OVRPlayerController
-            var controller = player.GetComponent<OVRPlayerController>();
-            if (controller != null)
+            // Add ground
+            AddGround();
+
+            Selection.activeGameObject = rig;
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+
+            Debug.Log($"{LOG} === TESTBED DONE ===");
+            Debug.Log($"{LOG} Rig includes: locomotion (slide+teleport+snap turn), hand grab, ray, poke.");
+            Debug.Log($"{LOG} Left thumbstick = move, Right thumbstick = turn.");
+        }
+
+        [MenuItem("CYBERNOMAD/Scene Setup/Copy SDK Example Scene/Locomotion Examples", false, 110)]
+        public static void CopyLocomotionExample()
+        {
+            CopyExampleScene("LocomotionExamples");
+        }
+
+        [MenuItem("CYBERNOMAD/Scene Setup/Copy SDK Example Scene/Hand Grab Examples", false, 111)]
+        public static void CopyHandGrabExample()
+        {
+            CopyExampleScene("HandGrabExamples");
+        }
+
+        [MenuItem("CYBERNOMAD/Scene Setup/Copy SDK Example Scene/Touch Grab Examples", false, 112)]
+        public static void CopyTouchGrabExample()
+        {
+            CopyExampleScene("TouchGrabExamples");
+        }
+
+        [MenuItem("CYBERNOMAD/Scene Setup/Copy SDK Example Scene/Distance Grab Examples", false, 113)]
+        public static void CopyDistanceGrabExample()
+        {
+            CopyExampleScene("DistanceGrabExamples");
+        }
+
+        private static void CopyExampleScene(string sceneName)
+        {
+            // Find scene in PackageCache Samples~
+            string[] guids = AssetDatabase.FindAssets(sceneName + " t:scene");
+            string sourcePath = null;
+
+            // Samples~ is hidden from AssetDatabase, search manually
+            string[] searchPaths = new[]
             {
-                var so = new SerializedObject(controller);
+                System.IO.Path.Combine(Application.dataPath, "..", "Library", "PackageCache"),
+            };
 
-                // Movement speed
-                var accel = so.FindProperty("Acceleration");
-                if (accel != null) accel.floatValue = 0.1f;
-
-                var damping = so.FindProperty("Damping");
-                if (damping != null) damping.floatValue = 0.3f;
-
-                // Snap turn
-                var rotAmount = so.FindProperty("RotationAmount");
-                if (rotAmount != null) rotAmount.floatValue = 45f;
-
-                // Enable linear movement
-                var enableLinear = so.FindProperty("EnableLinearMovement");
-                if (enableLinear != null) enableLinear.boolValue = true;
-
-                // Enable rotation
-                var enableRot = so.FindProperty("EnableRotation");
-                if (enableRot != null) enableRot.boolValue = true;
-
-                so.ApplyModifiedProperties();
-                Debug.Log($"{LOG} OVRPlayerController configured: movement + snap turn.");
-            }
-
-            // Configure OVRManager on the child OVRCameraRig
-            var rig = FindChildRecursive(player.transform, "OVRCameraRig");
-            if (rig != null)
+            foreach (var searchRoot in searchPaths)
             {
-                var mgr = rig.GetComponent<OVRManager>();
-                if (mgr != null)
+                if (!System.IO.Directory.Exists(searchRoot)) continue;
+                var files = System.IO.Directory.GetFiles(searchRoot, sceneName + ".unity", System.IO.SearchOption.AllDirectories);
+                foreach (var f in files)
                 {
-                    var so = new SerializedObject(mgr);
-
-                    // FloorLevel tracking
-                    var trackingOrigin = so.FindProperty("_trackingOriginType");
-                    if (trackingOrigin != null) trackingOrigin.intValue = 1;
-
-                    // Controller-driven hand poses
-                    var handPoses = so.FindProperty("controllerDrivenHandPosesType");
-                    if (handPoses != null) handPoses.intValue = 1;
-
-                    // Simultaneous hands+controllers
-                    var simLaunch = so.FindProperty("launchSimultaneousHandsControllersOnStartup");
-                    if (simLaunch != null) simLaunch.boolValue = true;
-
-                    var simEnabled = so.FindProperty("SimultaneousHandsAndControllersEnabled");
-                    if (simEnabled != null) simEnabled.boolValue = true;
-
-                    so.ApplyModifiedProperties();
-                    Debug.Log($"{LOG} OVRManager configured on OVRCameraRig child.");
+                    if (f.Contains("Samples~") && f.Contains("interaction"))
+                    {
+                        sourcePath = f;
+                        break;
+                    }
                 }
-
-                // Add hand prefabs
-                MetaQuestSetup.AddOVRHandPrefabs(rig.gameObject);
+                if (sourcePath != null) break;
             }
-            else
+
+            if (sourcePath == null)
             {
-                Debug.LogWarning($"{LOG} OVRCameraRig child not found in OVRPlayerController -- hands not added.");
+                Debug.LogError($"{LOG} {sceneName}.unity not found in SDK Samples~!");
+                return;
             }
 
-            // Configure CharacterController for gravity
-            var cc = player.GetComponent<CharacterController>();
-            if (cc != null)
+            string destDir = System.IO.Path.Combine(Application.dataPath, "Scenes");
+            if (!System.IO.Directory.Exists(destDir))
+                System.IO.Directory.CreateDirectory(destDir);
+
+            string destPath = System.IO.Path.Combine(destDir, sceneName + ".unity");
+            System.IO.File.Copy(sourcePath, destPath, true);
+            AssetDatabase.Refresh();
+
+            Debug.Log($"{LOG} Copied {sceneName}.unity to Assets/Scenes/");
+            Debug.Log($"{LOG} Open it from Project window: Assets/Scenes/{sceneName}");
+
+            // Open the scene
+            var sceneAsset = AssetDatabase.LoadAssetAtPath<SceneAsset>("Assets/Scenes/" + sceneName + ".unity");
+            if (sceneAsset != null)
             {
-                cc.height = 1.8f;
-                cc.radius = 0.3f;
-                cc.center = new Vector3(0f, 0.9f, 0f);
-                cc.skinWidth = 0.02f;
-                Debug.Log($"{LOG} CharacterController: h=1.8, r=0.3, gravity via OVRPlayerController.");
+                UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/Scenes/" + sceneName + ".unity");
+                Debug.Log($"{LOG} Scene opened: {sceneName}");
             }
+        }
 
-            // Ensure ground plane exists for gravity -- Unlit to avoid VR flicker
+        private static void AddGround()
+        {
             var ground = GameObject.Find("Ground");
             if (ground == null)
             {
@@ -136,98 +139,30 @@ namespace Plaga44.Editor
                 ground.name = "Ground";
                 ground.transform.position = Vector3.zero;
                 ground.transform.localScale = new Vector3(10f, 1f, 10f);
-                SetUnlitMaterial(ground, new Color(0.25f, 0.25f, 0.25f));
                 Undo.RegisterCreatedObjectUndo(ground, "Add Ground");
-                Debug.Log($"{LOG} Ground plane added (Unlit material).");
             }
-            else
-            {
-                // Fix existing ground material to Unlit
-                SetUnlitMaterial(ground, new Color(0.25f, 0.25f, 0.25f));
-                Debug.Log($"{LOG} Ground material switched to Unlit.");
-            }
-
-            // Add table with test objects at hand height
-            AddTestTable(player.transform.position);
-
-            Selection.activeGameObject = player;
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
-                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
-
-            Debug.Log($"{LOG} === MVP Locomotion DONE ===");
-            Debug.Log($"{LOG} Controls: Left thumbstick = move, Right thumbstick = snap turn 45deg");
-            Debug.Log($"{LOG} Gravity is handled by CharacterController + OVRPlayerController.");
+            // Always set Unlit material
+            SetUnlitMaterial(ground, new Color(0.25f, 0.25f, 0.25f));
+            Debug.Log($"{LOG} Ground (Unlit).");
         }
 
-        private static void AddTestTable(Vector3 playerPos)
+        private static GameObject FindPrefab(string name)
         {
-            // Table 1m in front of player, at waist height
-            var existing = GameObject.Find("TestTable");
-            if (existing != null)
+            string[] guids = AssetDatabase.FindAssets(name + " t:prefab");
+            foreach (var guid in guids)
             {
-                Debug.Log($"{LOG} TestTable already exists, skipping.");
-                return;
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.Contains(name + ".prefab"))
+                {
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                    if (prefab != null)
+                    {
+                        Debug.Log($"{LOG} Found {name}: {path}");
+                        return prefab;
+                    }
+                }
             }
-
-            var table = new GameObject("TestTable");
-            table.transform.position = playerPos + new Vector3(0f, 0f, 1.2f);
-            Undo.RegisterCreatedObjectUndo(table, "Add Test Table");
-
-            // Table top
-            var top = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            top.name = "TableTop";
-            top.transform.SetParent(table.transform);
-            top.transform.localPosition = new Vector3(0f, 0.75f, 0f);
-            top.transform.localScale = new Vector3(1.2f, 0.05f, 0.6f);
-            SetUnlitMaterial(top, new Color(0.45f, 0.3f, 0.15f));
-
-            // Table legs
-            for (int i = 0; i < 4; i++)
-            {
-                var leg = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                leg.name = $"Leg{i}";
-                leg.transform.SetParent(table.transform);
-                float x = (i % 2 == 0) ? -0.5f : 0.5f;
-                float z = (i < 2) ? -0.25f : 0.25f;
-                leg.transform.localPosition = new Vector3(x, 0.375f, z);
-                leg.transform.localScale = new Vector3(0.05f, 0.75f, 0.05f);
-                SetUnlitMaterial(leg, new Color(0.35f, 0.22f, 0.1f));
-            }
-
-            // Objects ON the table (grabbable height ~0.85m)
-            float tableY = 0.85f;
-
-            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            cube.name = "GrabbableCube";
-            cube.transform.SetParent(table.transform);
-            cube.transform.localPosition = new Vector3(-0.3f, tableY, 0f);
-            cube.transform.localScale = Vector3.one * 0.12f;
-            SetUnlitMaterial(cube, new Color(0.8f, 0.2f, 0.2f));
-            var rbCube = cube.AddComponent<Rigidbody>();
-            rbCube.mass = 0.3f;
-            rbCube.collisionDetectionMode = CollisionDetectionMode.Continuous;
-
-            var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.name = "GrabbableSphere";
-            sphere.transform.SetParent(table.transform);
-            sphere.transform.localPosition = new Vector3(0f, tableY, 0f);
-            sphere.transform.localScale = Vector3.one * 0.1f;
-            SetUnlitMaterial(sphere, new Color(0.2f, 0.7f, 0.2f));
-            var rbSphere = sphere.AddComponent<Rigidbody>();
-            rbSphere.mass = 0.15f;
-            rbSphere.collisionDetectionMode = CollisionDetectionMode.Continuous;
-
-            var stone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            stone.name = "Stone";
-            stone.transform.SetParent(table.transform);
-            stone.transform.localPosition = new Vector3(0.3f, tableY, 0f);
-            stone.transform.localScale = new Vector3(0.08f, 0.06f, 0.08f);
-            SetUnlitMaterial(stone, new Color(0.5f, 0.5f, 0.5f));
-            var rbStone = stone.AddComponent<Rigidbody>();
-            rbStone.mass = 0.4f;
-            rbStone.collisionDetectionMode = CollisionDetectionMode.Continuous;
-
-            Debug.Log($"{LOG} TestTable with 3 objects added at hand height.");
+            return null;
         }
 
         private static void SetUnlitMaterial(GameObject obj, Color color)
@@ -235,7 +170,6 @@ namespace Plaga44.Editor
             var renderer = obj.GetComponent<Renderer>();
             if (renderer != null)
             {
-                // Use Unlit shader to avoid VR lighting flicker
                 var shader = Shader.Find("Universal Render Pipeline/Unlit");
                 if (shader == null) shader = Shader.Find("Unlit/Color");
                 if (shader == null) shader = Shader.Find("Universal Render Pipeline/Lit");
@@ -256,17 +190,6 @@ namespace Plaga44.Editor
                     Undo.DestroyObjectImmediate(t.gameObject);
                 }
             }
-        }
-
-        private static Transform FindChildRecursive(Transform parent, string name)
-        {
-            foreach (Transform child in parent)
-            {
-                if (child.name == name) return child;
-                var found = FindChildRecursive(child, name);
-                if (found != null) return found;
-            }
-            return null;
         }
     }
 }
