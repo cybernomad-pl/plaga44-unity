@@ -80,10 +80,20 @@ public class StoneSpawner : MonoBehaviour
             r.sharedMaterial = new Material(shader) { color = new Color(gray, gray - 0.03f, gray - 0.05f) };
         }
 
-        // Replace SphereCollider with BoxCollider -- flat faces = natural stacking
+        // Cross-shaped compound collider: 2 boxes at 90 degrees
         Object.Destroy(stone.GetComponent<SphereCollider>());
-        var box = stone.AddComponent<BoxCollider>();
-        box.material = _stoneMat;
+
+        var wideChild = new GameObject("Col_Wide");
+        wideChild.transform.SetParent(stone.transform, false);
+        var wideBox = wideChild.AddComponent<BoxCollider>();
+        wideBox.size = new Vector3(0.9f, 0.8f, 0.5f);
+        wideBox.material = _stoneMat;
+
+        var longChild = new GameObject("Col_Long");
+        longChild.transform.SetParent(stone.transform, false);
+        var longBox = longChild.AddComponent<BoxCollider>();
+        longBox.size = new Vector3(0.5f, 0.6f, 0.9f);
+        longBox.material = _stoneMat;
 
         // Rigidbody
         var rb = stone.AddComponent<Rigidbody>();
@@ -92,19 +102,18 @@ public class StoneSpawner : MonoBehaviour
         rb.angularDamping = 2.0f;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
-        // OVRGrabbable -- must disable GO first so Awake() doesn't fire with null m_grabPoints
+        // OVRGrabbable -- disable GO first so Awake() doesn't fire with null m_grabPoints
         stone.SetActive(false);
         var grabbable = stone.AddComponent<OVRGrabbable>();
         if (_grabPointsField != null)
         {
-            _grabPointsField.SetValue(grabbable, new Collider[] { box });
+            _grabPointsField.SetValue(grabbable, new Collider[] { wideBox, longBox });
         }
-        // Also set m_allowOffhandGrab
         var allowField = typeof(OVRGrabbable).GetField("m_allowOffhandGrab",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         if (allowField != null)
             allowField.SetValue(grabbable, true);
-        stone.SetActive(true); // Now Awake runs safely
+        stone.SetActive(true);
 
         // ThrowBoost
         var tb = stone.AddComponent<ThrowBoost>();

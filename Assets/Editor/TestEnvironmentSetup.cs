@@ -240,12 +240,25 @@ namespace Plaga44.Editor
             stone.transform.localScale = new Vector3(size[0], size[1], size[2]);
             SetUnlitMaterial(stone, new Color(gray, gray - 0.03f, gray - 0.05f));
 
-            // Replace SphereCollider with BoxCollider -- flat faces = natural stacking.
-            // Spheres roll off each other no matter the friction. Boxes have flat surfaces
-            // that create stable contact points, like real irregular stones.
+            // Cross-shaped compound collider: 2 boxes at 90 degrees.
+            // Wide+thick box for width, thin+long box for depth.
+            // Gives irregular stone-like contact -- flat faces for stacking,
+            // but not a perfect cube so they look/feel natural.
             Object.DestroyImmediate(stone.GetComponent<SphereCollider>());
-            var box = stone.AddComponent<BoxCollider>();
-            box.material = mat;
+
+            // Box 1: wide (X) and thick (Y), shorter depth (Z)
+            var wideChild = new GameObject("Col_Wide");
+            wideChild.transform.SetParent(stone.transform, false);
+            var wideBox = wideChild.AddComponent<BoxCollider>();
+            wideBox.size = new Vector3(0.9f, 0.8f, 0.5f);
+            wideBox.material = mat;
+
+            // Box 2: narrow (X), thinner (Y), long depth (Z)
+            var longChild = new GameObject("Col_Long");
+            longChild.transform.SetParent(stone.transform, false);
+            var longBox = longChild.AddComponent<BoxCollider>();
+            longBox.size = new Vector3(0.5f, 0.6f, 0.9f);
+            longBox.material = mat;
 
             // Physics -- heavy + high damping = stable stacking
             var rb = stone.AddComponent<Rigidbody>();
@@ -254,15 +267,16 @@ namespace Plaga44.Editor
             rb.angularDamping = 2.0f;
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
-            // OVRGrabbable
+            // OVRGrabbable -- grab points = both colliders
             var grabbable = stone.AddComponent<OVRGrabbable>();
             var gso = new SerializedObject(grabbable);
             SetBool(gso, "m_allowOffhandGrab", true);
             var grabPointsProp = gso.FindProperty("m_grabPoints");
             if (grabPointsProp != null)
             {
-                grabPointsProp.arraySize = 1;
-                grabPointsProp.GetArrayElementAtIndex(0).objectReferenceValue = box;
+                grabPointsProp.arraySize = 2;
+                grabPointsProp.GetArrayElementAtIndex(0).objectReferenceValue = wideBox;
+                grabPointsProp.GetArrayElementAtIndex(1).objectReferenceValue = longBox;
             }
             gso.ApplyModifiedProperties();
 
