@@ -7,8 +7,8 @@ using UnityEngine;
 
 public class ThrowBoost : MonoBehaviour
 {
-    [Tooltip("Velocity multiplier applied on release. 3 = throw 3x harder.")]
-    public float multiplier = 3.0f;
+    [Tooltip("Velocity multiplier applied on release. 5 = throw 5x harder.")]
+    public float multiplier = 5.0f;
 
     private OVRGrabbable _grabbable;
     private Rigidbody _rb;

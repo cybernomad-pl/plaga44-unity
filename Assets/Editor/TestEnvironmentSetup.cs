@@ -27,6 +27,7 @@ namespace Plaga44.Editor
 
             AddGround();
             AddTestTable(player.transform.position);
+            AddStoneSpawner(player.transform.position);
             AddSplashScreen();
             AddDebugHUD();
 
@@ -244,12 +245,12 @@ namespace Plaga44.Editor
             var sphereCol = stone.GetComponent<SphereCollider>();
             sphereCol.radius = 0.43f;
 
-            // Physics -- stackable + throwable
+            // Physics -- heavy + high damping = stable stacking, won't slide off
             sphereCol.material = mat;
             var rb = stone.AddComponent<Rigidbody>();
-            rb.mass = 0.25f;
-            rb.linearDamping = 0.5f;
-            rb.angularDamping = 1.0f;
+            rb.mass = 1.0f;
+            rb.linearDamping = 1.0f;
+            rb.angularDamping = 2.0f;
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
             // OVRGrabbable
@@ -265,7 +266,23 @@ namespace Plaga44.Editor
             gso.ApplyModifiedProperties();
 
             // ThrowBoost -- amplifies release velocity for satisfying throws
-            stone.AddComponent<ThrowBoost>();
+            var tb = stone.AddComponent<ThrowBoost>();
+            tb.multiplier = 5.0f;
+
+            // StoneCohesion -- gentle attraction to nearby stones for stable piles
+            stone.AddComponent<StoneCohesion>();
+        }
+
+        // ---- SPAWNER ----
+
+        static void AddStoneSpawner(Vector3 playerPos)
+        {
+            var go = new GameObject("StoneSpawner");
+            // Position at table center
+            go.transform.position = playerPos + new Vector3(0f, 0f, 1.2f);
+            go.AddComponent<StoneSpawner>();
+            Undo.RegisterCreatedObjectUndo(go, "Add StoneSpawner");
+            Debug.Log($"{LOG} StoneSpawner added (new stone every 20s).");
         }
 
         // ---- GRAB ----
