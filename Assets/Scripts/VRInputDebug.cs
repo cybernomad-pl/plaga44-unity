@@ -1,15 +1,12 @@
 // VRInputDebug.cs
 // CYBERNOMAD -- In-headset HUD debug overlay for controller input.
-// Follows head (attached to CenterEyeAnchor), always visible.
-// Toggle via menu: CYBERNOMAD > Debug > VR Input Debug HUD
-// Auto-starts on Play when enabled + Meta XR SDK installed.
+// Follows head (centerEyeAnchor), controller panels follow controller anchors.
+// Pure Meta XR SDK -- no generic XR fallbacks.
 //
-// Requires: com.meta.xr.sdk.core (auto-detected via HAS_META_XR define)
+// Requires: com.meta.xr.sdk.core (HAS_META_XR define)
 
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.XR;
 
 public class VRInputDebug : MonoBehaviour
 {
@@ -43,7 +40,7 @@ public class VRInputDebug : MonoBehaviour
         }
     }
 
-    // ── Instance ────────────────────────────────────────────────────────
+    // -- Instance --
 
     private float displayDistance = 0.4f;
     private float displayScale = 0.0004f;
@@ -51,22 +48,18 @@ public class VRInputDebug : MonoBehaviour
     private Canvas _canvas;
     private Text _leftText;
     private Text _rightText;
-    private Text _headerText;
     private Text _reticleText;
     private Text _labelText;
-    private Transform _centerEye;
 
     private Canvas _leftCtrlCanvas;
     private Text _leftCtrlText;
-    private Transform _leftCtrl;
-    private GameObject _leftFollower;
 
     private Canvas _rightCtrlCanvas;
     private Text _rightCtrlText;
-    private Transform _rightCtrl;
-    private GameObject _rightFollower;
 
-    private float ctrlPanelOffset = 0.315f;
+#if HAS_META_XR
+    private OVRCameraRig _rig;
+#endif
 
     void Start()
     {
@@ -77,26 +70,27 @@ public class VRInputDebug : MonoBehaviour
 
     void Update()
     {
-        if (_centerEye == null)
+#if HAS_META_XR
+        if (_rig == null)
         {
-            FindCenterEye();
-            if (_centerEye == null)
-            {
-                var cam = Camera.main;
-                if (cam != null) _centerEye = cam.transform;
-                else return;
-            }
+            _rig = FindFirstObjectByType<OVRCameraRig>();
+            if (_rig == null) return;
         }
 
-        _canvas.transform.position = _centerEye.position + _centerEye.forward * displayDistance;
-        _canvas.transform.rotation = _centerEye.rotation;
+        // Main HUD follows head
+        var centerEye = _rig.centerEyeAnchor;
+        if (centerEye != null)
+        {
+            _canvas.transform.position = centerEye.position + centerEye.forward * displayDistance;
+            _canvas.transform.rotation = centerEye.rotation;
+        }
 
-        FindController(true, ref _leftCtrl, ref _leftFollower);
-        FindController(false, ref _rightCtrl, ref _rightFollower);
-        PositionCtrlCanvas(_leftCtrlCanvas, _leftCtrl, true);
-        PositionCtrlCanvas(_rightCtrlCanvas, _rightCtrl, false);
+        // Controller panels follow controller anchors
+        PositionCtrlCanvas(_leftCtrlCanvas, _rig.leftControllerAnchor, centerEye, true);
+        PositionCtrlCanvas(_rightCtrlCanvas, _rig.rightControllerAnchor, centerEye, false);
 
         UpdateTexts();
+#endif
     }
 
     void OnDestroy()
@@ -104,134 +98,85 @@ public class VRInputDebug : MonoBehaviour
         if (_instance == this) _instance = null;
     }
 
-    // ── Update display ──────────────────────────────────────────────────
+    // -- Display --
 
+#if HAS_META_XR
     private void UpdateTexts()
     {
         _leftText.text = $"FPS: {(1f / Time.unscaledDeltaTime):F0}  F:{Time.frameCount}";
 
-        var devices = new List<InputDevice>();
-        InputDevices.GetDevices(devices);
-        string status = $"XR:{devices.Count}";
-#if HAS_META_XR
         var ac = OVRInput.GetActiveController();
         string cc = ac != OVRInput.Controller.None ? "#0f0" : "#888";
-        status += $" OVR:<color={cc}>{ac}</color>";
-#endif
-        _rightText.text = status;
+        _rightText.text = $"OVR:<color={cc}>{ac}</color>";
 
-        _leftCtrlText.text = GetControllerState("LEFT", true);
-        _rightCtrlText.text = GetControllerState("RIGHT", false);
+        _leftCtrlText.text = GetControllerState("LEFT", OVRInput.Controller.LTouch);
+        _rightCtrlText.text = GetControllerState("RIGHT", OVRInput.Controller.RTouch);
     }
 
-    // ── Controller state (dual: OVRInput + Unity XR) ────────────────────
-
-    private string GetControllerState(string hand, bool isLeft)
+    private string GetControllerState(string hand, OVRInput.Controller ctrl)
     {
         string s = $"<b>=== {hand} ===</b>\n";
 
-        // --- Unity XR InputDevice ---
-        InputDevice xrDevice = default;
-        var characteristics = InputDeviceCharacteristics.Controller |
-            (isLeft ? InputDeviceCharacteristics.Left : InputDeviceCharacteristics.Right);
-        var controllers = new List<InputDevice>();
-        InputDevices.GetDevicesWithCharacteristics(characteristics, controllers);
+        bool connected = OVRInput.IsControllerConnected(ctrl);
+        s += $"Connected: {Colored(connected)}\n\n";
 
-        bool xrConnected = controllers.Count > 0;
-        if (xrConnected) xrDevice = controllers[0];
-
-        s += $"XR Connected: {Colored(xrConnected)}\n";
-
-#if HAS_META_XR
-        var ctrl = isLeft ? OVRInput.Controller.LTouch : OVRInput.Controller.RTouch;
-        bool ovrConnected = OVRInput.IsControllerConnected(ctrl);
-        s += $"OVR Connected: {Colored(ovrConnected)}\n\n";
-#else
-        s += "\n";
-#endif
-
-        if (!xrConnected)
+        if (!connected)
         {
-            s += "<color=#888>No controller detected</color>\n";
+            s += "<color=#888>No controller</color>\n";
             return s;
         }
 
-        // --- Buttons via Unity XR ---
-        s += "<b>-- Buttons (XR) --</b>\n";
+        bool isLeft = ctrl == OVRInput.Controller.LTouch;
 
-        bool primaryBtn, secondaryBtn, menuBtn, stickBtn;
-        xrDevice.TryGetFeatureValue(CommonUsages.primaryButton, out primaryBtn);
-        xrDevice.TryGetFeatureValue(CommonUsages.secondaryButton, out secondaryBtn);
-        xrDevice.TryGetFeatureValue(CommonUsages.menuButton, out menuBtn);
-        xrDevice.TryGetFeatureValue(CommonUsages.primary2DAxisClick, out stickBtn);
+        // Buttons
+        s += "<b>-- Buttons --</b>\n";
+        s += $"{(isLeft ? "X" : "A")}:       {BtnStr(OVRInput.Get(OVRInput.Button.One, ctrl))}\n";
+        s += $"{(isLeft ? "Y" : "B")}:       {BtnStr(OVRInput.Get(OVRInput.Button.Two, ctrl))}\n";
+        if (isLeft) s += $"Menu:    {BtnStr(OVRInput.Get(OVRInput.Button.Start, ctrl))}\n";
+        s += $"Stick:   {BtnStr(OVRInput.Get(OVRInput.Button.PrimaryThumbstick, ctrl))}\n\n";
 
-        s += $"{(isLeft ? "X" : "A")}:       {BtnStr(primaryBtn)}\n";
-        s += $"{(isLeft ? "Y" : "B")}:       {BtnStr(secondaryBtn)}\n";
-        if (isLeft) s += $"Menu:    {BtnStr(menuBtn)}\n";
-        s += $"Stick:   {BtnStr(stickBtn)}\n\n";
-
-        // --- Triggers ---
+        // Triggers
         s += "<b>-- Triggers --</b>\n";
-        float trigger, grip;
-        xrDevice.TryGetFeatureValue(CommonUsages.trigger, out trigger);
-        xrDevice.TryGetFeatureValue(CommonUsages.grip, out grip);
+        float trigger = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, ctrl);
+        float grip = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, ctrl);
         s += $"Index:   {Bar(trigger)} {trigger:F2}\n";
         s += $"Grip:    {Bar(grip)} {grip:F2}\n\n";
 
-        // --- Thumbstick ---
+        // Thumbstick
         s += "<b>-- Thumbstick --</b>\n";
-        Vector2 stick;
-        xrDevice.TryGetFeatureValue(CommonUsages.primary2DAxis, out stick);
+        Vector2 stick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, ctrl);
         s += $"X: {stick.x:+0.00;-0.00}  Y: {stick.y:+0.00;-0.00}\n";
         s += $"Dir: {StickVisual(stick)}\n\n";
 
-        // --- Touch (OVR only) ---
-#if HAS_META_XR
-        s += "<b>-- Touch (OVR) --</b>\n";
-        if (isLeft)
-        {
-            s += $"X:     {Touch(OVRInput.Touch.Three, ctrl)}\n";
-            s += $"Y:     {Touch(OVRInput.Touch.Four, ctrl)}\n";
-        }
-        else
-        {
-            s += $"A:     {Touch(OVRInput.Touch.One, ctrl)}\n";
-            s += $"B:     {Touch(OVRInput.Touch.Two, ctrl)}\n";
-        }
-        s += $"Stick: {Touch(OVRInput.Touch.PrimaryThumbstick, ctrl)}\n";
-        s += $"Index: {Touch(OVRInput.Touch.PrimaryIndexTrigger, ctrl)}\n";
-#endif
+        // Touch
+        s += "<b>-- Touch --</b>\n";
+        s += $"{(isLeft ? "X" : "A")}:     {TouchStr(OVRInput.Get(isLeft ? OVRInput.Touch.Three : OVRInput.Touch.One, ctrl))}\n";
+        s += $"{(isLeft ? "Y" : "B")}:     {TouchStr(OVRInput.Get(isLeft ? OVRInput.Touch.Four : OVRInput.Touch.Two, ctrl))}\n";
+        s += $"Stick: {TouchStr(OVRInput.Get(OVRInput.Touch.PrimaryThumbstick, ctrl))}\n";
+        s += $"Index: {TouchStr(OVRInput.Get(OVRInput.Touch.PrimaryIndexTrigger, ctrl))}\n\n";
 
-        // --- Position/Rotation ---
-        s += "\n<b>-- Tracking --</b>\n";
-        Vector3 pos;
-        Quaternion rot;
-        xrDevice.TryGetFeatureValue(CommonUsages.devicePosition, out pos);
-        xrDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out rot);
+        // Tracking
+        s += "<b>-- Tracking --</b>\n";
+        Vector3 pos = OVRInput.GetLocalControllerPosition(ctrl);
+        Quaternion rot = OVRInput.GetLocalControllerRotation(ctrl);
         s += $"Pos: {pos.x:F2} {pos.y:F2} {pos.z:F2}\n";
         s += $"Rot: {rot.eulerAngles.x:F0} {rot.eulerAngles.y:F0} {rot.eulerAngles.z:F0}\n";
 
-        bool tracked;
-        xrDevice.TryGetFeatureValue(CommonUsages.isTracked, out tracked);
-        s += $"Tracked: {Colored(tracked)}\n";
-
         return s;
     }
+#endif
 
-    // ── Formatting helpers ──────────────────────────────────────────────
+    // -- Formatting --
 
     private string BtnStr(bool pressed)
     {
         return pressed ? "<color=#0f0><b>[PRESSED]</b></color>" : "<color=#888>[      ]</color>";
     }
 
-#if HAS_META_XR
-    private string Touch(OVRInput.Touch touch, OVRInput.Controller ctrl)
+    private string TouchStr(bool touched)
     {
-        bool touched = OVRInput.Get(touch, ctrl);
         return touched ? "<color=#ff0>[TOUCH]</color>" : "<color=#888>[     ]</color>";
     }
-#endif
 
     private string Bar(float value)
     {
@@ -263,72 +208,23 @@ public class VRInputDebug : MonoBehaviour
         return "v/";
     }
 
-    // ── Canvas setup ────────────────────────────────────────────────────
+    // -- Canvas --
 
-    private void FindCenterEye()
+    private void PositionCtrlCanvas(Canvas canvas, Transform anchor, Transform centerEye, bool isLeft)
     {
-#if HAS_META_XR
-        var rig = FindFirstObjectByType<OVRCameraRig>();
-        if (rig != null)
-        {
-            _centerEye = rig.centerEyeAnchor;
-            return;
-        }
-#endif
-        var cam = Camera.main;
-        if (cam != null) _centerEye = cam.transform;
-    }
-
-    private void FindController(bool isLeft, ref Transform ctrl, ref GameObject follower)
-    {
-#if HAS_META_XR
-        if (ctrl == null)
-        {
-            var rig = FindFirstObjectByType<OVRCameraRig>();
-            if (rig != null)
-            {
-                ctrl = isLeft ? rig.leftControllerAnchor : rig.rightControllerAnchor;
-            }
-        }
-        // OVR anchor tracks in world space -- don't fall through to XR fallback
-        // (XR fallback uses tracking space which doesn't move with locomotion)
-        if (ctrl != null) return;
-#endif
-        var side = isLeft ? InputDeviceCharacteristics.Left : InputDeviceCharacteristics.Right;
-        var devs = new List<InputDevice>();
-        InputDevices.GetDevicesWithCharacteristics(
-            InputDeviceCharacteristics.Controller | side, devs);
-        if (devs.Count == 0) { ctrl = null; return; }
-
-        Vector3 pos; Quaternion rot;
-        if (!devs[0].TryGetFeatureValue(CommonUsages.devicePosition, out pos) ||
-            !devs[0].TryGetFeatureValue(CommonUsages.deviceRotation, out rot))
-        { ctrl = null; return; }
-
-        if (follower == null)
-        {
-            follower = new GameObject($"XRFollow_{(isLeft ? "L" : "R")}");
-            follower.transform.SetParent(transform);
-        }
-        follower.transform.position = pos;
-        follower.transform.rotation = rot;
-        ctrl = follower.transform;
-    }
-
-    private void PositionCtrlCanvas(Canvas canvas, Transform ctrl, bool isLeft)
-    {
-        if (ctrl == null) { canvas.gameObject.SetActive(false); return; }
+        if (anchor == null) { canvas.gameObject.SetActive(false); return; }
 
         canvas.gameObject.SetActive(true);
+        // Offset relative to controller, not world space
         float sideways = isLeft ? -0.05f : 0.12f;
-        canvas.transform.position = ctrl.position
-            + Vector3.up * 0.15f + Vector3.right * sideways;
+        canvas.transform.position = anchor.position
+            + anchor.up * 0.15f + anchor.right * sideways;
 
-        if (_centerEye != null)
+        if (centerEye != null)
             canvas.transform.rotation = Quaternion.LookRotation(
-                canvas.transform.position - _centerEye.position, Vector3.up);
+                canvas.transform.position - centerEye.position, Vector3.up);
         else
-            canvas.transform.rotation = ctrl.rotation;
+            canvas.transform.rotation = anchor.rotation;
     }
 
     private void CreateDebugCanvas()
@@ -355,10 +251,6 @@ public class VRInputDebug : MonoBehaviour
 
         _rightText = CreateText(canvasGO.transform, "HudRight",
             new Vector2(300, 15), new Vector2(400, 40), TextAnchor.MiddleLeft, 18);
-
-        _headerText = CreateText(canvasGO.transform, "Header",
-            Vector2.zero, Vector2.zero, TextAnchor.UpperCenter, 1);
-        _headerText.gameObject.SetActive(false);
     }
 
     private Canvas CreateCtrlCanvas(string name, ref Text text)
