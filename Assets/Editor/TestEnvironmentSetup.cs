@@ -7,14 +7,21 @@ namespace Plaga44.Editor
 {
     /// <summary>
     /// One-click TESTBED. Creates:
-    /// 1. OVRCameraRig (CAMERA + tracking) with hands
-    /// 2. OVRInteractionComprehensive (ISDK: grab, locomotion, ray, poke)
+    /// 1. OVRCameraRig (CAMERA + tracking) -- bare, NO hand prefabs
+    /// 2. OVRInteractionComprehensive (ISDK: grab, locomotion, ray, poke, hand visuals)
     ///    -- wired to OVRCameraRig via OVRCameraRigRef._ovrCameraRig
-    /// 3. Floor, table, debug HUD, splash screen
+    /// 3. Floor, table with ONE grabbable stone, debug HUD, splash screen
+    ///
+    /// IMPORTANT: OVRInteractionComprehensive provides ALL hand/controller visuals.
+    /// We do NOT add OVRHandPrefab -- that causes double hands!
     /// </summary>
     public static class TestEnvironmentSetup
     {
         private const string LOG = "[PLAGA44]";
+
+        // ISDK script GUIDs (from com.meta.xr.sdk.interaction package)
+        private const string GUID_GRABBABLE = "43f86b14a27b52f4f9298c33015b5c26";
+        private const string GUID_HAND_GRAB_INTERACTABLE = "e9a7676b01585ce43908639a27765dfc";
 
         [MenuItem("CYBERNOMAD/Scene Setup/Setup TESTBED", false, 50)]
         public static void SetupTestbed()
@@ -23,25 +30,25 @@ namespace Plaga44.Editor
 
             CleanScene();
 
-            // 1. Camera rig + hands
+            // 1. Bare camera rig (NO hand prefabs -- ISDK handles hand visuals)
             var cameraRig = AddCameraRig();
 
-            // 2. ISDK interactions (grab + locomotion) wired to camera rig
+            // 2. ISDK interactions (grab + locomotion + hand visuals) wired to camera rig
             if (cameraRig != null)
                 AddInteractions(cameraRig);
 
             // 3. Environment
             AddFloor();
-            AddTestTable();
+            AddTableWithStone();
 
             // 4. Extras
             AddSplashScreen();
-            AddDebugHUD();
+            AddDebugHUD(cameraRig);
 
             EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
 
             Debug.Log($"{LOG} === TESTBED READY ===");
-            Debug.Log($"{LOG} L-stick = move, R-stick = snap turn, grip = grab");
+            Debug.Log($"{LOG} L-stick = move, R-stick = snap turn, grip = grab stone");
         }
 
         [MenuItem("CYBERNOMAD/Scene Setup/Clean Scene", false, 200)]
@@ -58,25 +65,74 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} Scene cleaned.");
         }
 
-        // ---- CAMERA RIG ----
+        // ==================================================================
+        // CAMERA RIG -- bare OVRCameraRig, NO OVRHandPrefab
+        // OVRInteractionComprehensive provides all hand/controller visuals!
+        // ==================================================================
 
         static OVRCameraRig AddCameraRig()
         {
-            // Use MetaQuestSetup which adds OVRCameraRig + OVRHandPrefabs + configures OVRManager
-            MetaQuestSetup.SetupVRSceneHands();
-
-            // Find the OVRCameraRig that was just added
-            var rig = GameObject.FindFirstObjectByType<OVRCameraRig>();
-            if (rig == null)
+            // Check build target
+            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
             {
-                Debug.LogError($"{LOG} OVRCameraRig not found after setup!");
+                Debug.LogError($"{LOG} Build target is not Android! Camera rig needs Android target.");
                 return null;
             }
-            Debug.Log($"{LOG} OVRCameraRig ready (camera + hands).");
+
+            // Find OVRCameraRig prefab
+            var prefab = FindPrefab("OVRCameraRig");
+            if (prefab == null)
+            {
+                Debug.LogError($"{LOG} OVRCameraRig prefab not found! Is com.meta.xr.sdk.core installed?");
+                return null;
+            }
+
+            // Delete existing Main Camera
+            var cameras = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None);
+            foreach (var cam in cameras)
+            {
+                if (cam.gameObject.name == "Main Camera")
+                {
+                    Undo.DestroyObjectImmediate(cam.gameObject);
+                    Debug.Log($"{LOG} Deleted Main Camera.");
+                    break;
+                }
+            }
+
+            // Instantiate bare rig -- NO hand prefabs!
+            var rigGO = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            rigGO.transform.position = Vector3.zero;
+            rigGO.transform.rotation = Quaternion.identity;
+            Undo.RegisterCreatedObjectUndo(rigGO, "Add OVRCameraRig");
+
+            // Configure OVRManager
+            var mgr = rigGO.GetComponent<OVRManager>();
+            if (mgr != null)
+            {
+                var so = new SerializedObject(mgr);
+
+                // FloorLevel tracking origin
+                var trackOrigin = so.FindProperty("_trackingOriginType");
+                if (trackOrigin != null) trackOrigin.intValue = 1;
+
+                so.ApplyModifiedProperties();
+                Debug.Log($"{LOG} OVRManager: FloorLevel tracking origin.");
+            }
+
+            var rig = rigGO.GetComponent<OVRCameraRig>();
+            if (rig == null)
+            {
+                Debug.LogError($"{LOG} OVRCameraRig component not found on prefab!");
+                return null;
+            }
+
+            Debug.Log($"{LOG} OVRCameraRig ready (bare rig, no hand prefabs -- ISDK handles visuals).");
             return rig;
         }
 
-        // ---- ISDK INTERACTIONS ----
+        // ==================================================================
+        // ISDK INTERACTIONS
+        // ==================================================================
 
         static void AddInteractions(OVRCameraRig cameraRig)
         {
@@ -95,7 +151,7 @@ namespace Plaga44.Editor
             // WIRE: find OVRCameraRigRef component and set _ovrCameraRig
             WireCameraRigRef(interaction, cameraRig);
 
-            // WIRE: find PlayerLocomotor and set _playerOrigin + _playerHead
+            // WIRE: find locomotion components and set _playerOrigin + _playerEyes
             WirePlayerOrigin(interaction, cameraRig);
 
             Debug.Log($"{LOG} OVRInteractionComprehensive wired to OVRCameraRig.");
@@ -103,9 +159,8 @@ namespace Plaga44.Editor
 
         static void WireCameraRigRef(GameObject interactionRoot, OVRCameraRig cameraRig)
         {
-            // OVRCameraRigRef is the central config point -- has _ovrCameraRig field
-            var rigRefs = interactionRoot.GetComponentsInChildren<MonoBehaviour>(true);
-            foreach (var mb in rigRefs)
+            var allMBs = interactionRoot.GetComponentsInChildren<MonoBehaviour>(true);
+            foreach (var mb in allMBs)
             {
                 if (mb == null) continue;
                 if (mb.GetType().Name != "OVRCameraRigRef") continue;
@@ -115,43 +170,20 @@ namespace Plaga44.Editor
                 if (prop != null)
                 {
                     prop.objectReferenceValue = cameraRig;
-                    so.ApplyModifiedProperties();
                     Debug.Log($"{LOG} Wired OVRCameraRigRef._ovrCameraRig -> {cameraRig.name}");
                 }
 
-                // Also wire _leftHand and _rightHand if we can find them
-                var leftHandProp = so.FindProperty("_leftHand");
-                var rightHandProp = so.FindProperty("_rightHand");
-                if (leftHandProp != null || rightHandProp != null)
-                {
-                    var hands = cameraRig.GetComponentsInChildren<OVRHand>(true);
-                    foreach (var hand in hands)
-                    {
-                        var handSo = new SerializedObject(hand);
-                        var handType = handSo.FindProperty("HandType");
-                        if (handType != null)
-                        {
-                            if (handType.intValue == 0 && leftHandProp != null) // HandLeft
-                            {
-                                leftHandProp.objectReferenceValue = hand;
-                                Debug.Log($"{LOG} Wired _leftHand -> {hand.name}");
-                            }
-                            else if (handType.intValue == 1 && rightHandProp != null) // HandRight
-                            {
-                                rightHandProp.objectReferenceValue = hand;
-                                Debug.Log($"{LOG} Wired _rightHand -> {hand.name}");
-                            }
-                        }
-                    }
-                    so.ApplyModifiedProperties();
-                }
-                break; // Only one OVRCameraRigRef expected
+                // NOTE: _leftHand/_rightHand on OVRCameraRigRef refer to OVRHand components.
+                // Since we don't add OVRHandPrefab, these will be null.
+                // OVRInteractionComprehensive handles hands internally via ISDK.
+
+                so.ApplyModifiedProperties();
+                break;
             }
         }
 
         static void WirePlayerOrigin(GameObject interactionRoot, OVRCameraRig cameraRig)
         {
-            // Find any component with _playerOrigin or _playerEyes fields
             var allMBs = interactionRoot.GetComponentsInChildren<MonoBehaviour>(true);
             foreach (var mb in allMBs)
             {
@@ -177,10 +209,24 @@ namespace Plaga44.Editor
                         Debug.Log($"{LOG} Wired _playerEyes -> {centerEye.name} on {mb.GetType().Name}");
                     }
                 }
+
+                var headProp = so.FindProperty("_playerHead");
+                if (headProp != null && headProp.propertyType == SerializedPropertyType.ObjectReference)
+                {
+                    var centerEye = cameraRig.centerEyeAnchor;
+                    if (centerEye != null)
+                    {
+                        headProp.objectReferenceValue = centerEye;
+                        so.ApplyModifiedProperties();
+                        Debug.Log($"{LOG} Wired _playerHead -> {centerEye.name} on {mb.GetType().Name}");
+                    }
+                }
             }
         }
 
-        // ---- ENVIRONMENT ----
+        // ==================================================================
+        // ENVIRONMENT
+        // ==================================================================
 
         static void AddFloor()
         {
@@ -193,8 +239,9 @@ namespace Plaga44.Editor
             Undo.RegisterCreatedObjectUndo(floor, "Add Floor");
         }
 
-        static void AddTestTable()
+        static void AddTableWithStone()
         {
+            // --- Table ---
             var table = new GameObject("TestTable");
             table.transform.position = new Vector3(0f, 0f, 1.5f);
             Undo.RegisterCreatedObjectUndo(table, "Add TestTable");
@@ -220,16 +267,82 @@ namespace Plaga44.Editor
                 SetMat(leg, new Color(0.35f, 0.22f, 0.1f));
             }
 
-            float y = 0.85f;
-            AddObj(table.transform, "RedCube", PrimitiveType.Cube,
-                new Vector3(-0.3f, y, 0f), Vector3.one * 0.12f, new Color(0.8f, 0.2f, 0.2f), 0.3f);
-            AddObj(table.transform, "GreenSphere", PrimitiveType.Sphere,
-                new Vector3(0f, y, 0f), Vector3.one * 0.1f, new Color(0.2f, 0.7f, 0.2f), 0.15f);
-            AddObj(table.transform, "Stone", PrimitiveType.Sphere,
-                new Vector3(0.3f, y, 0f), new Vector3(0.08f, 0.06f, 0.08f), new Color(0.5f, 0.5f, 0.5f), 0.4f);
+            // --- ONE grabbable stone on the table ---
+            AddGrabbableStone(table.transform);
         }
 
-        // ---- EXTRAS ----
+        /// <summary>
+        /// Creates a stone-like grabbable sphere with ISDK components:
+        /// Collider (trigger) + Rigidbody (kinematic) + Grabbable + HandGrabInteractable
+        /// Matches SDK's [BB] Grabbable Cube structure.
+        /// </summary>
+        static void AddGrabbableStone(Transform tableParent)
+        {
+            // Create sphere (slightly squashed = stone shape)
+            var stone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            stone.name = "Stone";
+            stone.transform.SetParent(tableParent);
+            stone.transform.localPosition = new Vector3(0f, 0.85f, 0f);
+            stone.transform.localScale = new Vector3(0.12f, 0.09f, 0.10f);
+            SetMat(stone, new Color(0.45f, 0.42f, 0.40f));
+
+            // Collider must be TRIGGER for ISDK grab detection
+            var col = stone.GetComponent<Collider>();
+            if (col != null) col.isTrigger = true;
+
+            // Rigidbody: kinematic, no gravity (ISDK standard -- Grabbable handles physics)
+            var rb = stone.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.mass = 0.4f;
+
+            // Add ISDK Grabbable component via script GUID
+            var grabbableScript = LoadScriptByGUID(GUID_GRABBABLE);
+            if (grabbableScript == null)
+            {
+                Debug.LogError($"{LOG} Grabbable script not found (GUID: {GUID_GRABBABLE}). Stone won't be grabbable.");
+                // Fallback: at least make it a normal physics object
+                rb.isKinematic = false;
+                rb.useGravity = true;
+                return;
+            }
+
+            var grabbableType = grabbableScript.GetClass();
+            var grabbable = stone.AddComponent(grabbableType);
+
+            // Wire Grabbable fields
+            var gSo = new SerializedObject(grabbable);
+            SetObjRef(gSo, "_rigidbody", rb);
+            SetBool(gSo, "_kinematicWhileSelected", true);
+            SetBool(gSo, "_throwWhenUnselected", true);
+            gSo.ApplyModifiedProperties();
+
+            // Add ISDK HandGrabInteractable component via script GUID
+            var hgiScript = LoadScriptByGUID(GUID_HAND_GRAB_INTERACTABLE);
+            if (hgiScript == null)
+            {
+                Debug.LogError($"{LOG} HandGrabInteractable script not found (GUID: {GUID_HAND_GRAB_INTERACTABLE}).");
+                return;
+            }
+
+            var hgiType = hgiScript.GetClass();
+            var hgi = stone.AddComponent(hgiType);
+
+            // Wire HandGrabInteractable fields
+            var hSo = new SerializedObject(hgi);
+            SetObjRef(hSo, "_pointableElement", grabbable);
+            SetObjRef(hSo, "_rigidbody", rb);
+            // _supportedGrabTypes: 3 = Pinch|Palm (both)
+            var grabTypes = hSo.FindProperty("_supportedGrabTypes");
+            if (grabTypes != null) grabTypes.intValue = 3;
+            hSo.ApplyModifiedProperties();
+
+            Debug.Log($"{LOG} Grabbable stone added: Collider(trigger) + Rigidbody + Grabbable + HandGrabInteractable");
+        }
+
+        // ==================================================================
+        // EXTRAS
+        // ==================================================================
 
         static void AddSplashScreen()
         {
@@ -238,27 +351,57 @@ namespace Plaga44.Editor
             Undo.RegisterCreatedObjectUndo(go, "Add SplashScreen");
         }
 
-        static void AddDebugHUD()
+        /// <summary>
+        /// Adds VRInputDebug as a CHILD of OVRCameraRig so it always moves with the player.
+        /// VRInputDebug.Update() repositions its canvases relative to centerEyeAnchor,
+        /// but parenting ensures it's never left behind during locomotion.
+        /// </summary>
+        static void AddDebugHUD(OVRCameraRig cameraRig)
         {
             var go = new GameObject("VRInputDebug");
             go.AddComponent<VRInputDebug>();
+
+            // Parent to camera rig so it moves with locomotion
+            if (cameraRig != null)
+            {
+                go.transform.SetParent(cameraRig.transform);
+                go.transform.localPosition = Vector3.zero;
+                go.transform.localRotation = Quaternion.identity;
+            }
+
             Undo.RegisterCreatedObjectUndo(go, "Add VRInputDebug");
         }
 
-        // ---- HELPERS ----
+        // ==================================================================
+        // HELPERS
+        // ==================================================================
 
-        static void AddObj(Transform parent, string name, PrimitiveType type,
-            Vector3 pos, Vector3 scale, Color color, float mass)
+        static MonoScript LoadScriptByGUID(string guid)
         {
-            var obj = GameObject.CreatePrimitive(type);
-            obj.name = name;
-            obj.transform.SetParent(parent);
-            obj.transform.localPosition = pos;
-            obj.transform.localScale = scale;
-            SetMat(obj, color);
-            var rb = obj.AddComponent<Rigidbody>();
-            rb.mass = mass;
-            rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (string.IsNullOrEmpty(path))
+            {
+                Debug.LogError($"{LOG} Script GUID not found: {guid}");
+                return null;
+            }
+            var script = AssetDatabase.LoadAssetAtPath<MonoScript>(path);
+            if (script == null)
+                Debug.LogError($"{LOG} Could not load MonoScript at: {path}");
+            return script;
+        }
+
+        static void SetObjRef(SerializedObject so, string propName, Object value)
+        {
+            var prop = so.FindProperty(propName);
+            if (prop != null)
+                prop.objectReferenceValue = value;
+        }
+
+        static void SetBool(SerializedObject so, string propName, bool value)
+        {
+            var prop = so.FindProperty(propName);
+            if (prop != null)
+                prop.boolValue = value;
         }
 
         static GameObject FindPrefab(string name)
