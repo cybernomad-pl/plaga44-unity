@@ -6,8 +6,9 @@ namespace Plaga44.Editor
 {
     /// <summary>
     /// One-click TESTBED: OVRPlayerController (camera + hands + thumbstick movement + gravity)
-    /// + ground + table + stone + splash + debug HUD.
+    /// + OVRGrabber on controllers + ground + table + grabbable stone + splash + debug HUD.
     /// OVRPlayerController has OVRCameraRig as CHILD -- no separate camera rig needed.
+    /// OVRGrabber/OVRGrabbable from com.meta.xr.sdk.core -- simplest grab system.
     /// </summary>
     public static class TestEnvironmentSetup
     {
@@ -124,7 +125,10 @@ namespace Plaga44.Editor
                 cc.skinWidth = 0.02f;
             }
 
-            Debug.Log($"{LOG} OVRPlayerController ready (camera + hands + movement + gravity).");
+            // Grab -- OVRGrabber on controller anchors
+            AddGrabbers(rigTransform, player);
+
+            Debug.Log($"{LOG} OVRPlayerController ready (camera + hands + movement + gravity + grab).");
             return player;
         }
 
@@ -180,6 +184,68 @@ namespace Plaga44.Editor
             var rb = stone.AddComponent<Rigidbody>();
             rb.mass = 0.4f;
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+
+            // OVRGrabbable -- makes stone grabbable by OVRGrabber
+            var grabbable = stone.AddComponent<OVRGrabbable>();
+            var gso = new SerializedObject(grabbable);
+            SetBool(gso, "m_allowOffhandGrab", true);
+            var grabPointsProp = gso.FindProperty("m_grabPoints");
+            if (grabPointsProp != null)
+            {
+                grabPointsProp.arraySize = 1;
+                grabPointsProp.GetArrayElementAtIndex(0).objectReferenceValue = stone.GetComponent<Collider>();
+            }
+            gso.ApplyModifiedProperties();
+        }
+
+        // ---- GRAB ----
+
+        static void AddGrabbers(Transform rigTransform, GameObject player)
+        {
+            if (rigTransform == null) return;
+
+            var leftCtrl = FindChild(rigTransform, "LeftControllerAnchor");
+            var rightCtrl = FindChild(rigTransform, "RightControllerAnchor");
+
+            if (leftCtrl != null) SetupGrabber(leftCtrl.gameObject, 1, player); // 1 = OVRInput.Controller.LTouch
+            if (rightCtrl != null) SetupGrabber(rightCtrl.gameObject, 2, player); // 2 = OVRInput.Controller.RTouch
+
+            Debug.Log($"{LOG} OVRGrabber added to controller anchors.");
+        }
+
+        static void SetupGrabber(GameObject anchorGO, int controllerValue, GameObject player)
+        {
+            // Rigidbody (kinematic -- hand doesn't obey physics)
+            var rb = anchorGO.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+
+            // Trigger collider -- grab detection volume
+            var col = anchorGO.AddComponent<SphereCollider>();
+            col.isTrigger = true;
+            col.radius = 0.05f;
+
+            // OVRGrabber
+            var grabber = anchorGO.AddComponent<OVRGrabber>();
+            var so = new SerializedObject(grabber);
+
+            SetInt(so, "m_controller", controllerValue);
+            SetBool(so, "m_parentHeldObject", true);
+
+            // Grab volume = the trigger SphereCollider we just added
+            var volumesProp = so.FindProperty("m_grabVolumes");
+            if (volumesProp != null)
+            {
+                volumesProp.arraySize = 1;
+                volumesProp.GetArrayElementAtIndex(0).objectReferenceValue = col;
+            }
+
+            // Player reference for collision ignore
+            var playerProp = so.FindProperty("m_player");
+            if (playerProp != null)
+                playerProp.objectReferenceValue = player;
+
+            so.ApplyModifiedProperties();
         }
 
         // ---- EXTRAS ----
