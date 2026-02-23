@@ -159,6 +159,14 @@ namespace Plaga44.Editor
             top.transform.localScale = new Vector3(1.2f, 0.05f, 0.6f);
             top.isStatic = true;
             SetUnlitMaterial(top, new Color(0.45f, 0.3f, 0.15f));
+            var topMat = new PhysicsMaterial("WoodMat")
+            {
+                dynamicFriction = 0.7f,
+                staticFriction = 0.8f,
+                bounciness = 0.02f,
+                frictionCombine = PhysicsMaterialCombine.Maximum
+            };
+            top.GetComponent<Collider>().material = topMat;
 
             // Legs
             float[] xs = { -0.5f, 0.5f, -0.5f, 0.5f };
@@ -174,18 +182,63 @@ namespace Plaga44.Editor
                 SetUnlitMaterial(leg, new Color(0.35f, 0.22f, 0.1f));
             }
 
-            // Stone
+            // Stones -- pile of grabbable rocks with friction
+            var stoneMat = new PhysicsMaterial("StoneMat")
+            {
+                dynamicFriction = 0.8f,
+                staticFriction = 0.9f,
+                bounciness = 0.05f,
+                frictionCombine = PhysicsMaterialCombine.Maximum
+            };
+
+            Vector3[] stonePositions =
+            {
+                new Vector3( 0.00f, 0.85f,  0.00f),
+                new Vector3(-0.15f, 0.85f,  0.05f),
+                new Vector3( 0.18f, 0.85f, -0.03f),
+                new Vector3(-0.05f, 0.85f, -0.10f),
+                new Vector3( 0.10f, 0.85f,  0.12f),
+                new Vector3( 0.00f, 0.95f,  0.02f), // on top of pile
+            };
+
+            float[][] stoneSizes =
+            {
+                new[] { 0.12f, 0.09f, 0.10f },
+                new[] { 0.10f, 0.07f, 0.09f },
+                new[] { 0.08f, 0.06f, 0.11f },
+                new[] { 0.11f, 0.08f, 0.07f },
+                new[] { 0.09f, 0.07f, 0.08f },
+                new[] { 0.07f, 0.05f, 0.06f },
+            };
+
+            float[] stoneGrays = { 0.45f, 0.38f, 0.50f, 0.42f, 0.35f, 0.48f };
+
+            for (int s = 0; s < stonePositions.Length; s++)
+            {
+                AddStone(table.transform, $"Stone{s}", stonePositions[s],
+                    stoneSizes[s], stoneGrays[s], stoneMat);
+            }
+        }
+
+        static void AddStone(Transform parent, string name, Vector3 localPos,
+            float[] size, float gray, PhysicsMaterial mat)
+        {
             var stone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            stone.name = "Stone";
-            stone.transform.SetParent(table.transform);
-            stone.transform.localPosition = new Vector3(0f, 0.85f, 0f);
-            stone.transform.localScale = new Vector3(0.12f, 0.09f, 0.10f);
-            SetUnlitMaterial(stone, new Color(0.45f, 0.42f, 0.40f));
+            stone.name = name;
+            stone.transform.SetParent(parent);
+            stone.transform.localPosition = localPos;
+            stone.transform.localScale = new Vector3(size[0], size[1], size[2]);
+            SetUnlitMaterial(stone, new Color(gray, gray - 0.03f, gray - 0.05f));
+
+            // Physics -- heavy friction, high drag so stones don't slide/roll away
+            stone.GetComponent<Collider>().material = mat;
             var rb = stone.AddComponent<Rigidbody>();
             rb.mass = 0.4f;
+            rb.drag = 2f;
+            rb.angularDrag = 3f;
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
-            // OVRGrabbable -- makes stone grabbable by OVRGrabber
+            // OVRGrabbable
             var grabbable = stone.AddComponent<OVRGrabbable>();
             var gso = new SerializedObject(grabbable);
             SetBool(gso, "m_allowOffhandGrab", true);
