@@ -280,18 +280,35 @@ namespace Plaga44.Editor
             rb.isKinematic = true;
             rb.useGravity = false;
 
-            // Physical collider -- hand pushes objects, no pass-through
-            // Offset forward (local Z) toward fingertips, large enough to cover hand
-            var physCol = anchorGO.AddComponent<SphereCollider>();
-            physCol.isTrigger = false;
-            physCol.radius = 0.08f;
-            physCol.center = new Vector3(0f, 0f, 0.05f);
+            // Hand-shaped compound collider (child objects inherit parent Rigidbody)
+            // Palm -- flat box at grip center
+            var palm = new GameObject("PalmCollider");
+            palm.transform.SetParent(anchorGO.transform, false);
+            palm.transform.localPosition = new Vector3(0f, 0f, 0.03f);
+            var palmCol = palm.AddComponent<BoxCollider>();
+            palmCol.size = new Vector3(0.08f, 0.03f, 0.08f);
 
-            // Trigger collider -- grab detection volume (larger than physical)
+            // Fingers -- capsule extending forward from palm
+            var fingers = new GameObject("FingersCollider");
+            fingers.transform.SetParent(anchorGO.transform, false);
+            fingers.transform.localPosition = new Vector3(0f, 0f, 0.10f);
+            var fingersCol = fingers.AddComponent<CapsuleCollider>();
+            fingersCol.direction = 2; // Z axis (forward)
+            fingersCol.radius = 0.02f;
+            fingersCol.height = 0.10f;
+
+            // Thumb -- small sphere offset to the side
+            var thumb = new GameObject("ThumbCollider");
+            thumb.transform.SetParent(anchorGO.transform, false);
+            thumb.transform.localPosition = new Vector3(0.04f, 0f, 0.05f);
+            var thumbCol = thumb.AddComponent<SphereCollider>();
+            thumbCol.radius = 0.02f;
+
+            // Trigger collider -- grab detection volume (on anchor, covers whole hand area)
             var grabCol = anchorGO.AddComponent<SphereCollider>();
             grabCol.isTrigger = true;
             grabCol.radius = 0.1f;
-            grabCol.center = new Vector3(0f, 0f, 0.05f);
+            grabCol.center = new Vector3(0f, 0f, 0.06f);
 
             // OVRGrabber
             var grabber = anchorGO.AddComponent<OVRGrabber>();
