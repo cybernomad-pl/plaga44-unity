@@ -69,42 +69,64 @@ namespace Plaga44.Editor
 
         static void AddComprehensiveRig()
         {
-            // OVRInteractionComprehensive = the full Meta ISDK rig
-            // Contains: OVRCameraRig, hand tracking, controller tracking,
-            // HandGrabInteractor, locomotion (slide+teleport+turn), ray, poke
-            string[] guids = AssetDatabase.FindAssets("OVRInteractionComprehensive t:prefab");
-            GameObject prefab = null;
+            // Step 1: OVRCameraRig (the CAMERA + tracking origin)
+            // This is required -- OVRInteractionComprehensive references it, doesn't contain it
+            MetaQuestSetup.SetupVRSceneHands();
 
-            foreach (var guid in guids)
+            // Step 2: OVRInteractionComprehensive (ISDK overlay: grab, locomotion, ray, poke)
+            // It hooks into the OVRCameraRig that's already in scene
+            var interactionPrefab = FindPrefab("OVRInteractionComprehensive");
+            if (interactionPrefab != null)
             {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.Contains("OVRInteractionComprehensive.prefab"))
-                {
-                    prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                    if (prefab != null)
-                    {
-                        Debug.Log($"{LOG} Found rig: {path}");
-                        break;
-                    }
-                }
+                var interaction = (GameObject)PrefabUtility.InstantiatePrefab(interactionPrefab);
+                interaction.transform.position = Vector3.zero;
+                interaction.transform.rotation = Quaternion.identity;
+                Undo.RegisterCreatedObjectUndo(interaction, "Add ISDK Interactions");
+                Debug.Log($"{LOG} OVRInteractionComprehensive added (grab + locomotion + ray + poke).");
+            }
+            else
+            {
+                Debug.LogWarning($"{LOG} OVRInteractionComprehensive not found -- no grab/locomotion.");
+                Debug.LogWarning($"{LOG} Is com.meta.xr.sdk.interaction.ovr installed?");
             }
 
-            if (prefab == null)
+            // Step 3: VRInputDebug HUD
+            AddDebugHUD();
+        }
+
+        static void AddDebugHUD()
+        {
+            // Find existing VRInputDebug or add new one
+            var existing = GameObject.FindFirstObjectByType<VRInputDebug>();
+            if (existing != null)
             {
-                Debug.LogError($"{LOG} OVRInteractionComprehensive.prefab NOT FOUND!");
-                Debug.LogError($"{LOG} Make sure com.meta.xr.sdk.interaction.ovr is installed.");
-                Debug.LogError($"{LOG} Falling back to bare OVRCameraRig...");
-                MetaQuestSetup.SetupVRSceneHands();
+                Debug.Log($"{LOG} VRInputDebug already in scene.");
                 return;
             }
 
-            var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            rig.transform.position = Vector3.zero;
-            rig.transform.rotation = Quaternion.identity;
-            Undo.RegisterCreatedObjectUndo(rig, "Add Comprehensive Rig");
+            var debugGO = new GameObject("VRInputDebug");
+            debugGO.AddComponent<VRInputDebug>();
+            Undo.RegisterCreatedObjectUndo(debugGO, "Add VRInputDebug");
+            Debug.Log($"{LOG} VRInputDebug HUD added.");
+        }
 
-            Selection.activeGameObject = rig;
-            Debug.Log($"{LOG} OVRInteractionComprehensive added (camera + hands + locomotion + grab).");
+        static GameObject FindPrefab(string name)
+        {
+            string[] guids = AssetDatabase.FindAssets(name + " t:prefab");
+            foreach (var guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                if (path.Contains(name + ".prefab"))
+                {
+                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                    if (prefab != null)
+                    {
+                        Debug.Log($"{LOG} Found {name}: {path}");
+                        return prefab;
+                    }
+                }
+            }
+            return null;
         }
 
         static void AddFloor()
