@@ -221,14 +221,17 @@ namespace Plaga44.Editor
             rb.useGravity = false;
 
             // Physical collider -- hand pushes objects, no pass-through
+            // Offset forward (local Z) toward fingertips, large enough to cover hand
             var physCol = anchorGO.AddComponent<SphereCollider>();
             physCol.isTrigger = false;
-            physCol.radius = 0.03f;
+            physCol.radius = 0.08f;
+            physCol.center = new Vector3(0f, 0f, 0.05f);
 
             // Trigger collider -- grab detection volume (larger than physical)
             var grabCol = anchorGO.AddComponent<SphereCollider>();
             grabCol.isTrigger = true;
-            grabCol.radius = 0.06f;
+            grabCol.radius = 0.1f;
+            grabCol.center = new Vector3(0f, 0f, 0.05f);
 
             // OVRGrabber
             var grabber = anchorGO.AddComponent<OVRGrabber>();
