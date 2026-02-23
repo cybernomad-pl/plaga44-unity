@@ -53,34 +53,39 @@ namespace Plaga44.Editor
             root.AddComponent<HitTarget>();
             root.transform.position = position;
 
-            // HEAD -- sphere, detaches on hit
+            // HEAD -- sphere at top of neck
             CreateZoneSphere(root.transform, "Head", HitZoneType.Head,
-                position: new Vector3(0f, 1.65f, 0f), radius: 0.12f);
+                position: new Vector3(0f, 1.68f, 0f), radius: 0.12f);
 
-            // TORSO -- capsule (does NOT detach -- it's the core)
+            // TORSO (upper) -- hit here = explode everything
             CreateZoneCapsule(root.transform, "Body", HitZoneType.Body,
-                position: new Vector3(0f, 1.20f, 0f),
-                radius: 0.18f, height: 0.60f, direction: 1);
+                position: new Vector3(0f, 1.30f, 0f),
+                radius: 0.18f, height: 0.45f, direction: 1);
 
-            // LEFT ARM
+            // PELVIS -- bridge between torso and legs
+            CreateZoneCapsule(root.transform, "Pelvis", HitZoneType.Body,
+                position: new Vector3(0f, 0.95f, 0f),
+                radius: 0.16f, height: 0.25f, direction: 1);
+
+            // LEFT ARM -- T-pose: horizontal along X axis, attached to shoulder
             CreateZoneCapsule(root.transform, "LeftArm", HitZoneType.LeftArm,
-                position: new Vector3(-0.35f, 1.20f, 0f),
-                radius: 0.06f, height: 0.55f, direction: 1);
+                position: new Vector3(-0.48f, 1.38f, 0f),
+                radius: 0.05f, height: 0.55f, direction: 0); // 0 = X axis
 
-            // RIGHT ARM
+            // RIGHT ARM -- T-pose
             CreateZoneCapsule(root.transform, "RightArm", HitZoneType.RightArm,
-                position: new Vector3(0.35f, 1.20f, 0f),
-                radius: 0.06f, height: 0.55f, direction: 1);
+                position: new Vector3(0.48f, 1.38f, 0f),
+                radius: 0.05f, height: 0.55f, direction: 0);
 
-            // LEFT LEG
+            // LEFT LEG -- attached to pelvis
             CreateZoneCapsule(root.transform, "LeftLeg", HitZoneType.LeftLeg,
-                position: new Vector3(-0.12f, 0.50f, 0f),
-                radius: 0.08f, height: 0.80f, direction: 1);
+                position: new Vector3(-0.10f, 0.45f, 0f),
+                radius: 0.07f, height: 0.80f, direction: 1);
 
             // RIGHT LEG
             CreateZoneCapsule(root.transform, "RightLeg", HitZoneType.RightLeg,
-                position: new Vector3(0.12f, 0.50f, 0f),
-                radius: 0.08f, height: 0.80f, direction: 1);
+                position: new Vector3(0.10f, 0.45f, 0f),
+                radius: 0.07f, height: 0.80f, direction: 1);
         }
 
         // -------------------------------------------------------------------------

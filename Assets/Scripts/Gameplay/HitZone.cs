@@ -42,33 +42,64 @@ namespace Plaga44.Gameplay
         /// <summary>
         /// Called by HitTarget after RegisterHit. Detaches this body part,
         /// adds Rigidbody, and applies force from the projectile.
+        /// If Body (torso) is hit -- explodes ALL sibling zones.
         /// </summary>
         public void OnHit(float force, Vector3 impactDirection)
         {
             if (_detached) return;
-            if (!detachOnHit) return;
-            if (zoneType == HitZoneType.Body) return; // Core never detaches
 
+            if (zoneType == HitZoneType.Body)
+            {
+                // Torso hit = explode everything
+                ExplodeTarget(force, impactDirection);
+                return;
+            }
+
+            if (!detachOnHit) return;
+            Detach(force, impactDirection);
+        }
+
+        private void Detach(float force, Vector3 impactDirection)
+        {
+            if (_detached) return;
             _detached = true;
 
-            // Detach from parent
-            transform.SetParent(null);
+            // Remember world position before detaching
+            Vector3 worldPos = transform.position;
+            Quaternion worldRot = transform.rotation;
 
-            // Add Rigidbody so it falls with gravity
+            transform.SetParent(null);
+            transform.position = worldPos;
+            transform.rotation = worldRot;
+
             var rb = gameObject.AddComponent<Rigidbody>();
             rb.mass = 0.5f;
             rb.linearDamping = 0.5f;
             rb.angularDamping = 0.5f;
 
-            // Fling it in impact direction + upward
             Vector3 flingDir = (impactDirection.normalized + Vector3.up * 0.5f).normalized;
             rb.AddForce(flingDir * force * 2f, ForceMode.Impulse);
             rb.AddTorque(Random.insideUnitSphere * force, ForceMode.Impulse);
 
-            Debug.Log($"{LOG} {zoneType} detached from target!");
-
-            // Destroy after 10s so it doesn't pile up
+            Debug.Log($"{LOG} {zoneType} detached!");
             Destroy(gameObject, 10f);
+        }
+
+        private void ExplodeTarget(float force, Vector3 impactDirection)
+        {
+            var owner = GetOwner();
+            if (owner == null) return;
+
+            // Collect all zones first (iterating while detaching modifies hierarchy)
+            var allZones = owner.GetComponentsInChildren<HitZone>();
+            foreach (var zone in allZones)
+            {
+                // Each part flies in a slightly different direction
+                Vector3 scatter = impactDirection + Random.insideUnitSphere * 0.5f;
+                zone.Detach(force * 0.8f, scatter);
+            }
+
+            Debug.Log($"{LOG} Target {owner.name} EXPLODED!");
         }
     }
 }
