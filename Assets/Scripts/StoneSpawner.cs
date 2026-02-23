@@ -73,7 +73,7 @@ public class StoneSpawner : MonoBehaviour
 
         // Material -- unlit gray
         float gray = Random.Range(0.30f, 0.55f);
-        var shader = Shader.Find("Universal Render Pipeline/Unlit");
+        var shader = Shader.Find("Universal Render Pipeline/Lit");
         if (shader != null)
         {
             var r = stone.GetComponent<Renderer>();

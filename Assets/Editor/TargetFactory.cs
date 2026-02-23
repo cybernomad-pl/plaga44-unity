@@ -22,19 +22,19 @@ namespace Plaga44.Editor
         {
             Debug.Log($"{LOG} Creating 10 test targets...");
 
-            // 10 targets spread in an arc, 3-7m away, varied X positions
+            // 10 targets spread wide, 5-50m away, varied X positions
             Vector3[] positions =
             {
-                new Vector3(-3.0f, 0f,  4.0f),
-                new Vector3(-1.5f, 0f,  3.5f),
-                new Vector3(-0.5f, 0f,  5.0f),
-                new Vector3( 0.5f, 0f,  4.0f),
-                new Vector3( 1.5f, 0f,  3.5f),
-                new Vector3( 3.0f, 0f,  4.5f),
-                new Vector3(-2.0f, 0f,  6.0f),
-                new Vector3( 0.0f, 0f,  7.0f),
-                new Vector3( 2.0f, 0f,  6.0f),
-                new Vector3( 0.0f, 0f,  3.0f),
+                new Vector3(-2.0f, 0f,   5.0f),
+                new Vector3( 1.5f, 0f,   8.0f),
+                new Vector3(-4.0f, 0f,  12.0f),
+                new Vector3( 3.0f, 0f,  15.0f),
+                new Vector3( 0.0f, 0f,  20.0f),
+                new Vector3(-6.0f, 0f,  25.0f),
+                new Vector3( 5.0f, 0f,  30.0f),
+                new Vector3(-3.0f, 0f,  35.0f),
+                new Vector3( 2.0f, 0f,  42.0f),
+                new Vector3( 0.0f, 0f,  50.0f),
             };
 
             for (int i = 0; i < positions.Length; i++)
