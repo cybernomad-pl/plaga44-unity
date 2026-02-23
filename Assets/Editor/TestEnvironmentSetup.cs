@@ -204,8 +204,7 @@ namespace Plaga44.Editor
         {
             var r = obj.GetComponent<Renderer>();
             if (r == null) return;
-            var shader = Shader.Find("Universal Render Pipeline/Unlit")
-                      ?? Shader.Find("Unlit/Color");
+            var shader = Shader.Find("Universal Render Pipeline/Unlit");
             if (shader == null) return;
             r.sharedMaterial = new Material(shader) { color = color };
         }
