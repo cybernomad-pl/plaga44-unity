@@ -11,6 +11,8 @@ using UnityEngine.UI;
 public class SplashScreen : MonoBehaviour
 {
     public float fadeDuration = 1.0f;
+    [Tooltip("Display name with formatting. Use <color=#CC3333> for red parts. Leave empty to use Application.productName.")]
+    public string displayName = "PLAGA <color=#CC3333>'44</color>";
 
     private Canvas _canvas;
     private Image _bg;
@@ -167,39 +169,27 @@ public class SplashScreen : MonoBehaviour
         bgRect.anchorMax = Vector2.one;
         bgRect.sizeDelta = Vector2.zero;
 
-        // "TESTBED:" label -- small, above project name
+        // "TESTBED:" label -- small, top-left above project name
         var labelGO = new GameObject("TestbedLabel");
         labelGO.transform.SetParent(canvasGO.transform, false);
         var label = labelGO.AddComponent<Text>();
         label.text = "TESTBED:";
-        label.font = Font.CreateDynamicFontFromOSFont("Consolas", 28);
-        label.fontSize = 28;
-        label.color = new Color(0.6f, 0.6f, 0.6f);
-        label.alignment = TextAnchor.MiddleCenter;
+        label.font = Font.CreateDynamicFontFromOSFont("Consolas", 18);
+        label.fontSize = 18;
+        label.color = new Color(0.5f, 0.5f, 0.5f);
+        label.alignment = TextAnchor.LowerLeft;
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
         label.verticalOverflow = VerticalWrapMode.Overflow;
         var labelRect = labelGO.GetComponent<RectTransform>();
-        labelRect.anchoredPosition = new Vector2(0, 80);
-        labelRect.sizeDelta = new Vector2(2000, 100);
+        labelRect.anchoredPosition = new Vector2(-360, 50);
+        labelRect.sizeDelta = new Vector2(400, 40);
 
-        // Project name -- e.g. "PLAGA '44" with '44 in red
-        // Uses Application.productName from PlayerSettings
+        // Project name -- configurable via displayName field in Inspector
+        // Default: "PLAGA <color=#CC3333>'44</color>"
         var titleGO = new GameObject("Title");
         titleGO.transform.SetParent(canvasGO.transform, false);
         _title = titleGO.AddComponent<Text>();
-        string projectName = Application.productName;
-        // Color the numeric suffix red (e.g. "'44" in "PLAGA '44")
-        int apoIdx = projectName.IndexOf('\'');
-        if (apoIdx >= 0)
-        {
-            string before = projectName.Substring(0, apoIdx);
-            string after = projectName.Substring(apoIdx);
-            _title.text = $"{before}<color=#CC3333>{after}</color>";
-        }
-        else
-        {
-            _title.text = projectName;
-        }
+        _title.text = string.IsNullOrEmpty(displayName) ? Application.productName : displayName;
         _title.font = Font.CreateDynamicFontFromOSFont("Consolas", 52);
         _title.fontSize = 52;
         _title.color = Color.white;
@@ -208,7 +198,7 @@ public class SplashScreen : MonoBehaviour
         _title.horizontalOverflow = HorizontalWrapMode.Overflow;
         _title.verticalOverflow = VerticalWrapMode.Overflow;
         var titleRect = titleGO.GetComponent<RectTransform>();
-        titleRect.anchoredPosition = new Vector2(0, -10);
+        titleRect.anchoredPosition = Vector2.zero;
         titleRect.sizeDelta = new Vector2(2000, 200);
     }
 }

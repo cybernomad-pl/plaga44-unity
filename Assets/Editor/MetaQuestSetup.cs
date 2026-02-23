@@ -304,31 +304,52 @@ namespace Plaga44.Editor
 
         static void ConfigureOVRHand(GameObject handGO, int handIndex)
         {
-            // All fields are internal so we use SerializedObject
-            // handIndex: 0=HandLeft, 1=HandRight
+            string side = handIndex == 0 ? "Left" : "Right";
+
             var hand = handGO.GetComponent<OVRHand>();
             if (hand != null)
             {
                 var so = new SerializedObject(hand);
                 var prop = so.FindProperty("HandType");
-                if (prop != null) { prop.intValue = handIndex; so.ApplyModifiedProperties(); }
+                if (prop != null)
+                {
+                    prop.intValue = handIndex;
+                    so.ApplyModifiedProperties();
+                    Debug.Log($"{LOG} OVRHand.HandType = {side} (OK)");
+                }
+                else Debug.LogError($"{LOG} OVRHand.HandType property NOT FOUND!");
             }
+            else Debug.LogError($"{LOG} OVRHand component NOT FOUND on {handGO.name}!");
 
             var skeleton = handGO.GetComponent<OVRSkeleton>();
             if (skeleton != null)
             {
                 var so = new SerializedObject(skeleton);
                 var prop = so.FindProperty("_skeletonType");
-                if (prop != null) { prop.intValue = handIndex; so.ApplyModifiedProperties(); }
+                if (prop != null)
+                {
+                    prop.intValue = handIndex;
+                    so.ApplyModifiedProperties();
+                    Debug.Log($"{LOG} OVRSkeleton._skeletonType = {side} (OK)");
+                }
+                else Debug.LogError($"{LOG} OVRSkeleton._skeletonType property NOT FOUND!");
             }
+            else Debug.LogError($"{LOG} OVRSkeleton NOT FOUND on {handGO.name}!");
 
             var mesh = handGO.GetComponent<OVRMesh>();
             if (mesh != null)
             {
                 var so = new SerializedObject(mesh);
                 var prop = so.FindProperty("_meshType");
-                if (prop != null) { prop.intValue = handIndex; so.ApplyModifiedProperties(); }
+                if (prop != null)
+                {
+                    prop.intValue = handIndex;
+                    so.ApplyModifiedProperties();
+                    Debug.Log($"{LOG} OVRMesh._meshType = {side} (OK)");
+                }
+                else Debug.LogError($"{LOG} OVRMesh._meshType property NOT FOUND!");
             }
+            else Debug.LogError($"{LOG} OVRMesh NOT FOUND on {handGO.name}!");
         }
 
         static Transform FindChildRecursive(Transform parent, string name)
