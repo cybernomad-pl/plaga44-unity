@@ -11,6 +11,7 @@
   "dependencies": {
     "com.meta.xr.sdk.audio": "81.0.0",
     "com.meta.xr.sdk.interaction": "81.0.0",
+    "com.meta.xr.sdk.interaction.ovr": "81.0.0",
     "com.meta.xr.sdk.core": "81.0.0",
     "com.unity.xr.meta-openxr": "2.4.0",
     "com.unity.xr.openxr": "1.14.0",

@@ -14,10 +14,10 @@ namespace Plaga44.Editor
         private const string MENU_PATH = "CYBERNOMAD/Debug/VR Input Debug HUD";
         private const string ENABLED_KEY = "CYBERNOMAD_VRInputDebug";
 
-        // Force off on editor startup -- must be enabled manually each session
+        // Default ON on editor startup -- toggle off in menu if needed
         static VRInputDebugMenu()
         {
-            EditorPrefs.SetBool(ENABLED_KEY, false);
+            EditorPrefs.SetBool(ENABLED_KEY, true);
         }
 
         [MenuItem(MENU_PATH, false, 500)]

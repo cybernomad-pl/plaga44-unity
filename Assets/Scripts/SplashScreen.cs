@@ -11,6 +11,8 @@ using UnityEngine.UI;
 public class SplashScreen : MonoBehaviour
 {
     public float fadeDuration = 1.0f;
+    [Tooltip("Display name with formatting. Use <color=#CC3333> for red parts. Leave empty to use Application.productName.")]
+    public string displayName = "PLAGA <color=#CC3333>'44</color>";
 
     private Canvas _canvas;
     private Image _bg;
@@ -167,13 +169,33 @@ public class SplashScreen : MonoBehaviour
         bgRect.anchorMax = Vector2.one;
         bgRect.sizeDelta = Vector2.zero;
 
-        // Title text -- centered
+        // "TESTBED:" label -- small, top-left above project name
+        var labelGO = new GameObject("TestbedLabel");
+        labelGO.transform.SetParent(canvasGO.transform, false);
+        var label = labelGO.AddComponent<Text>();
+        label.text = "TESTBED:";
+        label.font = Font.CreateDynamicFontFromOSFont("Consolas", 14);
+        label.fontSize = 14;
+        label.color = new Color(0.5f, 0.5f, 0.5f);
+        label.alignment = TextAnchor.LowerLeft;
+        label.horizontalOverflow = HorizontalWrapMode.Overflow;
+        label.verticalOverflow = VerticalWrapMode.Overflow;
+        var labelRect = labelGO.GetComponent<RectTransform>();
+        // Pivot left-center so anchoredPosition.x = left edge of text
+        labelRect.pivot = new Vector2(0f, 0.5f);
+        // "PLAGA '44" at fontSize 52 Consolas monospace: ~31px/char, 9 chars = ~280px
+        // Centered title left edge = -140px from center
+        labelRect.anchoredPosition = new Vector2(-125, 40);
+        labelRect.sizeDelta = new Vector2(400, 30);
+
+        // Project name -- configurable via displayName field in Inspector
+        // Default: "PLAGA <color=#CC3333>'44</color>"
         var titleGO = new GameObject("Title");
         titleGO.transform.SetParent(canvasGO.transform, false);
         _title = titleGO.AddComponent<Text>();
-        _title.text = "PLAGA '44\n<size=36>(testbed)</size>";
-        _title.font = Font.CreateDynamicFontFromOSFont("Consolas", 72);
-        _title.fontSize = 72;
+        _title.text = string.IsNullOrEmpty(displayName) ? Application.productName : displayName;
+        _title.font = Font.CreateDynamicFontFromOSFont("Consolas", 52);
+        _title.fontSize = 52;
         _title.color = Color.white;
         _title.alignment = TextAnchor.MiddleCenter;
         _title.supportRichText = true;
@@ -181,11 +203,6 @@ public class SplashScreen : MonoBehaviour
         _title.verticalOverflow = VerticalWrapMode.Overflow;
         var titleRect = titleGO.GetComponent<RectTransform>();
         titleRect.anchoredPosition = Vector2.zero;
-        titleRect.sizeDelta = new Vector2(2000, 600);
-
-        // Outline for readability
-        var outline = titleGO.AddComponent<Outline>();
-        outline.effectColor = new Color(0.2f, 0.2f, 0.2f, 1f);
-        outline.effectDistance = new Vector2(2, -2);
+        titleRect.sizeDelta = new Vector2(2000, 200);
     }
 }
