@@ -29,8 +29,8 @@ namespace Plaga44.Editor
 
             root.AddComponent<HitTarget>();
 
-            // Position it 2 m in front of scene origin.
-            root.transform.position = new Vector3(0f, 0f, 2f);
+            // Position it 4 m in front of scene origin (away from table).
+            root.transform.position = new Vector3(0f, 0f, 4f);
 
             // Build body parts as children.
             // All dimensions approximate a 1.75 m standing humanoid.
