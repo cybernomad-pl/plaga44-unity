@@ -194,7 +194,6 @@ namespace Plaga44.Editor
             };
 
             // Table top at Y=0.775 (0.75 + half of 0.05). Scatter on surface, no overlaps.
-            // Near-uniform scales so SphereCollider matches visual closely.
             float tableY = 0.82f;
             Vector3[] stonePositions =
             {
@@ -208,7 +207,7 @@ namespace Plaga44.Editor
                 new Vector3(-0.08f, tableY, -0.10f),
             };
 
-            // Near-uniform scales -- SphereCollider matches visual well
+            // Near-uniform scales
             float[][] stoneSizes =
             {
                 new[] { 0.08f, 0.07f, 0.08f },
