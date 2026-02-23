@@ -27,6 +27,7 @@ namespace Plaga44.Editor
 
             AddGround();
             AddTestTable(player.transform.position);
+            AddStoneSpawner(player.transform.position);
             AddSplashScreen();
             AddDebugHUD();
 
@@ -159,6 +160,14 @@ namespace Plaga44.Editor
             top.transform.localScale = new Vector3(1.2f, 0.05f, 0.6f);
             top.isStatic = true;
             SetUnlitMaterial(top, new Color(0.45f, 0.3f, 0.15f));
+            var topMat = new PhysicsMaterial("WoodMat")
+            {
+                dynamicFriction = 0.7f,
+                staticFriction = 0.8f,
+                bounciness = 0.02f,
+                frictionCombine = PhysicsMaterialCombine.Maximum
+            };
+            top.GetComponent<Collider>().material = topMat;
 
             // Legs
             float[] xs = { -0.5f, 0.5f, -0.5f, 0.5f };
@@ -174,28 +183,117 @@ namespace Plaga44.Editor
                 SetUnlitMaterial(leg, new Color(0.35f, 0.22f, 0.1f));
             }
 
-            // Stone
-            var stone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            stone.name = "Stone";
-            stone.transform.SetParent(table.transform);
-            stone.transform.localPosition = new Vector3(0f, 0.85f, 0f);
-            stone.transform.localScale = new Vector3(0.12f, 0.09f, 0.10f);
-            SetUnlitMaterial(stone, new Color(0.45f, 0.42f, 0.40f));
-            var rb = stone.AddComponent<Rigidbody>();
-            rb.mass = 0.4f;
-            rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+            // Stones -- scattered on table, STACKABLE by player
+            // High friction + zero bounce so they grip when placed on each other.
+            var stoneMat = new PhysicsMaterial("StoneMat")
+            {
+                dynamicFriction = 1.0f,
+                staticFriction = 1.0f,
+                bounciness = 0f,
+                frictionCombine = PhysicsMaterialCombine.Maximum
+            };
 
-            // OVRGrabbable -- makes stone grabbable by OVRGrabber
+            // Table top at Y=0.775 (0.75 + half of 0.05). Scatter on surface, no overlaps.
+            float tableY = 0.82f;
+            Vector3[] stonePositions =
+            {
+                new Vector3(-0.15f, tableY,  0.00f),
+                new Vector3(-0.02f, tableY, -0.08f),
+                new Vector3( 0.12f, tableY, -0.02f),
+                new Vector3( 0.00f, tableY,  0.10f),
+                new Vector3(-0.10f, tableY,  0.12f),
+                new Vector3( 0.15f, tableY,  0.10f),
+                new Vector3( 0.02f, tableY,  0.00f),
+                new Vector3(-0.08f, tableY, -0.10f),
+            };
+
+            // Near-uniform scales
+            float[][] stoneSizes =
+            {
+                new[] { 0.08f, 0.07f, 0.08f },
+                new[] { 0.07f, 0.06f, 0.07f },
+                new[] { 0.09f, 0.08f, 0.08f },
+                new[] { 0.06f, 0.06f, 0.07f },
+                new[] { 0.07f, 0.07f, 0.06f },
+                new[] { 0.08f, 0.07f, 0.07f },
+                new[] { 0.10f, 0.09f, 0.09f },
+                new[] { 0.06f, 0.05f, 0.06f },
+            };
+
+            float[] stoneGrays = { 0.45f, 0.38f, 0.50f, 0.42f, 0.35f, 0.48f, 0.40f, 0.52f };
+
+            for (int s = 0; s < stonePositions.Length; s++)
+            {
+                AddStone(table.transform, $"Stone{s}", stonePositions[s],
+                    stoneSizes[s], stoneGrays[s], stoneMat);
+            }
+        }
+
+        static void AddStone(Transform parent, string name, Vector3 localPos,
+            float[] size, float gray, PhysicsMaterial mat)
+        {
+            var stone = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            stone.name = name;
+            stone.transform.SetParent(parent);
+            stone.transform.localPosition = localPos;
+            stone.transform.localScale = new Vector3(size[0], size[1], size[2]);
+            SetUnlitMaterial(stone, new Color(gray, gray - 0.03f, gray - 0.05f));
+
+            // Cross-shaped compound collider: 2 boxes at 90 degrees.
+            // Wide+thick box for width, thin+long box for depth.
+            // Gives irregular stone-like contact -- flat faces for stacking,
+            // but not a perfect cube so they look/feel natural.
+            Object.DestroyImmediate(stone.GetComponent<SphereCollider>());
+
+            // Box 1: wide (X) and thick (Y), shorter depth (Z)
+            var wideChild = new GameObject("Col_Wide");
+            wideChild.transform.SetParent(stone.transform, false);
+            var wideBox = wideChild.AddComponent<BoxCollider>();
+            wideBox.size = new Vector3(0.9f, 0.8f, 0.5f);
+            wideBox.material = mat;
+
+            // Box 2: narrow (X), thinner (Y), long depth (Z)
+            var longChild = new GameObject("Col_Long");
+            longChild.transform.SetParent(stone.transform, false);
+            var longBox = longChild.AddComponent<BoxCollider>();
+            longBox.size = new Vector3(0.5f, 0.6f, 0.9f);
+            longBox.material = mat;
+
+            // Physics -- heavy + high damping = stable stacking
+            var rb = stone.AddComponent<Rigidbody>();
+            rb.mass = 1.0f;
+            rb.linearDamping = 1.0f;
+            rb.angularDamping = 2.0f;
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+
+            // OVRGrabbable -- grab points = both colliders
             var grabbable = stone.AddComponent<OVRGrabbable>();
             var gso = new SerializedObject(grabbable);
             SetBool(gso, "m_allowOffhandGrab", true);
             var grabPointsProp = gso.FindProperty("m_grabPoints");
             if (grabPointsProp != null)
             {
-                grabPointsProp.arraySize = 1;
-                grabPointsProp.GetArrayElementAtIndex(0).objectReferenceValue = stone.GetComponent<Collider>();
+                grabPointsProp.arraySize = 2;
+                grabPointsProp.GetArrayElementAtIndex(0).objectReferenceValue = wideBox;
+                grabPointsProp.GetArrayElementAtIndex(1).objectReferenceValue = longBox;
             }
             gso.ApplyModifiedProperties();
+
+            // ThrowBoost -- amplifies release velocity for satisfying throws
+            var tb = stone.AddComponent<ThrowBoost>();
+            tb.multiplier = 5.0f;
+        }
+
+        // ---- SPAWNER ----
+
+        static void AddStoneSpawner(Vector3 playerPos)
+        {
+            var go = new GameObject("StoneSpawner");
+            // Position at table center
+            go.transform.position = playerPos + new Vector3(0f, 0f, 1.2f);
+            go.AddComponent<StoneSpawner>();
+            Undo.RegisterCreatedObjectUndo(go, "Add StoneSpawner");
+            Debug.Log($"{LOG} StoneSpawner added (new stone every 20s).");
         }
 
         // ---- GRAB ----
@@ -220,22 +318,45 @@ namespace Plaga44.Editor
             rb.isKinematic = true;
             rb.useGravity = false;
 
-            // Physical collider -- hand pushes objects, no pass-through
-            var physCol = anchorGO.AddComponent<SphereCollider>();
-            physCol.isTrigger = false;
-            physCol.radius = 0.03f;
+            // Hand-shaped compound collider (child objects inherit parent Rigidbody)
+            // Tight fit -- some clipping OK, no "force field"
+            // Palm -- thin box at grip center
+            var palm = new GameObject("PalmCollider");
+            palm.transform.SetParent(anchorGO.transform, false);
+            palm.transform.localPosition = new Vector3(0f, 0f, 0.02f);
+            var palmCol = palm.AddComponent<BoxCollider>();
+            palmCol.size = new Vector3(0.05f, 0.02f, 0.05f);
 
-            // Trigger collider -- grab detection volume (larger than physical)
+            // Fingers -- thin capsule extending forward
+            var fingers = new GameObject("FingersCollider");
+            fingers.transform.SetParent(anchorGO.transform, false);
+            fingers.transform.localPosition = new Vector3(0f, 0f, 0.08f);
+            var fingersCol = fingers.AddComponent<CapsuleCollider>();
+            fingersCol.direction = 2; // Z axis (forward)
+            fingersCol.radius = 0.012f;
+            fingersCol.height = 0.07f;
+
+            // Thumb -- tiny sphere offset to side
+            var thumb = new GameObject("ThumbCollider");
+            thumb.transform.SetParent(anchorGO.transform, false);
+            thumb.transform.localPosition = new Vector3(0.03f, 0f, 0.04f);
+            var thumbCol = thumb.AddComponent<SphereCollider>();
+            thumbCol.radius = 0.012f;
+
+            // Trigger collider -- grab detection volume (on anchor, covers whole hand area)
             var grabCol = anchorGO.AddComponent<SphereCollider>();
             grabCol.isTrigger = true;
-            grabCol.radius = 0.06f;
+            grabCol.radius = 0.1f;
+            grabCol.center = new Vector3(0f, 0f, 0.06f);
 
             // OVRGrabber
             var grabber = anchorGO.AddComponent<OVRGrabber>();
             var so = new SerializedObject(grabber);
 
             SetInt(so, "m_controller", controllerValue);
-            SetBool(so, "m_parentHeldObject", true);
+            // parentHeldObject=false -> OVRGrabber uses Rigidbody.MovePosition instead of
+            // transform parenting. MovePosition preserves physics collision with other objects.
+            SetBool(so, "m_parentHeldObject", false);
 
             // Grip transform = this anchor (where grabbed objects snap to)
             var gripProp = so.FindProperty("m_gripTransform");
@@ -250,10 +371,10 @@ namespace Plaga44.Editor
                 volumesProp.GetArrayElementAtIndex(0).objectReferenceValue = grabCol;
             }
 
-            // Player reference for collision ignore
-            var playerProp = so.FindProperty("m_player");
-            if (playerProp != null)
-                playerProp.objectReferenceValue = player;
+            // NOTE: m_player deliberately NOT set. OVRGrabber.GrabBegin() calls
+            // SetPlayerIgnoreCollision(obj, true) but GrabEnd() never restores it.
+            // With m_player=null, IgnoreCollision is skipped entirely, so hand-object
+            // collision stays active after grab+release.
 
             so.ApplyModifiedProperties();
         }
