@@ -240,10 +240,9 @@ namespace Plaga44.Editor
             stone.transform.localScale = new Vector3(size[0], size[1], size[2]);
             SetUnlitMaterial(stone, new Color(gray, gray - 0.03f, gray - 0.05f));
 
-            // SphereCollider uses MAX scale axis. With near-uniform scales the mismatch
-            // is minimal. Radius 0.43 = slight shrink for tighter fit, still stable physics.
+            // Default SphereCollider radius 0.5 -- matches mesh boundary on max axis.
+            // Near-uniform scales minimize mismatch on other axes.
             var sphereCol = stone.GetComponent<SphereCollider>();
-            sphereCol.radius = 0.43f;
 
             // Physics -- heavy + high damping = stable stacking, won't slide off
             sphereCol.material = mat;

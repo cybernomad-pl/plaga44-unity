@@ -75,7 +75,6 @@ public class StoneSpawner : MonoBehaviour
 
         // Collider
         var col = stone.GetComponent<SphereCollider>();
-        col.radius = 0.43f;
         col.material = _stoneMat;
 
         // Rigidbody
