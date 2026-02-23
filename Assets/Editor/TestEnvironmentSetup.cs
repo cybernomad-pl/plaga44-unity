@@ -330,10 +330,10 @@ namespace Plaga44.Editor
                 volumesProp.GetArrayElementAtIndex(0).objectReferenceValue = grabCol;
             }
 
-            // Player reference for collision ignore
-            var playerProp = so.FindProperty("m_player");
-            if (playerProp != null)
-                playerProp.objectReferenceValue = player;
+            // NOTE: m_player deliberately NOT set. OVRGrabber.GrabBegin() calls
+            // SetPlayerIgnoreCollision(obj, true) but GrabEnd() never restores it.
+            // With m_player=null, IgnoreCollision is skipped entirely, so hand-object
+            // collision stays active after grab+release.
 
             so.ApplyModifiedProperties();
         }
