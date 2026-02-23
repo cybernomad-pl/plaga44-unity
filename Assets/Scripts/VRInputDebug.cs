@@ -318,7 +318,7 @@ public class VRInputDebug : MonoBehaviour
         if (ctrl == null) { canvas.gameObject.SetActive(false); return; }
 
         canvas.gameObject.SetActive(true);
-        float sideways = isLeft ? -0.08f : 0.12f;
+        float sideways = isLeft ? -0.05f : 0.12f;
         canvas.transform.position = ctrl.position
             + Vector3.up * 0.15f + Vector3.right * sideways;
 
