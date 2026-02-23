@@ -237,12 +237,12 @@ namespace Plaga44.Editor
             stone.transform.localScale = new Vector3(size[0], size[1], size[2]);
             SetUnlitMaterial(stone, new Color(gray, gray - 0.03f, gray - 0.05f));
 
-            // Physics -- friction so stones don't slide, moderate drag so they respond to touch
+            // Physics -- light stones with friction, low drag for satisfying throws
             stone.GetComponent<Collider>().material = mat;
             var rb = stone.AddComponent<Rigidbody>();
-            rb.mass = 0.4f;
-            rb.linearDamping = 0.5f;
-            rb.angularDamping = 0.8f;
+            rb.mass = 0.15f;
+            rb.linearDamping = 0.2f;
+            rb.angularDamping = 0.3f;
             rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
             // OVRGrabbable
@@ -256,6 +256,9 @@ namespace Plaga44.Editor
                 grabPointsProp.GetArrayElementAtIndex(0).objectReferenceValue = stone.GetComponent<Collider>();
             }
             gso.ApplyModifiedProperties();
+
+            // ThrowBoost -- amplifies release velocity for satisfying throws
+            stone.AddComponent<ThrowBoost>();
         }
 
         // ---- GRAB ----
@@ -281,28 +284,29 @@ namespace Plaga44.Editor
             rb.useGravity = false;
 
             // Hand-shaped compound collider (child objects inherit parent Rigidbody)
-            // Palm -- flat box at grip center
+            // Tight fit -- some clipping OK, no "force field"
+            // Palm -- thin box at grip center
             var palm = new GameObject("PalmCollider");
             palm.transform.SetParent(anchorGO.transform, false);
-            palm.transform.localPosition = new Vector3(0f, 0f, 0.03f);
+            palm.transform.localPosition = new Vector3(0f, 0f, 0.02f);
             var palmCol = palm.AddComponent<BoxCollider>();
-            palmCol.size = new Vector3(0.08f, 0.03f, 0.08f);
+            palmCol.size = new Vector3(0.05f, 0.02f, 0.05f);
 
-            // Fingers -- capsule extending forward from palm
+            // Fingers -- thin capsule extending forward
             var fingers = new GameObject("FingersCollider");
             fingers.transform.SetParent(anchorGO.transform, false);
-            fingers.transform.localPosition = new Vector3(0f, 0f, 0.10f);
+            fingers.transform.localPosition = new Vector3(0f, 0f, 0.08f);
             var fingersCol = fingers.AddComponent<CapsuleCollider>();
             fingersCol.direction = 2; // Z axis (forward)
-            fingersCol.radius = 0.02f;
-            fingersCol.height = 0.10f;
+            fingersCol.radius = 0.012f;
+            fingersCol.height = 0.07f;
 
-            // Thumb -- small sphere offset to the side
+            // Thumb -- tiny sphere offset to side
             var thumb = new GameObject("ThumbCollider");
             thumb.transform.SetParent(anchorGO.transform, false);
-            thumb.transform.localPosition = new Vector3(0.04f, 0f, 0.05f);
+            thumb.transform.localPosition = new Vector3(0.03f, 0f, 0.04f);
             var thumbCol = thumb.AddComponent<SphereCollider>();
-            thumbCol.radius = 0.02f;
+            thumbCol.radius = 0.012f;
 
             // Trigger collider -- grab detection volume (on anchor, covers whole hand area)
             var grabCol = anchorGO.AddComponent<SphereCollider>();
