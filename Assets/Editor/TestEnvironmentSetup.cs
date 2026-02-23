@@ -215,15 +215,20 @@ namespace Plaga44.Editor
 
         static void SetupGrabber(GameObject anchorGO, int controllerValue, GameObject player)
         {
-            // Rigidbody (kinematic -- hand doesn't obey physics)
+            // Rigidbody (kinematic -- pushes dynamic objects but isn't moved by them)
             var rb = anchorGO.AddComponent<Rigidbody>();
             rb.isKinematic = true;
             rb.useGravity = false;
 
-            // Trigger collider -- grab detection volume
-            var col = anchorGO.AddComponent<SphereCollider>();
-            col.isTrigger = true;
-            col.radius = 0.05f;
+            // Physical collider -- hand pushes objects, no pass-through
+            var physCol = anchorGO.AddComponent<SphereCollider>();
+            physCol.isTrigger = false;
+            physCol.radius = 0.03f;
+
+            // Trigger collider -- grab detection volume (larger than physical)
+            var grabCol = anchorGO.AddComponent<SphereCollider>();
+            grabCol.isTrigger = true;
+            grabCol.radius = 0.06f;
 
             // OVRGrabber
             var grabber = anchorGO.AddComponent<OVRGrabber>();
@@ -232,12 +237,17 @@ namespace Plaga44.Editor
             SetInt(so, "m_controller", controllerValue);
             SetBool(so, "m_parentHeldObject", true);
 
-            // Grab volume = the trigger SphereCollider we just added
+            // Grip transform = this anchor (where grabbed objects snap to)
+            var gripProp = so.FindProperty("m_gripTransform");
+            if (gripProp != null)
+                gripProp.objectReferenceValue = anchorGO.transform;
+
+            // Grab volume = the trigger SphereCollider (NOT the physical one)
             var volumesProp = so.FindProperty("m_grabVolumes");
             if (volumesProp != null)
             {
                 volumesProp.arraySize = 1;
-                volumesProp.GetArrayElementAtIndex(0).objectReferenceValue = col;
+                volumesProp.GetArrayElementAtIndex(0).objectReferenceValue = grabCol;
             }
 
             // Player reference for collision ignore
