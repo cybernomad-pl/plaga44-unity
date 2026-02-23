@@ -195,6 +195,8 @@ public class VRInputDebug : MonoBehaviour
         _zoneText.text = "";
     }
 
+    private static Sprite _circleSprite;
+
     private Image CreateCircle(Transform parent, string name, float diameter, Color color)
     {
         var go = new GameObject(name);
@@ -205,11 +207,37 @@ public class VRInputDebug : MonoBehaviour
         rect.sizeDelta = new Vector2(diameter, diameter);
 
         var img = go.AddComponent<Image>();
-        img.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/Knob.psd");
+        img.sprite = GetCircleSprite();
         img.color = color;
         img.raycastTarget = false;
 
         return img;
+    }
+
+    /// <summary>
+    /// Generates a circle sprite at runtime. Unity 6 removed UI/Skin/Knob.psd builtin.
+    /// </summary>
+    private static Sprite GetCircleSprite()
+    {
+        if (_circleSprite != null) return _circleSprite;
+
+        const int res = 64;
+        var tex = new Texture2D(res, res, TextureFormat.RGBA32, false);
+        float center = res / 2f;
+        float radius = center - 1f;
+
+        for (int y = 0; y < res; y++)
+        {
+            for (int x = 0; x < res; x++)
+            {
+                float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
+                tex.SetPixel(x, y, dist <= radius ? Color.white : Color.clear);
+            }
+        }
+
+        tex.Apply();
+        _circleSprite = Sprite.Create(tex, new Rect(0, 0, res, res), new Vector2(0.5f, 0.5f));
+        return _circleSprite;
     }
 
 #if HAS_META_XR

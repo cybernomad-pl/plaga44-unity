@@ -101,14 +101,10 @@ public class StoneSpawner : MonoBehaviour
         rb.angularDamping = 2.0f;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
-        // OVRGrabbable -- Awake() finds SphereCollider on root, sets m_grabPoints. No crash.
-        var grabbable = stone.AddComponent<OVRGrabbable>();
-
-        // m_allowOffhandGrab via reflection (nice-to-have, not critical)
-        var allowField = typeof(OVRGrabbable).GetField("m_allowOffhandGrab",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        if (allowField != null)
-            allowField.SetValue(grabbable, true);
+        // RuntimeGrabbable -- safe subclass of OVRGrabbable for runtime AddComponent.
+        // OVRGrabbable.Awake() crashes on null m_grabPoints. RuntimeGrabbable handles it.
+        var grabbable = stone.AddComponent<RuntimeGrabbable>();
+        grabbable.SetAllowOffhandGrab(true);
 
         // GazeThrow -- gaze-corrected throwing with boost (replaces ThrowBoost)
         var gt = stone.AddComponent<GazeThrow>();
