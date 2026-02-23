@@ -14,7 +14,7 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} === Setup TESTBED ===");
             CleanScene();
             CreateInfiniteFloor();
-            MetaQuestSetup.SetupVRScene();
+            MetaQuestSetup.SetupVRSceneControllers();
             AddSplashScreen();
             Debug.Log($"{LOG} === TESTBED READY ===");
         }

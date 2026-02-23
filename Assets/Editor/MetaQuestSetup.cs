@@ -167,8 +167,8 @@ namespace Plaga44.Editor
                 BuildTargetGroup.Android, BuildTarget.Android);
         }
 
-        [MenuItem("CYBERNOMAD/Scene Setup/Setup VR Rig", false, 50)]
-        public static void SetupVRScene()
+        [MenuItem("CYBERNOMAD/Scene Setup/Setup VR Rig (Controllers)", false, 51)]
+        public static void SetupVRSceneControllers()
         {
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
             {
@@ -213,24 +213,85 @@ namespace Plaga44.Editor
             }
 
             var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            // With FloorLevel tracking origin, rig should be at Y=0
-            // (headset height is handled by tracking system)
             rig.transform.position = Vector3.zero;
             rig.transform.rotation = Quaternion.identity;
             Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
 
-            // Configure OVRManager -- per Meta docs + ControllerDrivenHandPoses sample
             var mgr = rig.GetComponent<OVRManager>();
             if (mgr != null)
             {
                 var so = new SerializedObject(mgr);
-                // Tracking Origin = Floor Level (doc step 4)
                 var pTrackingOrigin = so.FindProperty("_trackingOriginType");
                 if (pTrackingOrigin != null) pTrackingOrigin.intValue = 1; // FloorLevel
-                // Hand Tracking Support = Controllers and Hands (doc step)
+                so.ApplyModifiedProperties();
+                Debug.Log($"{LOG} OVRManager configured (FloorLevel, controllers only).");
+            }
+
+            Selection.activeGameObject = rig;
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+
+            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig (controllers).");
+        }
+
+        [MenuItem("CYBERNOMAD/Scene Setup/Setup VR Rig (Hands)", false, 52)]
+        public static void SetupVRSceneHands()
+        {
+            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
+            {
+                Debug.LogError($"{LOG} Build target is not Android. Run Step 2 first.");
+                return;
+            }
+
+            string[] guids = AssetDatabase.FindAssets("OVRCameraRig t:prefab");
+            if (guids.Length == 0)
+            {
+                Debug.LogError($"{LOG} OVRCameraRig prefab not found. Run Step 1 first.");
+                return;
+            }
+
+            string prefabPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab == null)
+            {
+                Debug.LogError($"{LOG} Could not load OVRCameraRig at: {prefabPath}");
+                return;
+            }
+
+            var existing = GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None);
+            foreach (var t in existing)
+            {
+                if (t.name == "OVRCameraRig" || t.name == "XROrigin")
+                {
+                    Debug.LogWarning($"{LOG} {t.name} already in scene. Skipping.");
+                    return;
+                }
+            }
+
+            var cameras = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None);
+            foreach (var cam in cameras)
+            {
+                if (cam.gameObject.name == "Main Camera")
+                {
+                    Undo.DestroyObjectImmediate(cam.gameObject);
+                    Debug.Log($"{LOG} Deleted Main Camera.");
+                    break;
+                }
+            }
+
+            var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            rig.transform.position = Vector3.zero;
+            rig.transform.rotation = Quaternion.identity;
+            Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
+
+            var mgr = rig.GetComponent<OVRManager>();
+            if (mgr != null)
+            {
+                var so = new SerializedObject(mgr);
+                var pTrackingOrigin = so.FindProperty("_trackingOriginType");
+                if (pTrackingOrigin != null) pTrackingOrigin.intValue = 1; // FloorLevel
                 var pHandSupport = so.FindProperty("_handTrackingSupport");
-                if (pHandSupport != null) pHandSupport.intValue = 2;
-                // Controller-driven hand poses (sample settings)
+                if (pHandSupport != null) pHandSupport.intValue = 2; // ControllersAndHands
                 var pEnabled = so.FindProperty("_controllerDrivenHandPoses");
                 if (pEnabled != null) pEnabled.boolValue = true;
                 var pType = so.FindProperty("controllerDrivenHandPosesType");
@@ -243,26 +304,22 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} OVRManager configured (FloorLevel + controller-driven hand poses).");
             }
 
-            // Add OVRHandPrefab under LeftHandAnchor and RightHandAnchor
-            // (exactly like Meta's ControllerDrivenHandPoses sample scene)
             AddOVRHandPrefabs(rig);
 
             Selection.activeGameObject = rig;
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
                 UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
 
-            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + OVRHandPrefab (controller-driven).");
+            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + OVRHandPrefab (controller-driven hands).");
         }
 
-        static void AddOVRHandPrefabs(GameObject rig)
+        public static void AddOVRHandPrefabs(GameObject rig)
         {
-            // OVRHandPrefab from com.meta.xr.sdk.core -- same as Meta's sample
             string[] guids = AssetDatabase.FindAssets("OVRHandPrefab t:prefab");
             GameObject handPrefab = null;
             foreach (var guid in guids)
             {
                 string p = AssetDatabase.GUIDToAssetPath(guid);
-                // Use the one from Prefabs/, not BuildingBlocks
                 if (p.Contains("Prefabs/OVRHandPrefab.prefab"))
                 {
                     handPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(p);
@@ -280,7 +337,6 @@ namespace Plaga44.Editor
                 return;
             }
 
-            // Find anchors in the instantiated rig
             Transform leftAnchor = FindChildRecursive(rig.transform, "LeftHandAnchor");
             Transform rightAnchor = FindChildRecursive(rig.transform, "RightHandAnchor");
 
@@ -290,7 +346,6 @@ namespace Plaga44.Editor
                 return;
             }
 
-            // Left hand
             var leftHand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, leftAnchor);
             leftHand.name = "OVRHandPrefab";
             leftHand.transform.localPosition = Vector3.zero;
@@ -298,7 +353,6 @@ namespace Plaga44.Editor
             ConfigureOVRHand(leftHand, 0); // 0 = HandLeft
             Undo.RegisterCreatedObjectUndo(leftHand, "Add Left OVRHandPrefab");
 
-            // Right hand
             var rightHand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, rightAnchor);
             rightHand.name = "OVRHandPrefab";
             rightHand.transform.localPosition = Vector3.zero;
@@ -309,10 +363,8 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} OVRHandPrefab added under LeftHandAnchor + RightHandAnchor.");
         }
 
-        static void ConfigureOVRHand(GameObject handGO, int handIndex)
+        public static void ConfigureOVRHand(GameObject handGO, int handIndex)
         {
-            string side = handIndex == 0 ? "Left" : "Right";
-
             var hand = handGO.GetComponent<OVRHand>();
             if (hand != null)
             {
@@ -322,7 +374,6 @@ namespace Plaga44.Editor
                 {
                     prop.intValue = handIndex;
                     so.ApplyModifiedProperties();
-                    Debug.Log($"{LOG} OVRHand.HandType = {side} (OK)");
                 }
                 else Debug.LogError($"{LOG} OVRHand.HandType property NOT FOUND!");
             }
@@ -337,7 +388,6 @@ namespace Plaga44.Editor
                 {
                     prop.intValue = handIndex;
                     so.ApplyModifiedProperties();
-                    Debug.Log($"{LOG} OVRSkeleton._skeletonType = {side} (OK)");
                 }
                 else Debug.LogError($"{LOG} OVRSkeleton._skeletonType property NOT FOUND!");
             }
@@ -352,14 +402,13 @@ namespace Plaga44.Editor
                 {
                     prop.intValue = handIndex;
                     so.ApplyModifiedProperties();
-                    Debug.Log($"{LOG} OVRMesh._meshType = {side} (OK)");
                 }
                 else Debug.LogError($"{LOG} OVRMesh._meshType property NOT FOUND!");
             }
             else Debug.LogError($"{LOG} OVRMesh NOT FOUND on {handGO.name}!");
         }
 
-        static Transform FindChildRecursive(Transform parent, string name)
+        public static Transform FindChildRecursive(Transform parent, string name)
         {
             foreach (Transform child in parent)
             {
