@@ -128,14 +128,14 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} CharacterController: h=1.8, r=0.3, gravity via OVRPlayerController.");
             }
 
-            // Ensure ground plane exists for gravity -- Unlit to avoid VR flicker
-            var ground = GameObject.Find("Ground");
+            // Ensure ground plane exists for gravity -- reuse existing floor from TESTBED
+            var ground = GameObject.Find("InfiniteFloor") ?? GameObject.Find("Ground");
             if (ground == null)
             {
                 ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
                 ground.name = "Ground";
                 ground.transform.position = Vector3.zero;
-                ground.transform.localScale = new Vector3(10f, 1f, 10f);
+                ground.transform.localScale = new Vector3(100f, 1f, 100f);
                 SetUnlitMaterial(ground, new Color(0.25f, 0.25f, 0.25f));
                 Undo.RegisterCreatedObjectUndo(ground, "Add Ground");
                 Debug.Log($"{LOG} Ground plane added (Unlit material).");
@@ -144,7 +144,7 @@ namespace Plaga44.Editor
             {
                 // Fix existing ground material to Unlit
                 SetUnlitMaterial(ground, new Color(0.25f, 0.25f, 0.25f));
-                Debug.Log($"{LOG} Ground material switched to Unlit.");
+                Debug.Log($"{LOG} Reusing existing floor: {ground.name} (switched to Unlit).");
             }
 
             // Add table with test objects at hand height
