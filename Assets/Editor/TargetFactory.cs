@@ -154,7 +154,7 @@ namespace Plaga44.Editor
             {
                 case 0:
                     vis.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-                    vis.transform.localScale = new Vector3(scaleY, scaleXZ, scaleXZ);
+                    vis.transform.localScale = new Vector3(scaleXZ, scaleY, scaleXZ);
                     break;
                 case 2:
                     vis.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
