@@ -17,7 +17,6 @@ namespace Plaga44.Editor
 
         private static readonly Color TargetColor = new Color(0.85f, 0.55f, 0.2f);
 
-        [MenuItem("CYBERNOMAD/Scene Setup/Add Test Targets", false, 102)]
         public static void AddTestTargets()
         {
             Debug.Log($"{LOG} Creating 10 test targets...");

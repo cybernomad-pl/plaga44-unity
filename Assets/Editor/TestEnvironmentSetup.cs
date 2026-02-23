@@ -28,6 +28,7 @@ namespace Plaga44.Editor
             AddGround();
             AddTestTable(player.transform.position);
             AddStoneSpawner(player.transform.position);
+            TargetFactory.AddTestTargets();
             AddSplashScreen();
             AddDebugHUD();
 
