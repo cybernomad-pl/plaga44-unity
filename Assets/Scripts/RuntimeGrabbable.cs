@@ -6,7 +6,8 @@
 // immediately -- there's no window to set m_grabPoints beforehand.
 //
 // Solution: Subclass with 'new void Awake()' that handles the null case.
-// OVRGrabber sees RuntimeGrabbable as OVRGrabbable (inheritance).
+// Also: ignores collision with CharacterController while grabbed,
+// so stones held near/behind head don't push the player.
 
 using UnityEngine;
 
@@ -37,6 +38,39 @@ public class RuntimeGrabbable : OVRGrabbable
                 if (col != null)
                     m_grabPoints = new Collider[] { col };
             }
+        }
+    }
+
+    public override void GrabBegin(OVRGrabber hand, Collider grabPoint)
+    {
+        base.GrabBegin(hand, grabPoint);
+        SetPlayerCollision(ignore: true);
+    }
+
+    public override void GrabEnd(Vector3 linearVelocity, Vector3 angularVelocity)
+    {
+        SetPlayerCollision(ignore: false);
+        base.GrabEnd(linearVelocity, angularVelocity);
+    }
+
+    /// <summary>
+    /// Ignore/restore collision between this stone and the player's CharacterController.
+    /// Prevents grabbed stones from pushing the player when held near/behind head.
+    /// OVRGrabber.m_player was deliberately not set (SDK bug: never restores collision).
+    /// We handle it ourselves with proper restore in GrabEnd.
+    /// </summary>
+    private void SetPlayerCollision(bool ignore)
+    {
+        var player = FindFirstObjectByType<OVRPlayerController>();
+        if (player == null) return;
+
+        var cc = player.GetComponent<CharacterController>();
+        if (cc == null) return;
+
+        foreach (var col in GetComponentsInChildren<Collider>())
+        {
+            if (!col.isTrigger)
+                Physics.IgnoreCollision(col, cc, ignore);
         }
     }
 }

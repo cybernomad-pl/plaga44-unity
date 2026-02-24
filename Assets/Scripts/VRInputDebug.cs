@@ -181,17 +181,17 @@ public class VRInputDebug : MonoBehaviour
 
         // Three concentric zone circles (behind text -- added first)
         // Outer = faint, middle = slightly brighter, inner = brightest
-        _outerZone = CreateCircle(parent, "OuterZone", 240f, new Color(0.3f, 0.9f, 0.3f, 0.06f));
-        _middleZone = CreateCircle(parent, "MiddleZone", 160f, new Color(0.3f, 0.9f, 0.3f, 0.08f));
-        _innerZone = CreateCircle(parent, "InnerZone", 80f, new Color(0.3f, 1f, 0.3f, 0.10f));
+        _outerZone = CreateCircle(parent, "OuterZone", 400f, new Color(0.3f, 0.9f, 0.3f, 0.06f));
+        _middleZone = CreateCircle(parent, "MiddleZone", 260f, new Color(0.3f, 0.9f, 0.3f, 0.08f));
+        _innerZone = CreateCircle(parent, "InnerZone", 130f, new Color(0.3f, 1f, 0.3f, 0.10f));
 
         // Controller position dots (small, bright)
-        _leftDot = CreateCircle(parent, "LDot", 14f, new Color(1f, 0.5f, 0f, 0.85f));
-        _rightDot = CreateCircle(parent, "RDot", 14f, new Color(0f, 0.6f, 1f, 0.85f));
+        _leftDot = CreateCircle(parent, "LDot", 20f, new Color(1f, 0.5f, 0f, 0.85f));
+        _rightDot = CreateCircle(parent, "RDot", 20f, new Color(0f, 0.6f, 1f, 0.85f));
 
         // Zone label -- small text below reticle
         _zoneText = CreateText(parent, "ZoneLabel",
-            new Vector2(0, -55), new Vector2(300, 30), TextAnchor.UpperCenter, 14);
+            new Vector2(0, -80), new Vector2(300, 30), TextAnchor.UpperCenter, 16);
         _zoneText.text = "";
     }
 
@@ -221,17 +221,20 @@ public class VRInputDebug : MonoBehaviour
     {
         if (_circleSprite != null) return _circleSprite;
 
-        const int res = 64;
+        const int res = 128;
         var tex = new Texture2D(res, res, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
         float center = res / 2f;
-        float radius = center - 1f;
+        float radius = center - 2f;
 
         for (int y = 0; y < res; y++)
         {
             for (int x = 0; x < res; x++)
             {
                 float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
-                tex.SetPixel(x, y, dist <= radius ? Color.white : Color.clear);
+                // Smooth anti-aliased edge: 2px falloff
+                float alpha = Mathf.Clamp01((radius - dist) / 2f);
+                tex.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
             }
         }
 
