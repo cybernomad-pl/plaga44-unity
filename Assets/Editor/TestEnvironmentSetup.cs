@@ -310,17 +310,16 @@ namespace Plaga44.Editor
             var rightCtrl = FindChild(rigTransform, "RightControllerAnchor");
 
             if (leftCtrl != null)
-            {
                 SetupGrabber(leftCtrl.gameObject, 1, player); // 1 = OVRInput.Controller.LTouch
-                AddControllerVisual(leftCtrl, 1);
-            }
             if (rightCtrl != null)
-            {
                 SetupGrabber(rightCtrl.gameObject, 2, player); // 2 = OVRInput.Controller.RTouch
-                AddControllerVisual(rightCtrl, 2);
-            }
 
-            Debug.Log($"{LOG} OVRGrabber + controller visuals added to anchors.");
+            // Ignore collision between hand colliders and CharacterController
+            // Without this, hand colliders inside CC volume push the player up.
+            if (player.GetComponent<HandCollisionIgnore>() == null)
+                player.AddComponent<HandCollisionIgnore>();
+
+            Debug.Log($"{LOG} OVRGrabber added to controller anchors.");
         }
 
         static void SetupGrabber(GameObject anchorGO, int controllerValue, GameObject player)
@@ -391,46 +390,6 @@ namespace Plaga44.Editor
             // collision stays active after grab+release.
 
             so.ApplyModifiedProperties();
-        }
-
-        /// <summary>
-        /// Adds OVRControllerPrefab as child of controller anchor for visual reference.
-        /// </summary>
-        static void AddControllerVisual(Transform anchor, int controllerValue)
-        {
-            string[] guids = AssetDatabase.FindAssets("OVRControllerPrefab t:prefab");
-            GameObject prefab = null;
-            foreach (var guid in guids)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.Contains("OVRControllerPrefab.prefab"))
-                {
-                    prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                    if (prefab != null) break;
-                }
-            }
-
-            if (prefab == null)
-            {
-                Debug.LogWarning($"{LOG} OVRControllerPrefab.prefab not found -- skipping controller visual.");
-                return;
-            }
-
-            var vis = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            vis.name = "ControllerVisual";
-            vis.transform.SetParent(anchor, false);
-            vis.transform.localPosition = Vector3.zero;
-            vis.transform.localRotation = Quaternion.identity;
-
-            // Set controller type via OVRControllerHelper (if present)
-            var helper = vis.GetComponent<OVRControllerHelper>();
-            if (helper != null)
-            {
-                var so = new SerializedObject(helper);
-                // m_controller: 1 = LTouch, 2 = RTouch
-                SetInt(so, "m_controller", controllerValue);
-                so.ApplyModifiedProperties();
-            }
         }
 
         // ---- EXTRAS ----
