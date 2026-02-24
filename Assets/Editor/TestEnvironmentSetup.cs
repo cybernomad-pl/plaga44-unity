@@ -331,35 +331,37 @@ namespace Plaga44.Editor
             rb.useGravity = false;
 
             // Hand-shaped compound collider (child objects inherit parent Rigidbody)
-            // Tight fit -- some clipping OK, no "force field"
-            // Palm -- thin box at grip center
+            // Positioned to wrap AROUND the controller grip like ghost hands in Meta sample.
+            // Controller anchor = center of grip. Hand is below and slightly behind.
+            //
+            // Palm -- thin box wrapping the grip area
             var palm = new GameObject("PalmCollider");
             palm.transform.SetParent(anchorGO.transform, false);
-            palm.transform.localPosition = new Vector3(0f, 0f, 0.02f);
+            palm.transform.localPosition = new Vector3(0f, -0.02f, -0.02f);
             var palmCol = palm.AddComponent<BoxCollider>();
-            palmCol.size = new Vector3(0.05f, 0.02f, 0.05f);
+            palmCol.size = new Vector3(0.06f, 0.03f, 0.06f);
 
-            // Fingers -- thin capsule extending forward
+            // Fingers -- curling around front of grip, slightly below
             var fingers = new GameObject("FingersCollider");
             fingers.transform.SetParent(anchorGO.transform, false);
-            fingers.transform.localPosition = new Vector3(0f, 0f, 0.08f);
+            fingers.transform.localPosition = new Vector3(0f, -0.02f, 0.04f);
             var fingersCol = fingers.AddComponent<CapsuleCollider>();
             fingersCol.direction = 2; // Z axis (forward)
-            fingersCol.radius = 0.012f;
-            fingersCol.height = 0.07f;
+            fingersCol.radius = 0.015f;
+            fingersCol.height = 0.06f;
 
-            // Thumb -- tiny sphere offset to side
+            // Thumb -- offset to side at grip height
             var thumb = new GameObject("ThumbCollider");
             thumb.transform.SetParent(anchorGO.transform, false);
-            thumb.transform.localPosition = new Vector3(0.03f, 0f, 0.04f);
+            thumb.transform.localPosition = new Vector3(0.025f, -0.005f, 0f);
             var thumbCol = thumb.AddComponent<SphereCollider>();
-            thumbCol.radius = 0.012f;
+            thumbCol.radius = 0.015f;
 
-            // Trigger collider -- grab detection volume (on anchor, covers whole hand area)
+            // Trigger collider -- grab detection volume centered on grip
             var grabCol = anchorGO.AddComponent<SphereCollider>();
             grabCol.isTrigger = true;
-            grabCol.radius = 0.1f;
-            grabCol.center = new Vector3(0f, 0f, 0.06f);
+            grabCol.radius = 0.08f;
+            grabCol.center = new Vector3(0f, -0.01f, 0.01f);
 
             // OVRGrabber
             var grabber = anchorGO.AddComponent<OVRGrabber>();
