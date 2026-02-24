@@ -1,7 +1,8 @@
 // StoneSpawner.cs
 // CYBERNOMAD -- Spawns a new grabbable stone on the table every N seconds.
 // Stone appears at random position on the table surface with random size/color.
-// Uses BoxCollider (not Sphere) so stones have flat faces and stack naturally.
+// Compound collider: SphereCollider (grab point) + cross-shaped BoxColliders (physics).
+// OVRGrabbable.Awake() needs a Collider on root GO -- SphereCollider stays for that.
 
 using UnityEngine;
 
@@ -22,9 +23,6 @@ public class StoneSpawner : MonoBehaviour
     private float _timer;
     private PhysicsMaterial _stoneMat;
 
-    // Cached reflection field for OVRGrabbable.m_grabPoints (protected, no public setter)
-    private static System.Reflection.FieldInfo _grabPointsField;
-
     void Start()
     {
         _timer = interval;
@@ -35,9 +33,6 @@ public class StoneSpawner : MonoBehaviour
             bounciness = 0f,
             frictionCombine = PhysicsMaterialCombine.Maximum
         };
-
-        _grabPointsField = typeof(OVRGrabbable).GetField("m_grabPoints",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
     }
 
     void Update()
@@ -71,18 +66,22 @@ public class StoneSpawner : MonoBehaviour
         stone.transform.position = pos;
         stone.transform.localScale = new Vector3(s, sy, sz);
 
-        // Material -- unlit gray
+        // Material -- Lit gray
         float gray = Random.Range(0.30f, 0.55f);
-        var shader = Shader.Find("Universal Render Pipeline/Unlit");
+        var shader = Shader.Find("Universal Render Pipeline/Lit");
         if (shader != null)
         {
             var r = stone.GetComponent<Renderer>();
             r.sharedMaterial = new Material(shader) { color = new Color(gray, gray - 0.03f, gray - 0.05f) };
         }
 
-        // Cross-shaped compound collider: 2 boxes at 90 degrees
-        Object.Destroy(stone.GetComponent<SphereCollider>());
+        // Keep SphereCollider (shrunk) -- OVRGrabbable.Awake() needs a Collider on root.
+        // Radius 0.35 fits inside the compound BoxColliders so boxes dominate contact.
+        var sphereCol = stone.GetComponent<SphereCollider>();
+        sphereCol.radius = 0.35f;
+        sphereCol.material = _stoneMat;
 
+        // Cross-shaped compound collider: 2 boxes at 90 degrees
         var wideChild = new GameObject("Col_Wide");
         wideChild.transform.SetParent(stone.transform, false);
         var wideBox = wideChild.AddComponent<BoxCollider>();
@@ -102,22 +101,17 @@ public class StoneSpawner : MonoBehaviour
         rb.angularDamping = 2.0f;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
-        // OVRGrabbable -- disable GO first so Awake() doesn't fire with null m_grabPoints
-        stone.SetActive(false);
-        var grabbable = stone.AddComponent<OVRGrabbable>();
-        if (_grabPointsField != null)
-        {
-            _grabPointsField.SetValue(grabbable, new Collider[] { wideBox, longBox });
-        }
-        var allowField = typeof(OVRGrabbable).GetField("m_allowOffhandGrab",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        if (allowField != null)
-            allowField.SetValue(grabbable, true);
-        stone.SetActive(true);
+        // RuntimeGrabbable -- safe subclass of OVRGrabbable for runtime AddComponent.
+        // OVRGrabbable.Awake() crashes on null m_grabPoints. RuntimeGrabbable handles it.
+        var grabbable = stone.AddComponent<RuntimeGrabbable>();
+        grabbable.SetAllowOffhandGrab(true);
 
-        // ThrowBoost
-        var tb = stone.AddComponent<ThrowBoost>();
-        tb.multiplier = 5.0f;
+        // GazeThrow -- gaze-corrected throwing with boost (replaces ThrowBoost)
+        var gt = stone.AddComponent<GazeThrow>();
+        gt.boostMultiplier = 5.0f;
+
+        // HitDetector -- registers hits on target zones
+        stone.AddComponent<Plaga44.Gameplay.HitDetector>();
 
         Debug.Log("[PLAGA44] StoneSpawner: new stone spawned.");
     }

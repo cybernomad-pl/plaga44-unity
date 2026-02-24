@@ -121,6 +121,29 @@ public class SplashScreen : MonoBehaviour
             if (r != null) r.enabled = true;
         }
         _hiddenRenderers.Clear();
+
+        // Also actively find and enable ALL renderers under controller/hand anchors.
+        // OVR SDK spawns controller models dynamically -- we may have hidden renderers
+        // that weren't in our tracking list (spawned after initial hide).
+        var rig = FindFirstObjectByType<OVRCameraRig>();
+        if (rig == null) return;
+
+        Transform[] anchors = new Transform[]
+        {
+            rig.leftControllerAnchor,
+            rig.rightControllerAnchor,
+            rig.leftHandAnchor,
+            rig.rightHandAnchor
+        };
+
+        foreach (var anchor in anchors)
+        {
+            if (anchor == null) continue;
+            foreach (var r in anchor.GetComponentsInChildren<Renderer>(true))
+            {
+                r.enabled = true;
+            }
+        }
     }
 
     private void FindCenterEye()
@@ -172,7 +195,7 @@ public class SplashScreen : MonoBehaviour
         labelRect.pivot = new Vector2(0f, 0.5f);
         // "PLAGA '44" at fontSize 52 Consolas monospace: ~31px/char, 9 chars = ~280px
         // Centered title left edge = -140px from center
-        labelRect.anchoredPosition = new Vector2(-125, 40);
+        labelRect.anchoredPosition = new Vector2(-124, 40);
         labelRect.sizeDelta = new Vector2(400, 30);
 
         // Project name -- configurable via displayName field in Inspector
