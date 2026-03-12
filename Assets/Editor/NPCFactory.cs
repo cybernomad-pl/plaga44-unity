@@ -274,18 +274,11 @@ namespace Plaga44.Editor
             // --- Stany w Base Layer ---
             var rootStateMachine = controller.layers[0].stateMachine;
 
-            var stateIdle    = rootStateMachine.AddState("Idle");
-            var statePatrol  = rootStateMachine.AddState("Patrol");
-            var stateChase   = rootStateMachine.AddState("Chase");
-            var stateAttack  = rootStateMachine.AddState("Attack");
-            var stateDeath   = rootStateMachine.AddState("Death");
-
-            // Layout w Animator oknie (czytelnosc)
-            stateIdle.position   = new Vector3(200f,  50f, 0f);
-            statePatrol.position = new Vector3(200f, 150f, 0f);
-            stateChase.position  = new Vector3(400f, 100f, 0f);
-            stateAttack.position = new Vector3(600f, 100f, 0f);
-            stateDeath.position  = new Vector3(400f, 250f, 0f);
+            var stateIdle    = rootStateMachine.AddState("Idle",   new Vector3(200f,  50f, 0f));
+            var statePatrol  = rootStateMachine.AddState("Patrol", new Vector3(200f, 150f, 0f));
+            var stateChase   = rootStateMachine.AddState("Chase",  new Vector3(400f, 100f, 0f));
+            var stateAttack  = rootStateMachine.AddState("Attack", new Vector3(600f, 100f, 0f));
+            var stateDeath   = rootStateMachine.AddState("Death",  new Vector3(400f, 250f, 0f));
 
             // Default state = Idle
             rootStateMachine.defaultState = stateIdle;
