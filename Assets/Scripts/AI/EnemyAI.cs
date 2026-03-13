@@ -106,6 +106,11 @@ namespace Plaga44.AI
         private static readonly Color ColorAttack  = new Color(0.85f, 0.0f,  0.05f);
         private static readonly Color ColorDead    = new Color(0.35f, 0.35f, 0.35f);
 
+        // ---- Public API ----
+
+        public EnemyState CurrentState => _state;
+        public bool IsDead => _state == EnemyState.Dead;
+
         // ---- Lifecycle ----
 
         private void Awake()
