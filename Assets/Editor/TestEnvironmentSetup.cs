@@ -33,6 +33,7 @@ namespace Plaga44.Editor
             TargetFactory.AddTestTargets();
             AddSplashScreen();
             AddDebugHUD();
+            AddVRUI(player);
             AddHapticFeedback();
 
             Selection.activeGameObject = player;
@@ -563,6 +564,69 @@ namespace Plaga44.Editor
             var go = new GameObject("VRInputDebug");
             go.AddComponent<VRInputDebug>();
             Undo.RegisterCreatedObjectUndo(go, "Add VRInputDebug");
+        }
+
+        // ---- VR UI ----
+
+        static void AddVRUI(GameObject player)
+        {
+            // Require EventSystem for UI interaction
+            if (Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
+            {
+                var esGO = new GameObject("EventSystem");
+                esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
+                esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+                Undo.RegisterCreatedObjectUndo(esGO, "Add EventSystem");
+            }
+
+            // VRMenuManager -- world-space pause menu
+            var menuGO = new GameObject("VRMenuManager");
+            menuGO.AddComponent<Plaga44.UI.VRMenuManager>();
+            Undo.RegisterCreatedObjectUndo(menuGO, "Add VRMenuManager");
+
+            // VRHealthDisplay -- wrist-mounted HP/stamina
+            var healthGO = new GameObject("VRHealthDisplay");
+            healthGO.AddComponent<Plaga44.UI.VRHealthDisplay>();
+            Undo.RegisterCreatedObjectUndo(healthGO, "Add VRHealthDisplay");
+
+            // VRScoreboard -- floating score panel
+            var scoreGO = new GameObject("VRScoreboard");
+            scoreGO.AddComponent<Plaga44.UI.VRScoreboard>();
+            Undo.RegisterCreatedObjectUndo(scoreGO, "Add VRScoreboard");
+
+            // VRNotification -- popup notifications
+            var notifGO = new GameObject("VRNotification");
+            notifGO.AddComponent<Plaga44.UI.VRNotification>();
+            Undo.RegisterCreatedObjectUndo(notifGO, "Add VRNotification");
+
+            // UIRayPointer -- laser pointer on both controller anchors
+            var rigTransform = FindChild(player.transform, "OVRCameraRig");
+            if (rigTransform != null)
+            {
+                AddRayPointer(rigTransform, "LeftControllerAnchor",
+                    OVRInput.Controller.LTouch);
+                AddRayPointer(rigTransform, "RightControllerAnchor",
+                    OVRInput.Controller.RTouch);
+            }
+
+            Debug.Log($"{LOG} VR UI system added (menu, health, score, notifications, ray pointers).");
+        }
+
+        static void AddRayPointer(Transform rigTransform, string anchorName,
+            OVRInput.Controller ctrl)
+        {
+            var anchor = FindChild(rigTransform, anchorName);
+            if (anchor == null)
+            {
+                Debug.LogWarning($"{LOG} UIRayPointer: anchor '{anchorName}' not found.");
+                return;
+            }
+
+            var existing = anchor.GetComponent<Plaga44.UI.UIRayPointer>();
+            if (existing != null) return;  // already set up
+
+            var pointer = anchor.gameObject.AddComponent<Plaga44.UI.UIRayPointer>();
+            pointer.controller = ctrl;
         }
 
         // ---- HAPTICS ----
