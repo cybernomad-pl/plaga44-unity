@@ -319,6 +319,10 @@ namespace Plaga44.Editor
             if (player.GetComponent<HandCollisionIgnore>() == null)
                 player.AddComponent<HandCollisionIgnore>();
 
+            // Runtime performance optimization -- ASW, FFR, Dynamic Resolution
+            if (player.GetComponent<PerformanceConfig>() == null)
+                player.AddComponent<PerformanceConfig>();
+
             Debug.Log($"{LOG} OVRGrabber added to controller anchors.");
         }
 
