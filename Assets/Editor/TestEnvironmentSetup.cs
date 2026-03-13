@@ -1,6 +1,8 @@
 #if UNITY_EDITOR
+using Plaga44.AI;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace Plaga44.Editor
 {
@@ -31,6 +33,7 @@ namespace Plaga44.Editor
             TargetFactory.AddTestTargets();
             AddSplashScreen();
             AddDebugHUD();
+            AddHapticFeedback();
 
             Selection.activeGameObject = player;
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
@@ -39,6 +42,156 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} === TESTBED READY ===");
             Debug.Log($"{LOG} L-stick = move, R-stick = snap turn, grip = grab");
         }
+
+        // ---- AI TESTBED ----
+
+        /// <summary>
+        /// Sets up the AI testbed: TESTBED base + 3 patrol enemies on a NavMesh-ready ground.
+        ///
+        /// NavMesh baking:
+        ///   This setup adds a NavMeshSurface component to the ground.
+        ///   You MUST manually bake the NavMesh after running this setup:
+        ///   Window -> AI -> Navigation -> Bake  (or the NavMeshSurface component on Ground).
+        ///   Enemies will log a warning if no NavMesh is found at their spawn position.
+        /// </summary>
+        [MenuItem("CYBERNOMAD/Scene Setup/Setup AI Testbed", false, 51)]
+        public static void SetupAITestbed()
+        {
+            Debug.Log($"{LOG} === Setup AI TESTBED ===");
+
+            // First run the base testbed
+            SetupTestbed();
+
+            // Then add AI layer on top
+            AddNavMeshSurface();
+            AddEnemySpawner();
+
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+
+            Debug.Log($"{LOG} === AI TESTBED READY ===");
+            Debug.Log($"{LOG} IMPORTANT: Bake NavMesh! Window -> AI -> Navigation -> Bake");
+            Debug.Log($"{LOG} Enemies: 3 capsules with patrol routes. Throw stones to damage them.");
+        }
+
+        static void AddNavMeshSurface()
+        {
+            // Find the Ground plane and add a NavMeshSurface so the NavMesh can be baked
+            var ground = GameObject.Find("Ground");
+            if (ground == null)
+            {
+                Debug.LogWarning($"{LOG} Ground not found -- NavMeshSurface not added. Run Setup TESTBED first.");
+                return;
+            }
+
+            // Check if already has a NavMeshSurface
+            if (ground.GetComponent<UnityEngine.AI.NavMeshSurface>() != null)
+            {
+                Debug.Log($"{LOG} NavMeshSurface already on Ground.");
+                return;
+            }
+
+            var surface = ground.AddComponent<UnityEngine.AI.NavMeshSurface>();
+            surface.collectObjects = UnityEngine.AI.CollectObjects.All;
+            surface.useGeometry = UnityEngine.AI.NavMeshCollectGeometry.PhysicsColliders;
+            Undo.RegisterCreatedObjectUndo(ground, "Add NavMeshSurface");
+
+            Debug.Log($"{LOG} NavMeshSurface added to Ground. Bake NavMesh in Window -> AI -> Navigation.");
+        }
+
+        static void AddEnemySpawner()
+        {
+            // Create patrol paths first
+            var path1 = CreatePatrolPath("PatrolPath_1", new Vector3[]
+            {
+                new Vector3(-5f, 0f, 10f),
+                new Vector3(-5f, 0f, 25f),
+                new Vector3( 5f, 0f, 25f),
+                new Vector3( 5f, 0f, 10f),
+            });
+
+            // path2 is added to the scene for manual use (assign in Inspector to a second spawner or enemy)
+            CreatePatrolPath("PatrolPath_2", new Vector3[]
+            {
+                new Vector3(-8f, 0f, 15f),
+                new Vector3(-8f, 0f, 35f),
+            });
+
+            // Spawner GO
+            var spawnerGO = new GameObject("EnemySpawner");
+            spawnerGO.transform.position = Vector3.zero;
+            Undo.RegisterCreatedObjectUndo(spawnerGO, "Add EnemySpawner");
+
+            var spawner = spawnerGO.AddComponent<EnemySpawner>();
+            spawner.maxEnemies = 3;
+            spawner.respawnDelay = 30f;
+            spawner.enemyHP = 100f;
+            spawner.patrolPath = path1;
+
+            // Spawn points spread around the scene
+            var sp1 = CreateSpawnPoint("SP_1", new Vector3(-4f, 0f, 12f));
+            var sp2 = CreateSpawnPoint("SP_2", new Vector3( 4f, 0f, 18f));
+            var sp3 = CreateSpawnPoint("SP_3", new Vector3(-7f, 0f, 22f));
+            sp1.transform.SetParent(spawnerGO.transform);
+            sp2.transform.SetParent(spawnerGO.transform);
+            sp3.transform.SetParent(spawnerGO.transform);
+
+            var so = new SerializedObject(spawner);
+            var spawnPointsProp = so.FindProperty("spawnPoints");
+            if (spawnPointsProp != null)
+            {
+                spawnPointsProp.arraySize = 3;
+                spawnPointsProp.GetArrayElementAtIndex(0).objectReferenceValue = sp1.transform;
+                spawnPointsProp.GetArrayElementAtIndex(1).objectReferenceValue = sp2.transform;
+                spawnPointsProp.GetArrayElementAtIndex(2).objectReferenceValue = sp3.transform;
+            }
+            so.ApplyModifiedProperties();
+
+            // Assign path2 to SP_3's enemy variation -- done at runtime by spawner
+            // For simplicity, all 3 use path1 (can be changed in Inspector)
+
+            Debug.Log($"{LOG} EnemySpawner ready: 3 spawn points, PatrolPath_1 (loop), PatrolPath_2 (pingpong).");
+        }
+
+        static PatrolPath CreatePatrolPath(string pathName, Vector3[] positions)
+        {
+            var pathGO = new GameObject(pathName);
+            Undo.RegisterCreatedObjectUndo(pathGO, $"Create {pathName}");
+            var path = pathGO.AddComponent<PatrolPath>();
+
+            var waypoints = new Transform[positions.Length];
+            for (int i = 0; i < positions.Length; i++)
+            {
+                var wp = new GameObject($"WP_{i}");
+                wp.transform.SetParent(pathGO.transform);
+                wp.transform.position = positions[i];
+                waypoints[i] = wp.transform;
+                Undo.RegisterCreatedObjectUndo(wp, $"Create waypoint {i}");
+            }
+
+            // Assign via SerializedObject to ensure proper undo/serialisation
+            var so = new SerializedObject(path);
+            var waypointsProp = so.FindProperty("waypoints");
+            if (waypointsProp != null)
+            {
+                waypointsProp.arraySize = waypoints.Length;
+                for (int i = 0; i < waypoints.Length; i++)
+                    waypointsProp.GetArrayElementAtIndex(i).objectReferenceValue = waypoints[i];
+            }
+            so.ApplyModifiedProperties();
+
+            return path;
+        }
+
+        static GameObject CreateSpawnPoint(string spName, Vector3 pos)
+        {
+            var go = new GameObject(spName);
+            go.transform.position = pos;
+            Undo.RegisterCreatedObjectUndo(go, $"Create {spName}");
+            return go;
+        }
+
+        // ---- CLEAN ----
 
         [MenuItem("CYBERNOMAD/Scene Setup/Clean Scene", false, 200)]
         public static void CleanScene()
@@ -267,8 +420,8 @@ namespace Plaga44.Editor
             rb.angularDamping = 2.0f;
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
-            // OVRGrabbable -- grab points = both colliders
-            var grabbable = stone.AddComponent<OVRGrabbable>();
+            // RuntimeGrabbable -- subclass of OVRGrabbable with haptic feedback + null-safe Awake.
+            var grabbable = stone.AddComponent<RuntimeGrabbable>();
             var gso = new SerializedObject(grabbable);
             SetBool(gso, "m_allowOffhandGrab", true);
             var grabPointsProp = gso.FindProperty("m_grabPoints");
@@ -318,6 +471,10 @@ namespace Plaga44.Editor
             // Without this, hand colliders inside CC volume push the player up.
             if (player.GetComponent<HandCollisionIgnore>() == null)
                 player.AddComponent<HandCollisionIgnore>();
+
+            // Runtime performance optimization -- ASW, FFR, Dynamic Resolution
+            if (player.GetComponent<PerformanceConfig>() == null)
+                player.AddComponent<PerformanceConfig>();
 
             Debug.Log($"{LOG} OVRGrabber added to controller anchors.");
         }
@@ -406,6 +563,23 @@ namespace Plaga44.Editor
             var go = new GameObject("VRInputDebug");
             go.AddComponent<VRInputDebug>();
             Undo.RegisterCreatedObjectUndo(go, "Add VRInputDebug");
+        }
+
+        // ---- HAPTICS ----
+
+        static void AddHapticFeedback()
+        {
+            // HapticFeedback is a singleton MonoBehaviour required for coroutine-based
+            // timed vibration pulses. One instance in scene is sufficient.
+            if (Object.FindFirstObjectByType<HapticFeedback>() != null)
+            {
+                Debug.Log($"{LOG} HapticFeedback already in scene.");
+                return;
+            }
+            var go = new GameObject("HapticFeedback");
+            go.AddComponent<HapticFeedback>();
+            Undo.RegisterCreatedObjectUndo(go, "Add HapticFeedback");
+            Debug.Log($"{LOG} HapticFeedback added.");
         }
 
         // ---- HELPERS ----

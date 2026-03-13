@@ -5,285 +5,199 @@ using UnityEngine;
 namespace Plaga44.AI
 {
     /// <summary>
-    /// Spawner wrogów z puli spawn pointów.
-    /// Obsługuje: limit wrogów (Quest performance), cooldown, fale.
+    /// Spawns capsule enemies at designated spawn points.
+    /// No models yet -- each enemy is a capsule (same approach as mannequin targets).
     ///
-    /// Wymaga: przynajmniej jeden SpawnPointMarker w scenie lub
-    /// ręcznie przypisane spawnPoints.
+    /// Visual coding:
+    ///   Enemy capsule = green (Patrol), changes colour per state via EnemyAI.
+    ///   Head sphere = slightly darker cap on top.
+    ///
+    /// NavMesh requirement: the scene must have a baked NavMesh.
+    /// Use "CYBERNOMAD / Scene Setup / Setup AI Testbed" which bakes it at runtime via
+    /// NavMeshSurface. If the surface is not present, spawned enemies will log a warning.
     /// </summary>
     public class EnemySpawner : MonoBehaviour
     {
-        private const string LOG = "[PLAGA44][Spawner]";
+        private const string LOG = "[PLAGA44]";
 
-        // -------------------------------------------------------------------------
-        // Inspector
-        // -------------------------------------------------------------------------
+        [Header("Spawn Settings")]
+        [Tooltip("Points where enemies can spawn. If empty, uses this transform.")]
+        public Transform[] spawnPoints = new Transform[0];
 
-        [Header("Prefab")]
-        [Tooltip("Prefab Klaszczura z komponentem EnemyAI")]
-        public GameObject enemyPrefab;
+        [Tooltip("Maximum number of live enemies at any time.")]
+        public int maxEnemies = 5;
 
-        [Header("Spawn Points")]
-        [Tooltip("Jesli puste -- szuka automatycznie SpawnPointMarker w scenie")]
-        public SpawnPointMarker[] spawnPoints;
+        [Tooltip("Seconds before a dead enemy is replaced. 0 = no respawn.")]
+        public float respawnDelay = 30f;
 
-        [Header("Limits -- Quest Performance")]
-        [Tooltip("Max jednoczesnych wrogów w scenie. Quest 3: max 8-12 dla stabilnych 72fps")]
-        [Range(1, 20)]
-        public int maxEnemies = 6;
+        [Header("Enemy Config")]
+        [Tooltip("Patrol path assigned to spawned enemies. Can be null for idle enemies.")]
+        public PatrolPath patrolPath;
 
-        [Tooltip("Cooldown miedzy kolejnymi spawnami [s]")]
-        public float spawnInterval = 5f;
+        [Tooltip("Starting HP for each spawned enemy.")]
+        public float enemyHP = 100f;
 
-        [Header("Wave System")]
-        [Tooltip("Wlacza system fal. Jesli false -- spawnuje ciagle az do limitu")]
-        public bool useWaves = false;
+        // ---- Private ----
 
-        [Tooltip("Dane fal (ilosc wrogów, przerwa po fali)")]
-        public WaveData[] waves;
+        private readonly List<GameObject> _liveEnemies = new List<GameObject>();
+        private int _spawnCounter;
 
-        [Tooltip("Jesli true -- powtarza ostatnia fale w nieskonczonosc")]
-        public bool loopLastWave = true;
-
-        [Header("Debug")]
-        public bool showDebugLogs = true;
-
-        // -------------------------------------------------------------------------
-        // Private
-        // -------------------------------------------------------------------------
-
-        private readonly List<EnemyAI> _activeEnemies = new List<EnemyAI>();
-        private bool _spawningActive;
-        private int _currentWaveIndex;
-        private Coroutine _spawnCoroutine;
-
-        // -------------------------------------------------------------------------
-        // Unity lifecycle
-        // -------------------------------------------------------------------------
+        // ---- Lifecycle ----
 
         private void Start()
         {
-            // Zbierz spawn pointy jesli nie przypisane ręcznie
-            if (spawnPoints == null || spawnPoints.Length == 0)
-            {
-                spawnPoints = FindObjectsByType<SpawnPointMarker>(FindObjectsSortMode.None);
-                if (showDebugLogs)
-                    Debug.Log($"{LOG} Znaleziono {spawnPoints.Length} spawn pointów w scenie.");
-            }
-
-            if (spawnPoints == null || spawnPoints.Length == 0)
-            {
-                Debug.LogWarning($"{LOG} Brak spawn pointów! Spawner bezczynny.");
-                return;
-            }
-
-            if (enemyPrefab == null)
-            {
-                Debug.LogWarning($"{LOG} Brak enemyPrefab! Przypisz prefab Klaszczura.");
-                return;
-            }
-
-            StartSpawning();
+            SpawnInitialEnemies();
         }
 
-        private void OnDestroy()
+        // ---- Spawn logic ----
+
+        private void SpawnInitialEnemies()
         {
-            StopSpawning();
-        }
-
-        // -------------------------------------------------------------------------
-        // Public API
-        // -------------------------------------------------------------------------
-
-        public void StartSpawning()
-        {
-            if (_spawningActive) return;
-            _spawningActive = true;
-
-            if (useWaves)
-                _spawnCoroutine = StartCoroutine(WaveSpawnLoop());
-            else
-                _spawnCoroutine = StartCoroutine(ContinuousSpawnLoop());
-        }
-
-        public void StopSpawning()
-        {
-            _spawningActive = false;
-            if (_spawnCoroutine != null)
+            int count = Mathf.Min(maxEnemies, spawnPoints.Length > 0 ? spawnPoints.Length : 1);
+            for (int i = 0; i < count; i++)
             {
-                StopCoroutine(_spawnCoroutine);
-                _spawnCoroutine = null;
+                SpawnEnemyAt(GetSpawnPoint(i));
             }
         }
 
-        public int ActiveEnemyCount => CountActiveEnemies();
-
-        public int CurrentWave => _currentWaveIndex;
-
-        // -------------------------------------------------------------------------
-        // Spawn loops
-        // -------------------------------------------------------------------------
-
-        private IEnumerator ContinuousSpawnLoop()
+        private Transform GetSpawnPoint(int index)
         {
-            while (_spawningActive)
+            if (spawnPoints != null && spawnPoints.Length > 0 && index < spawnPoints.Length)
+                return spawnPoints[index];
+            return transform;
+        }
+
+        private void SpawnEnemyAt(Transform spawnPoint)
+        {
+            if (_liveEnemies.Count >= maxEnemies) return;
+
+            Vector3 pos = spawnPoint != null ? spawnPoint.position : transform.position;
+            Quaternion rot = spawnPoint != null ? spawnPoint.rotation : transform.rotation;
+
+            GameObject enemy = CreateEnemyCapsule(pos, rot);
+            _liveEnemies.Add(enemy);
+
+            // Hook death to trigger respawn
+            var health = enemy.GetComponent<EnemyHealth>();
+            if (health != null)
             {
-                CleanDeadEnemies();
+                health.OnDeath += (_) => StartCoroutine(HandleEnemyDeath(enemy));
+            }
 
-                if (CountActiveEnemies() < maxEnemies)
-                {
-                    SpawnEnemy();
-                }
+            Debug.Log($"{LOG} Spawned enemy {enemy.name} at {pos}.");
+        }
 
-                yield return new WaitForSeconds(spawnInterval);
+        private IEnumerator HandleEnemyDeath(GameObject enemy)
+        {
+            // Wait for ragdoll to settle before removing from list
+            yield return new WaitForSeconds(5f);
+
+            _liveEnemies.Remove(enemy);
+            Destroy(enemy, 2f);
+
+            if (respawnDelay > 0f)
+            {
+                yield return new WaitForSeconds(respawnDelay - 5f);
+                // Pick a random spawn point for the replacement
+                int idx = Random.Range(0, Mathf.Max(1, spawnPoints.Length));
+                SpawnEnemyAt(GetSpawnPoint(idx));
             }
         }
 
-        private IEnumerator WaveSpawnLoop()
+        // ---- Enemy prefab construction ----
+
+        /// <summary>
+        /// Builds a capsule enemy with EnemyAI, EnemyHealth and a NavMeshAgent.
+        /// Hierarchy:
+        ///   Enemy_N  (root: NavMeshAgent, EnemyAI, EnemyHealth, CapsuleCollider, Rigidbody)
+        ///     Visual  (capsule mesh, Renderer -- colour changes with state)
+        ///     Head    (sphere on top for head hit zone -- EnemyHitReceiver)
+        /// </summary>
+        private GameObject CreateEnemyCapsule(Vector3 position, Quaternion rotation)
         {
-            if (waves == null || waves.Length == 0)
-            {
-                Debug.LogWarning($"{LOG} useWaves=true ale brak danych fal. Przelaczam na tryb ciagly.");
-                yield return StartCoroutine(ContinuousSpawnLoop());
-                yield break;
-            }
+            _spawnCounter++;
+            string enemyName = $"Enemy_{_spawnCounter}";
 
-            while (_spawningActive)
-            {
-                WaveData wave = waves[_currentWaveIndex];
-                if (showDebugLogs)
-                    Debug.Log($"{LOG} Fala {_currentWaveIndex + 1}/{waves.Length}: {wave.enemyCount} wrogów.");
+            // Root
+            var root = new GameObject(enemyName);
+            root.transform.position = position;
+            root.transform.rotation = rotation;
+            root.tag = "Enemy";
 
-                // Spawnuj wrogów fali
-                int spawned = 0;
-                while (spawned < wave.enemyCount && _spawningActive)
-                {
-                    CleanDeadEnemies();
+            // Capsule collider on root (for physics / stone impact)
+            var capsuleCol = root.AddComponent<CapsuleCollider>();
+            capsuleCol.height = 1.8f;
+            capsuleCol.radius = 0.35f;
+            capsuleCol.center = new Vector3(0f, 0.9f, 0f);
 
-                    if (CountActiveEnemies() < maxEnemies)
-                    {
-                        SpawnEnemy();
-                        spawned++;
-                        yield return new WaitForSeconds(spawnInterval);
-                    }
-                    else
-                    {
-                        // Czekaj az zwolni sie miejsce
-                        yield return new WaitForSeconds(1f);
-                    }
-                }
+            // Rigidbody -- kinematic until death (then EnemyAI enables ragdoll)
+            var rb = root.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.constraints = RigidbodyConstraints.FreezeRotation;
 
-                // Czekaj az wszyscy wrogowie z fali zgina (lub przerwa po fali)
-                yield return new WaitForSeconds(wave.postWaveDelay);
-                yield return new WaitUntil(() => CountActiveEnemies() == 0);
+            // NavMeshAgent
+            var agent = root.AddComponent<NavMeshAgent>();
+            agent.height = 1.8f;
+            agent.radius = 0.35f;
+            agent.baseOffset = 0f;
+            agent.speed = 2f;
+            agent.angularSpeed = 180f;
+            agent.acceleration = 8f;
+            agent.stoppingDistance = 0.3f;
+            agent.autoBraking = true;
 
-                if (showDebugLogs)
-                    Debug.Log($"{LOG} Fala {_currentWaveIndex + 1} zakonczona.");
+            // EnemyHealth
+            var health = root.AddComponent<EnemyHealth>();
+            health.maxHP = enemyHP;
 
-                // Przejdz do nastepnej fali
-                if (_currentWaveIndex + 1 < waves.Length)
-                {
-                    _currentWaveIndex++;
-                }
-                else if (loopLastWave)
-                {
-                    // Powtarzaj ostatnia fale
-                    if (showDebugLogs)
-                        Debug.Log($"{LOG} Powtarzam ostatnia fale.");
-                }
-                else
-                {
-                    if (showDebugLogs)
-                        Debug.Log($"{LOG} Wszystkie fale zakonczone.");
-                    _spawningActive = false;
-                }
-            }
+            // EnemyAI
+            var ai = root.AddComponent<EnemyAI>();
+            ai.patrolPath = patrolPath;
+            ai.visionRange = 15f;
+            ai.visionHalfAngle = 60f;
+            ai.hearingRadius = 5f;
+            ai.patrolSpeed = 1.8f;
+            ai.chaseSpeed = 4.5f;
+            ai.meleeRange = 2.0f;
+
+            // Visual: capsule body (visual only, no collider)
+            var visual = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            visual.name = "Visual";
+            Object.Destroy(visual.GetComponent<Collider>());
+            visual.transform.SetParent(root.transform);
+            visual.transform.localPosition = new Vector3(0f, 0.9f, 0f);
+            visual.transform.localScale = new Vector3(0.7f, 0.9f, 0.7f);
+            ApplyEnemyMaterial(visual, new Color(0.15f, 0.75f, 0.15f)); // Patrol green
+
+            // Head: small sphere -- receives stone hits and routes to EnemyHealth
+            var head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            head.name = "Head";
+            head.transform.SetParent(root.transform);
+            head.transform.localPosition = new Vector3(0f, 1.75f, 0f);
+            head.transform.localScale = Vector3.one * 0.28f;
+            ApplyEnemyMaterial(head, new Color(0.1f, 0.55f, 0.1f));
+
+            // EnemyHitReceiver on the head collider -- routes stone hits to EnemyHealth
+            var headReceiver = head.AddComponent<EnemyHitReceiver>();
+            headReceiver.zoneName = "Head";
+            headReceiver.enemyHealth = health;
+
+            // EnemyHitReceiver on the body collider -- routes stone hits to EnemyHealth
+            var bodyReceiver = root.AddComponent<EnemyHitReceiver>();
+            bodyReceiver.zoneName = "Body";
+            bodyReceiver.enemyHealth = health;
+
+            return root;
         }
 
-        // -------------------------------------------------------------------------
-        // Spawn single enemy
-        // -------------------------------------------------------------------------
-
-        private void SpawnEnemy()
+        private static void ApplyEnemyMaterial(GameObject go, Color color)
         {
-            SpawnPointMarker point = GetRandomSpawnPoint();
-            if (point == null)
-            {
-                Debug.LogWarning($"{LOG} Brak dostępnego spawn pointu.");
-                return;
-            }
-
-            GameObject go = Instantiate(enemyPrefab, point.transform.position, point.transform.rotation);
-            go.name = $"Klaszczur_{System.DateTime.Now.Ticks % 10000}";
-
-            EnemyAI ai = go.GetComponent<EnemyAI>();
-            if (ai == null)
-            {
-                Debug.LogWarning($"{LOG} Prefab {go.name} nie ma komponentu EnemyAI!");
-                Destroy(go);
-                return;
-            }
-
-            _activeEnemies.Add(ai);
-
-            if (showDebugLogs)
-                Debug.Log($"{LOG} Spawned {go.name} at {point.name}. Aktywnych: {CountActiveEnemies()}/{maxEnemies}");
+            var r = go.GetComponent<Renderer>();
+            if (r == null) return;
+            var shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Standard");
+            r.material = new Material(shader) { color = color };
         }
-
-        // -------------------------------------------------------------------------
-        // Helpers
-        // -------------------------------------------------------------------------
-
-        private SpawnPointMarker GetRandomSpawnPoint()
-        {
-            if (spawnPoints == null || spawnPoints.Length == 0) return null;
-
-            // Prosty randomizer -- mozna rozbudowac o najdalszy od gracza etc.
-            return spawnPoints[Random.Range(0, spawnPoints.Length)];
-        }
-
-        private void CleanDeadEnemies()
-        {
-            // Usun null (zniszczone GO) i martwe AI z listy
-            _activeEnemies.RemoveAll(e => e == null || e.IsDead);
-        }
-
-        private int CountActiveEnemies()
-        {
-            CleanDeadEnemies();
-            return _activeEnemies.Count;
-        }
-
-        // -------------------------------------------------------------------------
-        // Gizmos
-        // -------------------------------------------------------------------------
-
-#if UNITY_EDITOR
-        private void OnDrawGizmos()
-        {
-            if (spawnPoints == null) return;
-            foreach (var sp in spawnPoints)
-            {
-                if (sp == null) continue;
-                Gizmos.color = new Color(1f, 0f, 0f, 0.6f);
-                Gizmos.DrawWireSphere(sp.transform.position, 0.4f);
-                Gizmos.DrawRay(sp.transform.position, sp.transform.forward * 0.8f);
-            }
-        }
-#endif
-    }
-
-    // -------------------------------------------------------------------------
-    // Wave data (serializable struct dla inspector)
-    // -------------------------------------------------------------------------
-
-    [System.Serializable]
-    public class WaveData
-    {
-        [Tooltip("Ilosc wrogów do uspawnowania w tej fali")]
-        public int enemyCount = 5;
-
-        [Tooltip("Czas przerwy po zakonczeniu fali [s]")]
-        public float postWaveDelay = 10f;
     }
 }

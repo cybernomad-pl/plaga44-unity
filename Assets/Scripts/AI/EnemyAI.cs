@@ -1,531 +1,461 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
-using Plaga44.Gameplay;
 
 namespace Plaga44.AI
 {
     /// <summary>
-    /// Klaszczur AI -- prosty state machine kompatybilny z Quest 3.
-    /// Stany: Idle > Patrol > Chase > Attack > Death
+    /// Main enemy AI controller. Uses a NavMeshAgent for pathfinding.
     ///
-    /// Wymaga: NavMeshAgent, Animator, HitTarget (na tym samym GO lub rodzicu)
-    /// Animator parameters: "Speed" (float), "Attack" (trigger), "Death" (trigger), "Grounded" (bool)
+    /// State machine:
+    ///   Idle    --> Patrol  (when PatrolPath is assigned)
+    ///   Patrol  --> Alert   (player enters hearing range OR spotted in vision cone)
+    ///   Alert   --> Chase   (player confirmed: in cone or within hearing range for 0.5s)
+    ///   Alert   --> Patrol  (lost player before confirming)
+    ///   Chase   --> Attack  (within melee range)
+    ///   Chase   --> Alert   (player left vision cone -- give up after lostSightTimeout)
+    ///   Attack  --> Chase   (player moved out of melee range)
+    ///   Any     --> Dead    (EnemyHealth.OnDeath fires)
+    ///
+    /// Visual feedback: renderer color changes per state so it's obvious in VR testbed.
+    ///   Idle/Patrol = green, Alert = yellow, Chase = orange, Attack = red, Dead = grey.
+    ///
+    /// NavMesh requirement: scene must have a baked NavMesh or a NavMeshSurface component.
+    /// Run "CYBERNOMAD / Scene Setup / Setup AI Testbed" to get a ready scene.
     /// </summary>
     [RequireComponent(typeof(NavMeshAgent))]
-    [RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(EnemyHealth))]
     public class EnemyAI : MonoBehaviour
     {
-        private const string LOG = "[PLAGA44][AI]";
+        private const string LOG = "[PLAGA44]";
 
-        // -------------------------------------------------------------------------
-        // Enums
-        // -------------------------------------------------------------------------
-
-        public enum AIState
-        {
-            Idle,
-            Patrol,
-            Chase,
-            Attack,
-            Death
-        }
-
-        // -------------------------------------------------------------------------
-        // Inspector fields
-        // -------------------------------------------------------------------------
+        // ---- Inspector tunables ----
 
         [Header("Detection")]
-        [Tooltip("Promien wykrywania gracza (sphere cast)")]
-        public float detectionRange = 12f;
+        [Tooltip("Half-angle of the forward vision cone in degrees. 60 = 120 deg total FOV.")]
+        public float visionHalfAngle = 60f;
 
-        [Tooltip("Promien utraty gracza z zasięgu (powyżej = powrot do patrolu)")]
-        public float loseRange = 18f;
+        [Tooltip("Maximum vision range in metres.")]
+        public float visionRange = 15f;
 
-        [Tooltip("Layer mask dla gracza")]
-        public LayerMask playerLayerMask = ~0;
+        [Tooltip("Hearing radius -- player is detected even outside the vision cone.")]
+        public float hearingRadius = 5f;
 
-        [Tooltip("Tag gracza")]
-        public string playerTag = "Player";
-
-        [Header("Combat")]
-        [Tooltip("Zasieg ataku melee")]
-        public float attackRange = 1.8f;
-
-        [Tooltip("Cooldown miedzy atakami [s]")]
-        public float attackCooldown = 1.4f;
-
-        [Tooltip("Obrazenia jednego ataku (przekazywane do HitTarget gracza jesli wykryty)")]
-        public float attackDamage = 20f;
+        [Tooltip("Layer mask used for vision raycasts (should include environment blockers).")]
+        public LayerMask visionBlockMask = ~0;
 
         [Header("Movement")]
-        [Tooltip("Predkosc chodu (patrol)")]
+        [Tooltip("Walk speed during patrol.")]
         public float patrolSpeed = 1.8f;
 
-        [Tooltip("Predkosc biegu (chase)")]
-        public float chaseSpeed = 4.2f;
+        [Tooltip("Run speed when chasing.")]
+        public float chaseSpeed = 4.5f;
 
-        [Tooltip("Waypoints dla patrolu -- jesli puste, Klaszczur stoi w Idle")]
-        public Transform[] waypoints;
+        [Header("Combat")]
+        [Tooltip("Distance at which the enemy switches to Attack state.")]
+        public float meleeRange = 2.0f;
 
-        [Tooltip("Czas stania na waypoint przed ruszeniem [s]")]
-        public float waypointWaitTime = 2f;
+        [Tooltip("Damage dealt per melee attack.")]
+        public float meleeDamage = 20f;
 
-        [Header("Health")]
-        [Tooltip("Punkty zycia")]
-        public float maxHealth = 100f;
+        [Tooltip("Time between melee hits in seconds.")]
+        public float meleeRate = 1.5f;
 
-        [Header("Ragdoll / Death")]
-        [Tooltip("Jesli true -- wlacza ragdoll na smierc (wymaga Rigidbody na kosciach)")]
-        public bool useRagdoll = false;
+        [Header("Behaviour")]
+        [Tooltip("Seconds without line-of-sight before giving up chase and going to Alert.")]
+        public float lostSightTimeout = 5f;
 
-        [Tooltip("Czas zanim GO zostanie zniszczone po smierci [s]")]
-        public float deathCleanupDelay = 8f;
+        [Tooltip("How long enemy stays in Alert before returning to patrol.")]
+        public float alertTimeout = 3f;
 
-        // -------------------------------------------------------------------------
-        // Private state
-        // -------------------------------------------------------------------------
+        [Tooltip("Patrol path to follow. If null the enemy stays Idle.")]
+        public PatrolPath patrolPath;
+
+        [Tooltip("How close the enemy must get to a waypoint before moving to the next.")]
+        public float waypointArrivalDistance = 0.5f;
+
+        [Header("References")]
+        [Tooltip("Transform of the VR player's camera / head. Assign at runtime or via spawner.")]
+        public Transform playerTransform;
+
+        // ---- State (read-only in Inspector) ----
+
+        [Header("Debug -- read only")]
+        [SerializeField] private EnemyState _state = EnemyState.Idle;
+
+        // ---- Private ----
 
         private NavMeshAgent _agent;
-        private Animator _animator;
-        private HitTarget _hitTarget;
+        private EnemyHealth _health;
+        private Renderer _renderer;
 
-        private AIState _currentState = AIState.Idle;
-        private Transform _player;
-        private float _currentHealth;
+        private int _patrolIndex;
+        private int _patrolDirection = 1;
 
-        private int _waypointIndex;
-        private float _waypointWaitTimer;
-        private bool _waitingAtWaypoint;
+        private float _lostSightTimer;
+        private float _alertTimer;
+        private float _meleeTimer;
+        private float _alertConfirmTimer;
 
-        private float _attackTimer;
-        private bool _isDead;
+        // Last known player position used for chase target when LoS is lost
+        private Vector3 _lastKnownPlayerPos;
 
-        // Animator hashes (perf: avoid string lookups per frame)
-        private static readonly int AnimSpeed    = Animator.StringToHash("Speed");
-        private static readonly int AnimAttack   = Animator.StringToHash("Attack");
-        private static readonly int AnimDeath    = Animator.StringToHash("Death");
-        private static readonly int AnimGrounded = Animator.StringToHash("Grounded");
+        // State colors
+        private static readonly Color ColorPatrol = new Color(0.15f, 0.75f, 0.15f);
+        private static readonly Color ColorAlert   = new Color(0.95f, 0.85f, 0.0f);
+        private static readonly Color ColorChase   = new Color(0.95f, 0.45f, 0.0f);
+        private static readonly Color ColorAttack  = new Color(0.85f, 0.0f,  0.05f);
+        private static readonly Color ColorDead    = new Color(0.35f, 0.35f, 0.35f);
 
-        // -------------------------------------------------------------------------
-        // Unity lifecycle
-        // -------------------------------------------------------------------------
+        // ---- Public API ----
+
+        public EnemyState CurrentState => _state;
+        public bool IsDead => _state == EnemyState.Dead;
+
+        // ---- Lifecycle ----
 
         private void Awake()
         {
-            _agent    = GetComponent<NavMeshAgent>();
-            _animator = GetComponent<Animator>();
-            _hitTarget = GetComponent<HitTarget>() ?? GetComponentInParent<HitTarget>();
+            _agent  = GetComponent<NavMeshAgent>();
+            _health = GetComponent<EnemyHealth>();
+            _renderer = GetComponentInChildren<Renderer>();
 
-            _currentHealth = maxHealth;
-
-            if (_hitTarget != null)
-                _hitTarget.OnHit += HandleHit;
-            else
-                Debug.LogWarning($"{LOG} {name}: brak HitTarget -- Klaszczur nie bedzie reagowal na trafienia.");
+            _health.OnDeath += HandleDeath;
         }
 
         private void Start()
         {
-            // Szukamy gracza (moze jeszcze nie istniec przy Awake jesli spawner go tworzy)
-            FindPlayer();
+            // If player not assigned, try to find via tag (OVRPlayerController uses "Player" tag)
+            if (playerTransform == null)
+            {
+                var playerGO = GameObject.FindWithTag("Player");
+                if (playerGO != null)
+                    playerTransform = playerGO.transform;
+            }
 
-            TransitionTo(waypoints != null && waypoints.Length > 0 ? AIState.Patrol : AIState.Idle);
+            EnterState(patrolPath != null && patrolPath.HasWaypoints ? EnemyState.Patrol : EnemyState.Idle);
         }
 
         private void Update()
         {
-            if (_isDead) return;
+            if (_state == EnemyState.Dead) return;
 
-            _attackTimer -= Time.deltaTime;
-
-            // Odswiez referencje jesli gracz jeszcze nie znaleziony
-            if (_player == null) FindPlayer();
-
-            switch (_currentState)
+            switch (_state)
             {
-                case AIState.Idle:   UpdateIdle();   break;
-                case AIState.Patrol: UpdatePatrol(); break;
-                case AIState.Chase:  UpdateChase();  break;
-                case AIState.Attack: UpdateAttack(); break;
+                case EnemyState.Idle:    UpdateIdle();   break;
+                case EnemyState.Patrol:  UpdatePatrol(); break;
+                case EnemyState.Alert:   UpdateAlert();  break;
+                case EnemyState.Chase:   UpdateChase();  break;
+                case EnemyState.Attack:  UpdateAttack(); break;
             }
-
-            UpdateAnimatorParams();
         }
 
         private void OnDestroy()
         {
-            if (_hitTarget != null)
-                _hitTarget.OnHit -= HandleHit;
+            if (_health != null)
+                _health.OnDeath -= HandleDeath;
         }
 
-        // -------------------------------------------------------------------------
-        // State update methods
-        // -------------------------------------------------------------------------
+        // ---- State enter/exit ----
+
+        private void EnterState(EnemyState next)
+        {
+            _state = next;
+
+            switch (next)
+            {
+                case EnemyState.Idle:
+                    _agent.isStopped = true;
+                    SetColor(ColorPatrol);
+                    break;
+
+                case EnemyState.Patrol:
+                    _agent.isStopped = false;
+                    _agent.speed = patrolSpeed;
+                    SetColor(ColorPatrol);
+                    MoveToNextWaypoint();
+                    break;
+
+                case EnemyState.Alert:
+                    _agent.isStopped = true;
+                    _agent.speed = patrolSpeed;
+                    _alertTimer = 0f;
+                    _alertConfirmTimer = 0f;
+                    SetColor(ColorAlert);
+                    break;
+
+                case EnemyState.Chase:
+                    _agent.isStopped = false;
+                    _agent.speed = chaseSpeed;
+                    _lostSightTimer = 0f;
+                    SetColor(ColorChase);
+                    break;
+
+                case EnemyState.Attack:
+                    _agent.isStopped = true;
+                    _meleeTimer = meleeRate; // ready to hit immediately
+                    SetColor(ColorAttack);
+                    break;
+
+                case EnemyState.Dead:
+                    _agent.enabled = false;
+                    SetColor(ColorDead);
+                    // Ragdoll: add rigidbody to all child colliders
+                    EnableRagdoll();
+                    break;
+            }
+        }
+
+        // ---- Per-state updates ----
 
         private void UpdateIdle()
         {
-            _agent.isStopped = true;
-
-            if (CanSeePlayer())
-                TransitionTo(AIState.Chase);
+            // Transition to patrol if a path is now assigned
+            if (patrolPath != null && patrolPath.HasWaypoints)
+            {
+                EnterState(EnemyState.Patrol);
+                return;
+            }
+            CheckPlayerDetection();
         }
 
         private void UpdatePatrol()
         {
-            if (CanSeePlayer())
+            if (patrolPath == null || !patrolPath.HasWaypoints)
             {
-                TransitionTo(AIState.Chase);
+                EnterState(EnemyState.Idle);
                 return;
             }
 
-            if (waypoints == null || waypoints.Length == 0)
-            {
-                TransitionTo(AIState.Idle);
-                return;
-            }
+            CheckPlayerDetection();
 
-            if (_waitingAtWaypoint)
+            // Arrived at waypoint?
+            if (!_agent.pathPending && _agent.remainingDistance <= waypointArrivalDistance)
             {
-                _agent.isStopped = true;
-                _waypointWaitTimer -= Time.deltaTime;
-                if (_waypointWaitTimer <= 0f)
+                _patrolIndex = patrolPath.GetNextIndex(_patrolIndex, ref _patrolDirection);
+                MoveToNextWaypoint();
+            }
+        }
+
+        private void UpdateAlert()
+        {
+            _alertTimer += Time.deltaTime;
+
+            bool playerVisible = CanSeePlayer();
+            bool playerClose   = playerTransform != null &&
+                                 Vector3.Distance(transform.position, playerTransform.position) <= hearingRadius;
+
+            if (playerVisible || playerClose)
+            {
+                _alertConfirmTimer += Time.deltaTime;
+                // Face the player slowly while in Alert
+                if (playerTransform != null)
+                    TurnTowards(playerTransform.position, 90f);
+
+                // Transition to Chase after brief confirmation window
+                if (_alertConfirmTimer >= 0.4f)
                 {
-                    _waitingAtWaypoint = false;
-                    AdvanceWaypoint();
+                    EnterState(EnemyState.Chase);
                 }
-                return;
+            }
+            else
+            {
+                _alertConfirmTimer = 0f;
             }
 
-            _agent.isStopped = false;
-            _agent.speed = patrolSpeed;
-
-            // Sprawdz czy dotarlismy do waypointa
-            if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance + 0.1f)
+            // Give up if player not found in time
+            if (_alertTimer >= alertTimeout)
             {
-                _waitingAtWaypoint = true;
-                _waypointWaitTimer = waypointWaitTime;
+                Debug.Log($"{LOG} {name} alert timed out, returning to patrol.");
+                EnterState(patrolPath != null && patrolPath.HasWaypoints ? EnemyState.Patrol : EnemyState.Idle);
             }
         }
 
         private void UpdateChase()
         {
-            if (_player == null)
+            if (playerTransform == null) return;
+
+            float dist = Vector3.Distance(transform.position, playerTransform.position);
+
+            // Switch to Attack if in melee range
+            if (dist <= meleeRange)
             {
-                TransitionTo(AIState.Patrol);
+                EnterState(EnemyState.Attack);
                 return;
             }
 
-            float dist = Vector3.Distance(transform.position, _player.position);
-
-            // Utracilismy gracza
-            if (dist > loseRange)
+            // Update chase target
+            if (CanSeePlayer())
             {
-                TransitionTo(AIState.Patrol);
-                return;
+                _lastKnownPlayerPos = playerTransform.position;
+                _lostSightTimer = 0f;
+                _agent.SetDestination(_lastKnownPlayerPos);
             }
-
-            // Zasieg ataku
-            if (dist <= attackRange)
+            else
             {
-                TransitionTo(AIState.Attack);
-                return;
-            }
+                _lostSightTimer += Time.deltaTime;
 
-            _agent.isStopped = false;
-            _agent.speed = chaseSpeed;
-            _agent.SetDestination(_player.position);
+                // Still running to last known position
+                if (_lostSightTimer < lostSightTimeout)
+                {
+                    // Already heading there -- no update needed
+                }
+                else
+                {
+                    Debug.Log($"{LOG} {name} lost player, going Alert.");
+                    EnterState(EnemyState.Alert);
+                }
+            }
         }
 
         private void UpdateAttack()
         {
-            if (_player == null)
+            if (playerTransform == null) return;
+
+            float dist = Vector3.Distance(transform.position, playerTransform.position);
+
+            // Player left melee range -- chase again
+            if (dist > meleeRange + 0.3f)
             {
-                TransitionTo(AIState.Patrol);
+                EnterState(EnemyState.Chase);
                 return;
             }
 
-            float dist = Vector3.Distance(transform.position, _player.position);
+            // Always face player during attack
+            TurnTowards(playerTransform.position, 360f);
 
-            // Gracz uciekl
-            if (dist > attackRange * 1.3f)
+            // Deal damage on cooldown
+            _meleeTimer += Time.deltaTime;
+            if (_meleeTimer >= meleeRate)
             {
-                TransitionTo(AIState.Chase);
-                return;
-            }
-
-            // Obroc sie w strone gracza
-            Vector3 dir = (_player.position - transform.position).normalized;
-            dir.y = 0f;
-            if (dir != Vector3.zero)
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 10f * Time.deltaTime);
-
-            _agent.isStopped = true;
-
-            // Atak
-            if (_attackTimer <= 0f)
-            {
-                PerformAttack();
+                _meleeTimer = 0f;
+                DealMeleeDamage();
             }
         }
 
-        // -------------------------------------------------------------------------
-        // State transitions
-        // -------------------------------------------------------------------------
+        // ---- Detection ----
 
-        private void TransitionTo(AIState newState)
+        private void CheckPlayerDetection()
         {
-            if (_currentState == newState) return;
+            if (playerTransform == null) return;
 
-            Debug.Log($"{LOG} {name}: {_currentState} -> {newState}");
-            _currentState = newState;
-
-            switch (newState)
-            {
-                case AIState.Idle:
-                    _agent.isStopped = true;
-                    _agent.ResetPath();
-                    break;
-
-                case AIState.Patrol:
-                    _agent.isStopped = false;
-                    _agent.speed = patrolSpeed;
-                    if (waypoints != null && waypoints.Length > 0)
-                        _agent.SetDestination(waypoints[_waypointIndex].position);
-                    break;
-
-                case AIState.Chase:
-                    _agent.isStopped = false;
-                    _agent.speed = chaseSpeed;
-                    break;
-
-                case AIState.Attack:
-                    _agent.isStopped = true;
-                    _agent.ResetPath();
-                    _attackTimer = 0f; // pierwszy atak natychmiast
-                    break;
-
-                case AIState.Death:
-                    _isDead = true;
-                    _agent.isStopped = true;
-                    _agent.enabled = false;
-
-                    if (_animator != null)
-                        _animator.SetTrigger(AnimDeath);
-
-                    if (useRagdoll)
-                        EnableRagdoll();
-
-                    // Wylacz collider glowny zeby nie blokował nawigacji
-                    var col = GetComponent<CapsuleCollider>();
-                    if (col != null) col.enabled = false;
-
-                    Destroy(gameObject, deathCleanupDelay);
-                    break;
-            }
-        }
-
-        // -------------------------------------------------------------------------
-        // Combat
-        // -------------------------------------------------------------------------
-
-        private void PerformAttack()
-        {
-            _attackTimer = attackCooldown;
-
-            if (_animator != null)
-                _animator.SetTrigger(AnimAttack);
-
-            // Prosta detekcja melee -- jesli gracz w zasiegu i w polu widzenia
-            if (_player == null) return;
-
-            float dist = Vector3.Distance(transform.position, _player.position);
-            if (dist > attackRange) return;
-
-            // Tutaj mozna podpiac do systemu zdrowia gracza
-            // Na razie logujemy -- integracja zalezy od VR health systemu
-            Debug.Log($"{LOG} {name} atakuje gracza za {attackDamage} obrazen!");
-
-            // Przykladowe wywolanie gdy gracz bedzie mial PlayerHealth komponent:
-            // var playerHealth = _player.GetComponent<PlayerHealth>();
-            // if (playerHealth != null) playerHealth.TakeDamage(attackDamage);
-        }
-
-        // -------------------------------------------------------------------------
-        // Hit reaction (z HitTarget.OnHit)
-        // -------------------------------------------------------------------------
-
-        private void HandleHit(HitZone zone, float force, Transform thrower)
-        {
-            if (_isDead) return;
-
-            // Mapowanie sily uderzenia na obrazenia (tuning: 1N ~= 1 obrazenie)
-            float damage = force * 1f;
-            _currentHealth -= damage;
-
-            Debug.Log($"{LOG} {name} trafiony w {zone.zoneType} za {damage:F1} HP. Zostalo: {_currentHealth:F1}/{maxHealth}");
-
-            // Headshot bonus
-            if (zone.zoneType == HitZoneType.Head)
-                _currentHealth -= damage * 1.5f; // dodatkowe 150% za headshot
-
-            if (_currentHealth <= 0f)
-            {
-                TransitionTo(AIState.Death);
-                return;
-            }
-
-            // Reakcja na trafienie -- przerwij patrol, zacznij gonić atakującego
-            if (_currentState == AIState.Idle || _currentState == AIState.Patrol)
-            {
-                if (thrower != null && thrower.CompareTag(playerTag))
-                {
-                    _player = thrower;
-                    TransitionTo(AIState.Chase);
-                }
-                else if (_player == null)
-                {
-                    FindPlayer();
-                    if (_player != null) TransitionTo(AIState.Chase);
-                }
-            }
-        }
-
-        // -------------------------------------------------------------------------
-        // Ragdoll
-        // -------------------------------------------------------------------------
-
-        private void EnableRagdoll()
-        {
-            if (_animator != null)
-                _animator.enabled = false;
-
-            // Wlacz Rigidbody na wszystkich kosciach (muszą byc ustawione jako kinematic = true przed smiercia)
-            var rigidbodies = GetComponentsInChildren<Rigidbody>();
-            foreach (var rb in rigidbodies)
-            {
-                rb.isKinematic = false;
-            }
-
-            var colliders = GetComponentsInChildren<Collider>();
-            foreach (var col in colliders)
-            {
-                col.enabled = true;
-            }
-
-            Debug.Log($"{LOG} {name}: ragdoll wlaczony.");
-        }
-
-        // -------------------------------------------------------------------------
-        // Helpers
-        // -------------------------------------------------------------------------
-
-        private void FindPlayer()
-        {
-            var playerGO = GameObject.FindGameObjectWithTag(playerTag);
-            if (playerGO != null)
-                _player = playerGO.transform;
+            if (CanSeePlayer() || IsPlayerWithinHearing())
+                EnterState(EnemyState.Alert);
         }
 
         private bool CanSeePlayer()
         {
-            if (_player == null) return false;
+            if (playerTransform == null) return false;
 
-            float dist = Vector3.Distance(transform.position, _player.position);
-            if (dist > detectionRange) return false;
+            Vector3 eyePos  = transform.position + Vector3.up * 1.5f;
+            Vector3 toPlayer = playerTransform.position - eyePos;
+            float dist = toPlayer.magnitude;
 
-            // Prosty raycast do gracza -- sprawdz czy nie ma przeszkody
-            Vector3 origin = transform.position + Vector3.up * 1.4f; // oczy Klaszczura
-            Vector3 target = _player.position + Vector3.up * 1.0f;   // srodek gracza
-            Vector3 dir = (target - origin).normalized;
+            if (dist > visionRange) return false;
 
-            if (Physics.Raycast(origin, dir, out RaycastHit hit, detectionRange))
+            float angle = Vector3.Angle(transform.forward, toPlayer);
+            if (angle > visionHalfAngle) return false;
+
+            // Raycast: if we hit something AND it is NOT the player, LoS is blocked.
+            if (Physics.Raycast(eyePos, toPlayer.normalized, out RaycastHit hit, dist, visionBlockMask, QueryTriggerInteraction.Ignore))
             {
-                if (hit.transform == _player || hit.transform.IsChildOf(_player))
-                    return true;
+                // Check if the hit object is part of the player hierarchy
+                return hit.transform.IsChildOf(playerTransform) || hit.transform == playerTransform;
             }
 
-            return false;
+            // Ray reached the player without obstruction
+            return true;
         }
 
-        private void AdvanceWaypoint()
+        private bool IsPlayerWithinHearing()
         {
-            if (waypoints == null || waypoints.Length == 0) return;
-
-            _waypointIndex = (_waypointIndex + 1) % waypoints.Length;
-            _agent.SetDestination(waypoints[_waypointIndex].position);
+            if (playerTransform == null) return false;
+            return Vector3.Distance(transform.position, playerTransform.position) <= hearingRadius;
         }
 
-        private void UpdateAnimatorParams()
-        {
-            if (_animator == null) return;
+        // ---- Combat ----
 
-            float speed = _agent.velocity.magnitude;
-            _animator.SetFloat(AnimSpeed, speed);
-            _animator.SetBool(AnimGrounded, true); // Quest: pomijamy ground check dla perfu
+        private void DealMeleeDamage()
+        {
+            // Placeholder: in future this will call a player health component
+            Debug.Log($"{LOG} {name} MELEE HIT -- {meleeDamage} dmg to player (placeholder).");
         }
 
-        // -------------------------------------------------------------------------
-        // Public API (dla spawner/wave system)
-        // -------------------------------------------------------------------------
+        // ---- Death ----
 
-        public AIState CurrentState => _currentState;
-        public float HealthPercent => _currentHealth / maxHealth;
-        public bool IsDead => _isDead;
-
-        /// <summary>
-        /// Resetuje AI do poczatkowego stanu (np. po respawnie z puli obiektow).
-        /// </summary>
-        public void ResetAI()
+        private void HandleDeath(string killingZone)
         {
-            _isDead = false;
-            _currentHealth = maxHealth;
-            _attackTimer = 0f;
-            _waypointIndex = 0;
-            _waitingAtWaypoint = false;
+            EnterState(EnemyState.Dead);
+        }
 
-            if (_agent != null)
+        private void EnableRagdoll()
+        {
+            // Get all child colliders and add a Rigidbody if none exists
+            // Simple ragdoll: just let the capsule fall
+            var rb = GetComponent<Rigidbody>();
+            if (rb == null)
             {
-                _agent.enabled = true;
-                _agent.isStopped = false;
-                _agent.ResetPath();
+                rb = gameObject.AddComponent<Rigidbody>();
+                rb.mass = 70f;
+                rb.linearDamping = 1f;
+                rb.angularDamping = 2f;
             }
+            rb.isKinematic = false;
+            rb.useGravity = true;
 
-            var col = GetComponent<CapsuleCollider>();
-            if (col != null) col.enabled = true;
+            // Tip over
+            rb.AddForce(Vector3.up * 2f + transform.forward * -1f, ForceMode.Impulse);
+            rb.AddTorque(transform.right * 5f, ForceMode.Impulse);
 
-            TransitionTo(waypoints != null && waypoints.Length > 0 ? AIState.Patrol : AIState.Idle);
+            Debug.Log($"{LOG} {name} ragdoll activated.");
         }
 
-        // -------------------------------------------------------------------------
-        // Gizmos (editor debug)
-        // -------------------------------------------------------------------------
+        // ---- Patrol helpers ----
+
+        private void MoveToNextWaypoint()
+        {
+            if (patrolPath == null || !patrolPath.HasWaypoints) return;
+            Vector3 dest = patrolPath.GetWaypointPosition(_patrolIndex);
+            if (dest != Vector3.zero)
+                _agent.SetDestination(dest);
+        }
+
+        // ---- Utility ----
+
+        private void TurnTowards(Vector3 target, float degreesPerSecond)
+        {
+            Vector3 dir = (target - transform.position).normalized;
+            dir.y = 0f;
+            if (dir == Vector3.zero) return;
+            Quaternion look = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, look, degreesPerSecond * Time.deltaTime);
+        }
+
+        private void SetColor(Color c)
+        {
+            if (_renderer == null) return;
+            // Avoid shared material mutation -- use instance
+            _renderer.material.color = c;
+        }
+
+        // ---- Gizmos ----
 
 #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
-            // Detection range
-            Gizmos.color = new Color(1f, 1f, 0f, 0.25f);
-            Gizmos.DrawWireSphere(transform.position, detectionRange);
+            // Vision cone
+            UnityEditor.Handles.color = new Color(1f, 1f, 0f, 0.15f);
+            Vector3 origin = transform.position + Vector3.up * 1.5f;
+            UnityEditor.Handles.DrawSolidArc(origin, Vector3.up,
+                Quaternion.Euler(0, -visionHalfAngle, 0) * transform.forward,
+                visionHalfAngle * 2f, visionRange);
 
-            // Lose range
-            Gizmos.color = new Color(1f, 0.5f, 0f, 0.15f);
-            Gizmos.DrawWireSphere(transform.position, loseRange);
+            // Hearing range
+            UnityEditor.Handles.color = new Color(0f, 0.8f, 1f, 0.1f);
+            UnityEditor.Handles.DrawSolidDisc(transform.position, Vector3.up, hearingRadius);
 
-            // Attack range
-            Gizmos.color = new Color(1f, 0f, 0f, 0.35f);
-            Gizmos.DrawWireSphere(transform.position, attackRange);
-
-            // Waypoints
-            if (waypoints == null) return;
-            Gizmos.color = Color.cyan;
-            for (int i = 0; i < waypoints.Length; i++)
-            {
-                if (waypoints[i] == null) continue;
-                Gizmos.DrawSphere(waypoints[i].position, 0.15f);
-                if (i + 1 < waypoints.Length && waypoints[i + 1] != null)
-                    Gizmos.DrawLine(waypoints[i].position, waypoints[i + 1].position);
-            }
+            // Melee range
+            UnityEditor.Handles.color = new Color(1f, 0f, 0f, 0.1f);
+            UnityEditor.Handles.DrawSolidDisc(transform.position, Vector3.up, meleeRange);
         }
 #endif
     }
