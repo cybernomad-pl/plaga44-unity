@@ -13,6 +13,16 @@ using UnityEngine;
 
 public class RuntimeGrabbable : OVRGrabbable
 {
+    // Controller that last grabbed this object -- used for haptic feedback on release/hit.
+    // Determined at grab time via OVRInput.GetActiveController().
+    private OVRInput.Controller _lastGrabController = OVRInput.Controller.None;
+
+    /// <summary>
+    /// Returns the controller that is currently (or was last) holding this object.
+    /// Used by HitDetector to route haptic feedback to the correct hand.
+    /// </summary>
+    public OVRInput.Controller LastGrabController => _lastGrabController;
+
     /// <summary>
     /// Sets m_allowOffhandGrab (protected in base, no public setter).
     /// </summary>
@@ -45,10 +55,17 @@ public class RuntimeGrabbable : OVRGrabbable
     {
         base.GrabBegin(hand, grabPoint);
         SetPlayerCollision(ignore: true);
+
+        // Determine which controller just grabbed via active controller at grab moment.
+        // OVRGrabber.m_controller is protected so we can't access it directly from here.
+        // The hand trigger that fired GrabBegin IS the active controller.
+        _lastGrabController = OVRInput.GetActiveController();
+        HapticFeedback.Grab(_lastGrabController);
     }
 
     public override void GrabEnd(Vector3 linearVelocity, Vector3 angularVelocity)
     {
+        HapticFeedback.Release(_lastGrabController);
         SetPlayerCollision(ignore: false);
         base.GrabEnd(linearVelocity, angularVelocity);
     }

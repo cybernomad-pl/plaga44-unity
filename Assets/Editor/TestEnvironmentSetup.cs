@@ -33,6 +33,7 @@ namespace Plaga44.Editor
             TargetFactory.AddTestTargets();
             AddSplashScreen();
             AddDebugHUD();
+            AddHapticFeedback();
 
             Selection.activeGameObject = player;
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
@@ -419,8 +420,8 @@ namespace Plaga44.Editor
             rb.angularDamping = 2.0f;
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
 
-            // OVRGrabbable -- grab points = both colliders
-            var grabbable = stone.AddComponent<OVRGrabbable>();
+            // RuntimeGrabbable -- subclass of OVRGrabbable with haptic feedback + null-safe Awake.
+            var grabbable = stone.AddComponent<RuntimeGrabbable>();
             var gso = new SerializedObject(grabbable);
             SetBool(gso, "m_allowOffhandGrab", true);
             var grabPointsProp = gso.FindProperty("m_grabPoints");
@@ -562,6 +563,23 @@ namespace Plaga44.Editor
             var go = new GameObject("VRInputDebug");
             go.AddComponent<VRInputDebug>();
             Undo.RegisterCreatedObjectUndo(go, "Add VRInputDebug");
+        }
+
+        // ---- HAPTICS ----
+
+        static void AddHapticFeedback()
+        {
+            // HapticFeedback is a singleton MonoBehaviour required for coroutine-based
+            // timed vibration pulses. One instance in scene is sufficient.
+            if (Object.FindFirstObjectByType<HapticFeedback>() != null)
+            {
+                Debug.Log($"{LOG} HapticFeedback already in scene.");
+                return;
+            }
+            var go = new GameObject("HapticFeedback");
+            go.AddComponent<HapticFeedback>();
+            Undo.RegisterCreatedObjectUndo(go, "Add HapticFeedback");
+            Debug.Log($"{LOG} HapticFeedback added.");
         }
 
         // ---- HELPERS ----
