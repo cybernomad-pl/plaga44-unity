@@ -11,7 +11,7 @@ namespace Plaga44.Editor
     // -------------------------------------------------------------------------
     // FloodedGroundsLoader
     //
-    // MenuItem 1: PLAGA44/Scene/Load Flooded Grounds
+    // MenuItem 1: CYBERNOMAD/Scene/Load PLAGA 44 Demo
     //   - Otwiera Scene_A.unity z paczki HorrorSurvival2022
     //   - Usuwa FPS Controller (CharController_Motor, CharacterController na root)
     //   - Usuwa FPSDisplay
@@ -19,7 +19,7 @@ namespace Plaga44.Editor
     //   - Dodaje OVRCameraRig jezeli brak (reuzywamy MetaQuestSetup.SetupVRSceneHands)
     //   - Konfiguruje rendering pod Quest 3 (shadows, quality, FFR hint w layerze)
     //
-    // MenuItem 2: PLAGA44/Scene/New Scene -- Flooded Grounds Prefab Picker
+    // MenuItem 2: CYBERNOMAD/Scene/Prefab Picker
     //   - Tworzy nowa pusta scene
     //   - Dodaje OVRCameraRig
     //   - Otwiera okno EditorWindow z lista prefabow podzielona na kategorie
@@ -32,19 +32,22 @@ namespace Plaga44.Editor
         private const string LOG = "[PLAGA44]";
 
         private const string SCENE_PATH =
-            "Assets/AssetPacks/HorrorSurvival2022/Flooded_Grounds/Scenes/Scene_A.unity";
+            "Assets/FloodedGrounds/Scenes/Scene_A.unity";
 
         private const string PREFABS_ROOT =
-            "Assets/AssetPacks/HorrorSurvival2022/Flooded_Grounds/Prefabs";
+            "Assets/FloodedGrounds/Prefabs";
 
         // ------------------------------------------------------------------
         // MenuItem 1 -- Load Flooded Grounds
         // ------------------------------------------------------------------
 
-        [MenuItem("PLAGA44/Scene/Load Flooded Grounds", false, 10)]
+        private const string LEVEL_SCENE_PATH = "Assets/Scenes/PLAGA44_Level.unity";
+        private const string SPLASH_SCENE_PATH = "Assets/Scenes/PLAGA44_Splash.unity";
+
+        [MenuItem("CYBERNOMAD/Scene/Load PLAGA 44 Demo", false, 10)]
         public static void LoadFloodedGrounds()
         {
-            Debug.Log($"{LOG} === Load Flooded Grounds ===");
+            Debug.Log($"{LOG} === Building PLAGA '44 Demo ===");
 
             if (!File.Exists(Path.Combine(Application.dataPath, "..",  SCENE_PATH)))
             {
@@ -52,36 +55,120 @@ namespace Plaga44.Editor
                 return;
             }
 
-            // Zapytaj o zapis biezacej sceny
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
             {
                 Debug.Log($"{LOG} Cancelled by user.");
                 return;
             }
 
-            Scene scene = EditorSceneManager.OpenScene(SCENE_PATH, OpenSceneMode.Single);
-            if (!scene.IsValid())
+            // Ensure Scenes folder exists
+            if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
+                AssetDatabase.CreateFolder("Assets", "Scenes");
+
+            // ---- STEP 1: Build Level Scene ----
+            Debug.Log($"{LOG} [1/3] Building level scene...");
+
+            Scene levelScene = EditorSceneManager.OpenScene(SCENE_PATH, OpenSceneMode.Single);
+            if (!levelScene.IsValid())
             {
                 Debug.LogError($"{LOG} Failed to open scene: {SCENE_PATH}");
                 return;
             }
 
-            Debug.Log($"{LOG} Scene opened: {scene.name}");
-
             RemoveFPSController();
             RemoveFPSDisplay();
+            RemoveOrphanCameras();
+            RemoveLegacyEventSystems();
+            RemoveUnwantedObjects();
             SetQuestRenderingSettings();
-            EnsureOVRCameraRig();
 
-            EditorSceneManager.MarkSceneDirty(scene);
-            Debug.Log($"{LOG} === Flooded Grounds ready for VR. Save the scene (Ctrl+S). ===");
+            var player = TestEnvironmentSetup.AddPlayerControllerPublic();
+            if (player != null)
+            {
+                player.transform.position = new Vector3(420f, 36.5f, 241f);
+                Debug.Log($"{LOG} OVRPlayerController spawned at (420, 36.5, 241).");
+            }
+            else
+            {
+                EnsureOVRCameraRig();
+            }
+
+            MaterialUpgrader.UpgradeMaterials();
+
+            EditorSceneManager.SaveScene(levelScene, LEVEL_SCENE_PATH);
+            Debug.Log($"{LOG} Level scene saved: {LEVEL_SCENE_PATH}");
+
+            // ---- STEP 2: Build Splash Scene ----
+            Debug.Log($"{LOG} [2/3] Building splash scene...");
+
+            Scene splashScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
+            // Directional light
+            var lightGO = new GameObject("Directional Light");
+            var light = lightGO.AddComponent<Light>();
+            light.type = LightType.Directional;
+            light.intensity = 0;
+            lightGO.transform.rotation = Quaternion.Euler(50, -30, 0);
+
+            // OVRPlayerController (look around only -- locomotion disabled by SplashScreen)
+            var splashPlayer = TestEnvironmentSetup.AddPlayerControllerPublic();
+            if (splashPlayer != null)
+            {
+                splashPlayer.transform.position = Vector3.zero;
+            }
+
+            // SplashScreen component
+            var splashGO = new GameObject("SplashScreen");
+            var splash = splashGO.AddComponent<SplashScreen>();
+            splash.gameSceneName = "PLAGA44_Level";
+            splash.fadeDuration = 1.5f;
+            splash.displayName = "PLAGA <color=#CC3333>'44</color>";
+            Undo.RegisterCreatedObjectUndo(splashGO, "Add SplashScreen");
+
+            EditorSceneManager.SaveScene(splashScene, SPLASH_SCENE_PATH);
+            Debug.Log($"{LOG} Splash scene saved: {SPLASH_SCENE_PATH}");
+
+            // ---- STEP 3: Configure Build Settings ----
+            Debug.Log($"{LOG} [3/3] Configuring build settings...");
+
+            var scenes = new EditorBuildSettingsScene[]
+            {
+                new EditorBuildSettingsScene(SPLASH_SCENE_PATH, true),
+                new EditorBuildSettingsScene(LEVEL_SCENE_PATH, true),
+            };
+            EditorBuildSettings.scenes = scenes;
+            Debug.Log($"{LOG} Build Settings: scene 0 = Splash, scene 1 = Level");
+
+            // Open splash scene for testing
+            EditorSceneManager.OpenScene(SPLASH_SCENE_PATH, OpenSceneMode.Single);
+
+            Debug.Log($"{LOG} === PLAGA '44 Demo READY. Press Play to test. ===");
+        }
+
+        // ------------------------------------------------------------------
+        // MenuItem -- Add Splash Screen to current scene
+        // ------------------------------------------------------------------
+
+        [MenuItem("CYBERNOMAD/Scene/Add Splash Screen", false, 12)]
+        public static void AddSplashScreen()
+        {
+            // Sprawdź czy już jest
+            if (Object.FindFirstObjectByType<SplashScreen>() != null)
+            {
+                Debug.Log($"{LOG} SplashScreen already in scene.");
+                return;
+            }
+            TestEnvironmentSetup.AddSplashScreenPublic();
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+            Debug.Log($"{LOG} SplashScreen added. Press both triggers to dismiss.");
         }
 
         // ------------------------------------------------------------------
         // MenuItem 2 -- Prefab Picker (nowa scena)
         // ------------------------------------------------------------------
 
-        [MenuItem("PLAGA44/Scene/New Scene -- Flooded Grounds Prefab Picker", false, 11)]
+        [MenuItem("CYBERNOMAD/Scene/Prefab Picker", false, 11)]
         public static void OpenPrefabPicker()
         {
             Debug.Log($"{LOG} === New Scene + Prefab Picker ===");
@@ -136,10 +223,16 @@ namespace Plaga44.Editor
                     nameLower.Contains("fpscont") ||
                     nameLower.Contains("fps_cont") ||
                     nameLower.Contains("fps controller") ||
+                    nameLower.Contains("fpscontroller") ||
                     nameLower.Contains("firstperson") ||
                     nameLower.Contains("first_person") ||
+                    nameLower.Contains("wasd") ||
                     (nameLower.Contains("player") && go.transform.parent == null &&
-                     go.GetComponent<CharacterController>() != null);
+                     go.GetComponent<CharacterController>() != null) ||
+                    // CharacterController na root bez OVR = FPS controller
+                    (go.transform.parent == null &&
+                     go.GetComponent<CharacterController>() != null &&
+                     go.GetComponent<OVRPlayerController>() == null);
 
                 if (looksLikeFPS) toDestroy.Add(go);
             }
@@ -152,8 +245,114 @@ namespace Plaga44.Editor
 
             foreach (var go in toDestroy)
             {
+                if (go == null) continue;
                 Debug.Log($"{LOG} Removing FPS Controller: '{go.name}'");
                 Undo.DestroyObjectImmediate(go);
+            }
+        }
+
+        // Objects to remove from Flooded Grounds (not fitting PLAGA '44)
+        private static readonly string[] UNWANTED_PATTERNS = new string[]
+        {
+            "ship", "saucer", "flyingsaucer", "flying_saucer",
+            "blockercube", "_blocker",
+            "decobush", "hedge",
+        };
+
+        static void RemoveUnwantedObjects()
+        {
+            var allObjects = Object.FindObjectsByType<GameObject>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+            var toDestroy = new List<GameObject>();
+
+            foreach (var go in allObjects)
+            {
+                string nameLower = go.name.ToLowerInvariant();
+                foreach (var pattern in UNWANTED_PATTERNS)
+                {
+                    if (nameLower.Contains(pattern))
+                    {
+                        // Don't remove children separately if parent is already marked
+                        bool parentAlreadyMarked = false;
+                        var parent = go.transform.parent;
+                        while (parent != null)
+                        {
+                            string pName = parent.name.ToLowerInvariant();
+                            foreach (var p2 in UNWANTED_PATTERNS)
+                                if (pName.Contains(p2)) { parentAlreadyMarked = true; break; }
+                            if (parentAlreadyMarked) break;
+                            parent = parent.parent;
+                        }
+                        if (!parentAlreadyMarked)
+                            toDestroy.Add(go);
+                        break;
+                    }
+                }
+            }
+
+            foreach (var go in toDestroy)
+            {
+                if (go == null) continue;
+                Debug.Log($"{LOG} Removing unwanted object: '{go.name}'");
+                Undo.DestroyObjectImmediate(go);
+            }
+
+            if (toDestroy.Count > 0)
+                Debug.Log($"{LOG} Removed {toDestroy.Count} unwanted objects.");
+        }
+
+        static void RemoveLegacyEventSystems()
+        {
+            // Usuwa wszystkie EventSystem z legacy StandaloneInputModule/TouchInputModule
+            // (spamują InvalidOperationException bo projekt używa Input System package)
+            var allES = Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var es in allES)
+            {
+                if (es == null) continue;
+                var standalone = es.GetComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+                var touch = es.GetComponent<UnityEngine.EventSystems.TouchInputModule>();
+                if (standalone != null)
+                {
+                    Debug.Log($"{LOG} Removing legacy StandaloneInputModule from '{es.gameObject.name}'");
+                    Undo.DestroyObjectImmediate(standalone);
+                }
+                if (touch != null)
+                {
+                    Debug.Log($"{LOG} Removing legacy TouchInputModule from '{es.gameObject.name}'");
+                    Undo.DestroyObjectImmediate(touch);
+                }
+                // Jeśli EventSystem jest teraz pusty (bez input module) -- usuń cały GO
+                // (nasz AddVRUI doda nowy z InputSystemUIInputModule)
+                if (es == null) continue;
+                if (es.GetComponents<UnityEngine.EventSystems.BaseInputModule>().Length == 0)
+                {
+                    Debug.Log($"{LOG} Removing empty EventSystem: '{es.gameObject.name}'");
+                    Undo.DestroyObjectImmediate(es.gameObject);
+                }
+            }
+        }
+
+        static void RemoveOrphanCameras()
+        {
+            // Usuwa Main Camera i inne samodzielne kamery (nie będące pod OVR rigiem)
+            var allCams = Object.FindObjectsByType<Camera>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var cam in allCams)
+            {
+                // Nie ruszaj kamer pod OVR rigiem
+                bool underOVR = false;
+                var parent = cam.transform.parent;
+                while (parent != null)
+                {
+                    if (parent.name.Contains("OVR")) { underOVR = true; break; }
+                    parent = parent.parent;
+                }
+                if (!underOVR)
+                {
+                    Debug.Log($"{LOG} Removing orphan camera: '{cam.gameObject.name}'");
+                    Undo.DestroyObjectImmediate(cam.gameObject);
+                }
             }
         }
 
@@ -337,7 +536,7 @@ namespace Plaga44.Editor
     {
         private const string LOG = "[PLAGA44]";
         private const string PREFABS_ROOT =
-            "Assets/AssetPacks/HorrorSurvival2022/Flooded_Grounds/Prefabs";
+            "Assets/FloodedGrounds/Prefabs";
 
         // Kategorie i odpowiadajace im podfoldery
         private static readonly (string Label, string Folder)[] Categories =

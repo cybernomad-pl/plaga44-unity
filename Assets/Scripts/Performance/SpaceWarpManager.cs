@@ -1,3 +1,5 @@
+// AUTO-DISABLED: requires newer Meta XR SDK APIs
+#if PLAGA44_FULL_SDK
 // SpaceWarpManager.cs
 // CYBERNOMAD -- Application SpaceWarp controller for Meta Quest 3.
 // Enables ASW (render every 2nd frame, extrapolate motion) to double effective GPU budget.
@@ -175,3 +177,4 @@ namespace Plaga44.Performance
         }
     }
 }
+#endif // PLAGA44_FULL_SDK

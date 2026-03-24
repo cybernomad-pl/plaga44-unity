@@ -123,13 +123,15 @@ namespace Plaga44.Editor
 
             // --- EnemyAI ---
             var ai = root.AddComponent<EnemyAI>();
-            ai.detectionRange  = 12f;
-            ai.loseRange       = 18f;
-            ai.attackRange     = 1.8f;
-            ai.attackCooldown  = 1.4f;
+            ai.visionRange     = 12f;
+            ai.meleeRange      = 1.8f;
+            ai.meleeRate       = 1.4f;
             ai.patrolSpeed     = 1.8f;
             ai.chaseSpeed      = 4.2f;
-            ai.maxHealth       = 100f;
+
+            // maxHP lives on EnemyHealth (RequireComponent ensures it exists)
+            var health = root.GetComponent<EnemyHealth>();
+            if (health != null) health.maxHP = 100f;
 
             // --- Placeholder body (Capsule) ---
             BuildPlaceholderBody(root.transform, enemyLayer);

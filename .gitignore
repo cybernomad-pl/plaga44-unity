@@ -40,3 +40,9 @@ crashlytics-build.properties
 *.aab
 *.unitypackage
 *.app
+
+# Flooded Grounds asset pack (run setup-flooded-grounds.sh to install)
+Assets/FloodedGrounds/
+Assets/FloodedGrounds.meta
+Setup.unity
+Setup.unity.meta

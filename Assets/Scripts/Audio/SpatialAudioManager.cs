@@ -99,13 +99,9 @@ namespace Plaga44.Audio
             {
                 if (_autoEnableSpatializer)
                 {
-                    bool ok = AudioSettings.SetSpatializerPluginName(_expectedSpatializerPlugin);
-                    if (ok)
-                        Debug.Log($"{LOG} Spatializer set to \"{_expectedSpatializerPlugin}\".");
-                    else
-                        Debug.LogWarning($"{LOG} Failed to set spatializer \"{_expectedSpatializerPlugin}\". " +
-                                         "Is com.meta.xr.sdk.audio installed and the plugin enabled in " +
-                                         "Project Settings > Audio?");
+                    AudioSettings.SetSpatializerPluginName(_expectedSpatializerPlugin);
+                    Debug.Log($"{LOG} Spatializer set to \"{_expectedSpatializerPlugin}\". " +
+                              "Verify in Project Settings > Audio that the plugin is active.");
                 }
                 else
                 {

@@ -1,3 +1,5 @@
+// AUTO-DISABLED: PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 using UnityEngine;
 
 namespace Plaga44.Integration
@@ -192,3 +194,4 @@ namespace Plaga44.Integration
 #endif
     }
 }
+#endif // PLAGA44_FULL_SDK

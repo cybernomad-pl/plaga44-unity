@@ -113,18 +113,10 @@ namespace Plaga44.Editor
             // Project Settings > Audio > Spatializer Plugin is stored in AudioManager asset.
             // We set it via AudioSettings API for the current session; the persistent setting
             // must be changed by the user in Project Settings > Audio > Spatializer Plugin.
-            bool ok = AudioSettings.SetSpatializerPluginName(EXPECTED_SPATIALIZER);
-            if (ok)
-            {
-                Debug.Log($"{LOG} Spatializer set successfully for this session. " +
-                          "To persist: Project Settings > Audio > Spatializer Plugin = MetaXRAudioSpatializerUnity");
-                return true;
-            }
-
-            Debug.LogWarning($"{LOG} Could not set spatializer via AudioSettings API. " +
-                             "Set manually: Project Settings > Audio > Spatializer Plugin.");
-            LogSpatializerManualInstructions();
-            return false;
+            AudioSettings.SetSpatializerPluginName(EXPECTED_SPATIALIZER);
+            Debug.Log($"{LOG} Spatializer set to \"{EXPECTED_SPATIALIZER}\" for this session. " +
+                      "To persist: Project Settings > Audio > Spatializer Plugin = MetaXRAudioSpatializerUnity");
+            return true;
         }
 
         private static bool CheckOrCreateManager()

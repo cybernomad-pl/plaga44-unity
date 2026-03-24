@@ -53,7 +53,7 @@ namespace Plaga44.UI
             {
                 var esGO = new GameObject("EventSystem");
                 _eventSystem = esGO.AddComponent<EventSystem>();
-                esGO.AddComponent<StandaloneInputModule>();
+                esGO.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
             }
         }
 

@@ -1,3 +1,5 @@
+// AUTO-DISABLED: depends on PassthroughManager (guarded by PLAGA44_FULL_SDK)
+#if PLAGA44_FULL_SDK
 #if HAS_META_XR
 using System.Collections;
 using UnityEngine;
@@ -108,3 +110,4 @@ namespace Plaga44.MixedReality
     }
 }
 #endif // HAS_META_XR
+#endif // PLAGA44_FULL_SDK

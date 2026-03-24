@@ -8,7 +8,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
 using Oculus.Platform;
 using Oculus.Platform.Models;
 #endif
@@ -85,7 +85,7 @@ namespace Plaga44.Platform
 
         private async Task InitializeAsync()
         {
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
             try
             {
                 // Initialize Oculus Platform SDK with the App ID from OVR settings.
@@ -129,7 +129,7 @@ namespace Plaga44.Platform
 #endif
         }
 
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
         private Task<bool> CheckEntitlementAsync()
         {
             var tcs = new TaskCompletionSource<bool>();

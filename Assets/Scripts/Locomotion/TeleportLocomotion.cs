@@ -114,8 +114,8 @@ namespace Plaga44.Locomotion
 #if HAS_META_XR
             return OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch);
 #else
-            float h = Input.GetAxis("RightStickHorizontal");
-            float v = Input.GetAxis("RightStickVertical");
+            float h = UnityEngine.Input.GetAxis("RightStickHorizontal");
+            float v = UnityEngine.Input.GetAxis("RightStickVertical");
             return new Vector2(h, v);
 #endif
         }

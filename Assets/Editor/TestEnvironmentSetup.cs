@@ -3,6 +3,7 @@ using Plaga44.AI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
+using Unity.AI.Navigation;
 
 namespace Plaga44.Editor
 {
@@ -86,14 +87,14 @@ namespace Plaga44.Editor
             }
 
             // Check if already has a NavMeshSurface
-            if (ground.GetComponent<UnityEngine.AI.NavMeshSurface>() != null)
+            if (ground.GetComponent<NavMeshSurface>() != null)
             {
                 Debug.Log($"{LOG} NavMeshSurface already on Ground.");
                 return;
             }
 
-            var surface = ground.AddComponent<UnityEngine.AI.NavMeshSurface>();
-            surface.collectObjects = UnityEngine.AI.CollectObjects.All;
+            var surface = ground.AddComponent<NavMeshSurface>();
+            surface.collectObjects = CollectObjects.All;
             surface.useGeometry = UnityEngine.AI.NavMeshCollectGeometry.PhysicsColliders;
             Undo.RegisterCreatedObjectUndo(ground, "Add NavMeshSurface");
 
@@ -210,6 +211,12 @@ namespace Plaga44.Editor
 
         // ---- PLAYER (camera + hands + movement + gravity) ----
 
+        /// <summary>Public wrapper for FloodedGroundsLoader and other callers.</summary>
+        public static GameObject AddPlayerControllerPublic() => AddPlayerController();
+
+        /// <summary>Public wrapper to add splash screen from other editor tools.</summary>
+        public static void AddSplashScreenPublic() => AddSplashScreen();
+
         static GameObject AddPlayerController()
         {
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
@@ -248,9 +255,11 @@ namespace Plaga44.Editor
                 var so = new SerializedObject(controller);
                 SetFloat(so, "Acceleration", 0.1f);
                 SetFloat(so, "Damping", 0.3f);
-                SetFloat(so, "RotationAmount", 45f);
                 SetBool(so, "EnableLinearMovement", true);
                 SetBool(so, "EnableRotation", true);
+                SetBool(so, "SnapRotation", false);        // smooth rotation, not snap
+                SetFloat(so, "RotationRatchet", 0f);       // no snap angle
+                SetFloat(so, "RotationAmount", 30f);        // smooth rotation speed deg/s
                 so.ApplyModifiedProperties();
             }
 
@@ -575,7 +584,7 @@ namespace Plaga44.Editor
             {
                 var esGO = new GameObject("EventSystem");
                 esGO.AddComponent<UnityEngine.EventSystems.EventSystem>();
-                esGO.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+                esGO.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
                 Undo.RegisterCreatedObjectUndo(esGO, "Add EventSystem");
             }
 

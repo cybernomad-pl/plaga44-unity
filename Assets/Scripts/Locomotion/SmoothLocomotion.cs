@@ -99,8 +99,8 @@ namespace Plaga44.Locomotion
             return OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
 #else
             // Unity Input System / legacy fallback.
-            float h = Input.GetAxis("Horizontal");
-            float v = Input.GetAxis("Vertical");
+            float h = UnityEngine.Input.GetAxis("Horizontal");
+            float v = UnityEngine.Input.GetAxis("Vertical");
             return new Vector2(h, v);
 #endif
         }
@@ -110,7 +110,7 @@ namespace Plaga44.Locomotion
 #if HAS_META_XR
             return OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch);
 #else
-            float turn = Input.GetAxis("RightStickHorizontal");
+            float turn = UnityEngine.Input.GetAxis("RightStickHorizontal");
             return new Vector2(turn, 0f);
 #endif
         }

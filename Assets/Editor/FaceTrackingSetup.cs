@@ -1,3 +1,5 @@
+// AUTO-DISABLED: depends on classes guarded by PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 // FaceTrackingSetup.cs
 // CYBERNOMAD -- Editor menu to configure face tracking in the current scene.
 // Menu: CYBERNOMAD > Scene Setup > Setup Face Tracking
@@ -233,3 +235,4 @@ namespace Plaga44.Editor
     }
 }
 #endif // UNITY_EDITOR
+#endif // PLAGA44_FULL_SDK

@@ -5,7 +5,7 @@ namespace Plaga44.Gameplay
 {
     /// <summary>
     /// Mors Cerebri -- "brain death". MonoBehaviour placed on a target (enemy root).
-    /// Listens for hit events from HitDetector. If HitZone == Head and
+    /// Listens for hit events from HitDetector. If BodyZone == Head and
     /// incoming force >= forceThreshold, triggers ragdoll death sequence.
     ///
     /// Wiring: HitDetector calls OnHit(HitData) on this component.
@@ -43,7 +43,7 @@ namespace Plaga44.Gameplay
         public void OnHit(HitData data)
         {
             if (_isDead) return;
-            if (data.zone != HitZone.Head) return;
+            if (data.zone != BodyZone.Head) return;
             if (data.force < forceThreshold) return;
 
             Die(data);
@@ -72,7 +72,7 @@ namespace Plaga44.Gameplay
     // -------------------------------------------------------------------------
 
     /// <summary>Body zone identifier for hit detection routing.</summary>
-    public enum HitZone
+    public enum BodyZone
     {
         None,
         Head,
@@ -88,7 +88,7 @@ namespace Plaga44.Gameplay
     public struct HitData
     {
         /// <summary>Which body zone was struck.</summary>
-        public HitZone zone;
+        public BodyZone zone;
 
         /// <summary>Magnitude of impact force (kg*m/s or arbitrary game units).</summary>
         public float force;
@@ -99,7 +99,7 @@ namespace Plaga44.Gameplay
         /// <summary>World-space point of impact.</summary>
         public Vector3 hitPoint;
 
-        public HitData(HitZone zone, float force, Vector3 direction, Vector3 hitPoint)
+        public HitData(BodyZone zone, float force, Vector3 direction, Vector3 hitPoint)
         {
             this.zone      = zone;
             this.force     = force;

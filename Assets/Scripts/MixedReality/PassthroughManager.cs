@@ -1,3 +1,5 @@
+// AUTO-DISABLED: requires newer Meta XR SDK APIs
+#if PLAGA44_FULL_SDK
 #if HAS_META_XR
 using System.Collections;
 using UnityEngine;
@@ -185,3 +187,4 @@ namespace Plaga44.MixedReality
     }
 }
 #endif // HAS_META_XR
+#endif // PLAGA44_FULL_SDK

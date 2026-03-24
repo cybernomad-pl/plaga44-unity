@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
 using Oculus.Platform;
 using Oculus.Platform.Models;
 #endif
@@ -86,7 +86,7 @@ namespace Plaga44.Platform
             string json = JsonUtility.ToJson(data);
             byte[] bytes = Encoding.UTF8.GetBytes(json);
 
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
             try
             {
                 var tcs = new TaskCompletionSource<bool>();
@@ -133,7 +133,7 @@ namespace Plaga44.Platform
                 return LoadFromPlayerPrefs<T>(key);
             }
 
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
             try
             {
                 var tcs = new TaskCompletionSource<T>();
@@ -193,7 +193,7 @@ namespace Plaga44.Platform
                 return true;
             }
 
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
             try
             {
                 var tcs = new TaskCompletionSource<bool>();

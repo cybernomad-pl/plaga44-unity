@@ -1,3 +1,5 @@
+// AUTO-DISABLED: PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 // LobbyUI.cs
 // CYBERNOMAD -- PLAGA '44
 // World-space lobby UI: Create/Join room, player list, ready status.
@@ -657,3 +659,4 @@ namespace Plaga44.Networking
         }
     }
 }
+#endif // PLAGA44_FULL_SDK
