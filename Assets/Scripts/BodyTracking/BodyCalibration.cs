@@ -1,3 +1,5 @@
+// AUTO-DISABLED: PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 // BodyCalibration.cs
 // PLAGA '44 -- Player height calibration for body tracking.
 //
@@ -193,3 +195,4 @@ namespace Plaga44.BodyTracking
 #endif
     }
 }
+#endif // PLAGA44_FULL_SDK

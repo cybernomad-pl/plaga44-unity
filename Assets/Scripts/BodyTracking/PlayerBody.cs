@@ -1,3 +1,5 @@
+// AUTO-DISABLED: requires newer Meta XR SDK APIs
+#if PLAGA44_FULL_SDK
 // PlayerBody.cs
 // PLAGA '44 -- Represents the player's physical body in VR.
 // Uses OVRBody as the joint source and exposes them to other game systems.
@@ -228,3 +230,4 @@ namespace Plaga44.BodyTracking
         RightFoot,
     }
 }
+#endif // PLAGA44_FULL_SDK

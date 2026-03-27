@@ -11,7 +11,7 @@ using System;
 using System.Threading.Tasks;
 using UnityEngine;
 
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
 using Oculus.Platform;
 using Oculus.Platform.Models;
 #endif
@@ -105,7 +105,7 @@ namespace Plaga44.Platform
                 return false;
             }
 
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
             try
             {
                 var tcs = new TaskCompletionSource<bool>();
@@ -152,7 +152,7 @@ namespace Plaga44.Platform
                 return false;
             }
 
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
             try
             {
                 var tcs = new TaskCompletionSource<bool>();
@@ -198,7 +198,7 @@ namespace Plaga44.Platform
                 return null;
             }
 
-#if HAS_META_XR
+#if HAS_META_XR_PLATFORM
             try
             {
                 var tcs = new TaskCompletionSource<AchievementProgress>();

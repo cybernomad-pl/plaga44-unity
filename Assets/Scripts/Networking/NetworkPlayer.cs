@@ -1,3 +1,5 @@
+// AUTO-DISABLED: PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 // NetworkPlayer.cs
 // CYBERNOMAD -- PLAGA '44
 // Represents one player in the network session.
@@ -310,3 +312,4 @@ namespace Plaga44.Networking
         }
     }
 }
+#endif // PLAGA44_FULL_SDK

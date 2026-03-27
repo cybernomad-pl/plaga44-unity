@@ -1,3 +1,5 @@
+// AUTO-DISABLED: requires newer Meta XR SDK APIs
+#if PLAGA44_FULL_SDK
 // VoiceChat.cs
 // CYBERNOMAD -- PLAGA '44
 // Voice chat placeholder. Stubbed API ready for Photon Voice / Vivox integration.
@@ -169,7 +171,7 @@ namespace Plaga44.Networking
 #if HAS_META_XR
             return OVRInput.Get(PushToTalkButton);
 #else
-            return Input.GetKey(KeyCode.V);  // fallback: V key in editor
+            return UnityEngine.Input.GetKey(KeyCode.V);  // fallback: V key in editor
 #endif
         }
 
@@ -250,3 +252,4 @@ namespace Plaga44.Networking
         }
     }
 }
+#endif // PLAGA44_FULL_SDK

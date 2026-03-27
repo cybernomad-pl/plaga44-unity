@@ -431,7 +431,7 @@ namespace Plaga44.Platform
             return false;
 #else
             // In editor: use Tab key as toggle.
-            if (Input.GetKeyDown(KeyCode.Tab))
+            if (UnityEngine.Input.GetKeyDown(KeyCode.Tab))
                 return true;
             return false;
 #endif

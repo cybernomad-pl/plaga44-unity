@@ -1,3 +1,5 @@
+// AUTO-DISABLED: PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 // GestureCommandMap.cs
 // CYBERNOMAD -- ScriptableObject that maps microgestures to gameplay commands.
 //
@@ -156,3 +158,4 @@ namespace Plaga44.Input
         }
     }
 }
+#endif // PLAGA44_FULL_SDK

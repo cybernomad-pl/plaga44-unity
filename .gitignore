@@ -40,3 +40,13 @@ crashlytics-build.properties
 *.aab
 *.unitypackage
 *.app
+
+# Source template packs (not part of project -- assets extracted to Assets/PLAGA44/)
+Assets/FloodedGrounds/
+Assets/FloodedGrounds.meta
+Assets/SwordAndPistol/
+Assets/SwordAndPistol.meta
+
+# Legacy scenes
+Setup.unity
+Setup.unity.meta

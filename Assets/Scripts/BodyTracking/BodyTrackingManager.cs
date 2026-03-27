@@ -1,3 +1,5 @@
+// AUTO-DISABLED: requires newer Meta XR SDK APIs
+#if PLAGA44_FULL_SDK
 // BodyTrackingManager.cs
 // PLAGA '44 -- Initializes OVRBody for Meta Movement SDK body tracking.
 // Configures tracking fidelity (High) and joint set (FullBody).
@@ -248,3 +250,4 @@ namespace Plaga44.BodyTracking
 #endif
     }
 }
+#endif // PLAGA44_FULL_SDK

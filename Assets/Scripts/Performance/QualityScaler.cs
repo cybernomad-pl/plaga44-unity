@@ -1,3 +1,5 @@
+// AUTO-DISABLED: depends on PerformanceMonitor (guarded by PLAGA44_FULL_SDK)
+#if PLAGA44_FULL_SDK
 // QualityScaler.cs
 // CYBERNOMAD -- Dynamic quality scaling in response to performance drops.
 // Listens to PerformanceMonitor events and progressively reduces:
@@ -252,3 +254,4 @@ namespace Plaga44.Performance
         }
     }
 }
+#endif // PLAGA44_FULL_SDK

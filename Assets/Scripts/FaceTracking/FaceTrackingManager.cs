@@ -1,3 +1,5 @@
+// AUTO-DISABLED: PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 // FaceTrackingManager.cs
 // CYBERNOMAD -- Initializes OVRFaceExpressions and provides runtime blendshape API.
 // Requires: com.meta.xr.sdk.core (auto-detected via HAS_META_XR define)
@@ -159,3 +161,4 @@ namespace Plaga44.FaceTracking
         }
     }
 }
+#endif // PLAGA44_FULL_SDK

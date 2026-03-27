@@ -1,3 +1,5 @@
+// AUTO-DISABLED: PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 // GazeInteractable.cs
 // PLAGA '44 -- Component for objects that react to player gaze.
 // Fires OnGazeEnter / OnGazeExit / OnGazeDwell(duration) events.
@@ -212,3 +214,4 @@ namespace Plaga44.EyeTracking
         private void Update() => GazeInteractableRegistry.TickAll(Time.deltaTime);
     }
 }
+#endif // PLAGA44_FULL_SDK

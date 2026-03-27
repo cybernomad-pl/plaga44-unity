@@ -1,3 +1,5 @@
+// AUTO-DISABLED: PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 // CrouchDetector.cs
 // PLAGA '44 -- Detects physical player crouching in real life by tracking
 // the headset Y position relative to a calibrated standing height.
@@ -167,3 +169,4 @@ namespace Plaga44.IK
         }
     }
 }
+#endif // PLAGA44_FULL_SDK

@@ -1,8 +1,8 @@
 // SplashScreen.cs
-// CYBERNOMAD -- Black plane in front of face with PLAGA '44 title.
+// CYBERNOMAD -- Black screen in front of face with PLAGA '44 title.
 // Stays until both index triggers are pressed simultaneously.
-// Hides controller/hand models while active (input still works).
-// Uses world-space canvas following CenterEyeAnchor (same as VRInputDebug).
+// Hides controller/hand models while active.
+// Follows CenterEyeAnchor at fixed distance.
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,11 +11,10 @@ using UnityEngine.UI;
 public class SplashScreen : MonoBehaviour
 {
     public float fadeDuration = 1.0f;
-    [Tooltip("Display name with formatting. Use <color=#CC3333> for red parts. Leave empty to use Application.productName.")]
+    [Tooltip("Use <color=#CC3333> for red parts. Leave empty for Application.productName.")]
     public string displayName = "PLAGA <color=#CC3333>'44</color>";
 
     private Canvas _canvas;
-    private Image _bg;
     private Text _title;
     private Transform _centerEye;
     private bool _fading;
@@ -23,8 +22,8 @@ public class SplashScreen : MonoBehaviour
     private CanvasGroup _group;
     private List<Renderer> _hiddenRenderers = new List<Renderer>();
 
-    // World-space params
-    private float displayDistance = 0.55f;
+    // Distance from eyes -- far enough to be comfortable in VR
+    private float displayDistance = 1.5f;
     private float displayScale = 0.001f;
 
     void Start()
@@ -34,18 +33,16 @@ public class SplashScreen : MonoBehaviour
 
     void Update()
     {
-        // Find head
         if (_centerEye == null)
         {
             FindCenterEye();
             if (_centerEye == null) return;
         }
 
-        // Follow head -- locked to face
+        // Follow head
         _canvas.transform.position = _centerEye.position + _centerEye.forward * displayDistance;
         _canvas.transform.rotation = _centerEye.rotation;
 
-        // Hide controllers while splash is showing
         if (!_fading)
         {
             HideControllers();
@@ -65,7 +62,7 @@ public class SplashScreen : MonoBehaviour
             return;
         }
 
-        // Wait for BOTH index triggers pressed at the same time
+        // Both index triggers
         if (BothTriggersPressed())
         {
             _fading = true;
@@ -75,7 +72,6 @@ public class SplashScreen : MonoBehaviour
 
     void OnDestroy()
     {
-        // Safety -- always restore controllers
         ShowControllers();
     }
 
@@ -93,10 +89,8 @@ public class SplashScreen : MonoBehaviour
 
         Transform[] anchors = new Transform[]
         {
-            rig.leftControllerAnchor,
-            rig.rightControllerAnchor,
-            rig.leftHandAnchor,
-            rig.rightHandAnchor
+            rig.leftControllerAnchor, rig.rightControllerAnchor,
+            rig.leftHandAnchor, rig.rightHandAnchor
         };
 
         foreach (var anchor in anchors)
@@ -117,32 +111,23 @@ public class SplashScreen : MonoBehaviour
     private void ShowControllers()
     {
         foreach (var r in _hiddenRenderers)
-        {
             if (r != null) r.enabled = true;
-        }
         _hiddenRenderers.Clear();
 
-        // Also actively find and enable ALL renderers under controller/hand anchors.
-        // OVR SDK spawns controller models dynamically -- we may have hidden renderers
-        // that weren't in our tracking list (spawned after initial hide).
         var rig = FindFirstObjectByType<OVRCameraRig>();
         if (rig == null) return;
 
         Transform[] anchors = new Transform[]
         {
-            rig.leftControllerAnchor,
-            rig.rightControllerAnchor,
-            rig.leftHandAnchor,
-            rig.rightHandAnchor
+            rig.leftControllerAnchor, rig.rightControllerAnchor,
+            rig.leftHandAnchor, rig.rightHandAnchor
         };
 
         foreach (var anchor in anchors)
         {
             if (anchor == null) continue;
             foreach (var r in anchor.GetComponentsInChildren<Renderer>(true))
-            {
                 r.enabled = true;
-            }
         }
     }
 
@@ -155,7 +140,6 @@ public class SplashScreen : MonoBehaviour
 
     private void CreateWorldCanvas()
     {
-        // World-space canvas -- big black plane covering full FOV
         var canvasGO = new GameObject("SplashCanvas");
         canvasGO.transform.SetParent(transform);
         _canvas = canvasGO.AddComponent<Canvas>();
@@ -166,20 +150,19 @@ public class SplashScreen : MonoBehaviour
         rect.sizeDelta = new Vector2(4000, 4000);
         rect.localScale = Vector3.one * displayScale;
 
-        // CanvasGroup for clean fade
         _group = canvasGO.AddComponent<CanvasGroup>();
 
-        // Black background -- fills the entire canvas
+        // Black background
         var bgGO = new GameObject("Background");
         bgGO.transform.SetParent(canvasGO.transform, false);
-        _bg = bgGO.AddComponent<Image>();
-        _bg.color = Color.black;
+        var bg = bgGO.AddComponent<Image>();
+        bg.color = Color.black;
         var bgRect = bgGO.GetComponent<RectTransform>();
         bgRect.anchorMin = Vector2.zero;
         bgRect.anchorMax = Vector2.one;
         bgRect.sizeDelta = Vector2.zero;
 
-        // "TESTBED:" label -- small, top-left above project name
+        // "TESTBED:" label
         var labelGO = new GameObject("TestbedLabel");
         labelGO.transform.SetParent(canvasGO.transform, false);
         var label = labelGO.AddComponent<Text>();
@@ -191,15 +174,11 @@ public class SplashScreen : MonoBehaviour
         label.horizontalOverflow = HorizontalWrapMode.Overflow;
         label.verticalOverflow = VerticalWrapMode.Overflow;
         var labelRect = labelGO.GetComponent<RectTransform>();
-        // Pivot left-center so anchoredPosition.x = left edge of text
         labelRect.pivot = new Vector2(0f, 0.5f);
-        // "PLAGA '44" at fontSize 52 Consolas monospace: ~31px/char, 9 chars = ~280px
-        // Centered title left edge = -140px from center
         labelRect.anchoredPosition = new Vector2(-124, 40);
         labelRect.sizeDelta = new Vector2(400, 30);
 
-        // Project name -- configurable via displayName field in Inspector
-        // Default: "PLAGA <color=#CC3333>'44</color>"
+        // Project name
         var titleGO = new GameObject("Title");
         titleGO.transform.SetParent(canvasGO.transform, false);
         _title = titleGO.AddComponent<Text>();
@@ -214,5 +193,20 @@ public class SplashScreen : MonoBehaviour
         var titleRect = titleGO.GetComponent<RectTransform>();
         titleRect.anchoredPosition = Vector2.zero;
         titleRect.sizeDelta = new Vector2(2000, 200);
+
+        // Subtitle
+        var subGO = new GameObject("Subtitle");
+        subGO.transform.SetParent(canvasGO.transform, false);
+        var sub = subGO.AddComponent<Text>();
+        sub.text = "press both triggers";
+        sub.font = Font.CreateDynamicFontFromOSFont("Consolas", 16);
+        sub.fontSize = 16;
+        sub.color = new Color(0.4f, 0.4f, 0.4f);
+        sub.alignment = TextAnchor.MiddleCenter;
+        sub.horizontalOverflow = HorizontalWrapMode.Overflow;
+        sub.verticalOverflow = VerticalWrapMode.Overflow;
+        var subRect = subGO.GetComponent<RectTransform>();
+        subRect.anchoredPosition = new Vector2(0, -60);
+        subRect.sizeDelta = new Vector2(2000, 50);
     }
 }

@@ -1,3 +1,5 @@
+// AUTO-DISABLED: requires newer Meta XR SDK APIs
+#if PLAGA44_FULL_SDK
 // EmotionDetector.cs
 // CYBERNOMAD -- Classifies player emotion from OVRFaceExpressions blendshapes.
 // Emotions: Fear, Surprise, Anger, Joy, Neutral.
@@ -234,3 +236,4 @@ namespace Plaga44.FaceTracking
         }
     }
 }
+#endif // PLAGA44_FULL_SDK

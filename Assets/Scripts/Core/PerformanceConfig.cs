@@ -19,7 +19,7 @@ public class PerformanceConfig : MonoBehaviour
 
     [Header("Dynamic Resolution")]
     [Tooltip("Auto-scales render resolution when FPS drops. Configured on OVRManager instance.")]
-    public bool enableDynamicResolution = true;
+    public bool enableDynamicResolution = false;
     [Range(0.5f, 1.0f)]
     public float minResolutionScale = 0.7f;
     [Range(0.8f, 1.6f)]

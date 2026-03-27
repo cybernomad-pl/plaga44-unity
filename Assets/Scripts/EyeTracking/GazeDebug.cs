@@ -1,3 +1,5 @@
+// AUTO-DISABLED: PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 // GazeDebug.cs
 // PLAGA '44 -- Debug visualizer for eye tracking.
 // Draws gaze rays in Scene view (Debug.DrawRay) and optionally a world-space
@@ -198,3 +200,4 @@ namespace Plaga44.EyeTracking
 #endif
     }
 }
+#endif // PLAGA44_FULL_SDK

@@ -1,3 +1,5 @@
+// AUTO-DISABLED: depends on SpaceWarpManager (guarded by PLAGA44_FULL_SDK)
+#if PLAGA44_FULL_SDK
 // PerformanceMonitor.cs
 // CYBERNOMAD -- Real-time VR performance metrics with HUD overlay.
 // Tracks FPS, GPU time, CPU time (via OVRManager.GetGPUUtilLevel / GetCPULevel if available).
@@ -258,3 +260,4 @@ namespace Plaga44.Performance
         }
     }
 }
+#endif // PLAGA44_FULL_SDK

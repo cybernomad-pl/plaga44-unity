@@ -1,3 +1,5 @@
+// AUTO-DISABLED: PLAGA44_FULL_SDK
+#if PLAGA44_FULL_SDK
 // PeripheralThreat.cs
 // PLAGA '44 -- Horror gameplay mechanic.
 // The threat moves ONLY when it is in peripheral vision.
@@ -291,3 +293,4 @@ namespace Plaga44.EyeTracking
 #endif
     }
 }
+#endif // PLAGA44_FULL_SDK

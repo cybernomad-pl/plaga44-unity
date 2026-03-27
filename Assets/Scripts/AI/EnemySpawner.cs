@@ -137,7 +137,7 @@ namespace Plaga44.AI
             rb.constraints = RigidbodyConstraints.FreezeRotation;
 
             // NavMeshAgent
-            var agent = root.AddComponent<NavMeshAgent>();
+            var agent = root.AddComponent<UnityEngine.AI.NavMeshAgent>();
             agent.height = 1.8f;
             agent.radius = 0.35f;
             agent.baseOffset = 0f;
