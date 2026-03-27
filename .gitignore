@@ -41,7 +41,7 @@ crashlytics-build.properties
 *.unitypackage
 *.app
 
-# Asset packs (full packages -- only used assets are force-added via git add -f)
+# Source template packs (not part of project -- assets extracted to Assets/PLAGA44/)
 Assets/FloodedGrounds/
 Assets/FloodedGrounds.meta
 Assets/SwordAndPistol/

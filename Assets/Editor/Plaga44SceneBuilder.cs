@@ -11,11 +11,11 @@ using UnityEngine.SceneManagement;
 namespace Plaga44.Editor
 {
     // -------------------------------------------------------------------------
-    // FloodedGroundsLoader
+    // Plaga44SceneBuilder
     //
     // MenuItem 1: CYBERNOMAD/Scene/Load PLAGA 44 Demo
     //   1. Tworzy nowa scene PLAGA44_Demo.unity
-    //   2. Laduje Scene_A.unity additive (teren Flooded Grounds)
+    //   2. Laduje Scene_A.unity additive (teren PLAGA44)
     //   3. Przenosi obiekty z Scene_A do nowej sceny
     //   4. Czysci (FPS Controller, kamery, event systemy, unwanted objects)
     //   5. Dodaje OVRPlayerController + bron w rekach
@@ -26,7 +26,7 @@ namespace Plaga44.Editor
     //   - Tworzy nowa pusta scene + OVRCameraRig + Prefab Picker window
     // -------------------------------------------------------------------------
 
-    public static class FloodedGroundsLoader
+    public static class Plaga44SceneBuilder
     {
         private const string LOG = "[PLAGA44]";
 
@@ -60,7 +60,7 @@ namespace Plaga44.Editor
         // ------------------------------------------------------------------
 
         [MenuItem("CYBERNOMAD/Scene/Load PLAGA 44 Demo", false, 10)]
-        public static void LoadFloodedGrounds()
+        public static void BuildDemoScene()
         {
             if (!File.Exists(Path.Combine(Application.dataPath, "..", SCENE_A_PATH)))
             { Debug.LogError($"{LOG} {SCENE_A_PATH} not found"); return; }
@@ -87,7 +87,7 @@ namespace Plaga44.Editor
                 if (player.GetComponent<VRCrouch>() == null)
                     player.AddComponent<VRCrouch>();
 
-                // Make player taller -- Flooded Grounds architecture is oversized
+                // Make player taller -- PLAGA44 architecture is oversized
                 // OVRPlayerController sets camera Y = -(0.5*height) + center.y
                 // Default: height=1.8, center=0.9 -> camera at 0
                 // We want camera ~1.4m higher to match door handle height
@@ -336,9 +336,9 @@ namespace Plaga44.Editor
                 var audioGO = new GameObject("AudioManager");
                 var am = audioGO.AddComponent<AudioManager>();
 
-                // Load audio clips from SwordAndPistol
-                var gunClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/SwordAndPistol/Audio/gunSound.wav");
-                var sliceClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/SwordAndPistol/Audio/SliceSound.wav");
+                // Load audio clips from PLAGA44
+                var gunClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/PLAGA44/Audio/gunSound.wav");
+                var sliceClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/PLAGA44/Audio/SliceSound.wav");
 
                 if (gunClip != null)
                 {
@@ -492,7 +492,7 @@ namespace Plaga44.Editor
                 }
             }
 
-            // Also fix in-scene particle renderers whose materials aren't in FloodedGrounds
+            // Also fix in-scene particle renderers whose materials aren't in PLAGA44
             var allPS = Object.FindObjectsByType<ParticleSystemRenderer>(
                 FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var psr in allPS)
@@ -633,7 +633,7 @@ namespace Plaga44.Editor
             EditorSceneManager.MarkSceneDirty(newScene);
 
             // Otworz okno pickera
-            FloodedGroundsPrefabPicker.Open();
+            Plaga44PrefabPicker.Open();
         }
 
         // ------------------------------------------------------------------
@@ -735,11 +735,11 @@ namespace Plaga44.Editor
                 }
             }
 
-            // Inside FloodedGrounds: destroy all man-made children
-            var fg = GameObject.Find("FloodedGrounds");
+            // Inside PLAGA44: destroy all man-made children
+            var fg = GameObject.Find("Environment");
             if (fg != null)
             {
-                // Blacklist patterns for FloodedGrounds children
+                // Blacklist patterns for PLAGA44 children
                 string[] blacklist = {
                     "villa", "brick", "church", "ind_", "indbuilding",
                     "lighthouse", "cabin", "barn", "guard", "greenhouse",
@@ -766,13 +766,13 @@ namespace Plaga44.Editor
                         Object.DestroyImmediate(child);
                     }
                 }
-                Debug.Log($"{LOG} FloodedGrounds: kept only nature children.");
+                Debug.Log($"{LOG} PLAGA44: kept only nature children.");
             }
         }
 
         static void RemoveUnwantedObjects()
         {
-            // Step 1: Remove non-whitelisted ROOT objects (except FloodedGrounds container)
+            // Step 1: Remove non-whitelisted ROOT objects (except PLAGA44 container)
             var roots = SceneManager.GetActiveScene().GetRootGameObjects();
             int removedRoots = 0;
             foreach (var go in roots)
@@ -793,8 +793,8 @@ namespace Plaga44.Editor
                 removedRoots++;
             }
 
-            // Step 2: Remove non-nature children INSIDE FloodedGrounds
-            var fg = GameObject.Find("FloodedGrounds");
+            // Step 2: Remove non-nature children INSIDE PLAGA44
+            var fg = GameObject.Find("Environment");
             int removedChildren = 0;
             if (fg != null)
             {
@@ -817,7 +817,7 @@ namespace Plaga44.Editor
                 }
             }
 
-            Debug.Log($"{LOG} Whitelist: removed {removedRoots} roots + {removedChildren} FloodedGrounds children.");
+            Debug.Log($"{LOG} Whitelist: removed {removedRoots} roots + {removedChildren} PLAGA44 children.");
         }
 
         static void RemoveAllNonNature()
@@ -1127,7 +1127,7 @@ namespace Plaga44.Editor
             // Spawn na wysokosci 0 -- gracz stoi na podlodze
             rig.transform.position = new Vector3(0f, 0f, 0f);
             rig.transform.rotation = Quaternion.identity;
-            Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig (Flooded Grounds)");
+            Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig (PLAGA44)");
 
             Debug.Log($"{LOG} OVRCameraRig instantiated from: {prefabPath}");
 
@@ -1182,14 +1182,14 @@ namespace Plaga44.Editor
     }
 
     // =========================================================================
-    // FloodedGroundsPrefabPicker -- EditorWindow
+    // Plaga44PrefabPicker -- EditorWindow
     // =========================================================================
 
-    public class FloodedGroundsPrefabPicker : EditorWindow
+    public class Plaga44PrefabPicker : EditorWindow
     {
         private const string LOG = "[PLAGA44]";
         private const string PREFABS_ROOT =
-            "Assets/FloodedGrounds/Prefabs";
+            "Assets/PLAGA44/Prefabs";
 
         // Kategorie i odpowiadajace im podfoldery
         private static readonly (string Label, string Folder)[] Categories =
@@ -1225,7 +1225,7 @@ namespace Plaga44.Editor
 
         public static void Open()
         {
-            var window = GetWindow<FloodedGroundsPrefabPicker>("Flooded Grounds Prefabs");
+            var window = GetWindow<Plaga44PrefabPicker>("PLAGA44 Prefabs");
             window.minSize = new Vector2(520, 400);
             window.SelectCategory(0);
             window.Show();
@@ -1246,7 +1246,7 @@ namespace Plaga44.Editor
         void DrawHeader()
         {
             EditorGUILayout.Space(4);
-            EditorGUILayout.LabelField("Flooded Grounds -- Prefab Picker", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("PLAGA44 -- Prefab Picker", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(
                 "Kliknij prefab zeby dodac go do aktywnej sceny. Ctrl+Z cofa.",
                 EditorStyles.miniLabel);

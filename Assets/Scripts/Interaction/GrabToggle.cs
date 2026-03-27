@@ -11,7 +11,7 @@ public class GrabToggle : MonoBehaviour
     public float grabRadius = 0.5f;         // how far to search for items
     public float snapSpeed = 20f;           // how fast item snaps to hand
 
-    // Snap offsets per weapon type (from original SwordAndPistol GameScene)
+    // Snap offsets per weapon type (from original weapon template)
     private static readonly Vector3 SWORD_POS = new Vector3(0.01f, 0.27f, 0.172f);
     private static readonly Vector3 SWORD_ROT = new Vector3(-54f, 0f, 0f);
     private static readonly Vector3 GUN_POS = new Vector3(-0.0139f, -0.0059f, 0.0228f);

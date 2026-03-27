@@ -211,7 +211,7 @@ namespace Plaga44.Editor
 
         // ---- PLAYER (camera + hands + movement + gravity) ----
 
-        /// <summary>Public wrapper for FloodedGroundsLoader and other callers.</summary>
+        /// <summary>Public wrapper for Plaga44SceneBuilder and other callers.</summary>
         public static GameObject AddPlayerControllerPublic() => AddPlayerController();
 
         /// <summary>Public wrapper to add splash screen from other editor tools.</summary>
