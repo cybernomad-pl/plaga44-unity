@@ -41,8 +41,12 @@ crashlytics-build.properties
 *.unitypackage
 *.app
 
-# Flooded Grounds asset pack (run setup-flooded-grounds.sh to install)
+# Asset packs (full packages -- only used assets are force-added via git add -f)
 Assets/FloodedGrounds/
 Assets/FloodedGrounds.meta
+Assets/SwordAndPistol/
+Assets/SwordAndPistol.meta
+
+# Legacy scenes
 Setup.unity
 Setup.unity.meta

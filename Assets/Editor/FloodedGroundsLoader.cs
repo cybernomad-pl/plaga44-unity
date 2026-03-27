@@ -4,6 +4,8 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
 namespace Plaga44.Editor
@@ -12,163 +14,601 @@ namespace Plaga44.Editor
     // FloodedGroundsLoader
     //
     // MenuItem 1: CYBERNOMAD/Scene/Load PLAGA 44 Demo
-    //   - Otwiera Scene_A.unity z paczki HorrorSurvival2022
-    //   - Usuwa FPS Controller (CharController_Motor, CharacterController na root)
-    //   - Usuwa FPSDisplay
-    //   - Usuwa Main Camera (jezeli nie jest juz pod OVR rigiem)
-    //   - Dodaje OVRCameraRig jezeli brak (reuzywamy MetaQuestSetup.SetupVRSceneHands)
-    //   - Konfiguruje rendering pod Quest 3 (shadows, quality, FFR hint w layerze)
+    //   1. Tworzy nowa scene PLAGA44_Demo.unity
+    //   2. Laduje Scene_A.unity additive (teren Flooded Grounds)
+    //   3. Przenosi obiekty z Scene_A do nowej sceny
+    //   4. Czysci (FPS Controller, kamery, event systemy, unwanted objects)
+    //   5. Dodaje OVRPlayerController + bron w rekach
+    //   6. Ustawia Build Settings (tylko ta scena)
+    //   7. Usuwa stare sceny z projektu
     //
     // MenuItem 2: CYBERNOMAD/Scene/Prefab Picker
-    //   - Tworzy nowa pusta scene
-    //   - Dodaje OVRCameraRig
-    //   - Otwiera okno EditorWindow z lista prefabow podzielona na kategorie
-    //     (Buildings, Nature, Props, Atmospherics, Backgrounds)
-    //   - Klik na prefab = instancja w scenie przed graczem
+    //   - Tworzy nowa pusta scene + OVRCameraRig + Prefab Picker window
     // -------------------------------------------------------------------------
 
     public static class FloodedGroundsLoader
     {
         private const string LOG = "[PLAGA44]";
 
-        private const string SCENE_PATH =
-            "Assets/FloodedGrounds/Scenes/Scene_A.unity";
+        private const string SCENE_A_PATH =
+            "Assets/PLAGA44/Environment/Terrain/Scene_A.unity";
+
+        private const string DEMO_SCENE_PATH =
+            "Assets/Scenes/PLAGA44_Demo.unity";
 
         private const string PREFABS_ROOT =
-            "Assets/FloodedGrounds/Prefabs";
+            "Assets/PLAGA44/Environment/Prefabs";
+
+        // Sceny do usuniecia z projektu (smieci z wczesniejszych iteracji)
+        private static readonly string[] SCENES_TO_DELETE = new string[]
+        {
+            "Assets/Scenes/PLAGA44_Level.unity",
+            "Assets/Scenes/PLAGA44_Splash.unity",
+            "Assets/Scenes/HandGrabExamples.unity",
+            "Assets/Scenes/LocomotionExamples.unity",
+            "Assets/Scenes/SampleScene.unity",
+            "Assets/Setup.unity",
+            "Assets/Setup.unity2.unity",
+            "Assets/setup2.unity",
+            "Assets/TESTBED-1.unity",
+            "Assets/testbed.unity",
+            "Assets/_Recovery/0.unity",
+        };
 
         // ------------------------------------------------------------------
-        // MenuItem 1 -- Load Flooded Grounds
+        // MenuItem 1 -- Load PLAGA 44 Demo
         // ------------------------------------------------------------------
-
-        private const string LEVEL_SCENE_PATH = "Assets/Scenes/PLAGA44_Level.unity";
-        private const string SPLASH_SCENE_PATH = "Assets/Scenes/PLAGA44_Splash.unity";
 
         [MenuItem("CYBERNOMAD/Scene/Load PLAGA 44 Demo", false, 10)]
         public static void LoadFloodedGrounds()
         {
-            Debug.Log($"{LOG} === Building PLAGA '44 Demo ===");
+            if (!File.Exists(Path.Combine(Application.dataPath, "..", SCENE_A_PATH)))
+            { Debug.LogError($"{LOG} {SCENE_A_PATH} not found"); return; }
 
-            if (!File.Exists(Path.Combine(Application.dataPath, "..",  SCENE_PATH)))
-            {
-                Debug.LogError($"{LOG} Scene not found: {SCENE_PATH}");
-                return;
-            }
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
-            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
-            {
-                Debug.Log($"{LOG} Cancelled by user.");
-                return;
-            }
+            DeleteOldScenes();
 
-            // Ensure Scenes folder exists
-            if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
-                AssetDatabase.CreateFolder("Assets", "Scenes");
+            // Otwórz Scene_A, zrób wszystko, zapisz jako PLAGA44_Demo
+            Scene scene = EditorSceneManager.OpenScene(SCENE_A_PATH, OpenSceneMode.Single);
 
-            // ---- STEP 1: Build Level Scene ----
-            Debug.Log($"{LOG} [1/3] Building level scene...");
-
-            Scene levelScene = EditorSceneManager.OpenScene(SCENE_PATH, OpenSceneMode.Single);
-            if (!levelScene.IsValid())
-            {
-                Debug.LogError($"{LOG} Failed to open scene: {SCENE_PATH}");
-                return;
-            }
-
-            RemoveFPSController();
-            RemoveFPSDisplay();
-            RemoveOrphanCameras();
+            RemovePreviousSpawns();
             RemoveLegacyEventSystems();
-            RemoveUnwantedObjects();
+
+            // v2: BLACKLIST -- destroy specific named objects, keep everything else
+            DestroyByName();
+
             SetQuestRenderingSettings();
 
             var player = TestEnvironmentSetup.AddPlayerControllerPublic();
             if (player != null)
             {
-                player.transform.position = new Vector3(420f, 36.5f, 241f);
-                Debug.Log($"{LOG} OVRPlayerController spawned at (420, 36.5, 241).");
+                player.transform.position = ITEM_SPAWN_POINTS[UnityEngine.Random.Range(0, ITEM_SPAWN_POINTS.Length)];
+                if (player.GetComponent<VRCrouch>() == null)
+                    player.AddComponent<VRCrouch>();
+
+                // Make player taller -- Flooded Grounds architecture is oversized
+                // OVRPlayerController sets camera Y = -(0.5*height) + center.y
+                // Default: height=1.8, center=0.9 -> camera at 0
+                // We want camera ~1.4m higher to match door handle height
+                var cc = player.GetComponent<CharacterController>();
+                if (cc != null)
+                {
+                    cc.height = 4.6f;       // tall capsule
+                    cc.center = new Vector3(0f, 3.7f, 0f); // center high
+                    cc.radius = 0.4f;
+                    // camera Y = -(0.5*4.6) + 3.7 = -2.3 + 3.7 = 1.4m above player origin
+                }
+                // Also scale slightly for hand/world proportion
+                player.transform.localScale = Vector3.one * 1.3f;
             }
             else
-            {
                 EnsureOVRCameraRig();
-            }
 
             MaterialUpgrader.UpgradeMaterials();
 
-            EditorSceneManager.SaveScene(levelScene, LEVEL_SCENE_PATH);
-            Debug.Log($"{LOG} Level scene saved: {LEVEL_SCENE_PATH}");
+            SpawnItems();
+            SetupWeaponManagers();
+            AddPostProcessing();
+            FixParticleMaterials();
+            FixLeavesAndGrass();
 
-            // ---- STEP 2: Build Splash Scene ----
-            Debug.Log($"{LOG} [2/3] Building splash scene...");
+            // Zapisz jako nowa scena (Scene_A nietknięta)
+            string scenesDir = Path.Combine(Application.dataPath, "Scenes");
+            if (!Directory.Exists(scenesDir)) Directory.CreateDirectory(scenesDir);
+            EditorSceneManager.SaveScene(scene, DEMO_SCENE_PATH);
 
-            Scene splashScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            // Clean orphaned prefab refs from saved YAML
+            CleanOrphanedPrefabs(Path.Combine(Application.dataPath, "..", DEMO_SCENE_PATH));
 
-            // Directional light
-            var lightGO = new GameObject("Directional Light");
-            var light = lightGO.AddComponent<Light>();
-            light.type = LightType.Directional;
-            light.intensity = 0;
-            lightGO.transform.rotation = Quaternion.Euler(50, -30, 0);
-
-            // OVRPlayerController (look around only -- locomotion disabled by SplashScreen)
-            var splashPlayer = TestEnvironmentSetup.AddPlayerControllerPublic();
-            if (splashPlayer != null)
+            EditorBuildSettings.scenes = new EditorBuildSettingsScene[]
             {
-                splashPlayer.transform.position = Vector3.zero;
-            }
-
-            // SplashScreen component
-            var splashGO = new GameObject("SplashScreen");
-            var splash = splashGO.AddComponent<SplashScreen>();
-            splash.gameSceneName = "PLAGA44_Level";
-            splash.fadeDuration = 1.5f;
-            splash.displayName = "PLAGA <color=#CC3333>'44</color>";
-            Undo.RegisterCreatedObjectUndo(splashGO, "Add SplashScreen");
-
-            EditorSceneManager.SaveScene(splashScene, SPLASH_SCENE_PATH);
-            Debug.Log($"{LOG} Splash scene saved: {SPLASH_SCENE_PATH}");
-
-            // ---- STEP 3: Configure Build Settings ----
-            Debug.Log($"{LOG} [3/3] Configuring build settings...");
-
-            var scenes = new EditorBuildSettingsScene[]
-            {
-                new EditorBuildSettingsScene(SPLASH_SCENE_PATH, true),
-                new EditorBuildSettingsScene(LEVEL_SCENE_PATH, true),
+                new EditorBuildSettingsScene(DEMO_SCENE_PATH, true)
             };
-            EditorBuildSettings.scenes = scenes;
-            Debug.Log($"{LOG} Build Settings: scene 0 = Splash, scene 1 = Level");
 
-            // Open splash scene for testing
-            EditorSceneManager.OpenScene(SPLASH_SCENE_PATH, OpenSceneMode.Single);
+            Debug.Log($"{LOG} === PLAGA '44 Demo READY ({DEMO_SCENE_PATH}). Press Play. ===");
+        }
 
-            Debug.Log($"{LOG} === PLAGA '44 Demo READY. Press Play to test. ===");
+        static void DeleteOldScenes()
+        {
+            int deleted = 0;
+            foreach (var scenePath in SCENES_TO_DELETE)
+            {
+                if (File.Exists(Path.Combine(Application.dataPath, "..", scenePath)))
+                {
+                    AssetDatabase.DeleteAsset(scenePath);
+                    // Also delete .meta
+                    string metaPath = scenePath + ".meta";
+                    if (File.Exists(Path.Combine(Application.dataPath, "..", metaPath)))
+                        FileUtil.DeleteFileOrDirectory(Path.Combine(Application.dataPath, "..", metaPath));
+                    deleted++;
+                    Debug.Log($"{LOG} Deleted old scene: {scenePath}");
+                }
+            }
+            if (deleted > 0)
+            {
+                AssetDatabase.Refresh();
+                Debug.Log($"{LOG} Cleaned up {deleted} old scenes.");
+            }
         }
 
         // ------------------------------------------------------------------
-        // MenuItem -- Add Splash Screen to current scene
+        // Spawn grabbable items
         // ------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Scene/Add Splash Screen", false, 12)]
-        public static void AddSplashScreen()
+        static void AttachWeaponsToHands(GameObject player)
         {
-            // Sprawdź czy już jest
-            if (Object.FindFirstObjectByType<SplashScreen>() != null)
+            string swordPath = "Assets/PLAGA44/Weapons/Prefabs/Sword.prefab";
+            string gunPath = "Assets/PLAGA44/Weapons/Prefabs/GunWithShooting.prefab";
+            string bulletPath = "Assets/PLAGA44/Weapons/Prefabs/Bullet.prefab";
+
+            var swordPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(swordPath);
+            var gunPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(gunPath);
+            var bulletPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(bulletPath);
+
+            // Find hand anchors in OVRPlayerController -> OVRCameraRig
+            var rig = player.GetComponentInChildren<OVRCameraRig>();
+            if (rig == null) return;
+
+            // ---- Sword in LEFT hand ----
+            // Wartości z oryginalnej GameScene.unity (scene overrides na prefab)
+            GameObject swordInstance = null;
+            if (swordPrefab != null && rig.leftHandAnchor != null)
             {
-                Debug.Log($"{LOG} SplashScreen already in scene.");
+                var sword = (GameObject)PrefabUtility.InstantiatePrefab(swordPrefab);
+                sword.transform.SetParent(rig.leftHandAnchor);
+                sword.transform.localPosition = new Vector3(0.01f, 0.27f, 0.172f);
+                sword.transform.localRotation = Quaternion.Euler(-54f, 0f, 0f);
+                sword.transform.localScale = Vector3.one;
+                sword.name = "Sword_LeftHand";
+                swordInstance = sword;
+
+                SetLayerRecursive(sword, 0);
+
+                // Blade: remove MeshCollider (jak w oryginale), add BoxCollider
+                var bladeMC = sword.GetComponentInChildren<MeshCollider>();
+                if (bladeMC != null)
+                {
+                    var bladeGO = bladeMC.gameObject;
+                    Object.DestroyImmediate(bladeMC);
+                    // Replace with BoxCollider for OVRGrabbable + slicing
+                    if (bladeGO.GetComponent<Collider>() == null)
+                    {
+                        var bc = bladeGO.AddComponent<BoxCollider>();
+                        bc.size = new Vector3(0.05f, 0.8f, 0.05f);
+                        bc.center = new Vector3(0f, 0.4f, 0f);
+                    }
+                }
+
+                // Rigidbody on ROOT (OVRGrabbable needs it on same GO)
+                var rb = sword.GetComponent<Rigidbody>();
+                if (rb == null) rb = sword.AddComponent<Rigidbody>();
+                rb.isKinematic = true;
+                rb.useGravity = false;
+                rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+
+                // Collider on root for OVRGrabbable grab points
+                if (sword.GetComponent<Collider>() == null)
+                {
+                    var rootCol = sword.AddComponent<BoxCollider>();
+                    rootCol.size = new Vector3(0.05f, 0.3f, 0.05f);
+                }
+
+                if (sword.GetComponent<OVRGrabbable>() == null)
+                    sword.AddComponent<OVRGrabbable>();
+
+                SetupSwordSlicer(sword);
+                Undo.RegisterCreatedObjectUndo(sword, "Attach Sword");
+            }
+
+            // ---- Gun in RIGHT hand ----
+            // Wartości z oryginalnej GameScene.unity (scene overrides na prefab)
+            if (gunPrefab != null && rig.rightHandAnchor != null)
+            {
+                var gun = (GameObject)PrefabUtility.InstantiatePrefab(gunPrefab);
+                gun.transform.SetParent(rig.rightHandAnchor);
+                gun.transform.localPosition = new Vector3(-0.0139f, -0.0059f, 0.0228f);
+                gun.transform.localRotation = Quaternion.Euler(-64f, 10f, -101f);
+                gun.transform.localScale = new Vector3(0.01939102f, 0.01939102f, 0.01939102f);
+                gun.name = "Gun_RightHand";
+
+                SetLayerRecursive(gun, 0);
+
+                // Rigidbody + Collider on ROOT for OVRGrabbable
+                var rb = gun.GetComponent<Rigidbody>();
+                if (rb == null) rb = gun.AddComponent<Rigidbody>();
+                rb.isKinematic = true;
+                rb.useGravity = false;
+
+                if (gun.GetComponent<Collider>() == null)
+                {
+                    var gunCol = gun.AddComponent<BoxCollider>();
+                    gunCol.size = new Vector3(8f, 12f, 25f); // scale 0.019 -> world ~0.15x0.23x0.48m
+                    gunCol.center = new Vector3(0f, -3f, 5f);
+                }
+
+                if (gun.GetComponent<OVRGrabbable>() == null)
+                    gun.AddComponent<OVRGrabbable>();
+
+                var shooting = gun.GetComponent<Shooting>();
+                if (shooting != null)
+                {
+                    if (bulletPrefab != null)
+                        shooting.bulletPrefab = bulletPrefab;
+                    if (swordInstance != null)
+                        shooting.slicerGameobject = swordInstance;
+                }
+
+                Undo.RegisterCreatedObjectUndo(gun, "Attach Gun");
+            }
+
+            // ---- Scene singletons: VibrationManager + AudioManager ----
+            SetupWeaponManagers();
+        }
+
+        static void SetupSwordSlicer(GameObject sword)
+        {
+            // Find the blade -- first child with MeshCollider
+            MeshCollider bladeCollider = sword.GetComponentInChildren<MeshCollider>();
+            if (bladeCollider == null)
+            {
+                Debug.LogWarning($"{LOG} No MeshCollider found on sword -- adding BoxCollider as trigger for slicing.");
+                var col = sword.AddComponent<BoxCollider>();
+                col.isTrigger = true;
+                col.size = new Vector3(0.1f, 1.0f, 0.1f); // blade shape
+            }
+
+            GameObject bladeGO = bladeCollider != null ? bladeCollider.gameObject : sword;
+
+            // Add Slicer component if not present
+            var slicer = bladeGO.GetComponent<Slicer>();
+            if (slicer == null)
+                slicer = bladeGO.AddComponent<Slicer>();
+            // sliceMask: Everything (let it slice any physics object)
+            slicer.sliceMask = ~0;
+
+            // Add SliceListener on the blade for trigger detection
+            // Need a trigger collider for OnTriggerEnter
+            var triggerCol = bladeGO.GetComponent<Collider>();
+            if (triggerCol != null && !triggerCol.isTrigger)
+            {
+                // Keep the solid collider, add a separate trigger
+                var triggerChild = new GameObject("SliceTrigger");
+                triggerChild.transform.SetParent(bladeGO.transform, false);
+                var bc = triggerChild.AddComponent<BoxCollider>();
+                bc.isTrigger = true;
+                bc.size = new Vector3(0.1f, 1.2f, 0.1f);
+                var listener = triggerChild.AddComponent<SliceListener>();
+                listener.slicer = slicer;
+            }
+            else
+            {
+                var listener = bladeGO.GetComponent<SliceListener>();
+                if (listener == null)
+                    listener = bladeGO.AddComponent<SliceListener>();
+                listener.slicer = slicer;
+            }
+
+            Debug.Log($"{LOG} Slicer + SliceListener setup on '{bladeGO.name}'.");
+        }
+
+        static void SetLayerRecursive(GameObject go, int layer)
+        {
+            go.layer = layer;
+            foreach (Transform child in go.transform)
+                SetLayerRecursive(child.gameObject, layer);
+        }
+
+        static void SetupWeaponManagers()
+        {
+            // VibrationManager singleton
+            if (Object.FindAnyObjectByType<VibrationManager>() == null)
+            {
+                var vibGO = new GameObject("VibrationManager");
+                vibGO.AddComponent<VibrationManager>();
+                Undo.RegisterCreatedObjectUndo(vibGO, "Add VibrationManager");
+                Debug.Log($"{LOG} VibrationManager singleton added to scene.");
+            }
+
+            // AudioManager singleton with gun/slice sounds
+            if (Object.FindAnyObjectByType<AudioManager>() == null)
+            {
+                var audioGO = new GameObject("AudioManager");
+                var am = audioGO.AddComponent<AudioManager>();
+
+                // Load audio clips from SwordAndPistol
+                var gunClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/SwordAndPistol/Audio/gunSound.wav");
+                var sliceClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/SwordAndPistol/Audio/SliceSound.wav");
+
+                if (gunClip != null)
+                {
+                    var gunSrc = audioGO.AddComponent<AudioSource>();
+                    gunSrc.clip = gunClip;
+                    gunSrc.playOnAwake = false;
+                    gunSrc.spatialBlend = 1f;
+                    am.gunSound = gunSrc;
+                }
+
+                if (sliceClip != null)
+                {
+                    var sliceSrc = audioGO.AddComponent<AudioSource>();
+                    sliceSrc.clip = sliceClip;
+                    sliceSrc.playOnAwake = false;
+                    sliceSrc.spatialBlend = 1f;
+                    am.sliceSound = sliceSrc;
+                }
+
+                Undo.RegisterCreatedObjectUndo(audioGO, "Add AudioManager");
+                Debug.Log($"{LOG} AudioManager singleton added (gun={gunClip != null}, slice={sliceClip != null}).");
+            }
+        }
+
+        static void AddPostProcessing()
+        {
+            string profilePath = "Assets/Settings/PLAGA44_PostProcess.asset";
+            string settingsDir = Path.Combine(Application.dataPath, "Settings");
+            if (!Directory.Exists(settingsDir)) Directory.CreateDirectory(settingsDir);
+
+            // Always delete and recreate profile to ensure correct values
+            if (File.Exists(Path.Combine(Application.dataPath, "..", profilePath)))
+                AssetDatabase.DeleteAsset(profilePath);
+
+            // Remove existing Volume from scene
+            var existingVol = Object.FindAnyObjectByType<Volume>();
+            if (existingVol != null)
+                Object.DestroyImmediate(existingVol.gameObject);
+
+            // Create profile asset FIRST (empty), then add components as sub-assets
+            var profile = ScriptableObject.CreateInstance<VolumeProfile>();
+            AssetDatabase.CreateAsset(profile, profilePath);
+
+            // Create ColorAdjustments as sub-asset so it serializes to disk
+            var colorAdj = ScriptableObject.CreateInstance<ColorAdjustments>();
+            colorAdj.name = "ColorAdjustments";
+            colorAdj.active = true;
+            colorAdj.saturation.Override(76f);
+            colorAdj.contrast.Override(30f);
+            colorAdj.postExposure.Override(0.5f);
+
+            // Add as sub-asset + register in profile component list
+            AssetDatabase.AddObjectToAsset(colorAdj, profile);
+            profile.components.Add(colorAdj);
+
+            EditorUtility.SetDirty(colorAdj);
+            EditorUtility.SetDirty(profile);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            // Reload from disk to confirm
+            profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
+            Debug.Log($"{LOG} Profile components: {profile.components.Count} (expected 1)");
+
+            var volGO = new GameObject("PostProcess_Volume");
+            var volume = volGO.AddComponent<Volume>();
+            volume.isGlobal = true;
+            volume.priority = 1;
+            volume.sharedProfile = profile;
+
+            Undo.RegisterCreatedObjectUndo(volGO, "Add PostProcess Volume");
+            Debug.Log($"{LOG} Post-processing saved: {profilePath} (sat=76, contrast=30, exp=0.5)");
+        }
+
+        // Player + item spawn point: bridge/gate area
+        private static readonly Vector3[] ITEM_SPAWN_POINTS = new Vector3[]
+        {
+            new Vector3(457.94f, 16.45f, 409.63f),  // bridge gate entrance
+        };
+
+        static void FixParticleMaterials()
+        {
+            var urpParticleShader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            if (urpParticleShader == null)
+            {
+                Debug.LogWarning($"{LOG} URP Particles/Unlit shader not found.");
                 return;
             }
-            TestEnvironmentSetup.AddSplashScreenPublic();
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
-                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
-            Debug.Log($"{LOG} SplashScreen added. Press both triggers to dismiss.");
+
+            // Fix ALL atmospheric/particle materials ON DISK
+            // Catches: ATM_Leaf, ATM_DustParticle, ATM_HaloRing, etc.
+            // regardless of current shader (URP/Lit, legacy Particles, etc.)
+            string[] folders = { "Assets/PLAGA44" };
+            string[] guids = AssetDatabase.FindAssets("t:Material", folders);
+            int fixed_ = 0;
+
+            foreach (var guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+                if (mat == null) continue;
+
+                string matName = mat.name.ToLowerInvariant();
+                string shaderName = mat.shader.name;
+
+                // Fix if: (a) name contains ATM_ (atmospheric particles), or
+                //          (b) shader is legacy Particles (not yet URP)
+                bool isAtmospheric = matName.Contains("atm_");
+                bool isLegacyParticle = shaderName.Contains("Particles/") && !shaderName.Contains("Universal");
+
+                if (isAtmospheric || isLegacyParticle)
+                {
+                    mat.shader = urpParticleShader;
+                    mat.SetFloat("_Surface", 1); // Transparent
+
+                    // _Blend enum in URP Particles/Unlit:
+                    // 0=Alpha (SrcAlpha/OneMinusSrcAlpha)
+                    // 1=Premultiply (One/OneMinusSrcAlpha) <-- WRONG, causes white/black BG!
+                    // 2=Additive (SrcAlpha/One)
+                    // Leaves = Alpha blend (0), Dust/Halo = Additive (2)
+                    bool isLeaf = matName.Contains("leaf");
+                    int blendMode = isLeaf ? 0 : 2; // Alpha for leaves, Additive for dust/halo
+                    mat.SetFloat("_Blend", blendMode);
+
+                    if (isLeaf)
+                    {
+                        mat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        mat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                        mat.SetFloat("_SrcBlendAlpha", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        mat.SetFloat("_DstBlendAlpha", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                        mat.EnableKeyword("_BLENDMODE_ALPHA");
+                        mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    }
+                    else
+                    {
+                        mat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        mat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
+                        mat.SetFloat("_SrcBlendAlpha", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        mat.SetFloat("_DstBlendAlpha", (float)UnityEngine.Rendering.BlendMode.One);
+                        mat.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+                        mat.DisableKeyword("_BLENDMODE_ALPHA");
+                    }
+
+                    mat.SetFloat("_ZWrite", 0);
+                    mat.renderQueue = 3000;
+                    mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                    mat.DisableKeyword("_EMISSION");
+                    EditorUtility.SetDirty(mat);
+                    fixed_++;
+                    Debug.Log($"{LOG} Fixed particle material: {mat.name} -> blend={blendMode} ({(isLeaf ? "Alpha" : "Additive")})");
+                }
+            }
+
+            // Also fix in-scene particle renderers whose materials aren't in FloodedGrounds
+            var allPS = Object.FindObjectsByType<ParticleSystemRenderer>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var psr in allPS)
+            {
+                foreach (var mat in psr.sharedMaterials)
+                {
+                    if (mat == null) continue;
+                    string sn = mat.shader.name;
+                    string mn = mat.name.ToLowerInvariant();
+                    if ((sn.Contains("Particles/") && !sn.Contains("Universal")) || mn.Contains("atm_"))
+                    {
+                        mat.shader = urpParticleShader;
+                        mat.SetFloat("_Surface", 1);
+                        bool leaf = mn.Contains("leaf");
+                        mat.SetFloat("_Blend", leaf ? 0 : 2);
+                        mat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        mat.SetFloat("_DstBlend", leaf
+                            ? (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha
+                            : (float)UnityEngine.Rendering.BlendMode.One);
+                        mat.SetFloat("_SrcBlendAlpha", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                        mat.SetFloat("_DstBlendAlpha", leaf
+                            ? (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha
+                            : (float)UnityEngine.Rendering.BlendMode.One);
+                        mat.SetFloat("_ZWrite", 0);
+                        mat.renderQueue = 3000;
+                        mat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+                        if (leaf) { mat.EnableKeyword("_BLENDMODE_ALPHA"); mat.DisableKeyword("_ALPHAPREMULTIPLY_ON"); }
+                        else { mat.EnableKeyword("_ALPHAPREMULTIPLY_ON"); mat.DisableKeyword("_BLENDMODE_ALPHA"); }
+                        EditorUtility.SetDirty(mat);
+                        fixed_++;
+                    }
+                }
+            }
+
+            if (fixed_ > 0)
+            {
+                AssetDatabase.SaveAssets();
+                Debug.Log($"{LOG} Fixed {fixed_} particle materials to URP Particles/Unlit Additive (saved to disk).");
+            }
+        }
+
+        static void SpawnItems()
+        {
+            string swordPath = "Assets/PLAGA44/Weapons/Prefabs/Sword.prefab";
+            string gunPath = "Assets/PLAGA44/Weapons/Prefabs/GunWithShooting.prefab";
+
+            var swordPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(swordPath);
+            var gunPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(gunPath);
+
+            if (swordPrefab == null) Debug.LogError($"{LOG} Sword prefab not found: {swordPath}");
+            if (gunPrefab == null) Debug.LogError($"{LOG} Gun prefab not found: {gunPath}");
+
+            // Find terrain for height sampling
+            var terrain = Terrain.activeTerrain;
+
+            // Spawn both weapons at the spawn point
+            GameObject[] prefabs = new GameObject[] { swordPrefab, gunPrefab };
+            int spawned = 0;
+            for (int i = 0; i < prefabs.Length; i++)
+            {
+                var prefab = prefabs[i];
+                if (prefab == null) continue;
+
+                var go = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+
+                // Both weapons at same point, offset sideways
+                Vector3 pos = ITEM_SPAWN_POINTS[0];
+                if (terrain != null)
+                    pos.y = terrain.SampleHeight(pos) + terrain.transform.position.y + 0.8f;
+                else
+                    pos.y += 0.8f;
+                pos.x += (i == 0) ? -0.3f : 0.3f; // sword left, gun right
+
+                go.transform.position = pos;
+                go.name = $"{prefab.name}_Spawn{i}";
+
+                // Layer 0
+                SetLayerRecursive(go, 0);
+
+                // Rigidbody on root
+                var rb = go.GetComponent<Rigidbody>();
+                if (rb == null) rb = go.AddComponent<Rigidbody>();
+                rb.mass = 0.5f;
+                rb.useGravity = true;
+                rb.isKinematic = false;
+
+                // Collider on root for grab
+                if (go.GetComponent<Collider>() == null)
+                    go.AddComponent<BoxCollider>();
+
+                // OVRGrabbable
+                if (go.GetComponent<OVRGrabbable>() == null)
+                    go.AddComponent<OVRGrabbable>();
+
+                // Remove Slicer/SliceListener if accidentally on prefab (only for hand-held)
+                var slicer = go.GetComponentInChildren<Slicer>();
+                if (slicer != null) Object.DestroyImmediate(slicer);
+                var listener = go.GetComponentInChildren<SliceListener>();
+                if (listener != null) Object.DestroyImmediate(listener);
+
+                // Disable Shooting script on spawned guns (only works when held)
+                var shooting = go.GetComponent<Shooting>();
+                if (shooting != null) shooting.enabled = false;
+
+                Undo.RegisterCreatedObjectUndo(go, $"Spawn {go.name}");
+                spawned++;
+            }
+
+            Debug.Log($"{LOG} Spawned {spawned} items on terrain at {ITEM_SPAWN_POINTS.Length} locations.");
         }
 
         // ------------------------------------------------------------------
         // MenuItem 2 -- Prefab Picker (nowa scena)
         // ------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Scene/Prefab Picker", false, 11)]
+        // [MenuItem("CYBERNOMAD/Scene/Prefab Picker", false, 11)]
         public static void OpenPrefabPicker()
         {
             Debug.Log($"{LOG} === New Scene + Prefab Picker ===");
@@ -251,54 +691,284 @@ namespace Plaga44.Editor
             }
         }
 
-        // Objects to remove from Flooded Grounds (not fitting PLAGA '44)
-        private static readonly string[] UNWANTED_PATTERNS = new string[]
+        // v2 WHITELIST: ONLY raw nature -- zero man-made
+        private static readonly string[] KEEP_PATTERNS = new string[]
         {
-            "ship", "saucer", "flyingsaucer", "flying_saucer",
-            "blockercube", "_blocker",
-            "decobush", "hedge",
+            "terrain",
+            "water", "3d_water",
+            "tree",
+            "grass",
+            "bush",
+            "wind",
+            "sun",
         };
+
+        // v2: explicit blacklist -- destroy these root objects by name
+        static void DestroyByName()
+        {
+            string[] destroyRoots = {
+                "ScienceBuilding", "_FloodedBuilding2", "_GUI", "Canvas",
+                "Point light", "GameObject",
+            };
+            foreach (var name in destroyRoots)
+            {
+                var go = GameObject.Find(name);
+                while (go != null)
+                {
+                    Debug.Log($"{LOG} Destroying root: '{go.name}'");
+                    Object.DestroyImmediate(go);
+                    go = GameObject.Find(name);
+                }
+            }
+
+            // Destroy orphaned prefab instances + numbered objects
+            var all = Object.FindObjectsByType<GameObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var go in all)
+            {
+                if (go == null) continue;
+                string n = go.name.ToLowerInvariant();
+                if (n.StartsWith("pointlight_bounce") || n.StartsWith("reverb_interior") ||
+                    n.Contains("windowglass") || n.Contains("interiordust") ||
+                    n.Contains("deco_window") || n.Contains("_glass"))
+                {
+                    Object.DestroyImmediate(go);
+                }
+            }
+
+            // Inside FloodedGrounds: destroy all man-made children
+            var fg = GameObject.Find("FloodedGrounds");
+            if (fg != null)
+            {
+                // Blacklist patterns for FloodedGrounds children
+                string[] blacklist = {
+                    "villa", "brick", "church", "ind_", "indbuilding",
+                    "lighthouse", "cabin", "barn", "guard", "greenhouse",
+                    "bridge", "struct_", "pavement", "blockout",
+                    "prop_", "rock", "deco", "window",
+                    "door", "wall", "base_", "top_", "cor_",
+                    "floor", "roof", "stair", "chimney", "rail",
+                    "column", "balcon", "ceil", "support",
+                };
+                for (int i = fg.transform.childCount - 1; i >= 0; i--)
+                {
+                    var child = fg.transform.GetChild(i).gameObject;
+                    string cn = child.name.ToLowerInvariant();
+
+                    // Keep only nature
+                    bool isNature = cn.Contains("tree") || cn.Contains("grass") ||
+                                    cn.Contains("bush") || cn.Contains("water") ||
+                                    cn.Contains("terrain") || cn.Contains("wind") ||
+                                    cn.Contains("sun") || cn.Contains("atm_") ||
+                                    cn.Contains("fog") || cn.Contains("leaf");
+
+                    if (!isNature)
+                    {
+                        Object.DestroyImmediate(child);
+                    }
+                }
+                Debug.Log($"{LOG} FloodedGrounds: kept only nature children.");
+            }
+        }
 
         static void RemoveUnwantedObjects()
         {
-            var allObjects = Object.FindObjectsByType<GameObject>(
-                FindObjectsInactive.Include, FindObjectsSortMode.None);
-            var toDestroy = new List<GameObject>();
-
-            foreach (var go in allObjects)
+            // Step 1: Remove non-whitelisted ROOT objects (except FloodedGrounds container)
+            var roots = SceneManager.GetActiveScene().GetRootGameObjects();
+            int removedRoots = 0;
+            foreach (var go in roots)
             {
-                string nameLower = go.name.ToLowerInvariant();
-                foreach (var pattern in UNWANTED_PATTERNS)
+                if (go == null) continue;
+                string n = go.name.ToLowerInvariant();
+
+                // Always keep these roots
+                if (n.Contains("terrain") || n.Contains("water") || n.Contains("sun") ||
+                    n.Contains("wind") || n.Contains("tree") || n.Contains("grass") ||
+                    n.Contains("bush") || n == "floodedgrounds" ||
+                    n.Contains("ovr") || n.Contains("player") || n.Contains("postprocess") ||
+                    n.Contains("vibration") || n.Contains("audio") || n.Contains("spawn"))
+                    continue;
+
+                Debug.Log($"{LOG} ROOT destroying: '{go.name}'");
+                Object.DestroyImmediate(go);
+                removedRoots++;
+            }
+
+            // Step 2: Remove non-nature children INSIDE FloodedGrounds
+            var fg = GameObject.Find("FloodedGrounds");
+            int removedChildren = 0;
+            if (fg != null)
+            {
+                for (int i = fg.transform.childCount - 1; i >= 0; i--)
                 {
-                    if (nameLower.Contains(pattern))
+                    var child = fg.transform.GetChild(i).gameObject;
+                    if (child == null) continue;
+                    string cn = child.name.ToLowerInvariant();
+
+                    bool keep = false;
+                    foreach (var pattern in KEEP_PATTERNS)
                     {
-                        // Don't remove children separately if parent is already marked
-                        bool parentAlreadyMarked = false;
-                        var parent = go.transform.parent;
-                        while (parent != null)
-                        {
-                            string pName = parent.name.ToLowerInvariant();
-                            foreach (var p2 in UNWANTED_PATTERNS)
-                                if (pName.Contains(p2)) { parentAlreadyMarked = true; break; }
-                            if (parentAlreadyMarked) break;
-                            parent = parent.parent;
-                        }
-                        if (!parentAlreadyMarked)
-                            toDestroy.Add(go);
-                        break;
+                        if (cn.Contains(pattern)) { keep = true; break; }
+                    }
+                    if (!keep)
+                    {
+                        Object.DestroyImmediate(child);
+                        removedChildren++;
                     }
                 }
             }
 
-            foreach (var go in toDestroy)
+            Debug.Log($"{LOG} Whitelist: removed {removedRoots} roots + {removedChildren} FloodedGrounds children.");
+        }
+
+        static void RemoveAllNonNature()
+        {
+            // Brute force: find ALL GameObjects, destroy anything man-made
+            // This catches orphaned prefab instances (WindowGlass etc.)
+            var all = Object.FindObjectsByType<GameObject>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+            int removed = 0;
+            foreach (var go in all)
             {
                 if (go == null) continue;
-                Debug.Log($"{LOG} Removing unwanted object: '{go.name}'");
-                Undo.DestroyObjectImmediate(go);
+                string n = go.name.ToLowerInvariant();
+
+                // Skip system/VR objects
+                if (n.Contains("ovr") || n.Contains("player") || n.Contains("hand") ||
+                    n.Contains("controller") || n.Contains("anchor") || n.Contains("tracking") ||
+                    n.Contains("collider") || n.Contains("camera") || n.Contains("spawn") ||
+                    n.Contains("postprocess") || n.Contains("vibration") || n.Contains("audio") ||
+                    n.Contains("grab") || n.Contains("event")) continue;
+
+                // Skip nature
+                bool isNature = false;
+                foreach (var p in KEEP_PATTERNS)
+                {
+                    if (n.Contains(p)) { isNature = true; break; }
+                }
+                if (isNature) continue;
+
+                // Skip if empty name or "GameObject" (could be terrain child)
+                if (n == "" || n == "gameobject") continue;
+
+                // Everything else = man-made = destroy
+                Debug.Log($"{LOG} SWEEP destroying: '{go.name}' (parent: {(go.transform.parent != null ? go.transform.parent.name : "ROOT")})");
+                Object.DestroyImmediate(go);
+                removed++;
+            }
+            if (removed > 0)
+                Debug.Log($"{LOG} Final sweep: removed {removed} non-nature objects.");
+        }
+
+        static void FixLeavesAndGrass()
+        {
+            // 1. Shrink leaf particle systems (3x too big)
+            var allPS = Object.FindObjectsByType<ParticleSystem>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var ps in allPS)
+            {
+                if (ps == null) continue;
+                string n = ps.gameObject.name.ToLowerInvariant();
+                if (n.Contains("leaf") || n.Contains("atm_"))
+                {
+                    ps.transform.localScale = Vector3.one * 0.33f;
+                    Debug.Log($"{LOG} Shrunk particle: {ps.gameObject.name} to 0.33 scale.");
+                }
             }
 
-            if (toDestroy.Count > 0)
-                Debug.Log($"{LOG} Removed {toDestroy.Count} unwanted objects.");
+            // 2. Disable WindZone (kills grass animation)
+            var windZones = Object.FindObjectsByType<WindZone>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var wz in windZones)
+            {
+                wz.gameObject.SetActive(false);
+                Debug.Log($"{LOG} Disabled WindZone: {wz.gameObject.name}");
+            }
+
+            // 3. Disable terrain grass wave animation + kill billboards
+            var terrain = Terrain.activeTerrain;
+            if (terrain != null)
+            {
+                terrain.terrainData.wavingGrassSpeed = 0f;
+                terrain.terrainData.wavingGrassAmount = 0f;
+                terrain.terrainData.wavingGrassStrength = 0f;
+
+                // KILL tree billboards -- they wobble in VR when head moves
+                terrain.treeDistance = 50000f;          // render trees at any distance
+                terrain.treeBillboardDistance = 50000f;  // NEVER switch to billboard
+                terrain.treeCrossFadeLength = 0f;        // no cross-fade transition
+                terrain.treeMaximumFullLODCount = 50000; // all trees at full LOD
+                terrain.detailObjectDistance = 500f;     // grass/detail visibility
+                terrain.detailObjectDensity = 1f;        // full density
+                terrain.heightmapPixelError = 1f;        // max terrain mesh quality
+
+                Debug.Log($"{LOG} Terrain: grass static, billboards DISABLED (50000m), max quality.");
+            }
+        }
+
+        // Orphaned prefab GUIDs to strip from scene YAML after save
+        private static readonly string[] ORPHAN_GUIDS = new string[]
+        {
+            "fa96530a2d3d74a4796598aa6fdfecb2", // Church1_Deco_WindowGlass_A
+            "02a0e42f36bf76d4c946b93fc70c3cee", // IndBuilding2_Deco_WindowGlass_A
+            "058d6c4dd4db88e4f8b9dbe1b34054ac", // Villa1_Deco_WindowGlass_C
+            "15694160f3f4559468922f6c406043a6", // Villa1_Deco_WindowGlass_A
+            "33d2396704f502c40bd674b135e08461", // Villa2_Deco_WindowGlass_A
+            "475b1b6b7e2809143be41cfe67240ecf", // Villa1_Deco_WindowGlass_B
+            "715fd63a46fbdbe4aaa1d6f63749e896", // Cabin1_Deco_WindowGlass_A
+            "773c221436526d44f8af6a31cd3c49ad", // Cabin2_Deco_WindowGlass_A
+            "7e9dc500b042d594f976c40103e5aa08", // BrickHouse_Deco_WindowGlass_A
+            "8bdc869548e29fd4fbdf4c6b361ce4ce", // Church1_Deco_WindowGlass_B
+            "eaaa713946d21c349acbc0f8b739f316", // BrickHouse_Deco_WindowGlass_B
+        };
+
+        static void CleanOrphanedPrefabs(string scenePath)
+        {
+            string text = File.ReadAllText(scenePath);
+            // Split into YAML documents (separated by "--- !u!")
+            var docs = System.Text.RegularExpressions.Regex.Split(text, @"(?=--- !u!)");
+            var clean = new System.Text.StringBuilder();
+            int removed = 0;
+
+            foreach (var doc in docs)
+            {
+                bool orphan = false;
+                foreach (var guid in ORPHAN_GUIDS)
+                {
+                    if (doc.Contains(guid)) { orphan = true; break; }
+                }
+                if (!orphan)
+                    clean.Append(doc);
+                else
+                    removed++;
+            }
+
+            if (removed > 0)
+            {
+                File.WriteAllText(scenePath, clean.ToString());
+                AssetDatabase.Refresh();
+                Debug.Log($"{LOG} Cleaned {removed} orphaned prefab blocks from scene YAML.");
+            }
+        }
+
+        static void RemovePreviousSpawns()
+        {
+            // Remove weapon spawns / managers from previous Load runs baked into Scene_A
+            var allObjects = Object.FindObjectsByType<GameObject>(
+                FindObjectsInactive.Include, FindObjectsSortMode.None);
+            int removed = 0;
+            foreach (var go in allObjects)
+            {
+                if (go == null) continue;
+                string n = go.name;
+                if (n.Contains("_Spawn") || n == "Sword_LeftHand" || n == "Gun_RightHand" ||
+                    n == "VibrationManager" || n == "AudioManager" || n == "OVRPlayerController")
+                {
+                    Object.DestroyImmediate(go);
+                    removed++;
+                }
+            }
+            if (removed > 0)
+                Debug.Log($"{LOG} Removed {removed} leftover objects from previous Load.");
         }
 
         static void RemoveLegacyEventSystems()
@@ -378,39 +1048,22 @@ namespace Plaga44.Editor
 
         static void SetQuestRenderingSettings()
         {
-            // Shadow distance -- Quest 3 ma ograniczony GPU, krotiszy shadow distance
-            // redukuje koszt. 30m to dobry kompromis dla outdoor horroru.
-            QualitySettings.shadowDistance = 30f;
-
-            // MSAA x4 -- Quest 3 ma tile-based GPU gdzie MSAA jest tanie
-            QualitySettings.antiAliasing = 4;
-
-            // Bez vsync -- XR compositor sam kontroluje timing
+            // MAX QUALITY -- ZERO performance optimizations
+            QualitySettings.shadowDistance = 150f;
+            QualitySettings.shadows = UnityEngine.ShadowQuality.All;
+            QualitySettings.shadowResolution = UnityEngine.ShadowResolution.VeryHigh;
+            QualitySettings.antiAliasing = 8;
             QualitySettings.vSyncCount = 0;
+            QualitySettings.lodBias = 100f;           // NEVER switch to lower LOD
+            QualitySettings.maximumLODLevel = 0;       // Force highest LOD detail
+            QualitySettings.pixelLightCount = 4;
+            QualitySettings.anisotropicFiltering = AnisotropicFiltering.ForceEnable;
+            QualitySettings.skinWeights = SkinWeights.FourBones;
+            QualitySettings.softParticles = true;
 
-            // LOD bias -- troche nizej niz default zeby LOD wchodzil szybciej
-            QualitySettings.lodBias = 0.7f;
+            // LOD cross-fade disabled in URP .asset files on disk (m_EnableLODCrossFade: 0)
 
-            // Max pixel lights -- dynamic lights sa drogie na mobile VR
-            QualitySettings.pixelLightCount = 1;
-
-            // Realtime GI off -- zbyt drogie na Quest 3
-            if (Lightmapping.realtimeGI)
-            {
-                Lightmapping.realtimeGI = false;
-                Debug.Log($"{LOG} Realtime GI disabled (too expensive for Quest 3).");
-            }
-
-            // Baked GI zostawiamy -- Flooded Grounds ma prekalkulowane lightmapy
-
-            // Ambient light -- jezeli scena ma sehr ciemny ambient, dostosuj
-            // (nie nadpisujemy -- scena Flooded Grounds ma wlasny swiatlo setup)
-
-            Debug.Log($"{LOG} Quest 3 rendering settings applied:" +
-                      $" shadows=30m, MSAA=x4, vsync=0, LOD=0.7, pixelLights=1.");
-
-            // FFR (Fixed Foveated Rendering) -- ustawiamy przez OVRManager po dodaniu OVR rига
-            // (patrz EnsureOVRCameraRig)
+            Debug.Log($"{LOG} Render settings: MAX QUALITY (shadows=150m, MSAA=x8, LOD=100, pixelLights=4, NO LOD switching).");
         }
 
         // ------------------------------------------------------------------

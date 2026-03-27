@@ -1,3 +1,5 @@
+// AUTO-DISABLED: not needed for demo
+#if PLAGA44_FULL_SDK
 // VRInputDebugMenu.cs
 // CYBERNOMAD -- Editor menu toggle for VR Input Debug HUD.
 // Menu: CYBERNOMAD > Debug > VR Input Debug HUD
@@ -46,4 +48,5 @@ namespace Plaga44.Editor
         }
     }
 }
+#endif
 #endif

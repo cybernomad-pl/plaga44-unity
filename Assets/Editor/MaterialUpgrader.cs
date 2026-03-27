@@ -65,9 +65,9 @@ namespace Plaga44.Editor
                 }
             }
 
-            // Also scan Assets/FloodedGrounds for any material not in scene
+            // Also scan asset folders for any material not in scene
             var assetGuids = AssetDatabase.FindAssets("t:Material",
-                new[] { "Assets/FloodedGrounds" });
+                new[] { "Assets/PLAGA44" });
             foreach (var guid in assetGuids)
             {
                 var mat = AssetDatabase.LoadAssetAtPath<Material>(

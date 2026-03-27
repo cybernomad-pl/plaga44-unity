@@ -1,3 +1,5 @@
+// AUTO-DISABLED: not needed for demo
+#if PLAGA44_FULL_SDK
 #if UNITY_EDITOR
 using System.IO;
 using Plaga44.AI;
@@ -448,4 +450,5 @@ namespace Plaga44.Editor
         }
     }
 }
+#endif
 #endif

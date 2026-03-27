@@ -17,7 +17,7 @@ namespace Plaga44.Editor
     {
         private const string LOG = "[PLAGA44]";
 
-        [MenuItem("CYBERNOMAD/Scene Setup/Setup TESTBED", false, 50)]
+        // [MenuItem("CYBERNOMAD/Scene Setup/Setup TESTBED", false, 50)]
         public static void SetupTestbed()
         {
             Debug.Log($"{LOG} === Setup TESTBED ===");
@@ -56,7 +56,7 @@ namespace Plaga44.Editor
         ///   Window -> AI -> Navigation -> Bake  (or the NavMeshSurface component on Ground).
         ///   Enemies will log a warning if no NavMesh is found at their spawn position.
         /// </summary>
-        [MenuItem("CYBERNOMAD/Scene Setup/Setup AI Testbed", false, 51)]
+        // [MenuItem("CYBERNOMAD/Scene Setup/Setup AI Testbed", false, 51)]
         public static void SetupAITestbed()
         {
             Debug.Log($"{LOG} === Setup AI TESTBED ===");
@@ -195,7 +195,7 @@ namespace Plaga44.Editor
 
         // ---- CLEAN ----
 
-        [MenuItem("CYBERNOMAD/Scene Setup/Clean Scene", false, 200)]
+        // [MenuItem("CYBERNOMAD/Scene Setup/Clean Scene", false, 200)]
         public static void CleanScene()
         {
             var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
@@ -259,7 +259,7 @@ namespace Plaga44.Editor
                 SetBool(so, "EnableRotation", true);
                 SetBool(so, "SnapRotation", false);        // smooth rotation, not snap
                 SetFloat(so, "RotationRatchet", 0f);       // no snap angle
-                SetFloat(so, "RotationAmount", 30f);        // smooth rotation speed deg/s
+                SetFloat(so, "RotationAmount", 6f);         // smooth rotation speed deg/s (slow)
                 so.ApplyModifiedProperties();
             }
 
@@ -529,34 +529,9 @@ namespace Plaga44.Editor
             grabCol.radius = 0.08f;
             grabCol.center = new Vector3(0f, -0.01f, 0.01f);
 
-            // OVRGrabber
-            var grabber = anchorGO.AddComponent<OVRGrabber>();
-            var so = new SerializedObject(grabber);
-
-            SetInt(so, "m_controller", controllerValue);
-            // parentHeldObject=false -> OVRGrabber uses Rigidbody.MovePosition instead of
-            // transform parenting. MovePosition preserves physics collision with other objects.
-            SetBool(so, "m_parentHeldObject", false);
-
-            // Grip transform = this anchor (where grabbed objects snap to)
-            var gripProp = so.FindProperty("m_gripTransform");
-            if (gripProp != null)
-                gripProp.objectReferenceValue = anchorGO.transform;
-
-            // Grab volume = the trigger SphereCollider (NOT the physical one)
-            var volumesProp = so.FindProperty("m_grabVolumes");
-            if (volumesProp != null)
-            {
-                volumesProp.arraySize = 1;
-                volumesProp.GetArrayElementAtIndex(0).objectReferenceValue = grabCol;
-            }
-
-            // NOTE: m_player deliberately NOT set. OVRGrabber.GrabBegin() calls
-            // SetPlayerIgnoreCollision(obj, true) but GrabEnd() never restores it.
-            // With m_player=null, IgnoreCollision is skipped entirely, so hand-object
-            // collision stays active after grab+release.
-
-            so.ApplyModifiedProperties();
+            // GrabToggle replaces OVRGrabber -- snap-grab toggle system
+            // OVRGrabber disabled: conflicts with toggle logic (hold vs press)
+            anchorGO.AddComponent<GrabToggle>();
         }
 
         // ---- EXTRAS ----
