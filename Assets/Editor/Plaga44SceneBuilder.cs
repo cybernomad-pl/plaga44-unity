@@ -702,7 +702,7 @@ namespace Plaga44.Editor
             }
 
             // Inside PLAGA44: destroy all man-made children
-            var fg = GameObject.Find("Environment");
+            var fg = GameObject.Find("Environment") ?? GameObject.Find("FloodedGrounds");
             if (fg != null)
             {
                 // Blacklist patterns for PLAGA44 children
@@ -733,6 +733,9 @@ namespace Plaga44.Editor
                     }
                 }
                 Debug.Log($"{LOG} PLAGA44: kept only nature children.");
+                // Rename container to our name
+                if (fg.name != "Environment")
+                    fg.name = "Environment";
             }
         }
 
@@ -760,7 +763,7 @@ namespace Plaga44.Editor
             }
 
             // Step 2: Remove non-nature children INSIDE PLAGA44
-            var fg = GameObject.Find("Environment");
+            var fg = GameObject.Find("Environment") ?? GameObject.Find("FloodedGrounds");
             int removedChildren = 0;
             if (fg != null)
             {
