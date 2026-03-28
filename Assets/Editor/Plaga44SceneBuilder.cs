@@ -280,36 +280,8 @@ namespace Plaga44.Editor
 
             GameObject bladeGO = bladeCollider != null ? bladeCollider.gameObject : sword;
 
-            // Add Slicer component if not present
-            var slicer = bladeGO.GetComponent<Slicer>();
-            if (slicer == null)
-                slicer = bladeGO.AddComponent<Slicer>();
-            // sliceMask: Everything (let it slice any physics object)
-            slicer.sliceMask = ~0;
-
-            // Add SliceListener on the blade for trigger detection
-            // Need a trigger collider for OnTriggerEnter
-            var triggerCol = bladeGO.GetComponent<Collider>();
-            if (triggerCol != null && !triggerCol.isTrigger)
-            {
-                // Keep the solid collider, add a separate trigger
-                var triggerChild = new GameObject("SliceTrigger");
-                triggerChild.transform.SetParent(bladeGO.transform, false);
-                var bc = triggerChild.AddComponent<BoxCollider>();
-                bc.isTrigger = true;
-                bc.size = new Vector3(0.1f, 1.2f, 0.1f);
-                var listener = triggerChild.AddComponent<SliceListener>();
-                listener.slicer = slicer;
-            }
-            else
-            {
-                var listener = bladeGO.GetComponent<SliceListener>();
-                if (listener == null)
-                    listener = bladeGO.AddComponent<SliceListener>();
-                listener.slicer = slicer;
-            }
-
-            Debug.Log($"{LOG} Slicer + SliceListener setup on '{bladeGO.name}'.");
+            // TODO: Slicer + SliceListener (disabled in pre-alpha)
+            Debug.Log($"{LOG} Blade collider setup on '{bladeGO.name}'.");
         }
 
         static void SetLayerRecursive(GameObject go, int layer)
@@ -586,12 +558,6 @@ namespace Plaga44.Editor
                 // OVRGrabbable
                 if (go.GetComponent<OVRGrabbable>() == null)
                     go.AddComponent<OVRGrabbable>();
-
-                // Remove Slicer/SliceListener if accidentally on prefab (only for hand-held)
-                var slicer = go.GetComponentInChildren<Slicer>();
-                if (slicer != null) Object.DestroyImmediate(slicer);
-                var listener = go.GetComponentInChildren<SliceListener>();
-                if (listener != null) Object.DestroyImmediate(listener);
 
                 // Disable Shooting script on spawned guns (only works when held)
                 var shooting = go.GetComponent<Shooting>();
