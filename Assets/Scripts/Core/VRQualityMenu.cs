@@ -552,8 +552,8 @@ public class VRQualityMenu : MonoBehaviour
                 string bar = "";
                 if (s.max > s.min)
                 {
-                    float pct = (s.get() - s.min) / (s.max - s.min);
-                    int filled = (int)(pct * 12);
+                    float pct = Mathf.Clamp01((s.get() - s.min) / (s.max - s.min));
+                    int filled = Mathf.Clamp((int)(pct * 12), 0, 12);
                     bar = " [" + new string('|', filled) + new string('.', 12 - filled) + "]";
                 }
                 _rowTexts[i].text = $"<color={c}>{arrow}{s.name}: {val}{bar}</color>";

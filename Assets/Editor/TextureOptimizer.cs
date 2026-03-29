@@ -3,14 +3,14 @@ using UnityEngine;
 using System.IO;
 
 /// <summary>
-/// Forces all textures in FloodedGrounds to use ASTC 6x6 compression
-/// and max 1024 resolution on Android (Quest).
+/// Forces all textures to use ASTC 6x6 compression
+/// and max 2048 resolution on Android (Quest 3).
 /// Run from menu: PLAGA44 > Optimize Textures for Quest
 /// Also runs automatically during build via BuildScript.
 /// </summary>
 public static class TextureOptimizer
 {
-    private const int MAX_SIZE_QUEST = 1024;
+    private const int MAX_SIZE_QUEST = 2048;
     private const TextureImporterFormat FORMAT_QUEST = TextureImporterFormat.ASTC_6x6;
 
     [MenuItem("PLAGA44/Optimize Textures for Quest")]

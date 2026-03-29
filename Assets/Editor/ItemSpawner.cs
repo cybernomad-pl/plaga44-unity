@@ -306,10 +306,25 @@ namespace Plaga44.Editor
             Vector3 spawnPos = Vector3.zero;
             Quaternion spawnRot = Quaternion.identity;
 
-            if (_spawnAtCamera && SceneView.lastActiveSceneView != null)
+            if (_spawnAtCamera)
             {
                 var sv = SceneView.lastActiveSceneView;
-                spawnPos = sv.camera.transform.position + sv.camera.transform.forward * 3f;
+                if (sv == null && SceneView.sceneViews.Count > 0)
+                    sv = SceneView.sceneViews[0] as SceneView;
+
+                if (sv != null && sv.camera != null)
+                {
+                    spawnPos = sv.camera.transform.position + sv.camera.transform.forward * 3f;
+                }
+                else
+                {
+                    // Fallback: use main camera if scene view unavailable
+                    var cam = Camera.main;
+                    if (cam != null)
+                        spawnPos = cam.transform.position + cam.transform.forward * 3f;
+                    else
+                        Debug.LogWarning($"{LOG} No SceneView or Camera.main found -- spawning at origin.");
+                }
             }
 
             // Instantiate
