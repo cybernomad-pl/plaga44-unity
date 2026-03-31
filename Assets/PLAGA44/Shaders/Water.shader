@@ -13,23 +13,12 @@ Shader "Flooded_Grounds/PBR_Water"
         _ScrollSpeed ("Scroll Speed", Range(0,2)) = 0.15
         _WaveFreq ("Wave Frequency", Range(0,100)) = 20
         _WaveHeight ("Wave Height", Range(0,3)) = 0.15
-        _WaveComplexity ("Wave Complexity", Range(0,1)) = 0.5
-        _WaveSteepness ("Wave Steepness", Range(0,1)) = 0.3
-        _ReflStr ("Reflection Strength", Range(0,3)) = 1.0
-        _FresnelPow ("Fresnel Power", Range(0.1,10)) = 4.0
-        _UVScale ("UV Density", Range(0.1,200)) = 1.0
-        _Alpha ("Transparency", Range(0,1)) = 1.0
-        _FoamColor ("Foam Color", Color) = (0.85, 0.9, 0.85, 0.8)
-        _FoamDepth ("Foam Depth Range", Range(0.01,5)) = 0.5
-        _FoamStr ("Foam Strength", Range(0,3)) = 0.0
         _MainTex ("Base (RGB)", 2D) = "white" {}
     }
 
     SubShader
     {
-        Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Transparent" "Queue"="Transparent" }
-        Blend SrcAlpha OneMinusSrcAlpha
-        ZWrite On
+        Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Opaque" "Queue"="Geometry" }
 
         Pass
         {
@@ -42,11 +31,9 @@ Shader "Flooded_Grounds/PBR_Water"
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             #pragma multi_compile_fog
-            #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
                 float4 _Color;
@@ -60,15 +47,6 @@ Shader "Flooded_Grounds/PBR_Water"
                 float _ScrollSpeed;
                 float _WaveFreq;
                 float _WaveHeight;
-                float _WaveComplexity;
-                float _WaveSteepness;
-                float _ReflStr;
-                float _FresnelPow;
-                float _UVScale;
-                float _Alpha;
-                float4 _FoamColor;
-                float _FoamDepth;
-                float _FoamStr;
             CBUFFER_END
 
             TEXTURE2D(_BumpMap);  SAMPLER(sampler_BumpMap);
@@ -80,7 +58,6 @@ Shader "Flooded_Grounds/PBR_Water"
                 float3 normalOS   : NORMAL;
                 float4 tangentOS  : TANGENT;
                 float2 uv         : TEXCOORD0;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -93,45 +70,15 @@ Shader "Flooded_Grounds/PBR_Water"
                 float3 tangentWS   : TEXCOORD4;
                 float3 bitangentWS : TEXCOORD5;
                 float  fogFactor   : TEXCOORD6;
-                float4 screenPos   : TEXCOORD7;
-                UNITY_VERTEX_OUTPUT_STEREO
             };
 
             Varyings vert(Attributes IN)
             {
                 Varyings OUT = (Varyings)0;
-                UNITY_SETUP_INSTANCE_ID(IN);
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
 
-                // Multi-octave Gerstner-style waves
-                float t = _Time.y;
-                float3 p = IN.positionOS.xyz;
-                float h = 0;
-                float dx = 0, dz = 0;
-
-                // Wave 1 -- primary
-                float phase1 = t * _WaveFreq + (p.x * 1.0 + p.z * 2.0) * 8.0;
-                h += sin(phase1) * _WaveHeight;
-                dx += cos(phase1) * _WaveSteepness * _WaveHeight * 1.0;
-                dz += cos(phase1) * _WaveSteepness * _WaveHeight * 2.0;
-
-                // Wave 2 -- cross wave (adds complexity)
-                float phase2 = t * _WaveFreq * 0.7 + (p.x * 2.3 - p.z * 1.1) * 5.0;
-                h += sin(phase2) * _WaveHeight * 0.5 * _WaveComplexity;
-                dx += cos(phase2) * _WaveSteepness * _WaveHeight * 0.5 * 2.3;
-                dz += cos(phase2) * _WaveSteepness * _WaveHeight * 0.5 * -1.1;
-
-                // Wave 3 -- small ripples
-                float phase3 = t * _WaveFreq * 1.8 + (p.x * 0.7 + p.z * 3.5) * 12.0;
-                h += sin(phase3) * _WaveHeight * 0.25 * _WaveComplexity;
-
-                // Wave 4 -- long swell
-                float phase4 = t * _WaveFreq * 0.3 + (p.x * 0.3 + p.z * 0.8) * 2.0;
-                h += sin(phase4) * _WaveHeight * 0.8 * _WaveComplexity;
-
-                IN.positionOS.y += h;
-                IN.positionOS.x += dx * _WaveComplexity;
-                IN.positionOS.z += dz * _WaveComplexity;
+                float phase = _Time.y * _WaveFreq;
+                float wo = (IN.positionOS.x + IN.positionOS.z * 2.0) * 8.0;
+                IN.positionOS.y += sin(phase + wo) * _WaveHeight;
 
                 VertexPositionInputs pi = GetVertexPositionInputs(IN.positionOS.xyz);
                 VertexNormalInputs ni = GetVertexNormalInputs(IN.normalOS, IN.tangentOS);
@@ -142,19 +89,16 @@ Shader "Flooded_Grounds/PBR_Water"
                 OUT.tangentWS   = ni.tangentWS;
                 OUT.bitangentWS = ni.bitangentWS;
 
-                float scrollT = _Time.y * _ScrollSpeed;
-                float2 baseUV = IN.uv * _UVScale;
-                OUT.uv1 = baseUV * _BumpMap_ST.xy + _BumpMap_ST.zw + float2(scrollT, scrollT * 0.5);
-                OUT.uv2 = baseUV * _BumpMap2_ST.xy + _BumpMap2_ST.zw + float2(-scrollT * 0.7, scrollT * 0.3);
+                float t = _Time.y * _ScrollSpeed;
+                OUT.uv1 = IN.uv * _BumpMap_ST.xy + _BumpMap_ST.zw + float2(t, t * 0.5);
+                OUT.uv2 = IN.uv * _BumpMap2_ST.xy + _BumpMap2_ST.zw + float2(-t * 0.7, t * 0.3);
 
                 OUT.fogFactor = ComputeFogFactor(pi.positionCS.z);
-                OUT.screenPos = ComputeScreenPos(pi.positionCS);
                 return OUT;
             }
 
             half4 frag(Varyings IN) : SV_Target
             {
-                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
                 half4 n1 = SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, IN.uv1);
                 half4 n2 = SAMPLE_TEXTURE2D(_BumpMap2, sampler_BumpMap2, IN.uv2);
 
@@ -188,28 +132,9 @@ Shader "Flooded_Grounds/PBR_Water"
                     inputData.shadowCoord = float4(0, 0, 0, 0);
                 #endif
 
-                // Manual reflection probe/skybox cubemap sampling
-                float3 viewDir = inputData.viewDirectionWS;
-                float3 reflDir = reflect(-viewDir, normalWS);
-                half mip = (1.0 - _Smth) * 6.0; // roughness to mip level
-
-                // Sample unity_SpecCube0 (reflection probe or skybox fallback)
-                half4 envSample = SAMPLE_TEXTURECUBE_LOD(unity_SpecCube0, samplerunity_SpecCube0, reflDir, mip);
-                half3 envColor = DecodeHDREnvironment(envSample, unity_SpecCube0_HDR);
-
-                // Fresnel - more reflective at grazing angles
-                half NdotV = saturate(dot(normalWS, viewDir));
-                half fresnel = pow(1.0 - NdotV, _FresnelPow);
-                half reflAmount = lerp(_Metallic, 1.0, fresnel) * _ReflStr;
-
-                // Blend water color with environment reflection
-                half3 waterBase = _Color.rgb;
-                half3 finalColor = lerp(waterBase, envColor, reflAmount);
-
-                // Still use PBR for direct lighting (sun specular, shadows)
                 SurfaceData sd = (SurfaceData)0;
-                sd.albedo = finalColor;
-                sd.metallic = 0; // we handle reflections manually
+                sd.albedo = _Color.rgb;
+                sd.metallic = _Metallic;
                 sd.smoothness = _Smth;
                 sd.normalTS = normalTS;
                 sd.occlusion = 1.0;
@@ -217,20 +142,7 @@ Shader "Flooded_Grounds/PBR_Water"
                 sd.alpha = 1.0;
 
                 half4 color = UniversalFragmentPBR(inputData, sd);
-
-                // Add reflection on top of PBR result
-                color.rgb += envColor * reflAmount * 0.3;
-
-                // Depth-based edge foam at terrain intersection
-                float2 screenUV = IN.screenPos.xy / IN.screenPos.w;
-                float sceneDepth = LinearEyeDepth(SampleSceneDepth(screenUV), _ZBufferParams);
-                float surfaceDepth = IN.screenPos.w;
-                float depthDiff = sceneDepth - surfaceDepth;
-                float foamMask = (1.0 - saturate(depthDiff / _FoamDepth)) * _FoamStr;
-                color.rgb = lerp(color.rgb, _FoamColor.rgb, foamMask * _FoamColor.a);
-
                 color.rgb = MixFog(color.rgb, IN.fogFactor);
-                color.a = _Alpha;
                 return color;
             }
             ENDHLSL
@@ -261,12 +173,6 @@ Shader "Flooded_Grounds/PBR_Water"
                 float _ScrollSpeed;
                 float _WaveFreq;
                 float _WaveHeight;
-                float _WaveComplexity;
-                float _WaveSteepness;
-                float _ReflStr;
-                float _FresnelPow;
-                float _UVScale;
-                float _Alpha;
             CBUFFER_END
 
             struct A { float4 p : POSITION; };

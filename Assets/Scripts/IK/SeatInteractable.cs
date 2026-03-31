@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // SeatInteractable.cs
 // PLAGA '44 -- Place this on any seat object (chair, crate, ground).
 // Requires a Trigger Collider on the same GameObject or a child.
@@ -204,4 +202,3 @@ namespace Plaga44.IK
         public void ForceEject() => Eject();
     }
 }
-#endif // PLAGA44_FULL_SDK

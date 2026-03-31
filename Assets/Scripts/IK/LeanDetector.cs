@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // LeanDetector.cs
 // PLAGA '44 -- Detects player leaning left/right by tracking headset X offset
 // relative to a calibrated center position (the VR rig root or a body anchor).
@@ -197,4 +195,3 @@ namespace Plaga44.IK
         }
     }
 }
-#endif // PLAGA44_FULL_SDK

@@ -1,5 +1,3 @@
-// AUTO-DISABLED: requires newer Meta XR SDK APIs
-#if PLAGA44_FULL_SDK
 // BodyTrackingManager.cs
 // PLAGA '44 -- Initializes OVRBody for Meta Movement SDK body tracking.
 // Configures tracking fidelity (High) and joint set (FullBody).
@@ -116,9 +114,7 @@ namespace Plaga44.BodyTracking
             _initialized = true;
             Debug.Log($"{LOG} BodyTrackingManager initialized. Fidelity={trackingFidelity}, JointSet={jointSet}");
 #else
-            Debug.LogWarning($"{LOG} HAS_META_XR not defined. Body tracking unavailable. " +
-                             "Run CYBERNOMAD/Scene Setup/Setup Body Tracking.");
-            _initialized = true;
+            #error "HAS_META_XR not defined -- Quest project requires Meta XR SDK"
 #endif
         }
 
@@ -205,7 +201,7 @@ namespace Plaga44.BodyTracking
                     : $"{LOG} Body tracking LOST.");
             }
 #else
-            _trackingActive = false;
+            #error "HAS_META_XR not defined -- Quest project requires Meta XR SDK"
 #endif
         }
 
@@ -250,4 +246,3 @@ namespace Plaga44.BodyTracking
 #endif
     }
 }
-#endif // PLAGA44_FULL_SDK

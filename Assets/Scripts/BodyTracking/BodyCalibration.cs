@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // BodyCalibration.cs
 // PLAGA '44 -- Player height calibration for body tracking.
 //
@@ -181,7 +179,7 @@ namespace Plaga44.BodyTracking
             return left && OVRInput.Get(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.RTouch)
                 || right && OVRInput.Get(OVRInput.Button.PrimaryThumbstick, OVRInput.Controller.LTouch);
 #else
-            return false;
+            #error "HAS_META_XR not defined -- Quest project requires Meta XR SDK"
 #endif
         }
 
@@ -195,4 +193,3 @@ namespace Plaga44.BodyTracking
 #endif
     }
 }
-#endif // PLAGA44_FULL_SDK
