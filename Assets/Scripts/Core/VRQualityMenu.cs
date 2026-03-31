@@ -728,12 +728,12 @@ public class VRQualityMenu : MonoBehaviour
 
         // --- SAVE/LOAD ---
         _settings.Add(new Setting("--- PRESETS ---", () => 0, v => {}, 0, 0, 0));
-        _settings.Add(new Setting("[SAVE SLOT 1]", () => 0, v => SavePreset(1), 0, 1, 1, "F0"));
-        _settings.Add(new Setting("[SAVE SLOT 2]", () => 0, v => SavePreset(2), 0, 1, 1, "F0"));
-        _settings.Add(new Setting("[SAVE SLOT 3]", () => 0, v => SavePreset(3), 0, 1, 1, "F0"));
-        _settings.Add(new Setting("[LOAD SLOT 1]", () => 0, v => LoadPreset(1), 0, 1, 1, "F0"));
-        _settings.Add(new Setting("[LOAD SLOT 2]", () => 0, v => LoadPreset(2), 0, 1, 1, "F0"));
-        _settings.Add(new Setting("[LOAD SLOT 3]", () => 0, v => LoadPreset(3), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[SAVE 1:HI-END]", () => 0, v => SavePreset(1), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[SAVE 2:CUSTOM]", () => 0, v => SavePreset(2), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[SAVE 3:SAFE]", () => 0, v => SavePreset(3), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[LOAD 1:HI-END]", () => 0, v => LoadPreset(1), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[LOAD 2:CUSTOM]", () => 0, v => LoadPreset(2), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[LOAD 3:SAFE]", () => 0, v => LoadPreset(3), 0, 1, 1, "F0"));
         _settings.Add(new Setting("[SAVE TO LOG]", () => 0, v => SaveToLog(), 0, 1, 1, "F0"));
 
         // --- EXTRA ---
