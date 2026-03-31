@@ -18,6 +18,19 @@ public class SceneDefaults : MonoBehaviour
         DontDestroyOnLoad(go);
     }
 
+    // true = Quest-safe (low), false = hi-end (editor/Link)
+    public static bool SafeMode
+    {
+        get
+        {
+#if UNITY_EDITOR
+            return false; // hi-end in editor
+#else
+            return true;  // safe on device
+#endif
+        }
+    }
+
     void Awake()
     {
         ApplyAll();
@@ -25,6 +38,7 @@ public class SceneDefaults : MonoBehaviour
 
     void ApplyAll()
     {
+        Debug.Log($"[PLAGA44] SceneDefaults: profile={( SafeMode ? "SAFE (Quest)" : "HI-END (Editor)" )}");
         ApplyResolution();
         ApplyShadows();
         ApplyLighting();
@@ -46,9 +60,18 @@ public class SceneDefaults : MonoBehaviour
         var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
         if (urp == null) return;
 
-        urp.renderScale = 1.5f;
-        XRSettings.eyeTextureResolutionScale = 1.5f;
-        urp.msaaSampleCount = 8;
+        if (SafeMode)
+        {
+            urp.renderScale = 0.8f;
+            XRSettings.eyeTextureResolutionScale = 0.8f;
+            urp.msaaSampleCount = 2;
+        }
+        else
+        {
+            urp.renderScale = 1.5f;
+            XRSettings.eyeTextureResolutionScale = 1.5f;
+            urp.msaaSampleCount = 8;
+        }
         urp.supportsCameraDepthTexture = true;
     }
 
@@ -57,10 +80,20 @@ public class SceneDefaults : MonoBehaviour
         var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
         if (urp == null) return;
 
-        urp.shadowDistance = 135f;
-        urp.shadowDepthBias = 10f;
-        urp.shadowNormalBias = 0f;
-        urp.mainLightShadowmapResolution = 4096;
+        if (SafeMode)
+        {
+            urp.shadowDistance = 40f;
+            urp.shadowDepthBias = 10f;
+            urp.shadowNormalBias = 0f;
+            urp.mainLightShadowmapResolution = 1024;
+        }
+        else
+        {
+            urp.shadowDistance = 135f;
+            urp.shadowDepthBias = 10f;
+            urp.shadowNormalBias = 0f;
+            urp.mainLightShadowmapResolution = 4096;
+        }
     }
 
     void ApplyLighting()
@@ -68,10 +101,20 @@ public class SceneDefaults : MonoBehaviour
         var light = FindMainDirectionalLight();
         if (light == null) return;
 
-        light.intensity = 1.4f;
-        light.color = new Color(0.90f, 0.92f, 0.86f);
-        light.shadowStrength = 0.935f;
-        light.bounceIntensity = 4.26f;
+        if (SafeMode)
+        {
+            light.intensity = 1.2f;
+            light.color = new Color(0.90f, 0.92f, 0.86f);
+            light.shadowStrength = 0.7f;
+            light.bounceIntensity = 1f;
+        }
+        else
+        {
+            light.intensity = 1.4f;
+            light.color = new Color(0.90f, 0.92f, 0.86f);
+            light.shadowStrength = 0.935f;
+            light.bounceIntensity = 4.26f;
+        }
     }
 
     void ApplyFog()
@@ -94,13 +137,29 @@ public class SceneDefaults : MonoBehaviour
         var volume = FindAnyObjectByType<Volume>();
         if (volume == null || volume.profile == null) return;
 
-        if (volume.profile.TryGet<ColorAdjustments>(out var color))
+        if (SafeMode)
         {
-            color.postExposure.Override(1.5f);
-            color.contrast.Override(80f);
-            color.saturation.Override(40f);
-            color.hueShift.Override(5f);
-            color.colorFilter.Override(new Color(0.86f, 0.76f, 0.82f));
+            // Minimal post-processing on Quest
+            volume.weight = 0.3f;
+            if (volume.profile.TryGet<ColorAdjustments>(out var safeColor))
+            {
+                safeColor.postExposure.Override(1.2f);
+                safeColor.contrast.Override(50f);
+                safeColor.saturation.Override(10f);
+                safeColor.hueShift.Override(0f);
+                safeColor.colorFilter.Override(Color.white);
+            }
+        }
+        else
+        {
+            if (volume.profile.TryGet<ColorAdjustments>(out var color))
+            {
+                color.postExposure.Override(1.5f);
+                color.contrast.Override(80f);
+                color.saturation.Override(40f);
+                color.hueShift.Override(5f);
+                color.colorFilter.Override(new Color(0.86f, 0.76f, 0.82f));
+            }
         }
     }
 
@@ -238,6 +297,7 @@ public class SceneDefaults : MonoBehaviour
 
     void ApplyReflectionProbe()
     {
+        if (SafeMode) return; // skip reflection probe on Quest
         if (FindAnyObjectByType<ReflectionProbe>() != null) return;
 
         var go = new GameObject("_WaterReflectionProbe");
