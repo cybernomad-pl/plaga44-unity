@@ -71,7 +71,6 @@ public class SceneDefaults : MonoBehaviour
         light.intensity = 1.4f;
         light.color = new Color(0.90f, 0.92f, 0.86f);
         light.shadowStrength = 0.935f;
-        light.shadowAngle = 14.2f;
         light.bounceIntensity = 4.26f;
     }
 

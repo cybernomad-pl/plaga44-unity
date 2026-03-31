@@ -198,11 +198,6 @@ public class VRQualityMenu : MonoBehaviour
             v => { var l = FindMainLight(); if (l) l.shadowStrength = v; },
             0, 1, 0.001f, "F3"));
 
-        _settings.Add(new Setting("Light Shadow Softness",
-            () => { var l = FindMainLight(); return l != null ? l.shadowAngle : 0; },
-            v => { var l = FindMainLight(); if (l) l.shadowAngle = v; },
-            0, 90, 0.1f, "F1"));
-
         _settings.Add(new Setting("Light Indirect Multiplier",
             () => { var l = FindMainLight(); return l != null ? l.bounceIntensity : 1; },
             v => { var l = FindMainLight(); if (l) l.bounceIntensity = v; },
