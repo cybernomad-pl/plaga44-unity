@@ -38,7 +38,10 @@ public class SceneDefaults : MonoBehaviour
 
     void ApplyAll()
     {
-        Debug.Log($"[PLAGA44] SceneDefaults: profile={( SafeMode ? "SAFE (Quest)" : "HI-END (Editor)" )}");
+        string profile = SafeMode ? "SAFE (Quest)" : "HI-END (Editor)";
+        Debug.Log($"[PLAGA44] SceneDefaults: profile={profile}");
+
+        // Apply base defaults first
         ApplyResolution();
         ApplyShadows();
         ApplyLighting();
@@ -52,8 +55,28 @@ public class SceneDefaults : MonoBehaviour
         ApplyTerrain();
         ApplyReflectionProbe();
 
+        // On Quest: load SLOT 3 (SAFE) preset on top if it exists
+        // In Editor: load SLOT 1 (HI-END) preset on top if it exists
+        // This restores the user's tuned values from previous sessions
+        int autoSlot = SafeMode ? 3 : 1;
+        string presetKey = $"PLAGA44_PRESET_{autoSlot}";
+        string presetData = PlayerPrefs.GetString(presetKey, "");
+        if (!string.IsNullOrEmpty(presetData))
+        {
+            Debug.Log($"[PLAGA44] SceneDefaults: auto-loading SLOT {autoSlot} preset ({presetData.Length} chars)");
+            // Defer to VRQualityMenu which has the setting appliers
+            _pendingPresetSlot = autoSlot;
+        }
+        else
+        {
+            Debug.Log($"[PLAGA44] SceneDefaults: no preset in SLOT {autoSlot}, using code defaults");
+        }
+
         Debug.Log("[PLAGA44] SceneDefaults: all rendering defaults applied.");
     }
+
+    // Deferred preset load -- VRQualityMenu picks this up after it initializes
+    public static int _pendingPresetSlot = 0;
 
     void ApplyResolution()
     {

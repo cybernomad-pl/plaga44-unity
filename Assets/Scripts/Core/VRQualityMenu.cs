@@ -125,6 +125,13 @@ public class VRQualityMenu : MonoBehaviour
         CreateWorldCanvas();
         _canvas.SetActive(false);
         Debug.Log($"[PLAGA44] VRQualityMenu: {_settings.Count} settings, {_sectionStarts.Count} sections");
+
+        // Auto-load preset from SceneDefaults (SLOT 3 on Quest, SLOT 1 in editor)
+        if (SceneDefaults._pendingPresetSlot > 0)
+        {
+            LoadPreset(SceneDefaults._pendingPresetSlot);
+            SceneDefaults._pendingPresetSlot = 0;
+        }
     }
 
     void BuildSettings()
