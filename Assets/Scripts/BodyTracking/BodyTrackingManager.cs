@@ -121,21 +121,28 @@ namespace Plaga44.BodyTracking
         private void ApplyBodyTrackingConfiguration()
         {
 #if HAS_META_XR
-            // OVRPlugin.RequestBodyTrackingFidelity sets the fidelity level.
-            // Available since Meta XR SDK v50.
-            bool fidelityOk = OVRPlugin.RequestBodyTrackingFidelity(
-                (OVRPlugin.BodyTrackingFidelity2)trackingFidelity);
+            // Try SDK v74+ API, gracefully skip if not available
+            try
+            {
+                var method = typeof(OVRPlugin).GetMethod("RequestBodyTrackingFidelity");
+                if (method != null)
+                {
+                    bool ok = (bool)method.Invoke(null, new object[] { trackingFidelity });
+                    Debug.Log($"{LOG} Body tracking fidelity: {trackingFidelity} (ok={ok})");
+                }
+                else
+                {
+                    Debug.Log($"{LOG} RequestBodyTrackingFidelity not available in this SDK version.");
+                }
 
-            if (!fidelityOk)
-                Debug.LogWarning($"{LOG} RequestBodyTrackingFidelity({trackingFidelity}) returned false. " +
-                                 "Body tracking permission may not be granted.");
-            else
-                Debug.Log($"{LOG} Body tracking fidelity set to: {trackingFidelity}");
-
-            // Configure OVRBody properties directly.
-            _ovrBody.ProvidedSkeletonType = jointSet == OVRPlugin.BodyJointSet.FullBody
-                ? OVRPlugin.BodyJointSet.FullBody
-                : OVRPlugin.BodyJointSet.UpperBody;
+                var prop = _ovrBody.GetType().GetProperty("ProvidedSkeletonType");
+                if (prop != null)
+                    prop.SetValue(_ovrBody, jointSet);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"{LOG} Body tracking config failed (SDK version mismatch?): {e.Message}");
+            }
 #endif
         }
 
@@ -186,13 +193,40 @@ namespace Plaga44.BodyTracking
         }
 #endif
 
+        private System.Reflection.PropertyInfo _isTrackedProp;
+        private System.Reflection.PropertyInfo _jointLocationsProp;
+        private bool _reflectionInit;
+
+        private void InitReflection()
+        {
+#if HAS_META_XR
+            if (_reflectionInit || _ovrBody == null) return;
+            _reflectionInit = true;
+            var bodyType = _ovrBody.GetType();
+
+            // Try SDK v74+ API first, then older
+            _isTrackedProp = bodyType.GetProperty("IsBodyTracked")
+                          ?? bodyType.GetProperty("IsTracked");
+            _jointLocationsProp = bodyType.GetProperty("JointLocations")
+                               ?? bodyType.GetProperty("BodyState");
+
+            Debug.Log($"{LOG} OVRBody reflection: IsTracked={_isTrackedProp?.Name ?? "N/A"}, " +
+                      $"Joints={_jointLocationsProp?.Name ?? "N/A"}");
+#endif
+        }
+
         private void UpdateTrackingState()
         {
 #if HAS_META_XR
             if (_ovrBody == null) return;
+            InitReflection();
 
             bool wasActive = _trackingActive;
-            _trackingActive = _ovrBody.IsBodyTracked;
+
+            if (_isTrackedProp != null)
+                _trackingActive = (bool)_isTrackedProp.GetValue(_ovrBody);
+            else
+                _trackingActive = _ovrBody.enabled; // fallback: assume active if component is on
 
             if (_trackingActive != wasActive)
             {
@@ -208,22 +242,30 @@ namespace Plaga44.BodyTracking
         private void CacheJoints()
         {
 #if HAS_META_XR
-            if (_ovrBody == null || !_ovrBody.IsBodyTracked) return;
+            if (_ovrBody == null || !_trackingActive) return;
+            InitReflection();
 
-            // OVRBody.JointLocations is an IReadOnlyList<OVRPlugin.BodyJointLocation>
-            // available in Meta XR SDK v74+.
-            var jointLocations = _ovrBody.JointLocations;
+            // Try to read joint locations via reflection (SDK version agnostic)
+            if (_jointLocationsProp == null) return;
+
+            var jointLocations = _jointLocationsProp.GetValue(_ovrBody) as System.Collections.IList;
             if (jointLocations == null) return;
 
             _joints.Clear();
             for (int i = 0; i < jointLocations.Count; i++)
             {
                 var loc = jointLocations[i];
-                // Only cache joints with valid orientation and position flags.
-                if ((loc.LocationFlags & OVRPlugin.SpaceLocationFlags.OrientationValid) != 0
-                    && (loc.LocationFlags & OVRPlugin.SpaceLocationFlags.PositionValid) != 0)
+                if (loc == null) continue;
+
+                // Try to extract Pose via reflection
+                var locType = loc.GetType();
+                var poseProp = locType.GetField("Pose") ?? locType.GetField("pose");
+                var flagsProp = locType.GetField("LocationFlags") ?? locType.GetField("locationFlags");
+
+                if (poseProp != null)
                 {
-                    _joints[(OVRSkeleton.BoneId)i] = loc.Pose;
+                    var pose = (OVRPlugin.Posef)poseProp.GetValue(loc);
+                    _joints[(OVRSkeleton.BoneId)i] = pose;
                 }
             }
 #endif

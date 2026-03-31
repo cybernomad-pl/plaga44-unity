@@ -108,20 +108,18 @@ public class IKBoneWirer : MonoBehaviour
         var ik = GetComponent<Plaga44.IK.SimpleIKController>();
         if (ik == null) return;
 
-        // Map OVRSkeleton bones to IK controller
+        // Map OVRSkeleton bones to IK controller by name (SDK-version agnostic)
         foreach (var bone in skeleton.Bones)
         {
             if (bone == null || bone.Transform == null) continue;
+            string name = bone.Id.ToString();
 
-            switch (bone.Id)
-            {
-                case OVRSkeleton.BoneId.Body_LeftUpperLeg:  ik.leftUpperLeg  = bone.Transform; break;
-                case OVRSkeleton.BoneId.Body_LeftLowerLeg:  ik.leftLowerLeg  = bone.Transform; break;
-                case OVRSkeleton.BoneId.Body_LeftFootAnkle: ik.leftFoot      = bone.Transform; break;
-                case OVRSkeleton.BoneId.Body_RightUpperLeg: ik.rightUpperLeg = bone.Transform; break;
-                case OVRSkeleton.BoneId.Body_RightLowerLeg: ik.rightLowerLeg = bone.Transform; break;
-                case OVRSkeleton.BoneId.Body_RightFootAnkle:ik.rightFoot     = bone.Transform; break;
-            }
+            if (name.Contains("LeftUpperLeg"))       ik.leftUpperLeg  = bone.Transform;
+            else if (name.Contains("LeftLowerLeg"))  ik.leftLowerLeg  = bone.Transform;
+            else if (name.Contains("LeftFoot"))      ik.leftFoot      = bone.Transform;
+            else if (name.Contains("RightUpperLeg")) ik.rightUpperLeg = bone.Transform;
+            else if (name.Contains("RightLowerLeg")) ik.rightLowerLeg = bone.Transform;
+            else if (name.Contains("RightFoot"))     ik.rightFoot     = bone.Transform;
         }
 
         if (ik.leftUpperLeg != null && ik.rightUpperLeg != null)
