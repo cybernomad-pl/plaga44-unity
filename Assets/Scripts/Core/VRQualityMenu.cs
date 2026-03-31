@@ -1043,12 +1043,9 @@ public class VRQualityMenu : MonoBehaviour
         string key = $"PLAGA44_PRESET_{slot}";
         string data = PlayerPrefs.GetString(key, "");
 
-        // Fallback to hardcoded presets if PlayerPrefs empty or corrupted
-        if (string.IsNullOrEmpty(data) || !data.Contains("="))
-        {
-            if (slot == 1) data = PresetHiEnd.Data;
-            else if (slot == 3) data = PresetSafe.Data;
-        }
+        // Hardcoded presets -- ALWAYS use these for slot 1 and 3
+        if (slot == 1) data = PresetHiEnd.Data;
+        else if (slot == 3) data = PresetSafe.Data;
         if (string.IsNullOrEmpty(data))
         {
             Debug.LogWarning($"[PLAGA44] Preset {slot} is EMPTY");
