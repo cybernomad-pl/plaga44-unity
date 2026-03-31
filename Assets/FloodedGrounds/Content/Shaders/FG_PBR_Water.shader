@@ -221,13 +221,17 @@ Shader "Flooded_Grounds/PBR_Water"
                 // Add reflection on top of PBR result
                 color.rgb += envColor * reflAmount * 0.3;
 
-                // Depth-based edge foam at terrain intersection
+                // Depth-based transparency: shallow = transparent, deep = opaque
                 float2 screenUV = IN.screenPos.xy / IN.screenPos.w;
                 float sceneDepth = LinearEyeDepth(SampleSceneDepth(screenUV), _ZBufferParams);
                 float surfaceDepth = IN.screenPos.w;
                 float depthDiff = sceneDepth - surfaceDepth;
-                float foamMask = (1.0 - saturate(depthDiff / _FoamDepth)) * _FoamStr;
-                color.rgb = lerp(color.rgb, _FoamColor.rgb, foamMask * _FoamColor.a);
+                float depthFactor = saturate(depthDiff / _FoamDepth);
+                // Shallow (near shore): more transparent. Deep (center): more opaque
+                color.a = lerp(_Alpha * 0.1, _Alpha, depthFactor);
+                // Foam color at shoreline (inverse -- subtle)
+                float foamMask = (1.0 - depthFactor) * _FoamStr;
+                color.rgb = lerp(color.rgb, _FoamColor.rgb, foamMask * _FoamColor.a * 0.3);
 
                 color.rgb = MixFog(color.rgb, IN.fogFactor);
                 color.a = _Alpha;

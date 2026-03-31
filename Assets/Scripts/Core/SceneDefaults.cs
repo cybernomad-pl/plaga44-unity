@@ -1,6 +1,7 @@
 // SceneDefaults.cs
-// CYBERNOMAD -- Applies tuned rendering defaults on scene load.
-// Values from VR debug menu SaveToLog (session 2026-03-30).
+// CYBERNOMAD -- Applies rendering defaults on scene load.
+// SAFE mode (Quest standalone) vs HI-END mode (Editor/PCVR).
+// Values from VR debug menu SaveToLog sessions.
 
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -10,6 +11,21 @@ using UnityEngine.XR;
 [DefaultExecutionOrder(-100)]
 public class SceneDefaults : MonoBehaviour
 {
+    public static bool SafeMode
+    {
+        get
+        {
+#if UNITY_EDITOR
+            return false;
+#else
+            return true;
+#endif
+        }
+    }
+
+    // Deferred preset load -- VRQualityMenu picks this up after it initializes
+    public static int _pendingPresetSlot = 0;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoCreate()
     {
@@ -18,30 +34,13 @@ public class SceneDefaults : MonoBehaviour
         DontDestroyOnLoad(go);
     }
 
-    // true = Quest-safe (low), false = hi-end (editor/Link)
-    public static bool SafeMode
-    {
-        get
-        {
-#if UNITY_EDITOR
-            return false; // hi-end in editor
-#else
-            return true;  // safe on device
-#endif
-        }
-    }
-
-    void Awake()
-    {
-        ApplyAll();
-    }
+    void Awake() { ApplyAll(); }
 
     void ApplyAll()
     {
         string profile = SafeMode ? "SAFE (Quest)" : "HI-END (Editor)";
         Debug.Log($"[PLAGA44] SceneDefaults: profile={profile}");
 
-        // Apply base defaults first
         ApplyResolution();
         ApplyShadows();
         ApplyLighting();
@@ -55,70 +54,45 @@ public class SceneDefaults : MonoBehaviour
         ApplyTerrain();
         ApplyReflectionProbe();
 
-        // On Quest: load SLOT 3 (SAFE) preset on top if it exists
-        // In Editor: load SLOT 1 (HI-END) preset on top if it exists
-        // This restores the user's tuned values from previous sessions
         int autoSlot = SafeMode ? 3 : 1;
-        string presetKey = $"PLAGA44_PRESET_{autoSlot}";
-        string presetData = PlayerPrefs.GetString(presetKey, "");
+        string presetData = PlayerPrefs.GetString($"PLAGA44_PRESET_{autoSlot}", "");
         if (!string.IsNullOrEmpty(presetData))
         {
-            Debug.Log($"[PLAGA44] SceneDefaults: auto-loading SLOT {autoSlot} preset ({presetData.Length} chars)");
-            // Defer to VRQualityMenu which has the setting appliers
+            Debug.Log($"[PLAGA44] SceneDefaults: auto-loading SLOT {autoSlot} ({presetData.Length} chars)");
             _pendingPresetSlot = autoSlot;
         }
-        else
-        {
-            Debug.Log($"[PLAGA44] SceneDefaults: no preset in SLOT {autoSlot}, using code defaults");
-        }
 
-        Debug.Log("[PLAGA44] SceneDefaults: all rendering defaults applied.");
+        Debug.Log("[PLAGA44] SceneDefaults: defaults applied.");
     }
 
-    // Deferred preset load -- VRQualityMenu picks this up after it initializes
-    public static int _pendingPresetSlot = 0;
-
+    // ========== RESOLUTION ==========
     void ApplyResolution()
     {
         var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
         if (urp == null) return;
+        urp.supportsCameraDepthTexture = true;
 
         if (SafeMode)
-        {
-            urp.renderScale = 0.8f;
-            XRSettings.eyeTextureResolutionScale = 0.8f;
-            urp.msaaSampleCount = 2;
-        }
+        { urp.renderScale = 1.2f; XRSettings.eyeTextureResolutionScale = 1.2f; urp.msaaSampleCount = 2; }
         else
-        {
-            urp.renderScale = 1.5f;
-            XRSettings.eyeTextureResolutionScale = 1.5f;
-            urp.msaaSampleCount = 8;
-        }
-        urp.supportsCameraDepthTexture = true;
+        { urp.renderScale = 1.5f; XRSettings.eyeTextureResolutionScale = 1.5f; urp.msaaSampleCount = 8; }
     }
 
+    // ========== SHADOWS ==========
     void ApplyShadows()
     {
         var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
         if (urp == null) return;
+        urp.shadowDepthBias = 10f;
+        urp.shadowNormalBias = 0f;
 
         if (SafeMode)
-        {
-            urp.shadowDistance = 40f;
-            urp.shadowDepthBias = 10f;
-            urp.shadowNormalBias = 0f;
-            urp.mainLightShadowmapResolution = 1024;
-        }
+        { urp.shadowDistance = 150f; urp.mainLightShadowmapResolution = 4096; }
         else
-        {
-            urp.shadowDistance = 135f;
-            urp.shadowDepthBias = 10f;
-            urp.shadowNormalBias = 0f;
-            urp.mainLightShadowmapResolution = 4096;
-        }
+        { urp.shadowDistance = 135f; urp.mainLightShadowmapResolution = 4096; }
     }
 
+    // ========== LIGHTING ==========
     void ApplyLighting()
     {
         var light = FindMainDirectionalLight();
@@ -126,8 +100,8 @@ public class SceneDefaults : MonoBehaviour
 
         if (SafeMode)
         {
-            light.intensity = 1.2f;
-            light.color = new Color(0.90f, 0.92f, 0.86f);
+            light.intensity = 3.2f;
+            light.color = new Color(1.00f, 0.90f, 0.96f);
             light.shadowStrength = 0.7f;
             light.bounceIntensity = 1f;
         }
@@ -140,21 +114,36 @@ public class SceneDefaults : MonoBehaviour
         }
     }
 
+    // ========== FOG ==========
     void ApplyFog()
     {
         RenderSettings.fog = true;
-        RenderSettings.fogDensity = 0f;
-        RenderSettings.fogStartDistance = 0f;
-        RenderSettings.fogEndDistance = 400f;
-        RenderSettings.fogColor = new Color(0.22f, 0.26f, 0.28f);
+        if (SafeMode)
+        {
+            RenderSettings.fogDensity = 0.1f;
+            RenderSettings.fogStartDistance = 0f;
+            RenderSettings.fogEndDistance = 400f;
+            RenderSettings.fogColor = new Color(0.38f, 0.44f, 0.44f);
+        }
+        else
+        {
+            RenderSettings.fogDensity = 0f;
+            RenderSettings.fogStartDistance = 0f;
+            RenderSettings.fogEndDistance = 400f;
+            RenderSettings.fogColor = new Color(0.22f, 0.26f, 0.28f);
+        }
     }
 
+    // ========== TEXTURES ==========
     void ApplyTextures()
     {
-        QualitySettings.globalTextureMipmapLimit = 0;
-        QualitySettings.lodBias = 0.3f;
+        if (SafeMode)
+        { QualitySettings.globalTextureMipmapLimit = 3; QualitySettings.lodBias = 2.0f; }
+        else
+        { QualitySettings.globalTextureMipmapLimit = 0; QualitySettings.lodBias = 0.3f; }
     }
 
+    // ========== COLOR GRADING ==========
     void ApplyColorGrading()
     {
         var volume = FindAnyObjectByType<Volume>();
@@ -162,64 +151,64 @@ public class SceneDefaults : MonoBehaviour
 
         if (SafeMode)
         {
-            // Minimal post-processing on Quest
-            volume.weight = 0.3f;
-            if (volume.profile.TryGet<ColorAdjustments>(out var safeColor))
+            volume.weight = 1f;
+            if (volume.profile.TryGet<ColorAdjustments>(out var c))
             {
-                safeColor.postExposure.Override(1.2f);
-                safeColor.contrast.Override(50f);
-                safeColor.saturation.Override(10f);
-                safeColor.hueShift.Override(0f);
-                safeColor.colorFilter.Override(Color.white);
+                c.postExposure.Override(1.2f);
+                c.contrast.Override(50f);
+                c.saturation.Override(10f);
+                c.hueShift.Override(0f);
+                c.colorFilter.Override(Color.white);
             }
         }
         else
         {
-            if (volume.profile.TryGet<ColorAdjustments>(out var color))
+            if (volume.profile.TryGet<ColorAdjustments>(out var c))
             {
-                color.postExposure.Override(1.5f);
-                color.contrast.Override(80f);
-                color.saturation.Override(40f);
-                color.hueShift.Override(5f);
-                color.colorFilter.Override(new Color(0.86f, 0.76f, 0.82f));
+                c.postExposure.Override(1.5f);
+                c.contrast.Override(80f);
+                c.saturation.Override(40f);
+                c.hueShift.Override(5f);
+                c.colorFilter.Override(new Color(0.86f, 0.76f, 0.82f));
             }
         }
     }
 
+    // ========== SKYBOX ==========
     void ApplySkybox()
     {
         var mat = RenderSettings.skybox;
         if (mat == null) return;
 
-        // Switch to our custom skybox shader with cloud boost
         var customShader = Shader.Find("Flooded_Grounds/Skybox_Rotating");
         if (customShader != null && mat.shader != customShader)
         {
             mat.shader = customShader;
-            Debug.Log("[PLAGA44] SceneDefaults: skybox switched to Skybox_Rotating");
+            Debug.Log("[PLAGA44] SceneDefaults: skybox -> Skybox_Rotating");
         }
 
-        if (mat.HasColor("_Tint"))
-            mat.SetColor("_Tint", new Color(1.55f, 1.70f, 1.80f));
+        if (SafeMode)
+        {
+            if (mat.HasColor("_Tint")) mat.SetColor("_Tint", new Color(1.40f, 1.55f, 1.85f));
+            if (mat.HasFloat("_Exposure")) mat.SetFloat("_Exposure", 0.3f);
+            if (mat.HasFloat("_Rotation")) mat.SetFloat("_Rotation", 181f);
+            if (mat.HasFloat("_CloudBoost")) mat.SetFloat("_CloudBoost", 3.18f);
+            if (mat.HasFloat("_CloudThreshold")) mat.SetFloat("_CloudThreshold", 0.234f);
+        }
+        else
+        {
+            if (mat.HasColor("_Tint")) mat.SetColor("_Tint", new Color(1.55f, 1.70f, 1.80f));
+            if (mat.HasFloat("_Exposure")) mat.SetFloat("_Exposure", 0.2f);
+            if (mat.HasFloat("_Rotation")) mat.SetFloat("_Rotation", 335f);
+            if (mat.HasFloat("_CloudBoost")) mat.SetFloat("_CloudBoost", 2.77f);
+            if (mat.HasFloat("_CloudThreshold")) mat.SetFloat("_CloudThreshold", 0.379f);
+        }
 
-        if (mat.HasFloat("_Exposure"))
-            mat.SetFloat("_Exposure", 0.2f);
-
-        if (mat.HasFloat("_Rotation"))
-            mat.SetFloat("_Rotation", 335f);
-
-        if (mat.HasFloat("_CloudBoost"))
-            mat.SetFloat("_CloudBoost", 2.77f);
-
-        if (mat.HasFloat("_CloudThreshold"))
-            mat.SetFloat("_CloudThreshold", 0.379f);
-
-        if (mat.HasFloat("_RotSpeed"))
-            mat.SetFloat("_RotSpeed", 0f);
-
+        if (mat.HasFloat("_RotSpeed")) mat.SetFloat("_RotSpeed", 0f);
         SkyRotator.RotationSpeed = 0.31f;
     }
 
+    // ========== AMBIENT ==========
     void ApplyAmbient()
     {
         RenderSettings.ambientMode = AmbientMode.Skybox;
@@ -229,32 +218,28 @@ public class SceneDefaults : MonoBehaviour
         RenderSettings.defaultReflectionResolution = 512;
     }
 
+    // ========== CAMERA ==========
     void ApplyCamera()
     {
         var cam = Camera.main;
         if (cam == null) return;
-
         cam.nearClipPlane = 0.01f;
         cam.farClipPlane = 2000f;
     }
 
+    // ========== WATER ==========
     void ApplyWater()
     {
         Material waterMat = null;
         foreach (var r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
         {
             foreach (var m in r.sharedMaterials)
-            {
-                if (m != null && m.name.Contains("Water"))
-                {
-                    waterMat = m;
-                    break;
-                }
-            }
+                if (m != null && m.name.Contains("Water")) { waterMat = m; break; }
             if (waterMat != null) break;
         }
         if (waterMat == null) return;
 
+        // Same water values for both profiles (tuned in VR)
         waterMat.SetColor("_Color", new Color(0.318f, 0.381f, 0.404f));
         waterMat.SetFloat("_Metallic", 0.210f);
         waterMat.SetFloat("_Smth", 0.423f);
@@ -276,6 +261,7 @@ public class SceneDefaults : MonoBehaviour
         Debug.Log("[PLAGA44] SceneDefaults: water configured.");
     }
 
+    // ========== TERRAIN ==========
     void ApplyTerrain()
     {
         var terrain = FindAnyObjectByType<Terrain>();
@@ -293,34 +279,20 @@ public class SceneDefaults : MonoBehaviour
         if (layers != null)
         {
             if (layers.Length > 0 && layers[0] != null)
-            {
-                layers[0].normalScale = 0.160f;
-                layers[0].tileSize = new Vector2(17.8f, 17.8f);
-                layers[0].metallic = 0.026f;
-                layers[0].smoothness = 0.177f;
-            }
+            { layers[0].normalScale = 0.160f; layers[0].tileSize = new Vector2(17.8f, 17.8f); layers[0].metallic = 0.026f; layers[0].smoothness = 0.177f; }
             if (layers.Length > 1 && layers[1] != null)
-            {
-                layers[1].normalScale = 0.128f;
-                layers[1].tileSize = new Vector2(1.5f, 1.5f);
-                layers[1].metallic = 0f;
-                layers[1].smoothness = 0f;
-            }
+            { layers[1].normalScale = 0.128f; layers[1].tileSize = new Vector2(1.5f, 1.5f); layers[1].metallic = 0f; layers[1].smoothness = 0f; }
             if (layers.Length > 2 && layers[2] != null)
-            {
-                layers[2].normalScale = 0.060f;
-                layers[2].tileSize = new Vector2(12.3f, 12.3f);
-                layers[2].metallic = 0f;
-                layers[2].smoothness = 0.051f;
-            }
+            { layers[2].normalScale = 0.060f; layers[2].tileSize = new Vector2(12.3f, 12.3f); layers[2].metallic = 0f; layers[2].smoothness = 0.051f; }
         }
 
         Debug.Log("[PLAGA44] SceneDefaults: terrain configured.");
     }
 
+    // ========== REFLECTION PROBE ==========
     void ApplyReflectionProbe()
     {
-        if (SafeMode) return; // skip reflection probe on Quest
+        if (SafeMode) return;
         if (FindAnyObjectByType<ReflectionProbe>() != null) return;
 
         var go = new GameObject("_WaterReflectionProbe");
