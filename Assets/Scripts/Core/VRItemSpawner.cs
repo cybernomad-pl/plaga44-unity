@@ -274,11 +274,14 @@ public class VRItemSpawner : MonoBehaviour
         if (instance.GetComponent<OVRGrabbable>() == null)
             instance.AddComponent<OVRGrabbable>();
 
-        // Fix M249 grip orientation
+        // M249: full handler (two-handed grip, bipod, orientation, material)
         if (source.name.Contains("M249"))
         {
             var grab = instance.GetComponent<OVRGrabbable>();
             if (grab != null) M249GripFix.FixGrip(grab);
+            if (instance.GetComponent<M249Handler>() == null)
+                instance.AddComponent<M249Handler>();
+            M249MaterialSetup.ApplyToWeapon(instance);
         }
 
         _spawnedObjects.Add(instance);

@@ -715,6 +715,29 @@ public class VRQualityMenu : MonoBehaviour
             }
         }
 
+        // --- M249 MATERIAL ---
+        _settings.Add(new Setting("--- M249 ---", () => 0, v => {}, 0, 0, 0));
+        _settings.Add(new Setting("Gun Color R",
+            () => M249MaterialSetup.gunColor.r,
+            v => { M249MaterialSetup.gunColor.r = v; M249MaterialSetup.GetGunMaterial().SetColor("_BaseColor", M249MaterialSetup.gunColor); },
+            0, 1, 0.001f, "F3"));
+        _settings.Add(new Setting("Gun Color G",
+            () => M249MaterialSetup.gunColor.g,
+            v => { M249MaterialSetup.gunColor.g = v; M249MaterialSetup.GetGunMaterial().SetColor("_BaseColor", M249MaterialSetup.gunColor); },
+            0, 1, 0.001f, "F3"));
+        _settings.Add(new Setting("Gun Color B",
+            () => M249MaterialSetup.gunColor.b,
+            v => { M249MaterialSetup.gunColor.b = v; M249MaterialSetup.GetGunMaterial().SetColor("_BaseColor", M249MaterialSetup.gunColor); },
+            0, 1, 0.001f, "F3"));
+        _settings.Add(new Setting("Gun Metallic",
+            () => M249MaterialSetup.gunMetallic,
+            v => { M249MaterialSetup.gunMetallic = v; M249MaterialSetup.GetGunMaterial().SetFloat("_Metallic", v); },
+            0, 1, 0.001f, "F3"));
+        _settings.Add(new Setting("Gun Smoothness",
+            () => M249MaterialSetup.gunSmoothness,
+            v => { M249MaterialSetup.gunSmoothness = v; M249MaterialSetup.GetGunMaterial().SetFloat("_Smoothness", v); },
+            0, 1, 0.001f, "F3"));
+
         // --- TERRAIN DEFORMATION ---
         _settings.Add(new Setting("--- DEFORMATION ---", () => 0, v => {}, 0, 0, 0));
 
@@ -1007,7 +1030,7 @@ public class VRQualityMenu : MonoBehaviour
         {
             if (s.step == 0) continue;
             if (s.name.StartsWith("[")) continue;
-            sb.Append($"{s.name}={s.get().ToString("F4")};");
+            sb.Append($"{s.name}={s.get().ToString("F4", System.Globalization.CultureInfo.InvariantCulture)};");
         }
         string key = $"PLAGA44_PRESET_{slot}";
         PlayerPrefs.SetString(key, sb.ToString());
@@ -1019,6 +1042,13 @@ public class VRQualityMenu : MonoBehaviour
     {
         string key = $"PLAGA44_PRESET_{slot}";
         string data = PlayerPrefs.GetString(key, "");
+
+        // Fallback to hardcoded presets if PlayerPrefs empty or corrupted
+        if (string.IsNullOrEmpty(data) || !data.Contains("="))
+        {
+            if (slot == 1) data = PresetHiEnd.Data;
+            else if (slot == 3) data = PresetSafe.Data;
+        }
         if (string.IsNullOrEmpty(data))
         {
             Debug.LogWarning($"[PLAGA44] Preset {slot} is EMPTY");
@@ -1032,10 +1062,20 @@ public class VRQualityMenu : MonoBehaviour
         {
             if (string.IsNullOrEmpty(pair)) continue;
             var kv = pair.Split('=');
-            if (kv.Length == 2 && float.TryParse(kv[1], System.Globalization.NumberStyles.Float,
-                System.Globalization.CultureInfo.InvariantCulture, out float val))
+            if (kv.Length == 2)
             {
-                lookup[kv[0]] = val;
+                // Try invariant (dot) first, then comma-locale fallback
+                string valStr = kv[1].Trim();
+                if (float.TryParse(valStr, System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out float val))
+                {
+                    lookup[kv[0]] = val;
+                }
+                else if (float.TryParse(valStr.Replace(',', '.'), System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out float val2))
+                {
+                    lookup[kv[0]] = val2;
+                }
             }
         }
 
