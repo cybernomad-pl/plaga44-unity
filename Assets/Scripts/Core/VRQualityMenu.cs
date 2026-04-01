@@ -715,22 +715,6 @@ public class VRQualityMenu : MonoBehaviour
             }
         }
 
-        // --- ENVIRONMENT ---
-        _settings.Add(new Setting("--- ENVIRONMENT ---", () => 0, v => {}, 0, 0, 0));
-        _settings.Add(new Setting("Prop Count",
-            () => EnvironmentProps.spawnCount,
-            v => { EnvironmentProps.spawnCount = (int)v; },
-            0, 100, 1, "F0"));
-        _settings.Add(new Setting("Prop Radius",
-            () => EnvironmentProps.spawnRadius,
-            v => { EnvironmentProps.spawnRadius = v; },
-            5, 100, 1, "F0"));
-        _settings.Add(new Setting("[RESPAWN PROPS]", () => 0, v => EnvironmentProps.RespawnProps(), 0, 1, 1, "F0"));
-        _settings.Add(new Setting("Water Scoop Droplets",
-            () => { var ws = FindAnyObjectByType<WaterScoop>(); return ws != null ? ws.maxDroplets : 30; },
-            v => { var ws = FindAnyObjectByType<WaterScoop>(); if (ws) ws.maxDroplets = (int)v; },
-            5, 100, 1, "F0"));
-
         // --- M249 MATERIAL ---
         _settings.Add(new Setting("--- M249 ---", () => 0, v => {}, 0, 0, 0));
         _settings.Add(new Setting("Gun Color R",
