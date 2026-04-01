@@ -56,13 +56,13 @@ public class WaterScoop : MonoBehaviour
         var ps = go.AddComponent<ParticleSystem>();
 
         var main = ps.main;
-        main.maxParticles = maxDroplets;
+        main.maxParticles = 500; // enough for big splashes
         main.startLifetime = 1.5f;
         main.startSpeed = 0.02f;
         main.startSize = new ParticleSystem.MinMaxCurve(0.005f, 0.015f);
         main.startColor = new Color(0.3f, 0.45f, 0.55f, 0.7f);
         main.simulationSpace = ParticleSystemSimulationSpace.World;
-        main.gravityModifier = 0.3f;
+        main.gravityModifier = 0.8f; // realistic gravity on splashed water
         main.loop = true;
         main.playOnAwake = false;
 
@@ -166,23 +166,116 @@ public class WaterScoop : MonoBehaviour
             ps.Stop();
         }
 
-        // Splash when hand enters water fast
-        if (handInWater && !gripping && !scooped)
+        // SPLASH -- hand enters water fast
+        if (handInWater && !scooped)
         {
-            float handSpeed = OVRInput.GetLocalControllerVelocity(
-                gripAxis == OVRInput.Axis1D.PrimaryHandTrigger
-                    ? OVRInput.Controller.LTouch : OVRInput.Controller.RTouch).magnitude;
+            var ctrl = gripAxis == OVRInput.Axis1D.PrimaryHandTrigger
+                ? OVRInput.Controller.LTouch : OVRInput.Controller.RTouch;
+            Vector3 handVel = OVRInput.GetLocalControllerVelocity(ctrl);
+            float speed = handVel.magnitude;
 
-            if (handSpeed > 0.5f)
+            if (speed > 0.3f)
             {
-                var emitParams = new ParticleSystem.EmitParams();
-                emitParams.startLifetime = 0.8f;
-                for (int i = 0; i < 5; i++)
+                // Scale splash intensity with hand speed
+                float intensity = Mathf.Clamp01((speed - 0.3f) / 2f);
+                int splashCount = Mathf.CeilToInt(Mathf.Lerp(5, 60, intensity));
+                float splashForce = Mathf.Lerp(0.3f, 2.5f, intensity);
+                float splashRadius = Mathf.Lerp(0.03f, 0.15f, intensity);
+
+                Vector3 surfacePoint = new Vector3(hand.position.x, waterSurfaceY, hand.position.z);
+
+                for (int i = 0; i < splashCount; i++)
                 {
-                    emitParams.position = hand.position + Random.insideUnitSphere * 0.05f;
-                    emitParams.velocity = (Vector3.up + Random.insideUnitSphere) * handSpeed * 0.3f;
-                    ps.Emit(emitParams, 1);
+                    var ep = new ParticleSystem.EmitParams();
+
+                    // Big upward crown splash
+                    float angle = Random.Range(0f, Mathf.PI * 2f);
+                    float outward = Random.Range(0.3f, 1f);
+                    Vector3 dir = new Vector3(
+                        Mathf.Cos(angle) * outward,
+                        Random.Range(1.5f, 4f),  // strong upward bias
+                        Mathf.Sin(angle) * outward
+                    ).normalized;
+
+                    ep.position = surfacePoint + Random.insideUnitSphere * splashRadius;
+                    ep.velocity = dir * splashForce * Random.Range(0.5f, 1.2f);
+
+                    // Varied sizes -- some big drops, mostly small mist
+                    float sizeRoll = Random.value;
+                    if (sizeRoll < 0.1f)
+                        ep.startSize = Random.Range(0.02f, 0.04f);  // big drops
+                    else if (sizeRoll < 0.4f)
+                        ep.startSize = Random.Range(0.008f, 0.02f); // medium
+                    else
+                        ep.startSize = Random.Range(0.002f, 0.008f); // fine mist
+
+                    ep.startLifetime = Random.Range(0.4f, 1.2f);
+
+                    // Color variation -- white foam to blue-green water
+                    float colorRoll = Random.value;
+                    if (colorRoll < 0.3f)
+                        ep.startColor = new Color(0.85f, 0.9f, 0.95f, 0.8f); // white foam
+                    else
+                        ep.startColor = new Color(
+                            Random.Range(0.3f, 0.5f),
+                            Random.Range(0.45f, 0.65f),
+                            Random.Range(0.55f, 0.75f),
+                            Random.Range(0.4f, 0.8f));
+
+                    ps.Emit(ep, 1);
                 }
+
+                // Secondary ring of outward spray at water surface
+                if (intensity > 0.3f)
+                {
+                    int ringCount = Mathf.CeilToInt(20 * intensity);
+                    for (int i2 = 0; i2 < ringCount; i2++)
+                    {
+                        float a = (float)i2 / ringCount * Mathf.PI * 2f;
+                        var ep = new ParticleSystem.EmitParams();
+                        ep.position = surfacePoint;
+                        ep.velocity = new Vector3(
+                            Mathf.Cos(a) * splashForce * 0.6f,
+                            Random.Range(0.1f, 0.5f),
+                            Mathf.Sin(a) * splashForce * 0.6f);
+                        ep.startSize = Random.Range(0.005f, 0.015f);
+                        ep.startLifetime = Random.Range(0.3f, 0.8f);
+                        ep.startColor = new Color(0.7f, 0.8f, 0.85f, 0.5f);
+                        ps.Emit(ep, 1);
+                    }
+                }
+
+                // Ripple: flat disc particles at surface (visual only)
+                if (intensity > 0.2f)
+                {
+                    int rippleCount = 3;
+                    for (int r = 0; r < rippleCount; r++)
+                    {
+                        var ep = new ParticleSystem.EmitParams();
+                        ep.position = surfacePoint + Vector3.up * 0.01f;
+                        ep.velocity = Vector3.up * 0.01f; // nearly static
+                        ep.startSize = Random.Range(0.05f, 0.15f) * (1 + intensity);
+                        ep.startLifetime = Random.Range(0.5f, 1.5f);
+                        ep.startColor = new Color(0.6f, 0.7f, 0.75f, 0.15f); // very faint
+                        ps.Emit(ep, 1);
+                    }
+                }
+            }
+        }
+
+        // Dripping when hand leaves water
+        if (!handInWater && hand.position.y > waterSurfaceY && hand.position.y < waterSurfaceY + 0.4f && !scooped)
+        {
+            // Occasional drip from wet hand
+            if (Random.value < 0.05f)
+            {
+                var ep = new ParticleSystem.EmitParams();
+                ep.position = hand.position + Vector3.down * 0.05f + Random.insideUnitSphere * 0.02f;
+                ep.velocity = Vector3.down * Random.Range(0.1f, 0.4f);
+                ep.startSize = Random.Range(0.003f, 0.008f);
+                ep.startLifetime = 0.8f;
+                ep.startColor = new Color(0.4f, 0.55f, 0.65f, 0.6f);
+                ps.Emit(ep, 1);
             }
         }
     }
