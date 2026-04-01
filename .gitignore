@@ -47,6 +47,26 @@ Assets/FloodedGrounds.meta
 Assets/SwordAndPistol/
 Assets/SwordAndPistol.meta
 
+# Large binary assets (GitHub 100MB limit)
+*.fbx
+*.FBX
+*.blend
+*.obj
+*.max
+*.mb
+*.ma
+*.ztl
+*.psd
+*.tga
+*.tif
+*.tiff
+*.exr
+*.wav
+*.mp3
+*.ogg
+*.mp4
+*.mov
+
 # Legacy scenes
 Setup.unity
 Setup.unity.meta

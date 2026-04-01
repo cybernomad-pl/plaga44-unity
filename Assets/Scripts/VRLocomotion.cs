@@ -24,6 +24,7 @@ public class VRLocomotion : MonoBehaviour
     void Update()
     {
         if (_head == null) return;
+        if (VRQualityMenu.MenuOpen) return;
 
         Vector2 moveInput = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, _moveHand);
         Vector2 turnInput = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, _turnHand);
