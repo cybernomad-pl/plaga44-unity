@@ -12,7 +12,7 @@ public class MakeGrabbable : MonoBehaviour
     private static readonly string[] GrabbableNames = {
         "m249", "sword", "gun_fire", "gun fire", "mixingset", "mixing",
         "receiver", "magazine", "handguard", "stock", "grip_trigger",
-        "knife", "axe", "weapon", "item", "prop", "pickup",
+        "m249_part_", "knife", "axe", "weapon", "item", "prop", "pickup",
     };
 
     // Mass estimates (kg)
