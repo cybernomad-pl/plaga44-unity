@@ -23,7 +23,27 @@ public class BodyTrackingBootstrap : MonoBehaviour
 
     void Start()
     {
+        // Guard: Quest 2 nie obsluguje body tracking -- skip
+        if (!IsBodyTrackingSupported())
+        {
+            Debug.Log("[PLAGA44] BodyTrackingBootstrap: body tracking NOT supported on this device -- skipping.");
+            Destroy(gameObject);
+            return;
+        }
         SetupBodyTracking();
+    }
+
+    bool IsBodyTrackingSupported()
+    {
+        try
+        {
+            // Body tracking wymaga Quest 3/Pro -- sprawdzamy czy OVRPlugin raportuje wsparcie
+            return OVRPlugin.bodyTrackingSupported;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     void SetupBodyTracking()

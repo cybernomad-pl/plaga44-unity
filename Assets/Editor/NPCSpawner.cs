@@ -28,26 +28,30 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/NPC Spawner/PINEA Base", priority = 200)]
         public static void SpawnPINEA_Base() => SpawnNPC("PINEA_base");
 
-        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v1 - ACU Pants", priority = 201)]
-        public static void SpawnPINEA_V1() => SpawnNPC("PINEA_v1_brownshirt");
+        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v1 - Tactical (ACU + Brownshirt)", priority = 201)]
+        public static void SpawnPINEA_V1() => SpawnNPC("PINEA_v1_tactical");
 
-        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v2 - Fleck Military", priority = 202)]
-        public static void SpawnPINEA_V2() => SpawnNPC("PINEA_v2_fleck");
+        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v2 - Military (Fleck + IOTV)", priority = 202)]
+        public static void SpawnPINEA_V2() => SpawnNPC("PINEA_v2_military");
 
-        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v3 - IOTV Tactical", priority = 203)]
-        public static void SpawnPINEA_V3() => SpawnNPC("PINEA_v3_chainmail");
+        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v3 - Gambeson (ACU + Armor)", priority = 203)]
+        public static void SpawnPINEA_V3() => SpawnNPC("PINEA_v3_gambeson");
 
-        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v4 - Armored Gambeson", priority = 204)]
-        public static void SpawnPINEA_V4() => SpawnNPC("PINEA_v4_gambeson");
+        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v4 - Doublet (Fleck + Sleeve)", priority = 204)]
+        public static void SpawnPINEA_V4() => SpawnNPC("PINEA_v4_doublet");
 
-        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v5 - Doublet", priority = 205)]
-        public static void SpawnPINEA_V5() => SpawnNPC("PINEA_v5_doublet");
+        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v5 - Masked (Tactical + Ski Mask)", priority = 205)]
+        public static void SpawnPINEA_V5() => SpawnNPC("PINEA_v5_masked");
+
+        [MenuItem("CYBERNOMAD/NPC Spawner/PINEA v6 - Gasmask (Military + Gas)", priority = 206)]
+        public static void SpawnPINEA_V6() => SpawnNPC("PINEA_v6_gasmask");
 
         [MenuItem("CYBERNOMAD/NPC Spawner/-- Spawn ALL Variants --", priority = 220)]
         public static void SpawnAll()
         {
-            string[] variants = { "PINEA_base", "PINEA_v1_brownshirt", "PINEA_v2_fleck",
-                                  "PINEA_v3_chainmail", "PINEA_v4_gambeson", "PINEA_v5_doublet" };
+            string[] variants = { "PINEA_base", "PINEA_v1_tactical", "PINEA_v2_military",
+                                  "PINEA_v3_gambeson", "PINEA_v4_doublet", "PINEA_v5_masked",
+                                  "PINEA_v6_gasmask" };
             float spacing = 1.5f;
             for (int i = 0; i < variants.Length; i++)
             {
@@ -97,62 +101,81 @@ namespace Plaga44.Editor
             var animator = root.AddComponent<Animator>();
             animator.applyRootMotion = false;
 
-            // --- Buduj humanoidalny szkielet jako poseable ragdoll ---
-            // Kazda kosc = child GO z Rigidbody(kinematic) + Collider
-            // Struktura: Hips -> Spine -> Chest -> Head
-            //                                   -> LeftArm -> LeftForeArm -> LeftHand
-            //                                   -> RightArm -> RightForeArm -> RightHand
-            //            Hips -> LeftUpLeg -> LeftLeg -> LeftFoot
-            //            Hips -> RightUpLeg -> RightLeg -> RightFoot
+            // --- Meta FullBody Rig ---
+            // Nazwy kosci = OVRPlugin.BoneId.FullBody_* (gotowe do retargetingu)
+            // Hierarchia: Root -> Hips -> SpineLower -> SpineMiddle -> SpineUpper -> Chest -> Neck -> Head
+            //             Chest -> L/R Shoulder -> L/R Scapula -> L/R ArmUpper -> L/R ArmLower -> L/R HandWrist
+            //             Hips -> L/R UpperLeg -> L/R LowerLeg -> L/R FootAnkle -> L/R FootBall
 
-            var hips = CreateBone(root.transform, "Hips", Vector3.up * 0.95f,
+            // === SPINE ===
+            var bodyRoot = CreateBone(root.transform, "FullBody_Root", Vector3.zero,
+                BoneShape.Sphere, 0.05f);
+            var hips = CreateBone(bodyRoot.transform, "FullBody_Hips", Vector3.up * 0.95f,
                 BoneShape.Capsule, 0.15f, 0.3f, capsuleDir: 0);
-
-            // Spine chain
-            var spine = CreateBone(hips.transform, "Spine", Vector3.up * 0.15f,
-                BoneShape.Capsule, 0.14f, 0.2f, capsuleDir: 1);
-            var chest = CreateBone(spine.transform, "Chest", Vector3.up * 0.2f,
-                BoneShape.Capsule, 0.16f, 0.25f, capsuleDir: 0);
-            var neck = CreateBone(chest.transform, "Neck", Vector3.up * 0.2f,
+            var spineLower = CreateBone(hips.transform, "FullBody_SpineLower", Vector3.up * 0.1f,
+                BoneShape.Capsule, 0.13f, 0.18f, capsuleDir: 1);
+            var spineMiddle = CreateBone(spineLower.transform, "FullBody_SpineMiddle", Vector3.up * 0.1f,
+                BoneShape.Capsule, 0.13f, 0.18f, capsuleDir: 1);
+            var spineUpper = CreateBone(spineMiddle.transform, "FullBody_SpineUpper", Vector3.up * 0.1f,
+                BoneShape.Capsule, 0.14f, 0.18f, capsuleDir: 1);
+            var chest = CreateBone(spineUpper.transform, "FullBody_Chest", Vector3.up * 0.1f,
+                BoneShape.Capsule, 0.16f, 0.22f, capsuleDir: 0);
+            var neck = CreateBone(chest.transform, "FullBody_Neck", Vector3.up * 0.18f,
                 BoneShape.Capsule, 0.04f, 0.1f, capsuleDir: 1);
-            var head = CreateBone(neck.transform, "Head", Vector3.up * 0.1f,
+            var head = CreateBone(neck.transform, "FullBody_Head", Vector3.up * 0.1f,
                 BoneShape.Sphere, 0.12f);
 
-            // Left arm
-            var lShoulder = CreateBone(chest.transform, "LeftShoulder",
-                new Vector3(-0.18f, 0.15f, 0f), BoneShape.Capsule, 0.04f, 0.15f, capsuleDir: 0);
-            var lUpperArm = CreateBone(lShoulder.transform, "LeftUpperArm",
-                new Vector3(-0.15f, 0f, 0f), BoneShape.Capsule, 0.05f, 0.25f, capsuleDir: 0);
-            var lForeArm = CreateBone(lUpperArm.transform, "LeftForeArm",
-                new Vector3(-0.25f, 0f, 0f), BoneShape.Capsule, 0.04f, 0.22f, capsuleDir: 0);
-            var lHand = CreateBone(lForeArm.transform, "LeftHand",
-                new Vector3(-0.22f, 0f, 0f), BoneShape.Box, 0.08f, 0.03f);
+            // === LEFT ARM ===
+            var lShoulder = CreateBone(chest.transform, "FullBody_LeftShoulder",
+                new Vector3(-0.08f, 0.14f, 0f), BoneShape.Capsule, 0.04f, 0.1f, capsuleDir: 0);
+            var lScapula = CreateBone(lShoulder.transform, "FullBody_LeftScapula",
+                new Vector3(-0.1f, 0f, 0f), BoneShape.Capsule, 0.04f, 0.1f, capsuleDir: 0);
+            var lArmUpper = CreateBone(lScapula.transform, "FullBody_LeftArmUpper",
+                new Vector3(-0.1f, 0f, 0f), BoneShape.Capsule, 0.05f, 0.28f, capsuleDir: 0);
+            var lArmLower = CreateBone(lArmUpper.transform, "FullBody_LeftArmLower",
+                new Vector3(-0.28f, 0f, 0f), BoneShape.Capsule, 0.04f, 0.24f, capsuleDir: 0);
+            var lWristTwist = CreateBone(lArmLower.transform, "FullBody_LeftHandWristTwist",
+                new Vector3(-0.12f, 0f, 0f), BoneShape.Capsule, 0.03f, 0.08f, capsuleDir: 0);
+            var lWrist = CreateBone(lWristTwist.transform, "FullBody_LeftHandWrist",
+                new Vector3(-0.08f, 0f, 0f), BoneShape.Box, 0.08f, 0.03f);
 
-            // Right arm
-            var rShoulder = CreateBone(chest.transform, "RightShoulder",
-                new Vector3(0.18f, 0.15f, 0f), BoneShape.Capsule, 0.04f, 0.15f, capsuleDir: 0);
-            var rUpperArm = CreateBone(rShoulder.transform, "RightUpperArm",
-                new Vector3(0.15f, 0f, 0f), BoneShape.Capsule, 0.05f, 0.25f, capsuleDir: 0);
-            var rForeArm = CreateBone(rUpperArm.transform, "RightForeArm",
-                new Vector3(0.25f, 0f, 0f), BoneShape.Capsule, 0.04f, 0.22f, capsuleDir: 0);
-            var rHand = CreateBone(rForeArm.transform, "RightHand",
-                new Vector3(0.22f, 0f, 0f), BoneShape.Box, 0.08f, 0.03f);
+            // === RIGHT ARM ===
+            var rShoulder = CreateBone(chest.transform, "FullBody_RightShoulder",
+                new Vector3(0.08f, 0.14f, 0f), BoneShape.Capsule, 0.04f, 0.1f, capsuleDir: 0);
+            var rScapula = CreateBone(rShoulder.transform, "FullBody_RightScapula",
+                new Vector3(0.1f, 0f, 0f), BoneShape.Capsule, 0.04f, 0.1f, capsuleDir: 0);
+            var rArmUpper = CreateBone(rScapula.transform, "FullBody_RightArmUpper",
+                new Vector3(0.1f, 0f, 0f), BoneShape.Capsule, 0.05f, 0.28f, capsuleDir: 0);
+            var rArmLower = CreateBone(rArmUpper.transform, "FullBody_RightArmLower",
+                new Vector3(0.28f, 0f, 0f), BoneShape.Capsule, 0.04f, 0.24f, capsuleDir: 0);
+            var rWristTwist = CreateBone(rArmLower.transform, "FullBody_RightHandWristTwist",
+                new Vector3(0.12f, 0f, 0f), BoneShape.Capsule, 0.03f, 0.08f, capsuleDir: 0);
+            var rWrist = CreateBone(rWristTwist.transform, "FullBody_RightHandWrist",
+                new Vector3(0.08f, 0f, 0f), BoneShape.Box, 0.08f, 0.03f);
 
-            // Left leg
-            var lUpLeg = CreateBone(hips.transform, "LeftUpLeg",
-                new Vector3(-0.1f, -0.05f, 0f), BoneShape.Capsule, 0.07f, 0.4f, capsuleDir: 1);
-            var lLeg = CreateBone(lUpLeg.transform, "LeftLeg",
-                new Vector3(0f, -0.4f, 0f), BoneShape.Capsule, 0.06f, 0.38f, capsuleDir: 1);
-            var lFoot = CreateBone(lLeg.transform, "LeftFoot",
-                new Vector3(0f, -0.38f, 0.05f), BoneShape.Box, 0.08f, 0.05f, boxDepth: 0.2f);
+            // === LEFT LEG ===
+            var lUpperLeg = CreateBone(hips.transform, "FullBody_LeftUpperLeg",
+                new Vector3(-0.1f, -0.05f, 0f), BoneShape.Capsule, 0.07f, 0.42f, capsuleDir: 1);
+            var lLowerLeg = CreateBone(lUpperLeg.transform, "FullBody_LeftLowerLeg",
+                new Vector3(0f, -0.42f, 0f), BoneShape.Capsule, 0.06f, 0.4f, capsuleDir: 1);
+            var lAnkleTwist = CreateBone(lLowerLeg.transform, "FullBody_LeftFootAnkleTwist",
+                new Vector3(0f, -0.2f, 0f), BoneShape.Capsule, 0.04f, 0.08f, capsuleDir: 1);
+            var lAnkle = CreateBone(lAnkleTwist.transform, "FullBody_LeftFootAnkle",
+                new Vector3(0f, -0.2f, 0.02f), BoneShape.Box, 0.06f, 0.04f, boxDepth: 0.1f);
+            var lBall = CreateBone(lAnkle.transform, "FullBody_LeftFootBall",
+                new Vector3(0f, 0f, 0.1f), BoneShape.Sphere, 0.03f);
 
-            // Right leg
-            var rUpLeg = CreateBone(hips.transform, "RightUpLeg",
-                new Vector3(0.1f, -0.05f, 0f), BoneShape.Capsule, 0.07f, 0.4f, capsuleDir: 1);
-            var rLeg = CreateBone(rUpLeg.transform, "RightLeg",
-                new Vector3(0f, -0.4f, 0f), BoneShape.Capsule, 0.06f, 0.38f, capsuleDir: 1);
-            var rFoot = CreateBone(rLeg.transform, "RightFoot",
-                new Vector3(0f, -0.38f, 0.05f), BoneShape.Box, 0.08f, 0.05f, boxDepth: 0.2f);
+            // === RIGHT LEG ===
+            var rUpperLeg = CreateBone(hips.transform, "FullBody_RightUpperLeg",
+                new Vector3(0.1f, -0.05f, 0f), BoneShape.Capsule, 0.07f, 0.42f, capsuleDir: 1);
+            var rLowerLeg = CreateBone(rUpperLeg.transform, "FullBody_RightLowerLeg",
+                new Vector3(0f, -0.42f, 0f), BoneShape.Capsule, 0.06f, 0.4f, capsuleDir: 1);
+            var rAnkleTwist = CreateBone(rLowerLeg.transform, "FullBody_RightFootAnkleTwist",
+                new Vector3(0f, -0.2f, 0f), BoneShape.Capsule, 0.04f, 0.08f, capsuleDir: 1);
+            var rAnkle = CreateBone(rAnkleTwist.transform, "FullBody_RightFootAnkle",
+                new Vector3(0f, -0.2f, 0.02f), BoneShape.Box, 0.06f, 0.04f, boxDepth: 0.1f);
+            var rBall = CreateBone(rAnkle.transform, "FullBody_RightFootBall",
+                new Vector3(0f, 0f, 0.1f), BoneShape.Sphere, 0.03f);
 
             // Dodaj wizualne placeholder mesze (debug wireframe)
             AddBoneVisuals(root);

@@ -73,13 +73,35 @@ namespace Plaga44.BodyTracking
 
         private void Awake()
         {
+            // Guard: Quest 2 nie obsluguje body tracking
+            if (!IsBodyTrackingSupported())
+            {
+                Debug.Log($"{LOG} Body tracking NOT supported on this device -- disabling.");
+                enabled = false;
+                return;
+            }
             InitializeBodyTracking();
         }
 
         private void OnEnable()
         {
+            if (!IsBodyTrackingSupported())
+            {
+                enabled = false;
+                return;
+            }
             if (!_initialized)
                 InitializeBodyTracking();
+        }
+
+        private static bool IsBodyTrackingSupported()
+        {
+#if HAS_META_XR
+            try { return OVRPlugin.bodyTrackingSupported; }
+            catch { return false; }
+#else
+            return false;
+#endif
         }
 
         private void Update()
