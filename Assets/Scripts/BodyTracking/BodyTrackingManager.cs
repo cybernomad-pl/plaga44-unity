@@ -28,12 +28,12 @@ namespace Plaga44.BodyTracking
 
         [Header("Tracking Configuration")]
         [Tooltip("Show OVRSkeleton debug visualization. Requires OVRSkeleton component on same GO.")]
-        public bool showDebugSkeleton = false;
+        public bool showDebugSkeleton = true;
 
         // -- runtime state --
 
         private bool _initialized = false;
-        private bool _trackingActive = false;
+        private bool _trackingActive = true;
 
 #if HAS_META_XR
         [Header("Tracking Configuration (Meta XR)")]
