@@ -15,13 +15,8 @@ public class VRInputDebug : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void AutoSpawn()
     {
-        // Default OFF -- enable via CYBERNOMAD/Debug/VR Input Debug menu
-#if UNITY_EDITOR
-        if (!UnityEditor.EditorPrefs.GetBool(ENABLED_KEY, false)) return;
-#else
-        if (!PlayerPrefs.HasKey(ENABLED_KEY) || PlayerPrefs.GetInt(ENABLED_KEY, 0) == 0) return;
-#endif
-        Spawn();
+        // DISABLED -- enable manually via CYBERNOMAD/Debug/VR Input Debug menu
+        return;
     }
 
     private static VRInputDebug _instance;

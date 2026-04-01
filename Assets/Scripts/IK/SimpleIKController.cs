@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // SimpleIKController.cs
 // PLAGA '44 -- Two-bone IK solver for VR legs.
 // Handles foot grounding via raycasts so feet stay on floors/stairs/slopes.
@@ -281,4 +279,3 @@ namespace Plaga44.IK
         }
     }
 }
-#endif // PLAGA44_FULL_SDK
