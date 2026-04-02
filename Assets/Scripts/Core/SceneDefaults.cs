@@ -41,6 +41,10 @@ public class SceneDefaults : MonoBehaviour
         string profile = SafeMode ? "SAFE (Quest)" : "HI-END (Editor)";
         Debug.Log($"[PLAGA44] SceneDefaults: profile={profile}");
 
+        // NO GRAVITY
+        Physics.gravity = Vector3.zero;
+        Debug.Log("[PLAGA44] SceneDefaults: GRAVITY OFF");
+
         ApplyResolution();
         ApplyShadows();
         ApplyLighting();
