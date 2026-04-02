@@ -23,11 +23,18 @@ public class VRQualityMenu : MonoBehaviour
     private bool _visible = false;
     private int _selectedRow = 0;
     private float _inputCooldown = 0;
+    private int _scrollOffset = 0;
+    private const int VISIBLE_ROWS = 20;
+    private List<int> _sectionStarts = new List<int>();
+    private int _currentSection = 0;
 
     private UniversalRenderPipelineAsset _urpAsset;
     private Volume _postProcessVolume;
     private OVRPlayerController _ovrPlayer;
     private Material _skyboxMat;
+    private Material _waterMat;
+    private Material _treeBarkMat;
+    private Material _terrainMat;
     private ColorAdjustments _colorAdj;
     private Tonemapping _tonemapping;
     private Vignette _vignette;
@@ -67,6 +74,42 @@ public class VRQualityMenu : MonoBehaviour
         if (_ovrPlayer != null) _ovrPlayer.enabled = false; // blocked until menu closed
         _skyboxMat = RenderSettings.skybox;
 
+        // Find water material by name or shader name
+        foreach (var r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+        {
+            foreach (var m in r.sharedMaterials)
+            {
+                if (m != null && (m.name.Contains("Water") || m.name.Contains("water") ||
+                    (m.shader != null && m.shader.name.Contains("Water"))))
+                {
+                    _waterMat = m;
+                    break;
+                }
+            }
+            if (_waterMat != null) break;
+        }
+        if (_waterMat != null) Debug.Log($"[PLAGA44] VRQualityMenu: water material: {_waterMat.name}");
+
+        // Find tree bark material (first instance material containing "trunk")
+        foreach (var r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+        {
+            foreach (var m in r.materials) // .materials gives instances we can edit
+            {
+                if (m != null && (m.name.ToLower().Contains("trunk") || m.name.ToLower().Contains("bark")))
+                {
+                    _treeBarkMat = m;
+                    break;
+                }
+            }
+            if (_treeBarkMat != null) break;
+        }
+        if (_treeBarkMat != null) Debug.Log($"[PLAGA44] VRQualityMenu: tree bark material: {_treeBarkMat.name}");
+
+        // Find terrain material
+        var terrain = FindAnyObjectByType<Terrain>();
+        if (terrain != null && terrain.materialTemplate != null)
+            _terrainMat = terrain.materialTemplate;
+
         // Get post-process components
         if (_postProcessVolume != null && _postProcessVolume.profile != null)
         {
@@ -78,8 +121,17 @@ public class VRQualityMenu : MonoBehaviour
         }
 
         BuildSettings();
+        BuildSectionIndex();
         CreateWorldCanvas();
-        Debug.Log($"[PLAGA44] VRQualityMenu: {_settings.Count} settings loaded");
+        _canvas.SetActive(false);
+        Debug.Log($"[PLAGA44] VRQualityMenu: {_settings.Count} settings, {_sectionStarts.Count} sections");
+
+        // Auto-load preset from SceneDefaults (SLOT 3 on Quest, SLOT 1 in editor)
+        if (SceneDefaults._pendingPresetSlot > 0)
+        {
+            LoadPreset(SceneDefaults._pendingPresetSlot);
+            SceneDefaults._pendingPresetSlot = 0;
+        }
     }
 
     void BuildSettings()
@@ -151,7 +203,12 @@ public class VRQualityMenu : MonoBehaviour
         _settings.Add(new Setting("Light Shadow Strength",
             () => { var l = FindMainLight(); return l != null ? l.shadowStrength : 1; },
             v => { var l = FindMainLight(); if (l) l.shadowStrength = v; },
-            0, 1, 0.05f, "F2"));
+            0, 1, 0.001f, "F3"));
+
+        _settings.Add(new Setting("Light Indirect Multiplier",
+            () => { var l = FindMainLight(); return l != null ? l.bounceIntensity : 1; },
+            v => { var l = FindMainLight(); if (l) l.bounceIntensity = v; },
+            0, 5, 0.01f, "F2"));
 
         _settings.Add(new Setting("Fog Enabled",
             () => RenderSettings.fog ? 1 : 0,
@@ -326,6 +383,16 @@ public class VRQualityMenu : MonoBehaviour
                 () => _skyboxMat.HasFloat("_Rotation") ? _skyboxMat.GetFloat("_Rotation") : 0f,
                 v => { if (_skyboxMat.HasFloat("_Rotation")) _skyboxMat.SetFloat("_Rotation", v); },
                 0, 360, 10, "F0"));
+
+            _settings.Add(new Setting("Cloud Brightness",
+                () => _skyboxMat.HasFloat("_CloudBoost") ? _skyboxMat.GetFloat("_CloudBoost") : 1f,
+                v => { if (_skyboxMat.HasFloat("_CloudBoost")) _skyboxMat.SetFloat("_CloudBoost", v); },
+                0, 5, 0.01f, "F2"));
+
+            _settings.Add(new Setting("Cloud Threshold",
+                () => _skyboxMat.HasFloat("_CloudThreshold") ? _skyboxMat.GetFloat("_CloudThreshold") : 0.3f,
+                v => { if (_skyboxMat.HasFloat("_CloudThreshold")) _skyboxMat.SetFloat("_CloudThreshold", v); },
+                0, 1, 0.001f, "F3"));
         }
 
         // --- AMBIENT ---
@@ -385,12 +452,357 @@ public class VRQualityMenu : MonoBehaviour
             v => { if (Camera.main) Camera.main.farClipPlane = v; },
             50, 2000, 50, "F0"));
 
-        // --- SAVE ---
-        _settings.Add(new Setting("--- ACTIONS ---", () => 0, v => {}, 0, 0, 0));
-        _settings.Add(new Setting("[SAVE TO LOG]",
-            () => 0,
-            v => SaveToLog(),
-            0, 1, 1, "F0"));
+        // --- WATER ---
+        _settings.Add(new Setting("--- WATER ---", () => 0, v => {}, 0, 0, 0));
+
+        if (_waterMat != null)
+        {
+            _settings.Add(new Setting("Water R",
+                () => _waterMat.GetColor("_Color").r,
+                v => { var c = _waterMat.GetColor("_Color"); c.r = v; _waterMat.SetColor("_Color", c); },
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water G",
+                () => _waterMat.GetColor("_Color").g,
+                v => { var c = _waterMat.GetColor("_Color"); c.g = v; _waterMat.SetColor("_Color", c); },
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water B",
+                () => _waterMat.GetColor("_Color").b,
+                v => { var c = _waterMat.GetColor("_Color"); c.b = v; _waterMat.SetColor("_Color", c); },
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Metallic",
+                () => _waterMat.GetFloat("_Metallic"),
+                v => _waterMat.SetFloat("_Metallic", v),
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Smoothness",
+                () => _waterMat.GetFloat("_Smth"),
+                v => _waterMat.SetFloat("_Smth", v),
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Scroll Speed",
+                () => _waterMat.GetFloat("_ScrollSpeed"),
+                v => _waterMat.SetFloat("_ScrollSpeed", v),
+                0, 2, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Wave Height",
+                () => _waterMat.GetFloat("_WaveHeight"),
+                v => _waterMat.SetFloat("_WaveHeight", v),
+                0, 3, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Wave Freq",
+                () => _waterMat.GetFloat("_WaveFreq"),
+                v => _waterMat.SetFloat("_WaveFreq", v),
+                0, 100, 0.1f, "F1"));
+
+            _settings.Add(new Setting("Water Wave Complexity",
+                () => _waterMat.GetFloat("_WaveComplexity"),
+                v => _waterMat.SetFloat("_WaveComplexity", v),
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Wave Steepness",
+                () => _waterMat.GetFloat("_WaveSteepness"),
+                v => _waterMat.SetFloat("_WaveSteepness", v),
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Normal Strength",
+                () => _waterMat.GetFloat("_BumpScale"),
+                v => _waterMat.SetFloat("_BumpScale", v),
+                0, 3, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Emission",
+                () => _waterMat.GetFloat("_Emis"),
+                v => _waterMat.SetFloat("_Emis", v),
+                0, 0.5f, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Reflection Str",
+                () => _waterMat.GetFloat("_ReflStr"),
+                v => _waterMat.SetFloat("_ReflStr", v),
+                0, 3, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Fresnel Power",
+                () => _waterMat.GetFloat("_FresnelPow"),
+                v => _waterMat.SetFloat("_FresnelPow", v),
+                0.1f, 10, 0.01f, "F2"));
+
+            _settings.Add(new Setting("Water UV Density",
+                () => _waterMat.GetFloat("_UVScale"),
+                v => _waterMat.SetFloat("_UVScale", v),
+                0.1f, 200, 0.1f, "F1"));
+
+            _settings.Add(new Setting("Water Transparency",
+                () => _waterMat.GetFloat("_Alpha"),
+                v => _waterMat.SetFloat("_Alpha", v),
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Foam Depth",
+                () => _waterMat.GetFloat("_FoamDepth"),
+                v => _waterMat.SetFloat("_FoamDepth", v),
+                0.01f, 5, 0.01f, "F2"));
+
+            _settings.Add(new Setting("Water Foam Strength",
+                () => _waterMat.GetFloat("_FoamStr"),
+                v => _waterMat.SetFloat("_FoamStr", v),
+                0, 3, 0.01f, "F2"));
+
+            _settings.Add(new Setting("Water Foam R",
+                () => _waterMat.GetColor("_FoamColor").r,
+                v => { var c = _waterMat.GetColor("_FoamColor"); c.r = v; _waterMat.SetColor("_FoamColor", c); },
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Foam G",
+                () => _waterMat.GetColor("_FoamColor").g,
+                v => { var c = _waterMat.GetColor("_FoamColor"); c.g = v; _waterMat.SetColor("_FoamColor", c); },
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Water Foam B",
+                () => _waterMat.GetColor("_FoamColor").b,
+                v => { var c = _waterMat.GetColor("_FoamColor"); c.b = v; _waterMat.SetColor("_FoamColor", c); },
+                0, 1, 0.001f, "F3"));
+        }
+
+        // --- TREES ---
+        _settings.Add(new Setting("--- TREES ---", () => 0, v => {}, 0, 0, 0));
+
+        {
+            // Collect ALL bark + leaf instance materials
+            var allBarkMats = new System.Collections.Generic.List<Material>();
+            var allLeafMats = new System.Collections.Generic.List<Material>();
+            var seenBark = new System.Collections.Generic.HashSet<int>();
+            var seenLeaf = new System.Collections.Generic.HashSet<int>();
+            foreach (var r in FindObjectsByType<Renderer>(FindObjectsSortMode.None))
+            {
+                // Use sharedMaterials to affect all instances sharing the same material
+                var mats = r.sharedMaterials;
+                foreach (var m in mats)
+                {
+                    if (m == null) continue;
+                    string mn = m.name.ToLower();
+                    string sn = m.shader != null ? m.shader.name.ToLower() : "";
+                    int id = m.GetInstanceID();
+                    if ((mn.Contains("bark") || mn.Contains("trunk") || sn.Contains("bark")) && seenBark.Add(id))
+                        allBarkMats.Add(m);
+                    if ((mn.Contains("leaf") || mn.Contains("leaves") || sn.Contains("leaf")) && seenLeaf.Add(id))
+                        allLeafMats.Add(m);
+                }
+            }
+
+            if (allBarkMats.Count > 0)
+            {
+                var refMat = allBarkMats[0];
+                // URP Lit uses _BaseColor; TreeCreator uses _Color
+                string colorProp = refMat.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+
+                _settings.Add(new Setting("Bark R",
+                    () => refMat.GetColor(colorProp).r,
+                    v => { foreach (var m in allBarkMats) {
+                        string p = m.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+                        var c = m.GetColor(p); c.r = v; m.SetColor(p, c);
+                        if (m.HasColor("_Color") && p != "_Color") { var c2 = m.GetColor("_Color"); c2.r = v; m.SetColor("_Color", c2); }
+                    }}, 0, 2, 0.001f, "F3"));
+
+                _settings.Add(new Setting("Bark G",
+                    () => refMat.GetColor(colorProp).g,
+                    v => { foreach (var m in allBarkMats) {
+                        string p = m.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+                        var c = m.GetColor(p); c.g = v; m.SetColor(p, c);
+                        if (m.HasColor("_Color") && p != "_Color") { var c2 = m.GetColor("_Color"); c2.g = v; m.SetColor("_Color", c2); }
+                    }}, 0, 2, 0.001f, "F3"));
+
+                _settings.Add(new Setting("Bark B",
+                    () => refMat.GetColor(colorProp).b,
+                    v => { foreach (var m in allBarkMats) {
+                        string p = m.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+                        var c = m.GetColor(p); c.b = v; m.SetColor(p, c);
+                        if (m.HasColor("_Color") && p != "_Color") { var c2 = m.GetColor("_Color"); c2.b = v; m.SetColor("_Color", c2); }
+                    }}, 0, 2, 0.001f, "F3"));
+
+                _settings.Add(new Setting("Bark Smoothness",
+                    () => refMat.HasFloat("_Smoothness") ? refMat.GetFloat("_Smoothness") : (refMat.HasFloat("_Glossiness") ? refMat.GetFloat("_Glossiness") : 0),
+                    v => { foreach (var m in allBarkMats) { if (m.HasFloat("_Smoothness")) m.SetFloat("_Smoothness", v); if (m.HasFloat("_Glossiness")) m.SetFloat("_Glossiness", v); } },
+                    0, 1, 0.001f, "F3"));
+
+                _settings.Add(new Setting("Bark Specular R",
+                    () => refMat.HasColor("_SpecColor") ? refMat.GetColor("_SpecColor").r : 0.5f,
+                    v => { foreach (var m in allBarkMats) { if (m.HasColor("_SpecColor")) { var c = m.GetColor("_SpecColor"); c.r = v; m.SetColor("_SpecColor", c); } } },
+                    0, 1, 0.001f, "F3"));
+
+                _settings.Add(new Setting("Bark Specular G",
+                    () => refMat.HasColor("_SpecColor") ? refMat.GetColor("_SpecColor").g : 0.5f,
+                    v => { foreach (var m in allBarkMats) { if (m.HasColor("_SpecColor")) { var c = m.GetColor("_SpecColor"); c.g = v; m.SetColor("_SpecColor", c); } } },
+                    0, 1, 0.001f, "F3"));
+
+                _settings.Add(new Setting("Bark Specular B",
+                    () => refMat.HasColor("_SpecColor") ? refMat.GetColor("_SpecColor").b : 0.5f,
+                    v => { foreach (var m in allBarkMats) { if (m.HasColor("_SpecColor")) { var c = m.GetColor("_SpecColor"); c.b = v; m.SetColor("_SpecColor", c); } } },
+                    0, 1, 0.001f, "F3"));
+
+                Debug.Log($"[PLAGA44] VRQualityMenu: {allBarkMats.Count} bark materials (prop: {colorProp})");
+            }
+
+            if (allLeafMats.Count > 0)
+            {
+                var refLeaf = allLeafMats[0];
+
+                _settings.Add(new Setting("Leaf R",
+                    () => refLeaf.GetColor("_Color").r,
+                    v => { foreach (var m in allLeafMats) { var c = m.GetColor("_Color"); c.r = v; m.SetColor("_Color", c); } },
+                    0, 2, 0.001f, "F3"));
+
+                _settings.Add(new Setting("Leaf G",
+                    () => refLeaf.GetColor("_Color").g,
+                    v => { foreach (var m in allLeafMats) { var c = m.GetColor("_Color"); c.g = v; m.SetColor("_Color", c); } },
+                    0, 2, 0.001f, "F3"));
+
+                _settings.Add(new Setting("Leaf B",
+                    () => refLeaf.GetColor("_Color").b,
+                    v => { foreach (var m in allLeafMats) { var c = m.GetColor("_Color"); c.b = v; m.SetColor("_Color", c); } },
+                    0, 2, 0.001f, "F3"));
+
+                Debug.Log($"[PLAGA44] VRQualityMenu: {allLeafMats.Count} leaf materials");
+            }
+        }
+
+        // --- TERRAIN ---
+        _settings.Add(new Setting("--- TERRAIN ---", () => 0, v => {}, 0, 0, 0));
+
+        if (_terrainMat != null)
+        {
+            _settings.Add(new Setting("Terrain Normal",
+                () => _terrainMat.HasFloat("_BumpScale") ? _terrainMat.GetFloat("_BumpScale") : 1,
+                v => { if (_terrainMat.HasFloat("_BumpScale")) _terrainMat.SetFloat("_BumpScale", v); },
+                0, 3, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Terrain Smoothness",
+                () => _terrainMat.HasFloat("_Smoothness") ? _terrainMat.GetFloat("_Smoothness") : 0,
+                v => { if (_terrainMat.HasFloat("_Smoothness")) _terrainMat.SetFloat("_Smoothness", v); },
+                0, 1, 0.001f, "F3"));
+
+            _settings.Add(new Setting("Terrain Metallic",
+                () => _terrainMat.HasFloat("_Metallic") ? _terrainMat.GetFloat("_Metallic") : 0,
+                v => { if (_terrainMat.HasFloat("_Metallic")) _terrainMat.SetFloat("_Metallic", v); },
+                0, 1, 0.001f, "F3"));
+        }
+
+        // Terrain layers
+        var terrain = FindAnyObjectByType<Terrain>();
+        if (terrain != null && terrain.terrainData != null && terrain.terrainData.terrainLayers != null)
+        {
+            var layers = terrain.terrainData.terrainLayers;
+            for (int li = 0; li < Mathf.Min(layers.Length, 4); li++)
+            {
+                var layer = layers[li];
+                if (layer == null) continue;
+                int idx = li;
+                _settings.Add(new Setting($"Layer{li} NormalScale",
+                    () => layers[idx].normalScale,
+                    v => layers[idx].normalScale = v,
+                    0, 3, 0.001f, "F3"));
+                _settings.Add(new Setting($"Layer{li} TileSize",
+                    () => layers[idx].tileSize.x,
+                    v => layers[idx].tileSize = new Vector2(v, v),
+                    1, 100, 0.1f, "F1"));
+                _settings.Add(new Setting($"Layer{li} Metallic",
+                    () => layers[idx].metallic,
+                    v => layers[idx].metallic = v,
+                    0, 1, 0.001f, "F3"));
+                _settings.Add(new Setting($"Layer{li} Smoothness",
+                    () => layers[idx].smoothness,
+                    v => layers[idx].smoothness = v,
+                    0, 1, 0.001f, "F3"));
+            }
+        }
+
+        // --- M249 MATERIAL ---
+        _settings.Add(new Setting("--- M249 ---", () => 0, v => {}, 0, 0, 0));
+        _settings.Add(new Setting("Gun Color R",
+            () => M249MaterialSetup.gunColor.r,
+            v => { M249MaterialSetup.gunColor.r = v; M249MaterialSetup.GetGunMaterial().SetColor("_BaseColor", M249MaterialSetup.gunColor); },
+            0, 1, 0.001f, "F3"));
+        _settings.Add(new Setting("Gun Color G",
+            () => M249MaterialSetup.gunColor.g,
+            v => { M249MaterialSetup.gunColor.g = v; M249MaterialSetup.GetGunMaterial().SetColor("_BaseColor", M249MaterialSetup.gunColor); },
+            0, 1, 0.001f, "F3"));
+        _settings.Add(new Setting("Gun Color B",
+            () => M249MaterialSetup.gunColor.b,
+            v => { M249MaterialSetup.gunColor.b = v; M249MaterialSetup.GetGunMaterial().SetColor("_BaseColor", M249MaterialSetup.gunColor); },
+            0, 1, 0.001f, "F3"));
+        _settings.Add(new Setting("Gun Metallic",
+            () => M249MaterialSetup.gunMetallic,
+            v => { M249MaterialSetup.gunMetallic = v; M249MaterialSetup.GetGunMaterial().SetFloat("_Metallic", v); },
+            0, 1, 0.001f, "F3"));
+        _settings.Add(new Setting("Gun Smoothness",
+            () => M249MaterialSetup.gunSmoothness,
+            v => { M249MaterialSetup.gunSmoothness = v; M249MaterialSetup.GetGunMaterial().SetFloat("_Smoothness", v); },
+            0, 1, 0.001f, "F3"));
+
+        // --- TERRAIN DEFORMATION ---
+        _settings.Add(new Setting("--- DEFORMATION ---", () => 0, v => {}, 0, 0, 0));
+
+        _settings.Add(new Setting("Terrain Noise Strength",
+            () => TerrainDeformer.NoiseStrength,
+            v => { TerrainDeformer.NoiseStrength = v; TerrainDeformer.ApplyDeformation(); },
+            0, 20, 0.1f, "F1"));
+
+        _settings.Add(new Setting("Terrain Noise Scale",
+            () => TerrainDeformer.NoiseScale,
+            v => { TerrainDeformer.NoiseScale = v; TerrainDeformer.ApplyDeformation(); },
+            0.001f, 0.2f, 0.001f, "F3"));
+
+        _settings.Add(new Setting("Terrain Noise Seed",
+            () => TerrainDeformer.NoiseSeed,
+            v => { TerrainDeformer.NoiseSeed = v; TerrainDeformer.ApplyDeformation(); },
+            0, 1000, 1, "F0"));
+
+        // --- SAVE/LOAD ---
+        _settings.Add(new Setting("--- PRESETS ---", () => 0, v => {}, 0, 0, 0));
+        _settings.Add(new Setting("[SAVE 1:HI-END]", () => 0, v => SavePreset(1), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[SAVE 2:CUSTOM]", () => 0, v => SavePreset(2), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[SAVE 3:SAFE]", () => 0, v => SavePreset(3), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[LOAD 1:HI-END]", () => 0, v => LoadPreset(1), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[LOAD 2:CUSTOM]", () => 0, v => LoadPreset(2), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[LOAD 3:SAFE]", () => 0, v => LoadPreset(3), 0, 1, 1, "F0"));
+        _settings.Add(new Setting("[SAVE TO LOG]", () => 0, v => SaveToLog(), 0, 1, 1, "F0"));
+
+        // --- EXTRA ---
+        _settings.Add(new Setting("--- EXTRA ---", () => 0, v => {}, 0, 0, 0));
+        _settings.Add(new Setting("Sky Rotation Speed",
+            () => SkyRotator.RotationSpeed,
+            v => SkyRotator.RotationSpeed = v,
+            -5, 5, 0.01f, "F2"));
+    }
+
+    void BuildSectionIndex()
+    {
+        _sectionStarts.Clear();
+        for (int i = 0; i < _settings.Count; i++)
+        {
+            if (_settings[i].step == 0 && _settings[i].name.StartsWith("---"))
+                _sectionStarts.Add(i);
+        }
+    }
+
+    int GetCurrentSectionIndex()
+    {
+        for (int i = _sectionStarts.Count - 1; i >= 0; i--)
+        {
+            if (_selectedRow >= _sectionStarts[i]) return i;
+        }
+        return 0;
+    }
+
+    void JumpToSection(int sectionIdx)
+    {
+        sectionIdx = Mathf.Clamp(sectionIdx, 0, _sectionStarts.Count - 1);
+        _currentSection = sectionIdx;
+        _selectedRow = _sectionStarts[sectionIdx];
+        // Jump to first editable row in section
+        while (_selectedRow < _settings.Count && _settings[_selectedRow].step == 0)
+            _selectedRow++;
+        if (_selectedRow >= _settings.Count)
+            _selectedRow = _sectionStarts[sectionIdx];
     }
 
     static Light FindMainLight()
@@ -411,7 +823,7 @@ public class VRQualityMenu : MonoBehaviour
         _canvas.AddComponent<CanvasScaler>();
 
         var rt = _canvas.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(700, 40 + _settings.Count * 28);
+        rt.sizeDelta = new Vector2(700, 40 + VISIBLE_ROWS * 28 + 30);
         rt.localScale = Vector3.one * 0.0008f;
 
         // Background
@@ -428,9 +840,9 @@ public class VRQualityMenu : MonoBehaviour
         var fpsGo = MakeText(bg.transform, "", 20, Color.green, new Vector2(10, -5), new Vector2(680, 28));
         _fpsText = fpsGo.GetComponent<Text>();
 
-        // Rows
-        _rowTexts = new Text[_settings.Count];
-        for (int i = 0; i < _settings.Count; i++)
+        // Visible rows (scrollable window)
+        _rowTexts = new Text[VISIBLE_ROWS];
+        for (int i = 0; i < VISIBLE_ROWS; i++)
         {
             float y = -33 - i * 28;
             var go = MakeText(bg.transform, "", 18, Color.white, new Vector2(10, y), new Vector2(680, 26));
@@ -438,8 +850,8 @@ public class VRQualityMenu : MonoBehaviour
         }
 
         // Footer
-        MakeText(bg.transform, "R.STICK ^v select  |  L.TRIGGER -  R.TRIGGER +  |  [B]/[Y] hide",
-            14, new Color(0.5f, 0.5f, 0.5f), new Vector2(10, -33 - _settings.Count * 28), new Vector2(680, 22));
+        MakeText(bg.transform, "R.STICK ^v select <> section | L.TRIG - R.TRIG + | [B]/[Y] hide",
+            14, new Color(0.5f, 0.5f, 0.5f), new Vector2(10, -33 - VISIBLE_ROWS * 28), new Vector2(680, 22));
     }
 
     GameObject MakeText(Transform parent, string txt, int size, Color col, Vector2 pos, Vector2 sz)
@@ -471,8 +883,8 @@ public class VRQualityMenu : MonoBehaviour
             _fpsTimer = 0;
         }
 
-        // Toggle -- Menu button (hamburger/three lines) on left controller
-        if (OVRInput.GetDown(OVRInput.Button.Start))
+        // Toggle
+        if (OVRInput.GetDown(OVRInput.Button.Two) || OVRInput.GetDown(OVRInput.Button.Start))
         {
             _visible = !_visible;
             _canvas.SetActive(_visible);
@@ -515,6 +927,25 @@ public class VRQualityMenu : MonoBehaviour
             _inputCooldown = 0.2f;
         }
 
+        // Left/right = jump between sections
+        if (stick.x > 0.5f)
+        {
+            int sec = GetCurrentSectionIndex();
+            JumpToSection(sec + 1);
+            _inputCooldown = 0.25f;
+        }
+        else if (stick.x < -0.5f)
+        {
+            int sec = GetCurrentSectionIndex();
+            JumpToSection(sec - 1);
+            _inputCooldown = 0.25f;
+        }
+
+        // Keep selected row in visible scroll window
+        if (_selectedRow < _scrollOffset) _scrollOffset = _selectedRow;
+        if (_selectedRow >= _scrollOffset + VISIBLE_ROWS) _scrollOffset = _selectedRow - VISIBLE_ROWS + 1;
+        _scrollOffset = Mathf.Clamp(_scrollOffset, 0, Mathf.Max(0, _settings.Count - VISIBLE_ROWS));
+
         // Adjust with triggers: RIGHT = increase, LEFT = decrease
         if (rightTrigger > 0.5f)
         {
@@ -532,17 +963,22 @@ public class VRQualityMenu : MonoBehaviour
         // Update display
         string col = _fps >= 60 ? "#00ff00" : _fps >= 36 ? "#ffff00" : "#ff3333";
         long mem = UnityEngine.Profiling.Profiler.GetTotalAllocatedMemoryLong() / 1024 / 1024;
-        _fpsText.text = $"<color={col}>FPS: {_fps:F0}</color>  Mem: {mem}MB  Frame: {Time.frameCount}";
+        int secIdx = GetCurrentSectionIndex();
+        string secName = secIdx < _sectionStarts.Count ? _settings[_sectionStarts[secIdx]].name.Replace("---", "").Trim() : "";
+        _fpsText.text = $"<color={col}>FPS: {_fps:F0}</color>  Mem: {mem}MB  <color=#00ffff>{secName}</color> [{secIdx+1}/{_sectionStarts.Count}]";
 
-        for (int i = 0; i < _settings.Count; i++)
+        for (int vi = 0; vi < VISIBLE_ROWS; vi++)
         {
-            var s = _settings[i];
-            bool selected = (i == _selectedRow);
+            int si = vi + _scrollOffset;
+            if (si >= _settings.Count) { _rowTexts[vi].text = ""; continue; }
+
+            var s = _settings[si];
+            bool selected = (si == _selectedRow);
             bool isHeader = (s.step == 0);
 
             if (isHeader)
             {
-                _rowTexts[i].text = $"<color=#888888>{s.name}</color>";
+                _rowTexts[vi].text = $"<color=#888888>{s.name}</color>";
             }
             else
             {
@@ -556,7 +992,7 @@ public class VRQualityMenu : MonoBehaviour
                     int filled = Mathf.Clamp((int)(pct * 12), 0, 12);
                     bar = " [" + new string('|', filled) + new string('.', 12 - filled) + "]";
                 }
-                _rowTexts[i].text = $"<color={c}>{arrow}{s.name}: {val}{bar}</color>";
+                _rowTexts[vi].text = $"<color={c}>{arrow}{s.name}: {val}{bar}</color>";
             }
         }
     }
@@ -579,11 +1015,78 @@ public class VRQualityMenu : MonoBehaviour
         sb.AppendLine("### PLAGA44_SETTINGS_BEGIN ###");
         foreach (var s in _settings)
         {
-            if (s.step == 0) continue; // skip headers
-            if (s.name == "[SAVE TO LOG]" || s.name == "[PRESET]") continue;
+            if (s.step == 0) continue;
+            if (s.name.StartsWith("[")) continue;
             sb.AppendLine($"{s.name} = {s.get().ToString(s.format)}");
         }
         sb.AppendLine("### PLAGA44_SETTINGS_END ###");
         Debug.Log(sb.ToString());
+    }
+
+    void SavePreset(int slot)
+    {
+        var sb = new System.Text.StringBuilder();
+        foreach (var s in _settings)
+        {
+            if (s.step == 0) continue;
+            if (s.name.StartsWith("[")) continue;
+            sb.Append($"{s.name}={s.get().ToString("F4", System.Globalization.CultureInfo.InvariantCulture)};");
+        }
+        string key = $"PLAGA44_PRESET_{slot}";
+        PlayerPrefs.SetString(key, sb.ToString());
+        PlayerPrefs.Save();
+        Debug.Log($"[PLAGA44] Preset {slot} SAVED ({_settings.Count} values)");
+    }
+
+    void LoadPreset(int slot)
+    {
+        string key = $"PLAGA44_PRESET_{slot}";
+        string data = PlayerPrefs.GetString(key, "");
+
+        // Hardcoded presets -- ALWAYS use these for slot 1 and 3
+        if (slot == 1) data = PresetHiEnd.Data;
+        else if (slot == 3) data = PresetSafe.Data;
+        if (string.IsNullOrEmpty(data))
+        {
+            Debug.LogWarning($"[PLAGA44] Preset {slot} is EMPTY");
+            return;
+        }
+
+        // Parse "Name=Value;Name=Value;..."
+        var pairs = data.Split(';');
+        var lookup = new System.Collections.Generic.Dictionary<string, float>();
+        foreach (var pair in pairs)
+        {
+            if (string.IsNullOrEmpty(pair)) continue;
+            var kv = pair.Split('=');
+            if (kv.Length == 2)
+            {
+                // Try invariant (dot) first, then comma-locale fallback
+                string valStr = kv[1].Trim();
+                if (float.TryParse(valStr, System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out float val))
+                {
+                    lookup[kv[0]] = val;
+                }
+                else if (float.TryParse(valStr.Replace(',', '.'), System.Globalization.NumberStyles.Float,
+                    System.Globalization.CultureInfo.InvariantCulture, out float val2))
+                {
+                    lookup[kv[0]] = val2;
+                }
+            }
+        }
+
+        int applied = 0;
+        foreach (var s in _settings)
+        {
+            if (s.step == 0 || s.name.StartsWith("[")) continue;
+            if (lookup.TryGetValue(s.name, out float val))
+            {
+                s.set(val);
+                applied++;
+            }
+        }
+
+        Debug.Log($"[PLAGA44] Preset {slot} LOADED ({applied} values applied)");
     }
 }
