@@ -35,13 +35,15 @@ public class PlayerAvatar : MonoBehaviour
 
     void Start()
     {
-        // Find OVR rig
+        Debug.Log("[AVATAR] PlayerAvatar.Start() -- looking for OVRCameraRig...");
+
         var rig = FindAnyObjectByType<OVRCameraRig>();
         if (rig == null)
         {
-            Debug.LogWarning("[PLAGA44] PlayerAvatar: no OVRCameraRig -- skipping");
+            Debug.LogWarning("[AVATAR] no OVRCameraRig -- skipping");
             return;
         }
+        Debug.Log($"[AVATAR] OVRCameraRig found: {rig.name}");
 
         // Get anchors
         _hmdAnchor = rig.centerEyeAnchor;

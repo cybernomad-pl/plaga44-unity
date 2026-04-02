@@ -42,24 +42,33 @@ public class ModelSpawner : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("[SPAWNER] ModelSpawner.Start() -- loading models from Resources/PLAGA44/...");
+
         // Load all models from Resources
-        var models = Resources.LoadAll<GameObject>("PLAGA44");
-        foreach (var m in models)
+        var allAssets = Resources.LoadAll<GameObject>("PLAGA44");
+        Debug.Log($"[SPAWNER] Resources.LoadAll found {allAssets.Length} GameObjects total");
+
+        foreach (var m in allAssets)
         {
-            // Skip non-mesh
-            if (m.GetComponentInChildren<MeshFilter>() == null &&
-                m.GetComponentInChildren<SkinnedMeshRenderer>() == null) continue;
+            bool hasMesh = m.GetComponentInChildren<MeshFilter>() != null;
+            bool hasSkinned = m.GetComponentInChildren<SkinnedMeshRenderer>() != null;
+            Debug.Log($"[SPAWNER]   checking: {m.name} mesh={hasMesh} skinned={hasSkinned}");
+
+            if (!hasMesh && !hasSkinned) continue;
 
             string path = GetResourcePath(m);
             _modelPaths.Add(path);
             _modelNames.Add(m.name);
+            Debug.Log($"[SPAWNER]   ADDED: {m.name} -> {path}");
         }
 
         if (_modelPaths.Count > 0)
             selectedName = _modelNames[0];
+        else
+            Debug.LogWarning("[SPAWNER] NO MODELS FOUND IN RESOURCES!");
 
         CreateHUD();
-        Debug.Log($"[PLAGA44] ModelSpawner: {_modelPaths.Count} models loaded. RIGHT stick = browse/scale, RIGHT trigger = spawn.");
+        Debug.Log($"[SPAWNER] READY: {_modelPaths.Count} models. RIGHT stick=browse/scale, RIGHT trigger=spawn, Y=delete.");
     }
 
     string GetResourcePath(GameObject obj)
@@ -123,13 +132,16 @@ public class ModelSpawner : MonoBehaviour
         // RIGHT INDEX TRIGGER = spawn
         if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
         {
+            Debug.Log($"[SPAWNER] RIGHT TRIGGER pressed -- spawning '{selectedName}' (idx={selectedIndex})");
             SpawnSelected();
         }
 
-        // Y BUTTON = delete last spawned
-        if (OVRInput.GetDown(OVRInput.Button.Four)) // Y
+        // Y BUTTON = delete last spawned (with debounce)
+        if (OVRInput.GetDown(OVRInput.Button.Four) && _scrollCooldown <= 0f) // Y
         {
+            Debug.Log($"[SPAWNER] Y pressed -- deleting last ({_spawned.Count} total)");
             DeleteLast();
+            _scrollCooldown = 0.5f; // debounce 500ms
         }
     }
 
