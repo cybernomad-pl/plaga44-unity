@@ -92,14 +92,46 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} PoseRecorder dodany do sceny. A/X = keyframe wszystkich NPC.");
         }
 
+        // Mapowanie wariant -> model OBJ
+        private static readonly Dictionary<string, string> VariantModelMap = new Dictionary<string, string>
+        {
+            { "PINEA_base",        "Assets/PLAGA44/NPC/PINEA/Model/PINEA.obj" },
+            { "PINEA_v1_tactical", "Assets/PLAGA44/NPC/PINEA/Model/PINEA.obj" },
+            { "PINEA_v2_military", "Assets/PLAGA44/NPC/PINEA/Model/PINEA.obj" },
+            { "PINEA_v3_gambeson", "Assets/PLAGA44/NPC/PINEA/Model/PINEA.obj" },
+            { "PINEA_v4_doublet",  "Assets/PLAGA44/NPC/PINEA/Model/PINEA.obj" },
+            { "PINEA_v5_masked",   "Assets/PLAGA44/NPC/PINEA/Model/PINEA.obj" },
+            { "PINEA_v6_gasmask",  "Assets/PLAGA44/NPC/PINEA-NEO/Model/PINEA-NEO.obj" },
+        };
+
         private static GameObject BuildPoseableNPC(string variantName)
         {
             // Root
             GameObject root = new GameObject(variantName);
 
-            // Animator (pusty -- do pozniejszego przypięcia AnimatorController)
+            // Animator
             var animator = root.AddComponent<Animator>();
             animator.applyRootMotion = false;
+
+            // --- Zaladuj mesh z OBJ ---
+            string modelPath = VariantModelMap.ContainsKey(variantName)
+                ? VariantModelMap[variantName]
+                : "Assets/PLAGA44/NPC/PINEA/Model/PINEA.obj";
+
+            var modelAsset = AssetDatabase.LoadAssetAtPath<GameObject>(modelPath);
+            if (modelAsset != null)
+            {
+                var meshInstance = (GameObject)PrefabUtility.InstantiatePrefab(modelAsset);
+                meshInstance.name = variantName + "_Mesh";
+                meshInstance.transform.SetParent(root.transform);
+                meshInstance.transform.localPosition = Vector3.zero;
+                meshInstance.transform.localRotation = Quaternion.identity;
+                Debug.Log($"{LOG} Model zaladowany: {modelPath}");
+            }
+            else
+            {
+                Debug.LogWarning($"{LOG} Model nie znaleziony: {modelPath} -- spawning bez mesha");
+            }
 
             // --- Meta FullBody Rig ---
             // Nazwy kosci = OVRPlugin.BoneId.FullBody_* (gotowe do retargetingu)
