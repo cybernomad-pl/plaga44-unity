@@ -227,7 +227,7 @@ public class SceneDefaults : MonoBehaviour
     {
         var cam = Camera.main;
         if (cam == null) return;
-        cam.nearClipPlane = 0.01f;
+        cam.nearClipPlane = 0.15f; // avoid seeing inside avatar/models
         cam.farClipPlane = 2000f;
     }
 
