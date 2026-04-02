@@ -126,6 +126,7 @@ namespace Plaga44.Editor
                 meshInstance.transform.SetParent(root.transform);
                 meshInstance.transform.localPosition = Vector3.zero;
                 meshInstance.transform.localRotation = Quaternion.identity;
+                meshInstance.transform.localScale = Vector3.one * 0.01f; // Fuse exports in cm, Unity = meters
                 Debug.Log($"{LOG} Model zaladowany: {modelPath}");
             }
             else
