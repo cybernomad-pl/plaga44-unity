@@ -210,7 +210,7 @@ namespace Plaga44.Editor
                 new Vector3(0f, 0f, 0.1f), BoneShape.Sphere, 0.03f);
 
             // Dodaj wizualne placeholder mesze (debug wireframe)
-            AddBoneVisuals(root);
+            // AddBoneVisuals(root); // debug sfery wylaczone -- mamy prawdziwe mesze
 
             // Oznacz variant info
             var info = root.AddComponent<NPCVariantInfo>();

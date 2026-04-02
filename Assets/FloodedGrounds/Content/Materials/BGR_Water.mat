@@ -143,7 +143,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AddPrecomputedVelocity: 0
-    - _Alpha: 0.711
+    - _Alpha: 0.707
     - _AlphaClip: 0
     - _AlphaToMask: 0
     - _Blend: 0
@@ -162,10 +162,10 @@ Material:
     - _DetailTiling: 10
     - _DstBlend: 0
     - _DstBlendAlpha: 0
-    - _Emis: 0.173
+    - _Emis: 0.312
     - _EnvironmentReflections: 1
-    - _FoamDepth: 0.78
-    - _FoamStr: 0.12
+    - _FoamDepth: 0.61
+    - _FoamStr: 0.27
     - _Fresnel: 1
     - _FresnelPow: 7.01
     - _FresnelScale: 0.75
@@ -174,7 +174,7 @@ Material:
     - _Glossiness: 2.1641788
     - _GlossyReflections: 0
     - _InvertValue: 0
-    - _Metallic: 0.307
+    - _Metallic: 0.21
     - _OcclusionStrength: 1
     - _Opacity: 0.75
     - _Parallax: 0.0313
@@ -190,12 +190,12 @@ Material:
     - _RimWidth: 3
     - _SSSIntensity: 0.5
     - _SSSPower: 1
-    - _ScrollSpeed: 0.003
+    - _ScrollSpeed: 0.007
     - _Shift: 0
     - _Shininess: 0.6012862
     - _Smoothness: 1
     - _SmoothnessTextureChannel: 0
-    - _Smth: 0.788
+    - _Smth: 0.423
     - _SpecContrast: 2
     - _SpecIntensity: 2.3
     - _SpecularHighlights: 1
@@ -203,10 +203,10 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 0
     - _Transparency: 0.95
-    - _UVScale: 1.4
+    - _UVScale: 3.7
     - _WaveComplexity: 0.5
-    - _WaveFreq: 1.5
-    - _WaveHeight: 0.033
+    - _WaveFreq: 0.8
+    - _WaveHeight: 0.05
     - _WavePower: 1.4029856
     - _WaveScale: 0.058
     - _WaveSteepness: 0.3
@@ -223,13 +223,13 @@ Material:
     - _BaseColor: {r: 0.4, g: 0.45, b: 0.42, a: 0.5}
     - _BumpDirection: {r: 1, g: 1, b: -1, a: 1}
     - _BumpTiling: {r: 1, g: 1, b: -2, a: 3}
-    - _Color: {r: 0.45, g: 0.525, b: 0.616, a: 1}
+    - _Color: {r: 0.318, g: 0.381, b: 0.404, a: 1}
     - _ColorTint: {r: 0.74509805, g: 0.7023594, b: 0.5727028, a: 1}
     - _DistortParams: {r: 1, g: 1, b: 2, a: 1.15}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Foam: {r: 0.1, g: 0.375, b: 0, a: 0}
-    - _FoamColor: {r: 0.85, g: 0.9, b: 0.85, a: 0.8}
+    - _FoamColor: {r: 0.772, g: 0.836, b: 0.764, a: 0.8}
     - _GAmplitude: {r: 0.3, g: 0.35, b: 0.25, a: 0.25}
     - _GDirectionAB: {r: 0.3, g: 0.85, b: 0.85, a: 0.25}
     - _GDirectionCD: {r: 0.1, g: 0.9, b: 0.5, a: 0.5}
