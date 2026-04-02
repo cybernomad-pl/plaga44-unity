@@ -1,5 +1,0 @@
-C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/.utmp/RelWithDebInfo/1x3w6y5v/arm64-v8a/CMakeFiles/edit_cache.dir
-C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/.utmp/RelWithDebInfo/1x3w6y5v/arm64-v8a/CMakeFiles/rebuild_cache.dir
-C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/.utmp/RelWithDebInfo/1x3w6y5v/arm64-v8a/GameActivity/CMakeFiles/game.dir
-C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/.utmp/RelWithDebInfo/1x3w6y5v/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
-C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/.utmp/RelWithDebInfo/1x3w6y5v/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir
