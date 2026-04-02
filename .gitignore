@@ -1,0 +1,72 @@
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]serSettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# IDE
+/.vs/
+/.vscode/
+/.idea/
+*.csproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Crashes
+sysinfo.txt
+crashlytics-build.properties
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Source template packs (not part of project -- assets extracted to Assets/PLAGA44/)
+Assets/FloodedGrounds/
+Assets/FloodedGrounds.meta
+Assets/SwordAndPistol/
+Assets/SwordAndPistol.meta
+
+# Large binary assets (GitHub 100MB limit)
+*.fbx
+*.FBX
+*.blend
+*.obj
+*.max
+*.mb
+*.ma
+*.ztl
+*.psd
+*.tga
+*.tif
+*.tiff
+*.exr
+*.wav
+*.mp3
+*.ogg
+*.mp4
+*.mov
+
+# Legacy scenes
+Setup.unity
+Setup.unity.meta

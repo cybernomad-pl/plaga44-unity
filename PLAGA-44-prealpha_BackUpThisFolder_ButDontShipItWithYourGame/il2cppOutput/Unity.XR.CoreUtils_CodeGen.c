@@ -1,0 +1,486 @@
+﻿#include "pch-c.h"
+
+
+#include "codegen/il2cpp-codegen-metadata.h"
+
+
+
+
+
+extern void ARTrackablesParentTransformChangedEventArgs_get_Origin_m91D7C3638FBF94D468AD4467ABB2EC9500753F25 (void);
+extern void ARTrackablesParentTransformChangedEventArgs_get_TrackablesParent_m89F1B7B428A07F5142AEC2BF32A83B35B52C0425 (void);
+extern void ARTrackablesParentTransformChangedEventArgs__ctor_m46B5D18DF81A7296E36E37917E69AB9E748B6278 (void);
+extern void ARTrackablesParentTransformChangedEventArgs_Equals_m8CAA7BD42F09BF7349818EF3166792652FB9F4AE (void);
+extern void ARTrackablesParentTransformChangedEventArgs_Equals_mE6F5F659DD06166ACDDCE62B0652F014568D003B (void);
+extern void ARTrackablesParentTransformChangedEventArgs_GetHashCode_mA5FDE9D7D0F5F079886AA4C5DF806E082C725161 (void);
+extern void ScriptableSettingsPathAttribute__ctor_mC942C941C139A27C8B05E732EF21E6E2FFF9E808 (void);
+extern void TransformExtensions_GetLocalPose_m1DE50F03B6211C35AD0445A50626F97771B4321D (void);
+extern void TransformExtensions_SetLocalPose_m15B9FAC87B7B05C750A6D8FD77A0768818CFB7D4 (void);
+extern void TransformExtensions_SetWorldPose_mD1B6C71C60FB650943C8CC11546F26F3F28E4FDE (void);
+extern void TransformExtensions_TransformPose_m4047A2A74919D9C435751B65FF41503A32611B51 (void);
+extern void TypeExtensions_GetAssignableTypes_m7EB47C8D3E37D11462B285D5D16BA664A9B24142 (void);
+extern void TypeExtensions__cctor_mD85D49F1687F527C722D5A5261E2B65E2D6D6778 (void);
+extern void U3CU3Ec__DisplayClass2_0__ctor_m503826A926363EA4EAF9A0DE52DA34382B75C925 (void);
+extern void U3CU3Ec__DisplayClass2_0_U3CGetAssignableTypesU3Eb__0_m605F61DF1647ACBAF3D37F9AB38C2478C6BC5E57 (void);
+extern void HashCodeUtil_Combine_mE4BC0854C5A01EAD5211DA2ED260520F97352116 (void);
+extern void HashCodeUtil_ReferenceHash_m8CC95813163E44F2EA0D5C9D111EE0313ABCCCAF (void);
+extern void ReflectionUtils_GetCachedTypesPerAssembly_m86DA078F3122A2A8E9C28EE5F4B818F821D3C649 (void);
+extern void ReflectionUtils_ForEachType_m12D12BEAE4348C46F8E5AA2E9B49815E52DB8F14 (void);
+extern void ScriptableSettingsBase_GetInstanceByType_mDFE8821B150DD82581A25676A95EC50B494A835B (void);
+extern void ScriptableSettingsBase_OnEnable_m0157D649A6242B26149407B9B55F14985BCD4BAF (void);
+extern void ScriptableSettingsBase_OnLoaded_mBB3F1122638C208CA6F9E3EE0D70A86701401563 (void);
+extern void ScriptableSettingsBase_ValidatePath_m6F745ADC48CADCCC7DF26D660CE0DDBB446222BB (void);
+extern void ScriptableSettingsBase__ctor_mA76719D647AA7F514E58FE1571177FFA8440F558 (void);
+extern void ScriptableSettingsBase__cctor_mEA148991272FE8DE91DF2E77BC06A6C962D3BFAE (void);
+extern void UnityObjectUtils_Destroy_mFA9A21EE17656D12F1B126AD9C2CC4EDFD35F157 (void);
+extern void XRLoggingUtils__cctor_mCC38DDF72BDD9B437EE570D7D60F2A8117657A2A (void);
+extern void XRLoggingUtils_LogWarning_m58F15039BFEC116B7AE4555A526AC7CB9EDABB7A (void);
+extern void XROrigin_get_Camera_m8959027D616F5BD9AEAE3E41ADEE23BBC2CE3629 (void);
+extern void XROrigin_set_Camera_m4C858ED48CE3A20504A55FAA1A24FE05D1CC450B (void);
+extern void XROrigin_get_TrackablesParent_m6F7933DF03A5376C31D328F865F77D28EEC18E9C (void);
+extern void XROrigin_set_TrackablesParent_m2E813980627386E9DE2EA90D39FEEFAF80F31BC5 (void);
+extern void XROrigin_add_TrackablesParentTransformChanged_m04D2A05E3000931435B7F4CAC332E0EC2693B1EF (void);
+extern void XROrigin_remove_TrackablesParentTransformChanged_m5517FF0B97A3705A7F03F8E42092165C6666163C (void);
+extern void XROrigin_get_Origin_mCE6A3B327ACE6FAEDCC67A9DC952FEED191C26B6 (void);
+extern void XROrigin_set_Origin_m832CE9176B8C54EDC64059AFC67807EFE078249E (void);
+extern void XROrigin_get_CameraFloorOffsetObject_m24DB58FD33D0D5436DC3A6F023D8780C1B82FD07 (void);
+extern void XROrigin_set_CameraFloorOffsetObject_m3182CAC8A600DB7EF22432EA3B71BF76A21C4839 (void);
+extern void XROrigin_get_RequestedTrackingOriginMode_m8475634D9A0C8ECA371A3F2EC216A55F7D2F2D3C (void);
+extern void XROrigin_set_RequestedTrackingOriginMode_m3B166DBAA7C7B18C63EBEA83A308911C094DF554 (void);
+extern void XROrigin_get_CameraYOffset_m223B472CA64A210F0F315A503FF621A6C74EC2A3 (void);
+extern void XROrigin_set_CameraYOffset_mE11AF77FBC8B774E6CED34B10960AC9F747B67D1 (void);
+extern void XROrigin_get_CurrentTrackingOriginMode_m3117576FC85371E692EFFA853AF5297CEF150589 (void);
+extern void XROrigin_set_CurrentTrackingOriginMode_mD2DF2D77407214FFDBED47C114DB0C1348C4F84E (void);
+extern void XROrigin_get_OriginInCameraSpacePos_mF8CAAA59DDF4635AD3D7B1237B0742AA9BE283E6 (void);
+extern void XROrigin_get_CameraInOriginSpacePos_m6646CE94E1798A767E559EB1D785D00AE8C68EB1 (void);
+extern void XROrigin_get_CameraInOriginSpaceHeight_m1DC15C0A56A969838A827F425ABBED375751BFC5 (void);
+extern void XROrigin_MoveOffsetHeight_m6336FBEAEA9FA0742D0B1740E2316A9CABDAA7AF (void);
+extern void XROrigin_MoveOffsetHeight_mF0B8B1C8D45F9EF0D2DD9534B443D6EC2A9FC248 (void);
+extern void XROrigin_TryInitializeCamera_mA9C7C0C6C44A0694CDA78FD55D1952E9506717C3 (void);
+extern void XROrigin_SetupCamera_mE5719DCA5F732BE1D7BA0F543C614851A9D43655 (void);
+extern void XROrigin_SetupCamera_mB2D4BC328855A681FAE0D20BB2011E44C98A0E89 (void);
+extern void XROrigin_OnInputSubsystemTrackingOriginUpdated_m1D58DF267E36A73C5C5C5E155284D64D83810FD9 (void);
+extern void XROrigin_RepeatInitializeCamera_mB5CEC27430D87F2017CFD3DAEC8275D68D71F319 (void);
+extern void XROrigin_RotateAroundCameraUsingOriginUp_m42AE0DFCFBA84AC3CBAAB74D78FB1EA361102EA2 (void);
+extern void XROrigin_RotateAroundCameraPosition_m7E496775B85028CDE1EDA5DFEFC36350F371AA59 (void);
+extern void XROrigin_MatchOriginUp_m21E7F97625F9C616B757226DB083A8FE00297D1C (void);
+extern void XROrigin_MatchOriginUpCameraForward_m8D6A19292733DBEA380BF94DF74A6F9BC33E1F90 (void);
+extern void XROrigin_MatchOriginUpOriginForward_m6BB0CD69861590B4CA6F850D6824A47B37D2D5D3 (void);
+extern void XROrigin_MoveCameraToWorldLocation_m7AA0DF514F9F8E9E68541C314FAB868D043E5B4D (void);
+extern void XROrigin_Awake_mFC495553BD50D97BCE9BB513A9B2D4C2262B21A0 (void);
+extern void XROrigin_GetCameraOriginPose_m8FBEAA33C27E17B6F461C20C6E53B51E6CDAFFCB (void);
+extern void XROrigin_OnEnable_mFD45AFA9DDB9FE432E6037D592DCEDBD28DF3ECA (void);
+extern void XROrigin_OnDisable_m26B6FCDEAC250714CDEAC57039B8ADE42B1B411C (void);
+extern void XROrigin_OnBeforeRender_m4D292D007D30840EE0BBEE60BB1EF3E1FB3DF018 (void);
+extern void XROrigin_OnValidate_m26B16F4C6A9414A815BDED9E3C3075C9AA2E2AD3 (void);
+extern void XROrigin_ConvertTrackingOriginModeToFlag_mF88BE342675DA498A47141BAAC03E249A77E7D8F (void);
+extern void XROrigin_Start_m7F0D352F4EBEC07BE7C779E8B2997E6121C2E445 (void);
+extern void XROrigin_OnDestroy_m90EB715086F324C473AA55917913EF5F130ED2DE (void);
+extern void XROrigin__ctor_mD5AE064CEEF8128D772FABADBA6CDC2993C8079A (void);
+extern void XROrigin__cctor_m07732DF2A1B8B4A195B2671173B9F89B8DDD776B (void);
+extern void XROrigin_U3COnValidateU3Eg__IsModeStaleU7C60_0_mB0B1ACE8BD4524258867625EA557440EF4CA5C30 (void);
+extern void U3CRepeatInitializeCameraU3Ed__48__ctor_mEA756E5C40DFD2B29DAAEC516D2C2C4EC21837BA (void);
+extern void U3CRepeatInitializeCameraU3Ed__48_System_IDisposable_Dispose_m90C7F4D459D9169823A8741D4D8A8C4B7F097E1D (void);
+extern void U3CRepeatInitializeCameraU3Ed__48_MoveNext_m360FC31D4B39708F2973FBB50495B52C8E07A045 (void);
+extern void U3CRepeatInitializeCameraU3Ed__48_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_mCD469BF5623FB12496FA276FD3960E2E0C3038F1 (void);
+extern void U3CRepeatInitializeCameraU3Ed__48_System_Collections_IEnumerator_Reset_m5A0B2B0CD539415D4C1A16942B2E63B08DBA95D0 (void);
+extern void U3CRepeatInitializeCameraU3Ed__48_System_Collections_IEnumerator_get_Current_m083AEC9CB984904F6E211766D5A4AAA0A8F17BDF (void);
+static Il2CppMethodPointer s_methodPointers[116] = 
+{
+	ARTrackablesParentTransformChangedEventArgs_get_Origin_m91D7C3638FBF94D468AD4467ABB2EC9500753F25,
+	ARTrackablesParentTransformChangedEventArgs_get_TrackablesParent_m89F1B7B428A07F5142AEC2BF32A83B35B52C0425,
+	ARTrackablesParentTransformChangedEventArgs__ctor_m46B5D18DF81A7296E36E37917E69AB9E748B6278,
+	ARTrackablesParentTransformChangedEventArgs_Equals_m8CAA7BD42F09BF7349818EF3166792652FB9F4AE,
+	ARTrackablesParentTransformChangedEventArgs_Equals_mE6F5F659DD06166ACDDCE62B0652F014568D003B,
+	ARTrackablesParentTransformChangedEventArgs_GetHashCode_mA5FDE9D7D0F5F079886AA4C5DF806E082C725161,
+	ScriptableSettingsPathAttribute__ctor_mC942C941C139A27C8B05E732EF21E6E2FFF9E808,
+	TransformExtensions_GetLocalPose_m1DE50F03B6211C35AD0445A50626F97771B4321D,
+	TransformExtensions_SetLocalPose_m15B9FAC87B7B05C750A6D8FD77A0768818CFB7D4,
+	TransformExtensions_SetWorldPose_mD1B6C71C60FB650943C8CC11546F26F3F28E4FDE,
+	TransformExtensions_TransformPose_m4047A2A74919D9C435751B65FF41503A32611B51,
+	TypeExtensions_GetAssignableTypes_m7EB47C8D3E37D11462B285D5D16BA664A9B24142,
+	TypeExtensions__cctor_mD85D49F1687F527C722D5A5261E2B65E2D6D6778,
+	U3CU3Ec__DisplayClass2_0__ctor_m503826A926363EA4EAF9A0DE52DA34382B75C925,
+	U3CU3Ec__DisplayClass2_0_U3CGetAssignableTypesU3Eb__0_m605F61DF1647ACBAF3D37F9AB38C2478C6BC5E57,
+	HashCodeUtil_Combine_mE4BC0854C5A01EAD5211DA2ED260520F97352116,
+	HashCodeUtil_ReferenceHash_m8CC95813163E44F2EA0D5C9D111EE0313ABCCCAF,
+	ReflectionUtils_GetCachedTypesPerAssembly_m86DA078F3122A2A8E9C28EE5F4B818F821D3C649,
+	ReflectionUtils_ForEachType_m12D12BEAE4348C46F8E5AA2E9B49815E52DB8F14,
+	NULL,
+	NULL,
+	NULL,
+	ScriptableSettingsBase_GetInstanceByType_mDFE8821B150DD82581A25676A95EC50B494A835B,
+	ScriptableSettingsBase_OnEnable_m0157D649A6242B26149407B9B55F14985BCD4BAF,
+	ScriptableSettingsBase_OnLoaded_mBB3F1122638C208CA6F9E3EE0D70A86701401563,
+	ScriptableSettingsBase_ValidatePath_m6F745ADC48CADCCC7DF26D660CE0DDBB446222BB,
+	ScriptableSettingsBase__ctor_mA76719D647AA7F514E58FE1571177FFA8440F558,
+	ScriptableSettingsBase__cctor_mEA148991272FE8DE91DF2E77BC06A6C962D3BFAE,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	UnityObjectUtils_Destroy_mFA9A21EE17656D12F1B126AD9C2CC4EDFD35F157,
+	XRLoggingUtils__cctor_mCC38DDF72BDD9B437EE570D7D60F2A8117657A2A,
+	XRLoggingUtils_LogWarning_m58F15039BFEC116B7AE4555A526AC7CB9EDABB7A,
+	XROrigin_get_Camera_m8959027D616F5BD9AEAE3E41ADEE23BBC2CE3629,
+	XROrigin_set_Camera_m4C858ED48CE3A20504A55FAA1A24FE05D1CC450B,
+	XROrigin_get_TrackablesParent_m6F7933DF03A5376C31D328F865F77D28EEC18E9C,
+	XROrigin_set_TrackablesParent_m2E813980627386E9DE2EA90D39FEEFAF80F31BC5,
+	XROrigin_add_TrackablesParentTransformChanged_m04D2A05E3000931435B7F4CAC332E0EC2693B1EF,
+	XROrigin_remove_TrackablesParentTransformChanged_m5517FF0B97A3705A7F03F8E42092165C6666163C,
+	XROrigin_get_Origin_mCE6A3B327ACE6FAEDCC67A9DC952FEED191C26B6,
+	XROrigin_set_Origin_m832CE9176B8C54EDC64059AFC67807EFE078249E,
+	XROrigin_get_CameraFloorOffsetObject_m24DB58FD33D0D5436DC3A6F023D8780C1B82FD07,
+	XROrigin_set_CameraFloorOffsetObject_m3182CAC8A600DB7EF22432EA3B71BF76A21C4839,
+	XROrigin_get_RequestedTrackingOriginMode_m8475634D9A0C8ECA371A3F2EC216A55F7D2F2D3C,
+	XROrigin_set_RequestedTrackingOriginMode_m3B166DBAA7C7B18C63EBEA83A308911C094DF554,
+	XROrigin_get_CameraYOffset_m223B472CA64A210F0F315A503FF621A6C74EC2A3,
+	XROrigin_set_CameraYOffset_mE11AF77FBC8B774E6CED34B10960AC9F747B67D1,
+	XROrigin_get_CurrentTrackingOriginMode_m3117576FC85371E692EFFA853AF5297CEF150589,
+	XROrigin_set_CurrentTrackingOriginMode_mD2DF2D77407214FFDBED47C114DB0C1348C4F84E,
+	XROrigin_get_OriginInCameraSpacePos_mF8CAAA59DDF4635AD3D7B1237B0742AA9BE283E6,
+	XROrigin_get_CameraInOriginSpacePos_m6646CE94E1798A767E559EB1D785D00AE8C68EB1,
+	XROrigin_get_CameraInOriginSpaceHeight_m1DC15C0A56A969838A827F425ABBED375751BFC5,
+	XROrigin_MoveOffsetHeight_m6336FBEAEA9FA0742D0B1740E2316A9CABDAA7AF,
+	XROrigin_MoveOffsetHeight_mF0B8B1C8D45F9EF0D2DD9534B443D6EC2A9FC248,
+	XROrigin_TryInitializeCamera_mA9C7C0C6C44A0694CDA78FD55D1952E9506717C3,
+	XROrigin_SetupCamera_mE5719DCA5F732BE1D7BA0F543C614851A9D43655,
+	XROrigin_SetupCamera_mB2D4BC328855A681FAE0D20BB2011E44C98A0E89,
+	XROrigin_OnInputSubsystemTrackingOriginUpdated_m1D58DF267E36A73C5C5C5E155284D64D83810FD9,
+	XROrigin_RepeatInitializeCamera_mB5CEC27430D87F2017CFD3DAEC8275D68D71F319,
+	XROrigin_RotateAroundCameraUsingOriginUp_m42AE0DFCFBA84AC3CBAAB74D78FB1EA361102EA2,
+	XROrigin_RotateAroundCameraPosition_m7E496775B85028CDE1EDA5DFEFC36350F371AA59,
+	XROrigin_MatchOriginUp_m21E7F97625F9C616B757226DB083A8FE00297D1C,
+	XROrigin_MatchOriginUpCameraForward_m8D6A19292733DBEA380BF94DF74A6F9BC33E1F90,
+	XROrigin_MatchOriginUpOriginForward_m6BB0CD69861590B4CA6F850D6824A47B37D2D5D3,
+	XROrigin_MoveCameraToWorldLocation_m7AA0DF514F9F8E9E68541C314FAB868D043E5B4D,
+	XROrigin_Awake_mFC495553BD50D97BCE9BB513A9B2D4C2262B21A0,
+	XROrigin_GetCameraOriginPose_m8FBEAA33C27E17B6F461C20C6E53B51E6CDAFFCB,
+	XROrigin_OnEnable_mFD45AFA9DDB9FE432E6037D592DCEDBD28DF3ECA,
+	XROrigin_OnDisable_m26B6FCDEAC250714CDEAC57039B8ADE42B1B411C,
+	XROrigin_OnBeforeRender_m4D292D007D30840EE0BBEE60BB1EF3E1FB3DF018,
+	XROrigin_OnValidate_m26B16F4C6A9414A815BDED9E3C3075C9AA2E2AD3,
+	XROrigin_ConvertTrackingOriginModeToFlag_mF88BE342675DA498A47141BAAC03E249A77E7D8F,
+	XROrigin_Start_m7F0D352F4EBEC07BE7C779E8B2997E6121C2E445,
+	XROrigin_OnDestroy_m90EB715086F324C473AA55917913EF5F130ED2DE,
+	XROrigin__ctor_mD5AE064CEEF8128D772FABADBA6CDC2993C8079A,
+	XROrigin__cctor_m07732DF2A1B8B4A195B2671173B9F89B8DDD776B,
+	XROrigin_U3COnValidateU3Eg__IsModeStaleU7C60_0_mB0B1ACE8BD4524258867625EA557440EF4CA5C30,
+	U3CRepeatInitializeCameraU3Ed__48__ctor_mEA756E5C40DFD2B29DAAEC516D2C2C4EC21837BA,
+	U3CRepeatInitializeCameraU3Ed__48_System_IDisposable_Dispose_m90C7F4D459D9169823A8741D4D8A8C4B7F097E1D,
+	U3CRepeatInitializeCameraU3Ed__48_MoveNext_m360FC31D4B39708F2973FBB50495B52C8E07A045,
+	U3CRepeatInitializeCameraU3Ed__48_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_mCD469BF5623FB12496FA276FD3960E2E0C3038F1,
+	U3CRepeatInitializeCameraU3Ed__48_System_Collections_IEnumerator_Reset_m5A0B2B0CD539415D4C1A16942B2E63B08DBA95D0,
+	U3CRepeatInitializeCameraU3Ed__48_System_Collections_IEnumerator_get_Current_m083AEC9CB984904F6E211766D5A4AAA0A8F17BDF,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};
+extern void ARTrackablesParentTransformChangedEventArgs_get_Origin_m91D7C3638FBF94D468AD4467ABB2EC9500753F25_AdjustorThunk (void);
+extern void ARTrackablesParentTransformChangedEventArgs_get_TrackablesParent_m89F1B7B428A07F5142AEC2BF32A83B35B52C0425_AdjustorThunk (void);
+extern void ARTrackablesParentTransformChangedEventArgs__ctor_m46B5D18DF81A7296E36E37917E69AB9E748B6278_AdjustorThunk (void);
+extern void ARTrackablesParentTransformChangedEventArgs_Equals_m8CAA7BD42F09BF7349818EF3166792652FB9F4AE_AdjustorThunk (void);
+extern void ARTrackablesParentTransformChangedEventArgs_Equals_mE6F5F659DD06166ACDDCE62B0652F014568D003B_AdjustorThunk (void);
+extern void ARTrackablesParentTransformChangedEventArgs_GetHashCode_mA5FDE9D7D0F5F079886AA4C5DF806E082C725161_AdjustorThunk (void);
+static Il2CppTokenAdjustorThunkPair s_adjustorThunks[6] = 
+{
+	{ 0x06000001, ARTrackablesParentTransformChangedEventArgs_get_Origin_m91D7C3638FBF94D468AD4467ABB2EC9500753F25_AdjustorThunk },
+	{ 0x06000002, ARTrackablesParentTransformChangedEventArgs_get_TrackablesParent_m89F1B7B428A07F5142AEC2BF32A83B35B52C0425_AdjustorThunk },
+	{ 0x06000003, ARTrackablesParentTransformChangedEventArgs__ctor_m46B5D18DF81A7296E36E37917E69AB9E748B6278_AdjustorThunk },
+	{ 0x06000004, ARTrackablesParentTransformChangedEventArgs_Equals_m8CAA7BD42F09BF7349818EF3166792652FB9F4AE_AdjustorThunk },
+	{ 0x06000005, ARTrackablesParentTransformChangedEventArgs_Equals_mE6F5F659DD06166ACDDCE62B0652F014568D003B_AdjustorThunk },
+	{ 0x06000006, ARTrackablesParentTransformChangedEventArgs_GetHashCode_mA5FDE9D7D0F5F079886AA4C5DF806E082C725161_AdjustorThunk },
+};
+static const int32_t s_InvokerIndices[116] = 
+{
+	16906,
+	16906,
+	6492,
+	9030,
+	9265,
+	16828,
+	13088,
+	25046,
+	23158,
+	23158,
+	22363,
+	21063,
+	25943,
+	17119,
+	13088,
+	22112,
+	24822,
+	25851,
+	25293,
+	-1,
+	-1,
+	-1,
+	24999,
+	17119,
+	17119,
+	21892,
+	17119,
+	25943,
+	-1,
+	-1,
+	-1,
+	-1,
+	23141,
+	25943,
+	23157,
+	16906,
+	13088,
+	16906,
+	13088,
+	13088,
+	13088,
+	16906,
+	13088,
+	16906,
+	13088,
+	16828,
+	13011,
+	17015,
+	13183,
+	16828,
+	13011,
+	17108,
+	17108,
+	17015,
+	17119,
+	13183,
+	17119,
+	16701,
+	9265,
+	13088,
+	16906,
+	9359,
+	3939,
+	9449,
+	3940,
+	3940,
+	9449,
+	17119,
+	16941,
+	17119,
+	17119,
+	17119,
+	17119,
+	24818,
+	17119,
+	17119,
+	17119,
+	25943,
+	16701,
+	13011,
+	17119,
+	16701,
+	16906,
+	17119,
+	16906,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+	-1,
+};
+static const Il2CppTokenRangePair s_rgctxIndices[5] = 
+{
+	{ 0x02000009, { 0, 9 } },
+	{ 0x0200000B, { 9, 4 } },
+	{ 0x02000011, { 13, 15 } },
+	{ 0x02000012, { 28, 18 } },
+	{ 0x02000013, { 46, 11 } },
+};
+extern const uint32_t g_rgctx_ScriptableSettingsBase_1_tCC1B8E644A002165B9D289E629ACBCC8B5204C02;
+extern const uint32_t g_rgctx_T_tD75C904482F31E0C214186BAFACA01AAB4FBF363;
+extern const uint32_t g_rgctx_ScriptableSettingsBase_1_tCC1B8E644A002165B9D289E629ACBCC8B5204C02;
+extern const uint32_t g_rgctx_ScriptableSettings_1_CreateAndLoad_m174B694E02F94E8C532DCA12AB3AABE77E2E46D5;
+extern const uint32_t g_rgctx_ScriptableSettings_1_tEBDCEA06A56D935B7439A14F8513ACB8C0A9324C;
+extern const uint32_t g_rgctx_ScriptableSettingsBase_1_GetFilePath_m880B2C056E15937042F5477667F8EDAA728BB1F4;
+extern const uint32_t g_rgctx_ScriptableObject_CreateInstance_TisT_tD75C904482F31E0C214186BAFACA01AAB4FBF363_m382CF5AD8CC05F1172F2C6636C77B11E9183AC92;
+extern const uint32_t g_rgctx_ScriptableSettingsBase_1_Save_m579556D0ADDEDD27267C37AFF0E66ACFA44241BE;
+extern const uint32_t g_rgctx_ScriptableSettingsBase_1__ctor_m656DFE56F50E42B3AFC0966AF2DB4C079F87C944;
+extern const uint32_t g_rgctx_ScriptableSettingsBase_1_t38EEBDA86A8D7AAF469BF841A8F15D5C1B343D6C;
+extern const uint32_t g_rgctx_T_t2D4A2C3F601E1DE59938CB9FE4D7055ACC03CB49;
+extern const uint32_t g_rgctx_ScriptableSettingsBase_1_t38EEBDA86A8D7AAF469BF841A8F15D5C1B343D6C;
+extern const uint32_t g_rgctx_T_t2D4A2C3F601E1DE59938CB9FE4D7055ACC03CB49;
+extern const uint32_t g_rgctx_ReadOnlyList_1_t0A5699F9B96E6870474526CAB91398E5C1713E40;
+extern const uint32_t g_rgctx_List_1_tA64835FCB012F78DD1D319E8DBB49A3CA03DEA65;
+extern const uint32_t g_rgctx_List_1_get_Count_mA42E51CD41B43452788FB19BF9B492AB692EC26B;
+extern const uint32_t g_rgctx_List_1_get_Item_m6733373B77986A80C371575BCA157428263FEB35;
+extern const uint32_t g_rgctx_T_t4C11BB4A8E68AA8EA1429119605D0571656556DF;
+extern const uint32_t g_rgctx_List_1_GetEnumerator_m925A71AA988C63393CCDB0AF44C0A97E22A3BC04;
+extern const uint32_t g_rgctx_Enumerator_t0F7008DA65E4FCBB0449CDC4793AA4A5FD901E86;
+extern const uint32_t g_rgctx_ReadOnlyList_1_GetEnumerator_m6B138576210BB987348BFE51026CE0228EA8B832;
+extern const uint32_t g_rgctx_IEnumerator_1_tDA225CFF3D7A4A7F41D0B70581542ECBCD2479BD;
+extern const uint32_t g_rgctx_ReadOnlyList_1_Equals_m8847FEB30CC3BB11E242E7B6FC202AA96F7DEEFD;
+extern const uint32_t g_rgctx_Enumerator_get_Current_mD1024057FBEA6AFE960BCFF76FF69F40B05A0317;
+extern const uint32_t g_rgctx_Enumerator_t0F7008DA65E4FCBB0449CDC4793AA4A5FD901E86;
+extern const Il2CppRGCTXConstrainedData g_rgctx_T_t4C11BB4A8E68AA8EA1429119605D0571656556DF_Object_ToString_mF8AC1EB9D85AB52EC8FD8B8BDD131E855E69673F;
+extern const uint32_t g_rgctx_Enumerator_MoveNext_m6D54EC2038A8844A57355D868EF75CA8FAEBE0FB;
+extern const Il2CppRGCTXConstrainedData g_rgctx_Enumerator_t0F7008DA65E4FCBB0449CDC4793AA4A5FD901E86_IDisposable_Dispose_m3C902735BE731EE30AC1185E7AEF6ACE7A9D9CC7;
+extern const uint32_t g_rgctx_ReadOnlyListSpan_1_tBED6358028397D89B048C5AB66477B2429AF8E79;
+extern const uint32_t g_rgctx_Enumerator_t4D1430DCC3DA47C8420EB8CA2D505C4BF9701EAB;
+extern const uint32_t g_rgctx_Enumerator_get_end_m0622C079EE4B6F908CCF73E26418906F5197BB8D;
+extern const uint32_t g_rgctx_Enumerator_t4D1430DCC3DA47C8420EB8CA2D505C4BF9701EAB;
+extern const uint32_t g_rgctx_Enumerator_get_start_mFB2B528F0AFDA0C633D874FD2A9940C3D10BFCFF;
+extern const uint32_t g_rgctx_IReadOnlyList_1_t57149E2015B627E28B0C153745C632C07435DE3D;
+extern const uint32_t g_rgctx_IReadOnlyList_1_get_Item_mFAD700388C8FF29BD3D5E322BB4C1569A34B4CFB;
+extern const uint32_t g_rgctx_T_tFD6297963F9E9D16F988A129DAB45C47F7E87C38;
+extern const uint32_t g_rgctx_Enumerator__ctor_m6DB91A8BDDEAC5D2FCBD252ABB89972D7AE7096F;
+extern const uint32_t g_rgctx_IReadOnlyCollection_1_t7A640E8D58D45C8C48DC0988278FADA84AB86798;
+extern const uint32_t g_rgctx_IReadOnlyCollection_1_get_Count_m893128D12297ADF060F0CDF5917A89B3B2F958AB;
+extern const uint32_t g_rgctx_Enumerator__ctor_m3C743684FF5A6BDB63635D2C6F8EF0D2616AAC47;
+extern const uint32_t g_rgctx_ReadOnlyListSpan_1_GetEnumerator_mB2E1392C0694365F2A75F9B44F5A4780447BE502;
+extern const uint32_t g_rgctx_ReadOnlyListSpan_1_tBED6358028397D89B048C5AB66477B2429AF8E79;
+extern const uint32_t g_rgctx_IEnumerator_1_t45827AA19ACB77A81995BD21214A4C5D8094B01E;
+extern const uint32_t g_rgctx_ReadOnlyListSpan_1_Equals_m6BF35FD3DC2B937A58F8091880CAC57204E787CB;
+extern const uint32_t g_rgctx_HashCode_Combine_TisIReadOnlyList_1_t57149E2015B627E28B0C153745C632C07435DE3D_TisInt32_t680FF22E76F6EFAD4375103CBBFFA0421349384C_TisInt32_t680FF22E76F6EFAD4375103CBBFFA0421349384C_m3489AE7AFF207A0F7FD55841A88F779B1CAFB55B;
+extern const Il2CppRGCTXConstrainedData g_rgctx_T_tFD6297963F9E9D16F988A129DAB45C47F7E87C38_Object_ToString_mF8AC1EB9D85AB52EC8FD8B8BDD131E855E69673F;
+extern const uint32_t g_rgctx_Enumerator_t90857819A464C60829A18D3C3FDB541631EA781B;
+extern const uint32_t g_rgctx_Enumerator_get_start_m4FAD59DF646CC233AE438E3F4FD44F17E204331F;
+extern const uint32_t g_rgctx_Enumerator_t90857819A464C60829A18D3C3FDB541631EA781B;
+extern const uint32_t g_rgctx_Enumerator_get_end_mECF20C6B13106C705FC7FB7270630BB7ECAD329C;
+extern const uint32_t g_rgctx_IReadOnlyList_1_t7BB696FE40F97361889E0C7D2FCBF8FAFF78563E;
+extern const uint32_t g_rgctx_IReadOnlyList_1_get_Item_m76132C34B31F1415B235C60D6A9203AF492ED6B7;
+extern const uint32_t g_rgctx_T_t687BE33255FC5D4D33C7018DE6225756A8DA352C;
+extern const uint32_t g_rgctx_Enumerator_get_Current_mC510A584ED01DE96405FCAC28BA966154E1DE42B;
+extern const uint32_t g_rgctx_IReadOnlyCollection_1_tC99D24EEE9B3840C4E91A3715B0AC27CE2EAE229;
+extern const uint32_t g_rgctx_IReadOnlyCollection_1_get_Count_mC6104237E1111B7BA9A8CE576CBBCC6792043C1F;
+extern const uint32_t g_rgctx_Enumerator__ctor_mE16E4EA2071B2E33162C94B259BA9DD464C2016C;
+static const Il2CppRGCTXDefinition s_rgctxValues[57] = 
+{
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_ScriptableSettingsBase_1_tCC1B8E644A002165B9D289E629ACBCC8B5204C02 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_T_tD75C904482F31E0C214186BAFACA01AAB4FBF363 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_ScriptableSettingsBase_1_tCC1B8E644A002165B9D289E629ACBCC8B5204C02 },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_ScriptableSettings_1_CreateAndLoad_m174B694E02F94E8C532DCA12AB3AABE77E2E46D5 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_ScriptableSettings_1_tEBDCEA06A56D935B7439A14F8513ACB8C0A9324C },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_ScriptableSettingsBase_1_GetFilePath_m880B2C056E15937042F5477667F8EDAA728BB1F4 },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_ScriptableObject_CreateInstance_TisT_tD75C904482F31E0C214186BAFACA01AAB4FBF363_m382CF5AD8CC05F1172F2C6636C77B11E9183AC92 },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_ScriptableSettingsBase_1_Save_m579556D0ADDEDD27267C37AFF0E66ACFA44241BE },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_ScriptableSettingsBase_1__ctor_m656DFE56F50E42B3AFC0966AF2DB4C079F87C944 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_ScriptableSettingsBase_1_t38EEBDA86A8D7AAF469BF841A8F15D5C1B343D6C },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_T_t2D4A2C3F601E1DE59938CB9FE4D7055ACC03CB49 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_ScriptableSettingsBase_1_t38EEBDA86A8D7AAF469BF841A8F15D5C1B343D6C },
+	{ (Il2CppRGCTXDataType)1, (const void *)&g_rgctx_T_t2D4A2C3F601E1DE59938CB9FE4D7055ACC03CB49 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_ReadOnlyList_1_t0A5699F9B96E6870474526CAB91398E5C1713E40 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_List_1_tA64835FCB012F78DD1D319E8DBB49A3CA03DEA65 },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_List_1_get_Count_mA42E51CD41B43452788FB19BF9B492AB692EC26B },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_List_1_get_Item_m6733373B77986A80C371575BCA157428263FEB35 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_T_t4C11BB4A8E68AA8EA1429119605D0571656556DF },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_List_1_GetEnumerator_m925A71AA988C63393CCDB0AF44C0A97E22A3BC04 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_Enumerator_t0F7008DA65E4FCBB0449CDC4793AA4A5FD901E86 },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_ReadOnlyList_1_GetEnumerator_m6B138576210BB987348BFE51026CE0228EA8B832 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_IEnumerator_1_tDA225CFF3D7A4A7F41D0B70581542ECBCD2479BD },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_ReadOnlyList_1_Equals_m8847FEB30CC3BB11E242E7B6FC202AA96F7DEEFD },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Enumerator_get_Current_mD1024057FBEA6AFE960BCFF76FF69F40B05A0317 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_Enumerator_t0F7008DA65E4FCBB0449CDC4793AA4A5FD901E86 },
+	{ (Il2CppRGCTXDataType)5, (const void *)&g_rgctx_T_t4C11BB4A8E68AA8EA1429119605D0571656556DF_Object_ToString_mF8AC1EB9D85AB52EC8FD8B8BDD131E855E69673F },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Enumerator_MoveNext_m6D54EC2038A8844A57355D868EF75CA8FAEBE0FB },
+	{ (Il2CppRGCTXDataType)5, (const void *)&g_rgctx_Enumerator_t0F7008DA65E4FCBB0449CDC4793AA4A5FD901E86_IDisposable_Dispose_m3C902735BE731EE30AC1185E7AEF6ACE7A9D9CC7 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_ReadOnlyListSpan_1_tBED6358028397D89B048C5AB66477B2429AF8E79 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_Enumerator_t4D1430DCC3DA47C8420EB8CA2D505C4BF9701EAB },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Enumerator_get_end_m0622C079EE4B6F908CCF73E26418906F5197BB8D },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_Enumerator_t4D1430DCC3DA47C8420EB8CA2D505C4BF9701EAB },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Enumerator_get_start_mFB2B528F0AFDA0C633D874FD2A9940C3D10BFCFF },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_IReadOnlyList_1_t57149E2015B627E28B0C153745C632C07435DE3D },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_IReadOnlyList_1_get_Item_mFAD700388C8FF29BD3D5E322BB4C1569A34B4CFB },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_T_tFD6297963F9E9D16F988A129DAB45C47F7E87C38 },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Enumerator__ctor_m6DB91A8BDDEAC5D2FCBD252ABB89972D7AE7096F },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_IReadOnlyCollection_1_t7A640E8D58D45C8C48DC0988278FADA84AB86798 },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_IReadOnlyCollection_1_get_Count_m893128D12297ADF060F0CDF5917A89B3B2F958AB },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Enumerator__ctor_m3C743684FF5A6BDB63635D2C6F8EF0D2616AAC47 },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_ReadOnlyListSpan_1_GetEnumerator_mB2E1392C0694365F2A75F9B44F5A4780447BE502 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_ReadOnlyListSpan_1_tBED6358028397D89B048C5AB66477B2429AF8E79 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_IEnumerator_1_t45827AA19ACB77A81995BD21214A4C5D8094B01E },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_ReadOnlyListSpan_1_Equals_m6BF35FD3DC2B937A58F8091880CAC57204E787CB },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_HashCode_Combine_TisIReadOnlyList_1_t57149E2015B627E28B0C153745C632C07435DE3D_TisInt32_t680FF22E76F6EFAD4375103CBBFFA0421349384C_TisInt32_t680FF22E76F6EFAD4375103CBBFFA0421349384C_m3489AE7AFF207A0F7FD55841A88F779B1CAFB55B },
+	{ (Il2CppRGCTXDataType)5, (const void *)&g_rgctx_T_tFD6297963F9E9D16F988A129DAB45C47F7E87C38_Object_ToString_mF8AC1EB9D85AB52EC8FD8B8BDD131E855E69673F },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_Enumerator_t90857819A464C60829A18D3C3FDB541631EA781B },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Enumerator_get_start_m4FAD59DF646CC233AE438E3F4FD44F17E204331F },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_Enumerator_t90857819A464C60829A18D3C3FDB541631EA781B },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Enumerator_get_end_mECF20C6B13106C705FC7FB7270630BB7ECAD329C },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_IReadOnlyList_1_t7BB696FE40F97361889E0C7D2FCBF8FAFF78563E },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_IReadOnlyList_1_get_Item_m76132C34B31F1415B235C60D6A9203AF492ED6B7 },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_T_t687BE33255FC5D4D33C7018DE6225756A8DA352C },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Enumerator_get_Current_mC510A584ED01DE96405FCAC28BA966154E1DE42B },
+	{ (Il2CppRGCTXDataType)2, (const void *)&g_rgctx_IReadOnlyCollection_1_tC99D24EEE9B3840C4E91A3715B0AC27CE2EAE229 },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_IReadOnlyCollection_1_get_Count_mC6104237E1111B7BA9A8CE576CBBCC6792043C1F },
+	{ (Il2CppRGCTXDataType)3, (const void *)&g_rgctx_Enumerator__ctor_mE16E4EA2071B2E33162C94B259BA9DD464C2016C },
+};
+IL2CPP_EXTERN_C const Il2CppCodeGenModule g_Unity_XR_CoreUtils_CodeGenModule;
+const Il2CppCodeGenModule g_Unity_XR_CoreUtils_CodeGenModule = 
+{
+	"Unity.XR.CoreUtils.dll",
+	116,
+	s_methodPointers,
+	6,
+	s_adjustorThunks,
+	s_InvokerIndices,
+	0,
+	NULL,
+	5,
+	s_rgctxIndices,
+	57,
+	s_rgctxValues,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+};
