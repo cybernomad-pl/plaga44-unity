@@ -342,7 +342,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Color__ctor_m3786F0D6E510D9C
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71154
+// Method Definition Index: 71196
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfig_add_GetCameraHandler_m2CB915911752F24CE3A0DD370DBBF04BF4153C46 (GetCameraDelegate_t6656012307EDCA92ED0C70BC60F9690D39C4793F* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -385,7 +385,7 @@ IL_0006:
 		return;
 	}
 }
-// Method Definition Index: 71155
+// Method Definition Index: 71197
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfig_remove_GetCameraHandler_m3819BC074331701ED3D3EC09BCCC1A5468D2F2EA (GetCameraDelegate_t6656012307EDCA92ED0C70BC60F9690D39C4793F* ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -428,7 +428,7 @@ IL_0006:
 		return;
 	}
 }
-// Method Definition Index: 71156
+// Method Definition Index: 71198
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfig_SetupAllConfig_m44E2A1766C87194074F81B59D3835F8F38194993 (RuntimeObject* ___0_customConfig, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -449,7 +449,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfig_SetupAllConfig_m
 		return;
 	}
 }
-// Method Definition Index: 71157
+// Method Definition Index: 71199
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfig_ClearAllConfig_mD56C62AD1DD7E8DD0FE78F7100C238E851888F9C (RuntimeObject* ___0_customConfig, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -470,7 +470,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfig_ClearAllConfig_m
 		return;
 	}
 }
-// Method Definition Index: 71158
+// Method Definition Index: 71200
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184* CustomIntegrationConfig_GetCamera_mEDE04EC5F6A566321B919F4A733F84D6F10A3454 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -535,7 +535,7 @@ Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184* GetCameraDelegate_Invoke_mF0C2
 	typedef Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184* (*FunctionPointerType) (const RuntimeMethod*);
 	return ((FunctionPointerType)__this->___method_ptr)(method);
 }
-// Method Definition Index: 71159
+// Method Definition Index: 71201
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GetCameraDelegate__ctor_mBE95805D1E07B8515BB1A1BEC6E722FA6048140D (GetCameraDelegate_t6656012307EDCA92ED0C70BC60F9690D39C4793F* __this, RuntimeObject* ___0_object, intptr_t ___1_method, const RuntimeMethod* method) 
 {
 	__this->___method_ptr = (intptr_t)il2cpp_codegen_get_method_pointer((RuntimeMethod*)___1_method);
@@ -564,7 +564,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GetCameraDelegate__ctor_mBE95805D1E07B85
 	}
 	__this->___extra_arg = (intptr_t)&GetCameraDelegate_Invoke_mF0C2BD16291F0805BBD5D813330332389CF75824_Multicast;
 }
-// Method Definition Index: 71160
+// Method Definition Index: 71202
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184* GetCameraDelegate_Invoke_mF0C2BD16291F0805BBD5D813330332389CF75824 (GetCameraDelegate_t6656012307EDCA92ED0C70BC60F9690D39C4793F* __this, const RuntimeMethod* method) 
 {
 	typedef Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184* (*FunctionPointerType) (RuntimeObject*, const RuntimeMethod*);
@@ -578,7 +578,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71162
+// Method Definition Index: 71204
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfigBase_Awake_mE343DD448130865AD3706C93DFBB62E0D5F4CD78 (CustomIntegrationConfigBase_tA2D5A7EC89347EEAC98055070E9D360EC4715BDC* __this, const RuntimeMethod* method) 
 {
 	{
@@ -588,7 +588,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfigBase_Awake_mE343D
 		return;
 	}
 }
-// Method Definition Index: 71163
+// Method Definition Index: 71205
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfigBase_OnDestroy_mB07679E1AA9B42D79B1E3D30192010B56F0640CC (CustomIntegrationConfigBase_tA2D5A7EC89347EEAC98055070E9D360EC4715BDC* __this, const RuntimeMethod* method) 
 {
 	{
@@ -598,7 +598,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfigBase_OnDestroy_mB
 		return;
 	}
 }
-// Method Definition Index: 71164
+// Method Definition Index: 71206
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184* CustomIntegrationConfigBase_GetCamera_m00168AB60C2B28A6286AF3D29FA7ED81F24E4EAB (CustomIntegrationConfigBase_tA2D5A7EC89347EEAC98055070E9D360EC4715BDC* __this, const RuntimeMethod* method) 
 {
 	{
@@ -606,7 +606,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E
 		return (Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184*)NULL;
 	}
 }
-// Method Definition Index: 71165
+// Method Definition Index: 71207
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfigBase__ctor_mE96705B31E26A03C2FEDA28BCE42594BA3E59993 (CustomIntegrationConfigBase_tA2D5A7EC89347EEAC98055070E9D360EC4715BDC* __this, const RuntimeMethod* method) 
 {
 	{
@@ -630,7 +630,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CustomIntegrationConfigBase__ctor_mE9670
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71166
+// Method Definition Index: 71208
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void DebugMember__ctor_m23524BF378E4EA831123889D02C9A659855D65EA (DebugMember_tF9F428EB2AB116C284A469FDBF48467B7BB9708A* __this, int32_t ___0_color, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -663,7 +663,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void DebugMember__ctor_m23524BF378E4EA8311238
 		return;
 	}
 }
-// Method Definition Index: 71167
+// Method Definition Index: 71209
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void DebugMember__cctor_mCDE94112D1AD0353A21B35FC7D2A1DD84FA62566 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -709,7 +709,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void DebugMember__cctor_mCDE94112D1AD0353A21B
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-// Method Definition Index: 71160
+// Method Definition Index: 71202
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184* GetCameraDelegate_Invoke_mF0C2BD16291F0805BBD5D813330332389CF75824_inline (GetCameraDelegate_t6656012307EDCA92ED0C70BC60F9690D39C4793F* __this, const RuntimeMethod* method) 
 {
 	typedef Camera_tA92CC927D7439999BC82DBEDC0AA45B470F9E184* (*FunctionPointerType) (RuntimeObject*, const RuntimeMethod*);

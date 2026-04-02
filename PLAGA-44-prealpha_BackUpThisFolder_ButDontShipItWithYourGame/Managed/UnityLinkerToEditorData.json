@@ -55,7 +55,9 @@
           },
           {
             "name": "Avatar",
-            "scenes": [],
+            "scenes": [
+              "Assets/Scenes/PLAGA44_Demo.unity"
+            ],
             "dependencyType": 0,
             "icon": null
           },

@@ -87,7 +87,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Clamp_mEB9AEA827D27D2
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 71174
+// Method Definition Index: 71216
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float UnitConversionUtility_ConvertBrightnessToLumens_m6F15E8AB3B466F3FE6FEEB33D5CE471BCD9E8DED (float ___0_brightness, const RuntimeMethod* method) 
 {
 	{
@@ -98,7 +98,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float UnitConversionUtility_ConvertBrightness
 		return L_1;
 	}
 }
-// Method Definition Index: 71175
+// Method Definition Index: 71217
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float UnitConversionUtility_ConvertLumensToBrightness_mB801F5903C041B3C3C76D1915180504542D2AFEC (float ___0_lumens, const RuntimeMethod* method) 
 {
 	{

@@ -1180,7 +1180,7 @@ IL2CPP_EXTERN_C void DEFAULT_CALL MetaXRAudio_GetVersion(int32_t*, int32_t*, int
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65484
+// Method Definition Index: 65507
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t FMODPluginInterface_get_context_mAEC51D5C2BA7630303D58C199E0206EF38015265 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -1213,7 +1213,7 @@ IL_002e:
 		return L_6;
 	}
 }
-// Method Definition Index: 65485
+// Method Definition Index: 65508
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_GetPluginContext_m361B4FCDED04D26C820B33F3D5D6070A2FC50879 (intptr_t* ___0_context, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t*);
@@ -1235,7 +1235,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_GetPlugi
 
 	return returnValue;
 }
-// Method Definition Index: 65486
+// Method Definition Index: 65509
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t FMODPluginInterface_ovrAudio_GetVersion_mC9514BD2EF7C0A10F2111EDB1C21E0F3E60EC4AB (int32_t* ___0_Major, int32_t* ___1_Minor, int32_t* ___2_Patch, const RuntimeMethod* method) 
 {
 	typedef intptr_t (DEFAULT_CALL *PInvokeFunc) (int32_t*, int32_t*, int32_t*);
@@ -1257,7 +1257,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t FMODPluginInterface_ovrAudio_GetVers
 
 	return returnValue;
 }
-// Method Definition Index: 65487
+// Method Definition Index: 65510
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_SetAcousticModel_mE2F4BE7524F94B99D8F85FE0A0BF7ECD2324D3A6 (intptr_t ___0_context, int32_t ___1_quality, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, int32_t);
@@ -1279,7 +1279,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_SetAcous
 
 	return returnValue;
 }
-// Method Definition Index: 65488
+// Method Definition Index: 65511
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_SetAcousticModel_mD4E4218325E8059D87605FA3340BDDDDEE4C3867 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, int32_t ___0_model, const RuntimeMethod* method) 
 {
 	{
@@ -1292,7 +1292,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_SetAcousticModel_
 		return L_2;
 	}
 }
-// Method Definition Index: 65489
+// Method Definition Index: 65512
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_Enable_m017C080AA7E92E787B9B2CBFDF8A56478E9B91D2 (intptr_t ___0_context, uint32_t ___1_what, int32_t ___2_enable, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, uint32_t, int32_t);
@@ -1314,7 +1314,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_Enable_m
 
 	return returnValue;
 }
-// Method Definition Index: 65490
+// Method Definition Index: 65513
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_SetEnabled_m3F6A76A8F95C622BA6CB64577FE630A30CBC6D9C (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, uint32_t ___0_feature, bool ___1_enabled, const RuntimeMethod* method) 
 {
 	uint32_t G_B2_0 = 0;
@@ -1363,7 +1363,7 @@ IL_000e:
 		return L_3;
 	}
 }
-// Method Definition Index: 65491
+// Method Definition Index: 65514
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_CreateAudioGeometry_mF1BC1F6170B3508168EBD90F4C66CA4357E11E8F (intptr_t ___0_context, intptr_t* ___1_geometry, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, intptr_t*);
@@ -1385,7 +1385,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_CreateAu
 
 	return returnValue;
 }
-// Method Definition Index: 65492
+// Method Definition Index: 65515
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_CreateAudioGeometry_m9CEDF7CCA0581C787D318CD5BE17382BA60BEE0D (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t* ___0_geometry, const RuntimeMethod* method) 
 {
 	{
@@ -1398,7 +1398,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_CreateAudioGeomet
 		return L_2;
 	}
 }
-// Method Definition Index: 65493
+// Method Definition Index: 65516
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_DestroyAudioGeometry_mE07FB1FE317E55C3F53B6D20B18EE75AD32D35F0 (intptr_t ___0_geometry, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t);
@@ -1420,7 +1420,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_DestroyA
 
 	return returnValue;
 }
-// Method Definition Index: 65494
+// Method Definition Index: 65517
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_DestroyAudioGeometry_m676E82C1414115E399E58486762877B0F48AA4BA (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_geometry, const RuntimeMethod* method) 
 {
 	{
@@ -1431,7 +1431,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_DestroyAudioGeome
 		return L_1;
 	}
 }
-// Method Definition Index: 65495
+// Method Definition Index: 65518
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioGeometrySetObjectFlag_m9321017F67093392A7C998CD71B811802D4E4B2A (intptr_t ___0_geometry, uint32_t ___1_flag, int32_t ___2_enabled, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, uint32_t, int32_t);
@@ -1453,7 +1453,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioGeo
 
 	return returnValue;
 }
-// Method Definition Index: 65496
+// Method Definition Index: 65519
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioGeometrySetObjectFlag_m9460736E43305F233C0EA23B27D3C7D75DA1A64A (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_geometry, uint32_t ___1_flag, bool ___2_enabled, const RuntimeMethod* method) 
 {
 	uint32_t G_B4_0 = 0;
@@ -1515,7 +1515,7 @@ IL_0015:
 		return L_4;
 	}
 }
-// Method Definition Index: 65497
+// Method Definition Index: 65520
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioGeometryUploadSimplifiedMeshArrays_mE9F96C21AB195C9ADB96A9A7FAD7D6231A4521BF (intptr_t ___0_geometry, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___1_vertices, uintptr_t ___2_verticesBytesOffset, uintptr_t ___3_vertexCount, uintptr_t ___4_vertexStride, uint32_t ___5_vertexType, Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C* ___6_indices, uintptr_t ___7_indicesByteOffset, uintptr_t ___8_indexCount, uint32_t ___9_indexType, MeshGroupU5BU5D_tE2FBC633F034275D8D81A139BC36181351263935* ___10_groups, uintptr_t ___11_groupCount, MeshSimplification_tC0E0DE8C9BC025F1036A2A0C890E6F7A5EF0381A* ___12_simplification, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float*, uintptr_t, uintptr_t, uintptr_t, uint32_t, int32_t*, uintptr_t, uintptr_t, uint32_t, MeshGroup_tA75A8BD2FC392BA222995C129F74FD22C1FCC723*, uintptr_t, MeshSimplification_tC0E0DE8C9BC025F1036A2A0C890E6F7A5EF0381A*);
@@ -1555,7 +1555,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioGeo
 
 	return returnValue;
 }
-// Method Definition Index: 65498
+// Method Definition Index: 65521
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioGeometryUploadSimplifiedMeshArrays_m2A9B8F960D1C6A4AA017C48FEEA3FF33AE30DCE9 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_geometry, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___1_vertices, int32_t ___2_vertexCount, Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C* ___3_indices, int32_t ___4_indexCount, MeshGroupU5BU5D_tE2FBC633F034275D8D81A139BC36181351263935* ___5_groups, int32_t ___6_groupCount, MeshSimplification_tC0E0DE8C9BC025F1036A2A0C890E6F7A5EF0381A* ___7_simplification, const RuntimeMethod* method) 
 {
 	{
@@ -1582,7 +1582,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioGeometryUplo
 		return L_11;
 	}
 }
-// Method Definition Index: 65499
+// Method Definition Index: 65522
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioGeometrySetTransform_mBE226107B616C831B557CC4A4F61C4020F090AC2 (intptr_t ___0_geometry, float* ___1_matrix4x4, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float*);
@@ -1604,7 +1604,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioGeo
 
 	return returnValue;
 }
-// Method Definition Index: 65500
+// Method Definition Index: 65523
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioGeometrySetTransform_m66453E69F232B1EB2E3ECB7148FBDFE5724F9C8D (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_geometry, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	float* V_0 = NULL;
@@ -1702,7 +1702,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioGeometrySetT
 		return L_52;
 	}
 }
-// Method Definition Index: 65501
+// Method Definition Index: 65524
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioGeometryReadMeshFile_m22FF4AE5AC64EF62B9AE65D391E8835CCA1B7B17 (intptr_t ___0_geometry, String_t* ___1_filePath, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, char*);
@@ -1730,7 +1730,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioGeo
 
 	return returnValue;
 }
-// Method Definition Index: 65502
+// Method Definition Index: 65525
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioGeometryReadMeshFile_mEC7FE533A8413C4887DB6AC734BDE6B0FC3299F7 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_geometry, String_t* ___1_filePath, const RuntimeMethod* method) 
 {
 	{
@@ -1742,7 +1742,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioGeometryRead
 		return L_2;
 	}
 }
-// Method Definition Index: 65503
+// Method Definition Index: 65526
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioGeometryReadMeshMemory_mE39DC5CF8854879F7A2CB6305B29A551BBE79538 (intptr_t ___0_geometry, intptr_t ___1_data, uint64_t ___2_dataLength, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, intptr_t, uint64_t);
@@ -1764,7 +1764,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioGeo
 
 	return returnValue;
 }
-// Method Definition Index: 65504
+// Method Definition Index: 65527
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioGeometryReadMeshMemory_m7096ED9673646D6164E695CE11676EE74F719890 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_geometry, intptr_t ___1_data, uint64_t ___2_dataLength, const RuntimeMethod* method) 
 {
 	{
@@ -1777,7 +1777,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioGeometryRead
 		return L_3;
 	}
 }
-// Method Definition Index: 65505
+// Method Definition Index: 65528
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_CreateAudioMaterial_m3479ADEEF8339540C9F36AC3539552C818321E2B (intptr_t ___0_context, intptr_t* ___1_material, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, intptr_t*);
@@ -1799,7 +1799,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_CreateAu
 
 	return returnValue;
 }
-// Method Definition Index: 65506
+// Method Definition Index: 65529
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_CreateAudioMaterial_m4AB7078B18C46C5B49D96E79AAD603A7DAF9DDC9 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t* ___0_material, const RuntimeMethod* method) 
 {
 	{
@@ -1812,7 +1812,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_CreateAudioMateri
 		return L_2;
 	}
 }
-// Method Definition Index: 65507
+// Method Definition Index: 65530
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_DestroyAudioMaterial_mAFF67835731AFEDD272764F687F65DF026875C13 (intptr_t ___0_material, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t);
@@ -1834,7 +1834,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_DestroyA
 
 	return returnValue;
 }
-// Method Definition Index: 65508
+// Method Definition Index: 65531
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_DestroyAudioMaterial_m9D2827DA391F0BA7F9614E72566A081539E44D4D (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_material, const RuntimeMethod* method) 
 {
 	{
@@ -1845,7 +1845,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_DestroyAudioMater
 		return L_1;
 	}
 }
-// Method Definition Index: 65509
+// Method Definition Index: 65532
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioMaterialSetFrequency_m3D977F10218C962CE713E455366E1BF2EA1CC9D7 (intptr_t ___0_material, uint32_t ___1_property, float ___2_frequency, float ___3_value, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, uint32_t, float, float);
@@ -1867,7 +1867,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioMat
 
 	return returnValue;
 }
-// Method Definition Index: 65510
+// Method Definition Index: 65533
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioMaterialSetFrequency_m2EE59863EB3700A3EFD853E5C2AA6676E65CF05F (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_material, uint32_t ___1_property, float ___2_frequency, float ___3_value, const RuntimeMethod* method) 
 {
 	{
@@ -1881,7 +1881,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioMaterialSetF
 		return L_4;
 	}
 }
-// Method Definition Index: 65511
+// Method Definition Index: 65534
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioMaterialReset_mA7C7D6F626BFB65B3D5342EC27FBB683ED9A9EED (intptr_t ___0_material, uint32_t ___1_property, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, uint32_t);
@@ -1903,7 +1903,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioMat
 
 	return returnValue;
 }
-// Method Definition Index: 65512
+// Method Definition Index: 65535
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioMaterialReset_mDC86CB416051C9E8CB13CE355D153CA885C057C4 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_material, uint32_t ___1_property, const RuntimeMethod* method) 
 {
 	{
@@ -1915,7 +1915,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioMaterialRese
 		return L_2;
 	}
 }
-// Method Definition Index: 65513
+// Method Definition Index: 65536
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_CreateAudioSceneIR_mD0CFC3C280ED267C41274CD9C21CB4105D2BA13C (intptr_t ___0_context, intptr_t* ___1_sceneIR, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, intptr_t*);
@@ -1937,7 +1937,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_CreateAu
 
 	return returnValue;
 }
-// Method Definition Index: 65514
+// Method Definition Index: 65537
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_CreateAudioSceneIR_mEF9C42FF07B9F7E7C76336E5D7F1E53CBE285E3E (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t* ___0_sceneIR, const RuntimeMethod* method) 
 {
 	{
@@ -1950,7 +1950,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_CreateAudioSceneI
 		return L_2;
 	}
 }
-// Method Definition Index: 65515
+// Method Definition Index: 65538
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_DestroyAudioSceneIR_m2F58DD3C6717D4572AB76D85D70DF5AEF2B44F18 (intptr_t ___0_sceneIR, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t);
@@ -1972,7 +1972,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_DestroyA
 
 	return returnValue;
 }
-// Method Definition Index: 65516
+// Method Definition Index: 65539
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_DestroyAudioSceneIR_m8B0C2283DBA24451215A96A615AABD5AECB74E8D (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_sceneIR, const RuntimeMethod* method) 
 {
 	{
@@ -1983,7 +1983,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_DestroyAudioScene
 		return L_1;
 	}
 }
-// Method Definition Index: 65517
+// Method Definition Index: 65540
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioSceneIRSetEnabled_mD94AFF0915F03E3E1C1D177534638EC78B36231D (intptr_t ___0_sceneIR, int32_t ___1_enabled, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, int32_t);
@@ -2005,7 +2005,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioSce
 
 	return returnValue;
 }
-// Method Definition Index: 65518
+// Method Definition Index: 65541
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioSceneIRSetEnabled_mB35EC75FE9DCBFF66FA7EB320918BE016B54B1CA (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_sceneIR, bool ___1_enabled, const RuntimeMethod* method) 
 {
 	intptr_t G_B2_0;
@@ -2045,7 +2045,7 @@ IL_0008:
 		return L_2;
 	}
 }
-// Method Definition Index: 65519
+// Method Definition Index: 65542
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioSceneIRSetTransform_mA93E5A2830F595016D416D527D6CFD13D6885164 (intptr_t ___0_sceneIR, float* ___1_matrix4x4, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float*);
@@ -2067,7 +2067,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioSce
 
 	return returnValue;
 }
-// Method Definition Index: 65520
+// Method Definition Index: 65543
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioSceneIRSetTransform_mA24CCAB43AE277A70B7AA69871475270A5661483 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_sceneIR, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	float* V_0 = NULL;
@@ -2165,7 +2165,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioSceneIRSetTr
 		return L_52;
 	}
 }
-// Method Definition Index: 65521
+// Method Definition Index: 65544
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioSceneIRReadFile_mBD0E56DCDF9AFFC73E386F4E43C236944D2945B0 (intptr_t ___0_sceneIR, String_t* ___1_filePath, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, char*);
@@ -2193,7 +2193,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioSce
 
 	return returnValue;
 }
-// Method Definition Index: 65522
+// Method Definition Index: 65545
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioSceneIRReadFile_mE5D2F114BB146CF59D6FD2D6BA954A481DA4B5E0 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_sceneIR, String_t* ___1_filePath, const RuntimeMethod* method) 
 {
 	{
@@ -2205,7 +2205,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioSceneIRReadF
 		return L_2;
 	}
 }
-// Method Definition Index: 65523
+// Method Definition Index: 65546
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioSceneIRReadMemory_m3AA914163AD35A5D48C0BA0697689897B3892318 (intptr_t ___0_sceneIR, intptr_t ___1_data, uint64_t ___2_dataLength, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, intptr_t, uint64_t);
@@ -2227,7 +2227,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_AudioSce
 
 	return returnValue;
 }
-// Method Definition Index: 65524
+// Method Definition Index: 65547
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioSceneIRReadMemory_mF143CF3868643D105685E841A7F268FD5CD73213 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_sceneIR, intptr_t ___1_data, uint64_t ___2_dataLength, const RuntimeMethod* method) 
 {
 	{
@@ -2240,7 +2240,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_AudioSceneIRReadM
 		return L_3;
 	}
 }
-// Method Definition Index: 65525
+// Method Definition Index: 65548
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_CreateControlZone_m55CBCAF3355AEB1D26EA812D2AF00793B7D901B9 (intptr_t ___0_context, intptr_t* ___1_control, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, intptr_t*);
@@ -2262,7 +2262,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_CreateCo
 
 	return returnValue;
 }
-// Method Definition Index: 65526
+// Method Definition Index: 65549
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_CreateControlVolume_mD1D0243A4E44C835E557307C2A23DABD59AF3C9B (intptr_t ___0_context, intptr_t* ___1_control, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, intptr_t*);
@@ -2284,7 +2284,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_CreateCo
 
 	return returnValue;
 }
-// Method Definition Index: 65527
+// Method Definition Index: 65550
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_CreateControlZone_mEFFDD0D5B3947E664243BAA8FD17237C4DC17C39 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t* ___0_control, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -2332,7 +2332,7 @@ IL_001f:
 		return L_7;
 	}
 }
-// Method Definition Index: 65528
+// Method Definition Index: 65551
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_DestroyControlZone_mC568FE30BA460D17BA256FF23A5B4B8827B7E3D7 (intptr_t ___0_control, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t);
@@ -2354,7 +2354,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_DestroyC
 
 	return returnValue;
 }
-// Method Definition Index: 65529
+// Method Definition Index: 65552
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_DestroyControlVolume_m947CB83253926B0CBBEDDAC4A40D067B4A6CEEBE (intptr_t ___0_control, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t);
@@ -2376,7 +2376,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_DestroyC
 
 	return returnValue;
 }
-// Method Definition Index: 65530
+// Method Definition Index: 65553
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_DestroyControlZone_m030F1E8A9CE4C30FD411BA372968896DB653219E (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_control, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -2420,7 +2420,7 @@ IL_0013:
 		return L_5;
 	}
 }
-// Method Definition Index: 65531
+// Method Definition Index: 65554
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZoneSetEnabled_mADDA8149EE1068AD3526F0B93929DF8FB204719E (intptr_t ___0_control, int32_t ___1_enabled, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, int32_t);
@@ -2442,7 +2442,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZ
 
 	return returnValue;
 }
-// Method Definition Index: 65532
+// Method Definition Index: 65555
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlVolumeSetEnabled_mBF07C0C659ECB622C42359938153A15065437D06 (intptr_t ___0_control, int32_t ___1_enabled, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, int32_t);
@@ -2464,7 +2464,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlV
 
 	return returnValue;
 }
-// Method Definition Index: 65533
+// Method Definition Index: 65556
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ControlZoneSetEnabled_mB925877EB20F6B8CA3DB803FB1FD53981DE11BA2 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_control, bool ___1_enabled, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -2570,7 +2570,7 @@ IL_0021:
 		return L_7;
 	}
 }
-// Method Definition Index: 65534
+// Method Definition Index: 65557
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZoneSetTransform_m0C813387B822C1DD4C33B3D25438827AFABE9252 (intptr_t ___0_control, float* ___1_matrix4x4, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float*);
@@ -2592,7 +2592,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZ
 
 	return returnValue;
 }
-// Method Definition Index: 65535
+// Method Definition Index: 65558
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlVolumeSetTransform_m70C50AC9911D87B87451ACB9BEFB871267B672F8 (intptr_t ___0_control, float* ___1_matrix4x4, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float*);
@@ -2614,7 +2614,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlV
 
 	return returnValue;
 }
-// Method Definition Index: 65536
+// Method Definition Index: 65559
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ControlZoneSetTransform_m5E95C1D1594D703632EFC6A4C57A0174D6041729 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_control, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	float* V_0 = NULL;
@@ -2748,7 +2748,7 @@ IL_00ee:
 		return L_57;
 	}
 }
-// Method Definition Index: 65537
+// Method Definition Index: 65560
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZoneSetBox_m22EF8163F5EBA47AA2FC7427CAF54A45D135A836 (intptr_t ___0_control, float ___1_sizeX, float ___2_sizeY, float ___3_sizeZ, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float, float, float);
@@ -2770,7 +2770,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZ
 
 	return returnValue;
 }
-// Method Definition Index: 65538
+// Method Definition Index: 65561
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlVolumeSetBox_m0BD9F396B5E7ADAD69EF5A2EC44398DD4689F894 (intptr_t ___0_control, float ___1_sizeX, float ___2_sizeY, float ___3_sizeZ, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float, float, float);
@@ -2792,7 +2792,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlV
 
 	return returnValue;
 }
-// Method Definition Index: 65539
+// Method Definition Index: 65562
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ControlZoneSetBox_m5051DF1F383C0346D2A0F7060AA03550C9417409 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_control, float ___1_sizeX, float ___2_sizeY, float ___3_sizeZ, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -2842,7 +2842,7 @@ IL_001b:
 		return L_11;
 	}
 }
-// Method Definition Index: 65540
+// Method Definition Index: 65563
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZoneSetFadeDistance_m2ABEC31438002857F7721E53F86028E065B03760 (intptr_t ___0_control, float ___1_fadeX, float ___2_fadeY, float ___3_fadeZ, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float, float, float);
@@ -2864,7 +2864,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZ
 
 	return returnValue;
 }
-// Method Definition Index: 65541
+// Method Definition Index: 65564
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlVolumeSetFadeDistance_m066161A129F450786DE82D3E61315AF822D36D27 (intptr_t ___0_control, float ___1_fadeX, float ___2_fadeY, float ___3_fadeZ, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float, float, float);
@@ -2886,7 +2886,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlV
 
 	return returnValue;
 }
-// Method Definition Index: 65542
+// Method Definition Index: 65565
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ControlZoneSetFadeDistance_m9DB5CE4016370914059786CB9B59507A895225F5 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_control, float ___1_fadeX, float ___2_fadeY, float ___3_fadeZ, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -2936,7 +2936,7 @@ IL_001b:
 		return L_11;
 	}
 }
-// Method Definition Index: 65543
+// Method Definition Index: 65566
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZoneSetFrequency_m4DE33A87369F2BB1160F3CD312A1EA1CCE8F8062 (intptr_t ___0_control, uint32_t ___1_property, float ___2_frequency, float ___3_value, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, uint32_t, float, float);
@@ -2958,7 +2958,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZ
 
 	return returnValue;
 }
-// Method Definition Index: 65544
+// Method Definition Index: 65567
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlVolumeSetFrequency_mA53A347FEBB9C4E45A47FACD043969576A2BCFCD (intptr_t ___0_control, uint32_t ___1_property, float ___2_frequency, float ___3_value, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, uint32_t, float, float);
@@ -2980,7 +2980,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlV
 
 	return returnValue;
 }
-// Method Definition Index: 65545
+// Method Definition Index: 65568
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ControlZoneSetFrequency_m8F42396B2DD7FAE8F9755951F078D5FA3A23BA78 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_control, uint32_t ___1_property, float ___2_frequency, float ___3_value, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -3030,7 +3030,7 @@ IL_001b:
 		return L_11;
 	}
 }
-// Method Definition Index: 65546
+// Method Definition Index: 65569
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZoneReset_m856EED12F4CCC1E0B602107FF7E2F136874CBB46 (intptr_t ___0_control, uint32_t ___1_property, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, uint32_t);
@@ -3052,7 +3052,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlZ
 
 	return returnValue;
 }
-// Method Definition Index: 65547
+// Method Definition Index: 65570
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlVolumeReset_m6AC41428A5379CB136654A1577A7171C35F91D60 (intptr_t ___0_control, uint32_t ___1_property, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, uint32_t);
@@ -3074,7 +3074,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_ControlV
 
 	return returnValue;
 }
-// Method Definition Index: 65548
+// Method Definition Index: 65571
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ControlZoneReset_m18AAFCD2D170DDAE42EBC61DF60734FB357DE60C (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_control, uint32_t ___1_property, const RuntimeMethod* method) 
 {
 	int32_t V_0 = 0;
@@ -3120,7 +3120,7 @@ IL_0015:
 		return L_7;
 	}
 }
-// Method Definition Index: 65549
+// Method Definition Index: 65572
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FMODPluginInterface__ctor_m16ABFFAE4AB0BCFEF305D6F7B846E90CF1B1989F (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, const RuntimeMethod* method) 
 {
 	{
@@ -3130,7 +3130,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FMODPluginInterface__ctor_m16ABFFAE4AB0B
 		return;
 	}
 }
-// Method Definition Index: 65550
+// Method Definition Index: 65573
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_MetaXRAcousticNativeInterface_INativeInterface_AudioGeometrySetTransform_m3C355B08DD51C1D43B2594CD7E567D2E49EE8783 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_geometry, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	{
@@ -3141,7 +3141,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_MetaXRAcousticNat
 		return L_2;
 	}
 }
-// Method Definition Index: 65551
+// Method Definition Index: 65574
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_MetaXRAcousticNativeInterface_INativeInterface_AudioSceneIRSetTransform_m56926BEBD3667894BC6785CEBEA0F27E92FF3809 (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_sceneIR, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	{
@@ -3152,7 +3152,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_MetaXRAcousticNat
 		return L_2;
 	}
 }
-// Method Definition Index: 65552
+// Method Definition Index: 65575
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_MetaXRAcousticNativeInterface_INativeInterface_ControlZoneSetTransform_m1D5E0E9DBE22AB90558E878DD87F69D2F45E738F (FMODPluginInterface_t7E011BA6E883F9E3F04BDB36FBFD1AC7E6A6A9DA* __this, intptr_t ___0_control, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	{
@@ -3171,7 +3171,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_MetaXRAcousticNat
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65553
+// Method Definition Index: 65576
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_SetAcousticModel_mE20E9F464243D7C63BB50C439A87FD3CFA67E242 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, int32_t ___0_model, const RuntimeMethod* method) 
 {
 	{
@@ -3179,7 +3179,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_SetAcousticModel_mE20E
 		return (-1);
 	}
 }
-// Method Definition Index: 65554
+// Method Definition Index: 65577
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_SetEnabled_m09C6100EA7502EF97D4E9630433E038E9AC7A198 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, uint32_t ___0_feature, bool ___1_enabled, const RuntimeMethod* method) 
 {
 	{
@@ -3187,7 +3187,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_SetEnabled_m09C6100EA7
 		return (-1);
 	}
 }
-// Method Definition Index: 65555
+// Method Definition Index: 65578
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_CreateAudioGeometry_m0476E679C6EBD4AD909E34E82369E7A1C6EA855D (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t* ___0_geometry, const RuntimeMethod* method) 
 {
 	{
@@ -3198,7 +3198,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_CreateAudioGeometry_m0
 		return (-1);
 	}
 }
-// Method Definition Index: 65556
+// Method Definition Index: 65579
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_DestroyAudioGeometry_m5DCB278E0E0AE00CC1B9A018FFAEC12A0E70D1AB (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_geometry, const RuntimeMethod* method) 
 {
 	{
@@ -3206,7 +3206,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_DestroyAudioGeometry_m
 		return (-1);
 	}
 }
-// Method Definition Index: 65557
+// Method Definition Index: 65580
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioGeometrySetObjectFlag_mCCABBD7678E2EA452D05D71E7EC1BB360CA4D4D3 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_geometry, uint32_t ___1_flag, bool ___2_enabled, const RuntimeMethod* method) 
 {
 	{
@@ -3214,7 +3214,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioGeometrySetObject
 		return (-1);
 	}
 }
-// Method Definition Index: 65558
+// Method Definition Index: 65581
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioGeometryUploadSimplifiedMeshArrays_mB323B77A8C730C912E8D963CB2D23F20385DA36C (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_geometry, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___1_vertices, int32_t ___2_vertexCount, Int32U5BU5D_t19C97395396A72ECAF310612F0760F165060314C* ___3_indices, int32_t ___4_indexCount, MeshGroupU5BU5D_tE2FBC633F034275D8D81A139BC36181351263935* ___5_groups, int32_t ___6_groupCount, MeshSimplification_tC0E0DE8C9BC025F1036A2A0C890E6F7A5EF0381A* ___7_simplification, const RuntimeMethod* method) 
 {
 	{
@@ -3222,7 +3222,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioGeometryUploadSim
 		return (-1);
 	}
 }
-// Method Definition Index: 65559
+// Method Definition Index: 65582
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioGeometrySetTransform_mB68E3DC7DDEFC8D0F2345AD46AC30E75D936F4D4 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_geometry, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	{
@@ -3230,7 +3230,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioGeometrySetTransf
 		return (-1);
 	}
 }
-// Method Definition Index: 65560
+// Method Definition Index: 65583
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioGeometryReadMeshFile_m68ECE032CC47FC0562375CA0CA9B0B4C20540307 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_geometry, String_t* ___1_filePath, const RuntimeMethod* method) 
 {
 	{
@@ -3238,7 +3238,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioGeometryReadMeshF
 		return (-1);
 	}
 }
-// Method Definition Index: 65561
+// Method Definition Index: 65584
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioGeometryReadMeshMemory_mAC94FE0F47205135FC1C905483825A9C032DEA26 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_geometry, intptr_t ___1_data, uint64_t ___2_dataLength, const RuntimeMethod* method) 
 {
 	{
@@ -3246,7 +3246,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioGeometryReadMeshM
 		return (-1);
 	}
 }
-// Method Definition Index: 65562
+// Method Definition Index: 65585
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_CreateAudioMaterial_mF31EA03FC25CBCA236AD69CB4154349C7D5558AE (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t* ___0_material, const RuntimeMethod* method) 
 {
 	{
@@ -3257,7 +3257,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_CreateAudioMaterial_mF
 		return (-1);
 	}
 }
-// Method Definition Index: 65563
+// Method Definition Index: 65586
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_DestroyAudioMaterial_mE1A24E921E9236E587D44AE8C6096B4C238E2961 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_material, const RuntimeMethod* method) 
 {
 	{
@@ -3265,7 +3265,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_DestroyAudioMaterial_m
 		return (-1);
 	}
 }
-// Method Definition Index: 65564
+// Method Definition Index: 65587
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioMaterialSetFrequency_mA3B1E798E2010238C45F61A60A41DEDCF32EE328 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_material, uint32_t ___1_property, float ___2_frequency, float ___3_value, const RuntimeMethod* method) 
 {
 	{
@@ -3273,7 +3273,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioMaterialSetFreque
 		return (-1);
 	}
 }
-// Method Definition Index: 65565
+// Method Definition Index: 65588
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioMaterialReset_mFBE8A2CCB00EF24B56129DD036E9FEF58D33F94D (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_material, uint32_t ___1_property, const RuntimeMethod* method) 
 {
 	{
@@ -3281,7 +3281,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioMaterialReset_mFB
 		return (-1);
 	}
 }
-// Method Definition Index: 65566
+// Method Definition Index: 65589
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_CreateAudioSceneIR_m8F2C63C3F8C5A82AD3ADD1E75479618B8131B33C (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t* ___0_sceneIR, const RuntimeMethod* method) 
 {
 	{
@@ -3292,7 +3292,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_CreateAudioSceneIR_m8F
 		return (-1);
 	}
 }
-// Method Definition Index: 65567
+// Method Definition Index: 65590
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_DestroyAudioSceneIR_mA42E5AEFE39FC27F967B9F03622BCF7CA11D1450 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_sceneIR, const RuntimeMethod* method) 
 {
 	{
@@ -3300,7 +3300,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_DestroyAudioSceneIR_mA
 		return (-1);
 	}
 }
-// Method Definition Index: 65568
+// Method Definition Index: 65591
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioSceneIRSetEnabled_m9DB3A0B161C8581A5189D586D75C540F94D31331 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_sceneIR, bool ___1_enabled, const RuntimeMethod* method) 
 {
 	{
@@ -3308,7 +3308,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioSceneIRSetEnabled
 		return (-1);
 	}
 }
-// Method Definition Index: 65569
+// Method Definition Index: 65592
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioSceneIRSetTransform_m82C395BD3E584BFFAB8E3BDD2AF7039500EF8BEF (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_sceneIR, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	{
@@ -3316,7 +3316,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioSceneIRSetTransfo
 		return (-1);
 	}
 }
-// Method Definition Index: 65570
+// Method Definition Index: 65593
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioSceneIRReadFile_mEE35ED27C0B12E327FF04EECCDC8AB397ED8D7C7 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_sceneIR, String_t* ___1_filePath, const RuntimeMethod* method) 
 {
 	{
@@ -3324,7 +3324,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioSceneIRReadFile_m
 		return (-1);
 	}
 }
-// Method Definition Index: 65571
+// Method Definition Index: 65594
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioSceneIRReadMemory_m21F46D17425E66DBDC25F4D5167566DDD405B8E3 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_sceneIR, intptr_t ___1_data, uint64_t ___2_dataLength, const RuntimeMethod* method) 
 {
 	{
@@ -3332,7 +3332,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_AudioSceneIRReadMemory
 		return (-1);
 	}
 }
-// Method Definition Index: 65572
+// Method Definition Index: 65595
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_CreateControlZone_mB9EE36C95EB7BFD2CF4028C389625992CE54B378 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t* ___0_control, const RuntimeMethod* method) 
 {
 	{
@@ -3343,7 +3343,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_CreateControlZone_mB9E
 		return (-1);
 	}
 }
-// Method Definition Index: 65573
+// Method Definition Index: 65596
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_DestroyControlZone_mEF20727EE7B0B651C9E67AE10D688785A0100DEC (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_control, const RuntimeMethod* method) 
 {
 	{
@@ -3351,7 +3351,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_DestroyControlZone_mEF
 		return (-1);
 	}
 }
-// Method Definition Index: 65574
+// Method Definition Index: 65597
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneSetEnabled_mE0E2970620C0FC6C32DA6A3514BBA44C75BF1F96 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_control, bool ___1_enabled, const RuntimeMethod* method) 
 {
 	{
@@ -3359,7 +3359,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneSetEnabled_
 		return (-1);
 	}
 }
-// Method Definition Index: 65575
+// Method Definition Index: 65598
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneSetTransform_mD660AA85CB225488514041F89BA35D5C7A68242C (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_control, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	{
@@ -3367,7 +3367,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneSetTransfor
 		return (-1);
 	}
 }
-// Method Definition Index: 65576
+// Method Definition Index: 65599
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneSetBox_mFC12064BA2F4482D9C36778FEA2F860207B0AB65 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_control, float ___1_sizeX, float ___2_sizeY, float ___3_sizeZ, const RuntimeMethod* method) 
 {
 	{
@@ -3375,7 +3375,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneSetBox_mFC1
 		return (-1);
 	}
 }
-// Method Definition Index: 65577
+// Method Definition Index: 65600
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneSetFadeDistance_mE4DFC155546BAE5F63623756C483A3C3120810AD (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_control, float ___1_fadeX, float ___2_fadeY, float ___3_fadeZ, const RuntimeMethod* method) 
 {
 	{
@@ -3383,7 +3383,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneSetFadeDist
 		return (-1);
 	}
 }
-// Method Definition Index: 65578
+// Method Definition Index: 65601
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneSetFrequency_mF0DCF2D3877091D8F5DC0AA8404EAD8036C2ED8E (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_control, uint32_t ___1_property, float ___2_frequency, float ___3_value, const RuntimeMethod* method) 
 {
 	{
@@ -3391,7 +3391,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneSetFrequenc
 		return (-1);
 	}
 }
-// Method Definition Index: 65579
+// Method Definition Index: 65602
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneReset_m7249E9DA76A47740F03FE03EED1EF896D9C6EF42 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_control, uint32_t ___1_property, const RuntimeMethod* method) 
 {
 	{
@@ -3399,7 +3399,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_ControlZoneReset_m7249
 		return (-1);
 	}
 }
-// Method Definition Index: 65580
+// Method Definition Index: 65603
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void DummyInterface__ctor_m5A6FCA266454705569E226819A1B8FA71B82A333 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, const RuntimeMethod* method) 
 {
 	{
@@ -3407,7 +3407,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void DummyInterface__ctor_m5A6FCA266454705569
 		return;
 	}
 }
-// Method Definition Index: 65581
+// Method Definition Index: 65604
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_MetaXRAcousticNativeInterface_INativeInterface_AudioGeometrySetTransform_mF25FE61A9FED4BB7A385765D3CD513C9C2FA4B4B (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_geometry, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	{
@@ -3418,7 +3418,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_MetaXRAcousticNativeIn
 		return L_2;
 	}
 }
-// Method Definition Index: 65582
+// Method Definition Index: 65605
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_MetaXRAcousticNativeInterface_INativeInterface_AudioSceneIRSetTransform_m48EB12767BDE7802E22CD2A3D182CB839F64D864 (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_sceneIR, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	{
@@ -3429,7 +3429,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_MetaXRAcousticNativeIn
 		return L_2;
 	}
 }
-// Method Definition Index: 65583
+// Method Definition Index: 65606
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_MetaXRAcousticNativeInterface_INativeInterface_ControlZoneSetTransform_mD720F1A4357D3703615AA8318D70FB6A02B478CA (DummyInterface_tAF46C92073B9EC0045B3B191386483213865AA6A* __this, intptr_t ___0_control, Matrix4x4_tDB70CF134A14BA38190C59AA700BCE10E2AED3E6* ___1_matrix, const RuntimeMethod* method) 
 {
 	{
@@ -3448,7 +3448,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t DummyInterface_MetaXRAcousticNativeIn
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65584
+// Method Definition Index: 65607
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSceneGroup__ctor_m9784D881561CD8DC5AE158553ECE8C1DE4796CE4 (MetaXRAcousticSceneGroup_tB8587E500C480D9E8F0455755E4A779CDF9BEABB* __this, const RuntimeMethod* method) 
 {
 	{
@@ -3464,7 +3464,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSceneGroup__ctor_m9784D881
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65585
+// Method Definition Index: 65608
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings_OnBeforeSceneLoadRuntimeMethod_mDCBFB6746AFCE14BEAF2AC34F84969726E020915 (const RuntimeMethod* method) 
 {
 	{
@@ -3477,7 +3477,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings_OnBeforeSceneLoad
 		return;
 	}
 }
-// Method Definition Index: 65586
+// Method Definition Index: 65609
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t MetaXRAcousticSettings_get_AcousticModel_m128DCBF589EEC1D86A3B7E88BC27506A9F15671D (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, const RuntimeMethod* method) 
 {
 	{
@@ -3486,7 +3486,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t MetaXRAcousticSettings_get_AcousticMo
 		return L_0;
 	}
 }
-// Method Definition Index: 65587
+// Method Definition Index: 65610
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings_set_AcousticModel_mDBAE1232C11A84102A4AEC8762D1561FB5D2BCC9 (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, int32_t ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -3523,7 +3523,7 @@ IL_001c:
 		return;
 	}
 }
-// Method Definition Index: 65588
+// Method Definition Index: 65611
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAcousticSettings_get_DiffractionEnabled_m281BB8BFEDFE4E5D853CECACEDD77446E29A6CCD (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, const RuntimeMethod* method) 
 {
 	{
@@ -3532,7 +3532,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAcousticSettings_get_DiffractionEn
 		return L_0;
 	}
 }
-// Method Definition Index: 65589
+// Method Definition Index: 65612
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings_set_DiffractionEnabled_m22AB8523C25AB4929953210CC46C03717CFABA59 (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -3569,7 +3569,7 @@ IL_001d:
 		return;
 	}
 }
-// Method Definition Index: 65590
+// Method Definition Index: 65613
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* MetaXRAcousticSettings_get_ExcludeTags_m53F907405211CB582EE051ECE52CA65993F38D1A (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, const RuntimeMethod* method) 
 {
 	{
@@ -3578,7 +3578,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F
 		return L_0;
 	}
 }
-// Method Definition Index: 65591
+// Method Definition Index: 65614
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings_set_ExcludeTags_m3FA8343F237F069DC1A0B7B8BAE87E7B90FE409C (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -3589,7 +3589,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings_set_ExcludeTags_m
 		return;
 	}
 }
-// Method Definition Index: 65592
+// Method Definition Index: 65615
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAcousticSettings_get_MapBakeWriteGeo_m776D0967713A69769CC316AF6FE98E44E40E5D9E (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, const RuntimeMethod* method) 
 {
 	{
@@ -3598,7 +3598,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAcousticSettings_get_MapBakeWriteG
 		return L_0;
 	}
 }
-// Method Definition Index: 65593
+// Method Definition Index: 65616
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings_set_MapBakeWriteGeo_m39D6A0F2FBC2203E4F4766E1C58F6885EF7CDF2D (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -3608,7 +3608,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings_set_MapBakeWriteG
 		return;
 	}
 }
-// Method Definition Index: 65594
+// Method Definition Index: 65617
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings_ApplyAllSettings_m729E3782520C8D12092D933916ADD630914E2B23 (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -3662,7 +3662,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings_ApplyAllSettings_
 		return;
 	}
 }
-// Method Definition Index: 65595
+// Method Definition Index: 65618
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* MetaXRAcousticSettings_get_Instance_mDC770965C84C3FA9CFA15135E8A98AA0D0AACF97 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -3717,7 +3717,7 @@ IL_0033:
 		return L_6;
 	}
 }
-// Method Definition Index: 65596
+// Method Definition Index: 65619
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings__ctor_m4CECAC4AA93C4734A018CBBB44FE43CD6B86CCFD (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -3749,7 +3749,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAcousticSettings__ctor_m4CECAC4AA9
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65597
+// Method Definition Index: 65620
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* MetaXRAudioNativeInterface_get_Interface_mD282DE6365778E328E4FCB535651ADFFF91AF29B (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -3781,7 +3781,7 @@ IL_0011:
 		return L_2;
 	}
 }
-// Method Definition Index: 65598
+// Method Definition Index: 65621
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* MetaXRAudioNativeInterface_FindInterface_m9B3E5933AA6C52A0B363649644341499CF32AB26 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -3896,7 +3896,7 @@ IL_0049:
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65601
+// Method Definition Index: 65624
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t UnityNativeInterface_get_context_m95C47C43EE3A5F7CDE6E2649D8F0F4D786976E0B (UnityNativeInterface_tD09163B2786F8A2BB986CFE7710017F8C8C8DCC7* __this, const RuntimeMethod* method) 
 {
 	{
@@ -3923,7 +3923,7 @@ IL_001e:
 		return L_4;
 	}
 }
-// Method Definition Index: 65602
+// Method Definition Index: 65625
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UnityNativeInterface_ovrAudio_GetPluginContext_mBC1EF614EA1686C15FE859B74C071C007F59476C (intptr_t* ___0_context, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t*);
@@ -3945,7 +3945,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UnityNativeInterface_ovrAudio_GetPlug
 
 	return returnValue;
 }
-// Method Definition Index: 65603
+// Method Definition Index: 65626
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UnityNativeInterface_ovrAudio_SetAdvancedBoxRoomParametersUnity_mAD8CE3E58B88645E6CE265AEB044E6C246D468F4 (intptr_t ___0_context, float ___1_width, float ___2_height, float ___3_depth, bool ___4_lockToListenerPosition, float ___5_positionX, float ___6_positionY, float ___7_positionZ, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___8_wallMaterials, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float, float, float, int32_t, float, float, float, float*);
@@ -3973,7 +3973,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UnityNativeInterface_ovrAudio_SetAdva
 
 	return returnValue;
 }
-// Method Definition Index: 65604
+// Method Definition Index: 65627
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UnityNativeInterface_SetAdvancedBoxRoomParameters_mB03AC4305E4056E3294B4B81E5AE3F2A47E87E09 (UnityNativeInterface_tD09163B2786F8A2BB986CFE7710017F8C8C8DCC7* __this, float ___0_width, float ___1_height, float ___2_depth, bool ___3_lockToListenerPosition, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___4_position, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___5_wallMaterials, const RuntimeMethod* method) 
 {
 	{
@@ -3997,7 +3997,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UnityNativeInterface_SetAdvancedBoxRo
 		return L_12;
 	}
 }
-// Method Definition Index: 65605
+// Method Definition Index: 65628
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UnityNativeInterface_ovrAudio_SetRoomClutterFactor_m07D3584A7F969288C1DF4E22A62E8CEBAFE4DE63 (intptr_t ___0_context, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___1_clutterFactor, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float*);
@@ -4025,7 +4025,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UnityNativeInterface_ovrAudio_SetRoom
 
 	return returnValue;
 }
-// Method Definition Index: 65606
+// Method Definition Index: 65629
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UnityNativeInterface_SetRoomClutterFactor_m5ECC4E55E893DFEF5B824E5641C7D21A81D20891 (UnityNativeInterface_tD09163B2786F8A2BB986CFE7710017F8C8C8DCC7* __this, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___0_clutterFactor, const RuntimeMethod* method) 
 {
 	{
@@ -4038,7 +4038,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t UnityNativeInterface_SetRoomClutterFa
 		return L_2;
 	}
 }
-// Method Definition Index: 65607
+// Method Definition Index: 65630
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UnityNativeInterface__ctor_m429B3502D983C98CDB04D4B59574265D6E3C426A (UnityNativeInterface_tD09163B2786F8A2BB986CFE7710017F8C8C8DCC7* __this, const RuntimeMethod* method) 
 {
 	{
@@ -4056,7 +4056,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void UnityNativeInterface__ctor_m429B3502D983
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65608
+// Method Definition Index: 65631
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t WwisePluginInterface_get_context_mB92A2721618BB73E1508840EF068F0B42973C18C (WwisePluginInterface_t199AE67CEDE65A79910FD8DFA154C8FD392E6EEB* __this, const RuntimeMethod* method) 
 {
 	{
@@ -4083,7 +4083,7 @@ IL_001d:
 		return L_3;
 	}
 }
-// Method Definition Index: 65609
+// Method Definition Index: 65632
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t WwisePluginInterface_getOrCreateGlobalOvrAudioContext_mEF9C53E7B2B8AC2105A94F916E9008ECDFC79060 (const RuntimeMethod* method) 
 {
 	typedef intptr_t (DEFAULT_CALL *PInvokeFunc) ();
@@ -4105,7 +4105,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t WwisePluginInterface_getOrCreateGlob
 
 	return returnValue;
 }
-// Method Definition Index: 65610
+// Method Definition Index: 65633
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t WwisePluginInterface_ovrAudio_SetAdvancedBoxRoomParametersUnity_m46E7FC02F5E789AA6AC811160B510BDD754741D0 (intptr_t ___0_context, float ___1_width, float ___2_height, float ___3_depth, bool ___4_lockToListenerPosition, float ___5_positionX, float ___6_positionY, float ___7_positionZ, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___8_wallMaterials, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float, float, float, int32_t, float, float, float, float*);
@@ -4133,7 +4133,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t WwisePluginInterface_ovrAudio_SetAdva
 
 	return returnValue;
 }
-// Method Definition Index: 65611
+// Method Definition Index: 65634
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t WwisePluginInterface_SetAdvancedBoxRoomParameters_m7A4D44211390AE9AFC08B2C8A4A972CFD3510BC9 (WwisePluginInterface_t199AE67CEDE65A79910FD8DFA154C8FD392E6EEB* __this, float ___0_width, float ___1_height, float ___2_depth, bool ___3_lockToListenerPosition, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___4_position, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___5_wallMaterials, const RuntimeMethod* method) 
 {
 	{
@@ -4157,7 +4157,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t WwisePluginInterface_SetAdvancedBoxRo
 		return L_12;
 	}
 }
-// Method Definition Index: 65612
+// Method Definition Index: 65635
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t WwisePluginInterface_ovrAudio_SetRoomClutterFactor_mC16FC41F060DAB2E4DB8BC58A0FE9616F7D60D96 (intptr_t ___0_context, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___1_clutterFactor, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float*);
@@ -4185,7 +4185,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t WwisePluginInterface_ovrAudio_SetRoom
 
 	return returnValue;
 }
-// Method Definition Index: 65613
+// Method Definition Index: 65636
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t WwisePluginInterface_SetRoomClutterFactor_m02FA50551F4577EFE3A77BF6FDF33588842E49E4 (WwisePluginInterface_t199AE67CEDE65A79910FD8DFA154C8FD392E6EEB* __this, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___0_clutterFactor, const RuntimeMethod* method) 
 {
 	{
@@ -4198,7 +4198,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t WwisePluginInterface_SetRoomClutterFa
 		return L_2;
 	}
 }
-// Method Definition Index: 65614
+// Method Definition Index: 65637
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void WwisePluginInterface__ctor_m102AF2F81B68898D54A1BE79A6E9B37BFB23CDC7 (WwisePluginInterface_t199AE67CEDE65A79910FD8DFA154C8FD392E6EEB* __this, const RuntimeMethod* method) 
 {
 	{
@@ -4216,7 +4216,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void WwisePluginInterface__ctor_m102AF2F81B68
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65615
+// Method Definition Index: 65638
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR intptr_t FMODPluginInterface_get_context_mD2D698D2696EEA2899A7D9A9C65CFAF13892DB95 (FMODPluginInterface_t829FB8C7A2EC760BC196155384D04A8A47E0CA3D* __this, const RuntimeMethod* method) 
 {
 	{
@@ -4243,7 +4243,7 @@ IL_001e:
 		return L_4;
 	}
 }
-// Method Definition Index: 65616
+// Method Definition Index: 65639
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_GetPluginContext_m5DAC6D42596648E7CC10B0143A8F5C23280117E7 (intptr_t* ___0_context, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t*);
@@ -4265,7 +4265,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_GetPlugi
 
 	return returnValue;
 }
-// Method Definition Index: 65617
+// Method Definition Index: 65640
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_SetAdvancedBoxRoomParametersUnity_m7DA5D3DC14A4BD1D8C2BCCDC7FFE1C543A4A0E07 (intptr_t ___0_context, float ___1_width, float ___2_height, float ___3_depth, bool ___4_lockToListenerPosition, float ___5_positionX, float ___6_positionY, float ___7_positionZ, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___8_wallMaterials, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float, float, float, int32_t, float, float, float, float*);
@@ -4293,7 +4293,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_SetAdvan
 
 	return returnValue;
 }
-// Method Definition Index: 65618
+// Method Definition Index: 65641
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_SetAdvancedBoxRoomParameters_m8E6B517B160C20C7E3BD118720905A77890F262E (FMODPluginInterface_t829FB8C7A2EC760BC196155384D04A8A47E0CA3D* __this, float ___0_width, float ___1_height, float ___2_depth, bool ___3_lockToListenerPosition, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___4_position, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___5_wallMaterials, const RuntimeMethod* method) 
 {
 	{
@@ -4317,7 +4317,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_SetAdvancedBoxRoo
 		return L_12;
 	}
 }
-// Method Definition Index: 65619
+// Method Definition Index: 65642
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_SetRoomClutterFactor_m2EFB3F6AE58AF2632CB872A22272E778AE19D8A8 (intptr_t ___0_context, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___1_clutterFactor, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (intptr_t, float*);
@@ -4345,7 +4345,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_ovrAudio_SetRoomC
 
 	return returnValue;
 }
-// Method Definition Index: 65620
+// Method Definition Index: 65643
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_SetRoomClutterFactor_mC901A7E42F5D9DFDBF40F8D1E2EBBDA788AA5DDB (FMODPluginInterface_t829FB8C7A2EC760BC196155384D04A8A47E0CA3D* __this, SingleU5BU5D_t89DEFE97BCEDB5857010E79ECE0F52CF6E93B87C* ___0_clutterFactor, const RuntimeMethod* method) 
 {
 	{
@@ -4358,7 +4358,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t FMODPluginInterface_SetRoomClutterFac
 		return L_2;
 	}
 }
-// Method Definition Index: 65621
+// Method Definition Index: 65644
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FMODPluginInterface__ctor_m5E680483B10C7ED3C547F49EE1119E1987812F70 (FMODPluginInterface_t829FB8C7A2EC760BC196155384D04A8A47E0CA3D* __this, const RuntimeMethod* method) 
 {
 	{
@@ -4376,7 +4376,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void FMODPluginInterface__ctor_m5E680483B10C7
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65622
+// Method Definition Index: 65645
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioRoomAcousticProperties_CheckSceneHasRoom_m455C185C321FAD52A60CD29F1C5EC3B908A45210 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -4451,7 +4451,7 @@ IL_003c:
 		return;
 	}
 }
-// Method Definition Index: 65623
+// Method Definition Index: 65646
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioRoomAcousticProperties_Update_mEB82D666B651960636E16950A917F1B8E525A2AC (MetaXRAudioRoomAcousticProperties_t9E605CE8F232C8B8B455DC23F1469508556480C9* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -4543,7 +4543,7 @@ IL_00a2:
 		return;
 	}
 }
-// Method Definition Index: 65624
+// Method Definition Index: 65647
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioRoomAcousticProperties_SetWallMaterialPreset_mE8310341438AE1AC2F5AC20DD166596C00B6D58F (MetaXRAudioRoomAcousticProperties_t9E605CE8F232C8B8B455DC23F1469508556480C9* __this, int32_t ___0_wallIndex, int32_t ___1_materialPreset, const RuntimeMethod* method) 
 {
 	{
@@ -5024,7 +5024,7 @@ IL_046b:
 		return;
 	}
 }
-// Method Definition Index: 65625
+// Method Definition Index: 65648
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioRoomAcousticProperties_SetWallMaterialProperties_mEB84316AB48F153A23C03A9B50BBBE67A900EE41 (MetaXRAudioRoomAcousticProperties_t9E605CE8F232C8B8B455DC23F1469508556480C9* __this, int32_t ___0_wallIndex, float ___1_band0, float ___2_band1, float ___3_band2, float ___4_band3, const RuntimeMethod* method) 
 {
 	{
@@ -5056,7 +5056,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioRoomAcousticProperties_SetWal
 		return;
 	}
 }
-// Method Definition Index: 65626
+// Method Definition Index: 65649
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioRoomAcousticProperties__ctor_m2788AB8887747A67F08B70A6E02B535058904BB7 (MetaXRAudioRoomAcousticProperties_t9E605CE8F232C8B8B455DC23F1469508556480C9* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5114,7 +5114,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioRoomAcousticProperties__ctor_
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65627
+// Method Definition Index: 65650
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR MetaXRAudioSettings_t76602DA396AC738EC47E2C6D7F76C7B4BA2B25F9* MetaXRAudioSettings_get_Instance_mB453230A57D314E0508F6A012987114BE46160F1 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5169,7 +5169,7 @@ IL_0033:
 		return L_6;
 	}
 }
-// Method Definition Index: 65628
+// Method Definition Index: 65651
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSettings__ctor_m550A5B742E2FA68A0AE916975C98AFC4354625D8 (MetaXRAudioSettings_t76602DA396AC738EC47E2C6D7F76C7B4BA2B25F9* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5187,7 +5187,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSettings__ctor_m550A5B742E2FA
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65629
+// Method Definition Index: 65652
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_OnBeforeSceneLoadRuntimeMethod_m52DECD660A50BD6434F6DB531D2FD4BCBF42BD47 (const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5220,7 +5220,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_OnBeforeSceneLoadRunti
 		return;
 	}
 }
-// Method Definition Index: 65630
+// Method Definition Index: 65653
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAudioSource_get_EnableSpatialization_m5220DBFF3A337BA119766C052E1111A807A397C0 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5229,7 +5229,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAudioSource_get_EnableSpatializati
 		return L_0;
 	}
 }
-// Method Definition Index: 65631
+// Method Definition Index: 65654
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_set_EnableSpatialization_mE88DB02F1B601B42D87259E27568953DFF411FB0 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5240,7 +5240,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_set_EnableSpatializati
 		return;
 	}
 }
-// Method Definition Index: 65632
+// Method Definition Index: 65655
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSource_get_GainBoostDb_m881DA6E5AC2B002413A5DD27CCB18989096D9619 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5249,7 +5249,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSource_get_GainBoostDb_m881D
 		return L_0;
 	}
 }
-// Method Definition Index: 65633
+// Method Definition Index: 65656
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_set_GainBoostDb_m833C24BCE17A89200A3720015C09D30BA49B21DB (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, float ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5262,7 +5262,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_set_GainBoostDb_m833C2
 		return;
 	}
 }
-// Method Definition Index: 65634
+// Method Definition Index: 65657
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAudioSource_get_EnableAcoustics_m022030218248A46EDB269383A6590980A7C911B5 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5271,7 +5271,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAudioSource_get_EnableAcoustics_m0
 		return L_0;
 	}
 }
-// Method Definition Index: 65635
+// Method Definition Index: 65658
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_set_EnableAcoustics_mAD8ED3F63C17EF50996CA9DC24314F77FDB9D7C5 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5282,7 +5282,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_set_EnableAcoustics_mA
 		return;
 	}
 }
-// Method Definition Index: 65636
+// Method Definition Index: 65659
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSource_get_ReverbSendDb_mB25F0BEC5AE052E6ADE5F7012F61A37D11D58336 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5291,7 +5291,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSource_get_ReverbSendDb_mB25
 		return L_0;
 	}
 }
-// Method Definition Index: 65637
+// Method Definition Index: 65660
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_set_ReverbSendDb_m4F45AB54316190429B164D923E0F988DEF8C6E54 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, float ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5304,7 +5304,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_set_ReverbSendDb_m4F45
 		return;
 	}
 }
-// Method Definition Index: 65638
+// Method Definition Index: 65661
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_Awake_mC5DAEE4E3C851ECE31A9A72097BA9D4F3E7C7213 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5325,7 +5325,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_Awake_mC5DAEE4E3C851EC
 		return;
 	}
 }
-// Method Definition Index: 65639
+// Method Definition Index: 65662
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_Update_m0450DB433611D99275A3F4C2DD49E52672383B11 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5381,7 +5381,7 @@ IL_0029:
 		return;
 	}
 }
-// Method Definition Index: 65640
+// Method Definition Index: 65663
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource_UpdateParameters_m660E4EC58BEFF69332BF34E6C1FA819195CB44E0 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, const RuntimeMethod* method) 
 {
 	int32_t G_B2_0 = 0;
@@ -5444,7 +5444,7 @@ IL_003f:
 		return;
 	}
 }
-// Method Definition Index: 65641
+// Method Definition Index: 65664
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t MetaXRAudioSource_MetaXRAudio_SetGlobalVoiceLimit_m6305F25F5078BA076388898576E453D281578FAE (int32_t ___0_VoiceLimit, const RuntimeMethod* method) 
 {
 	typedef int32_t (DEFAULT_CALL *PInvokeFunc) (int32_t);
@@ -5466,7 +5466,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t MetaXRAudioSource_MetaXRAudio_SetGlob
 
 	return returnValue;
 }
-// Method Definition Index: 65642
+// Method Definition Index: 65665
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource__ctor_mC31D559BD5A9F59CA1BB3B6B9FDE931D7EEF3C62 (MetaXRAudioSource_t8D8D167DE494424AE3328EA5D966513EEECF74E0* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5486,7 +5486,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSource__ctor_mC31D559BD5A9F59
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65643
+// Method Definition Index: 65666
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_get_HrtfIntensity_mD4A6A3D036ABBFA09CF605F15CB490E3380F36FC (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5495,7 +5495,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_g
 		return L_0;
 	}
 }
-// Method Definition Index: 65644
+// Method Definition Index: 65667
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_set_HrtfIntensity_m1B3B94C7401C543A682764F80ED2A61A6917FC6F (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, float ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5508,7 +5508,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_se
 		return;
 	}
 }
-// Method Definition Index: 65645
+// Method Definition Index: 65668
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_get_VolumetricRadius_m55179A633D431FF5AA285D99B8ADE1C5B23861B4 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5517,7 +5517,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_g
 		return L_0;
 	}
 }
-// Method Definition Index: 65646
+// Method Definition Index: 65669
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_set_VolumetricRadius_m1669D6C4563E238DA1F63D88C248C1D7718B9D84 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, float ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5530,7 +5530,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_se
 		return;
 	}
 }
-// Method Definition Index: 65647
+// Method Definition Index: 65670
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_get_EarlyReflectionsSendDb_mF01D6818CE03191E5B2EB450E4A6607A553686C1 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5539,7 +5539,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_g
 		return L_0;
 	}
 }
-// Method Definition Index: 65648
+// Method Definition Index: 65671
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_set_EarlyReflectionsSendDb_m76521ECC77434A828F50B4A3315C3C7362B2B59C (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, float ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5552,7 +5552,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_se
 		return;
 	}
 }
-// Method Definition Index: 65649
+// Method Definition Index: 65672
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_get_ReverbReach_mBB1415909DB483CF18880BE859B0A4A60D9B090B (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5561,7 +5561,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_g
 		return L_0;
 	}
 }
-// Method Definition Index: 65650
+// Method Definition Index: 65673
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_set_ReverbReach_mF94BDF0AB7780632F49D4B11D0B58866B95D9292 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, float ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5574,7 +5574,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_se
 		return;
 	}
 }
-// Method Definition Index: 65651
+// Method Definition Index: 65674
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_get_OcclusionIntensity_m9A9B4ECC9910EE90799A5BCC9CC5D90E436D2703 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5583,7 +5583,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_g
 		return L_0;
 	}
 }
-// Method Definition Index: 65652
+// Method Definition Index: 65675
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_set_OcclusionIntensity_m1077E621915742CCCA8A6AAF716C71F5F4A55689 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, float ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5596,7 +5596,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_se
 		return;
 	}
 }
-// Method Definition Index: 65653
+// Method Definition Index: 65676
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_get_DirectivityIntensity_m1CB58E47A2A608940797E8AA03209160EEF25CDD (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5605,7 +5605,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float MetaXRAudioSourceExperimentalFeatures_g
 		return L_0;
 	}
 }
-// Method Definition Index: 65654
+// Method Definition Index: 65677
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_set_DirectivityIntensity_mBAD7CB7792ED5CA767E56D256EEF885CD04A0134 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, float ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5618,7 +5618,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_se
 		return;
 	}
 }
-// Method Definition Index: 65655
+// Method Definition Index: 65678
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t MetaXRAudioSourceExperimentalFeatures_get_DirectivityPattern_mF1F309350B794560DF2685CB8B0D7F9950547809 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5627,7 +5627,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t MetaXRAudioSourceExperimentalFeatures
 		return L_0;
 	}
 }
-// Method Definition Index: 65656
+// Method Definition Index: 65679
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_set_DirectivityPattern_m8560170064B0D6A1FE972F058F768A3E9513D955 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, int32_t ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5638,7 +5638,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_se
 		return;
 	}
 }
-// Method Definition Index: 65657
+// Method Definition Index: 65680
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAudioSourceExperimentalFeatures_get_DirectSoundEnabled_m345AB63398C9199627321CD60CE092EB820B7F11 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5647,7 +5647,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAudioSourceExperimentalFeatures_ge
 		return L_0;
 	}
 }
-// Method Definition Index: 65658
+// Method Definition Index: 65681
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_set_DirectSoundEnabled_m53EEC1028354C9D733C970A7E6EE9536B95C6079 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5658,7 +5658,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_se
 		return;
 	}
 }
-// Method Definition Index: 65659
+// Method Definition Index: 65682
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAudioSourceExperimentalFeatures_get_MediumAbsorption_m902A0479E29485E814E4BCFFF677654EDB513D05 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5667,7 +5667,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool MetaXRAudioSourceExperimentalFeatures_ge
 		return L_0;
 	}
 }
-// Method Definition Index: 65660
+// Method Definition Index: 65683
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_set_MediumAbsorption_m327325BE6745BFEA9DB330ADB1E5A446B9F3B245 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, bool ___0_value, const RuntimeMethod* method) 
 {
 	{
@@ -5678,7 +5678,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_se
 		return;
 	}
 }
-// Method Definition Index: 65661
+// Method Definition Index: 65684
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_OnValidate_mD2F0FFFA9E3CA3028EC84696FB60F1D03032944F (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5691,7 +5691,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_On
 		return;
 	}
 }
-// Method Definition Index: 65662
+// Method Definition Index: 65685
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_Awake_mBF310BC8962FFDE0C490DC6F118B21475C15279B (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5712,7 +5712,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_Aw
 		return;
 	}
 }
-// Method Definition Index: 65663
+// Method Definition Index: 65686
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_Update_mB9337C079A970C2F8BC3D28DF65CF2A23E8E039B (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -5762,7 +5762,7 @@ IL_0029:
 		return;
 	}
 }
-// Method Definition Index: 65664
+// Method Definition Index: 65687
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures_UpdateParameters_mC0FAB747523030BE2519777E5E658920E97928D8 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	int32_t G_B2_0 = 0;
@@ -5920,7 +5920,7 @@ IL_00d7:
 		return;
 	}
 }
-// Method Definition Index: 65665
+// Method Definition Index: 65688
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures__ctor_m32153734A56D0CEA75BA227E9652D37B4A95FE03 (MetaXRAudioSourceExperimentalFeatures_tBD6A37EFAA35B94A74AABB4C3674290FF83495B3* __this, const RuntimeMethod* method) 
 {
 	{
@@ -5956,7 +5956,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioSourceExperimentalFeatures__c
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65666
+// Method Definition Index: 65689
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioVersion_Awake_m929199F9C4C78F1C7DCC9FD7771DFD42F94659C5 (MetaXRAudioVersion_tB1D8AEFA0C1C87DA3EFD4F545CD4A1370BFABAFB* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6002,7 +6002,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioVersion_Awake_m929199F9C4C78F
 		return;
 	}
 }
-// Method Definition Index: 65667
+// Method Definition Index: 65690
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioVersion_MetaXRAudio_GetVersion_m18A5D74F925242105267EAD291C8A62A2C829483 (int32_t* ___0_Major, int32_t* ___1_Minor, int32_t* ___2_Patch, const RuntimeMethod* method) 
 {
 	typedef void (DEFAULT_CALL *PInvokeFunc) (int32_t*, int32_t*, int32_t*);
@@ -6023,7 +6023,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioVersion_MetaXRAudio_GetVersio
 	#endif
 
 }
-// Method Definition Index: 65668
+// Method Definition Index: 65691
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioVersion__ctor_m3FB3B215A5CBC920DA061D509BF9EE63C5E2AFEA (MetaXRAudioVersion_tB1D8AEFA0C1C87DA3EFD4F545CD4A1370BFABAFB* __this, const RuntimeMethod* method) 
 {
 	{
@@ -6039,7 +6039,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MetaXRAudioVersion__ctor_m3FB3B215A5CBC9
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65669
+// Method Definition Index: 65692
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MaterialData__ctor_m22E757C556F0E68B84CA084011B5DD93328D44DF (MaterialData_t41B21BF613E7FA7EFE406A6D70F68160BB13C17E* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6080,7 +6080,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MaterialData__ctor_m22E757C556F0E68B84CA
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65672
+// Method Definition Index: 65695
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* Spectrum_System_Collections_Generic_IEnumerableU3CMeta_XR_Acoustics_Spectrum_PointU3E_GetEnumerator_mD944E9588BB6B3D4538438C47736D21DB0F6CDB3 (Spectrum_tB3DBF8FDC543E15999B59292C4341C4E179A1F10* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6101,7 +6101,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* Spectrum_System_Collections_Ge
 		return (RuntimeObject*)L_3;
 	}
 }
-// Method Definition Index: 65673
+// Method Definition Index: 65696
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* Spectrum_System_Collections_IEnumerable_GetEnumerator_mB8A4549E98955FF389EB79B6A6779B15FCDE71A3 (Spectrum_tB3DBF8FDC543E15999B59292C4341C4E179A1F10* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6122,7 +6122,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* Spectrum_System_Collections_IE
 		return (RuntimeObject*)L_3;
 	}
 }
-// Method Definition Index: 65674
+// Method Definition Index: 65697
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Spectrum_Add_mF66FB8378C684D83CBAA74E80AF1EBA77B581CB8 (Spectrum_tB3DBF8FDC543E15999B59292C4341C4E179A1F10* __this, float ___0_frequency, float ___1_data, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6144,7 +6144,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Spectrum_Add_mF66FB8378C684D83CBAA74E80A
 		return;
 	}
 }
-// Method Definition Index: 65675
+// Method Definition Index: 65698
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Spectrum__ctor_m72B9B691A561F3739873E772C1D6693B29501A25 (Spectrum_tB3DBF8FDC543E15999B59292C4341C4E179A1F10* __this, Spectrum_tB3DBF8FDC543E15999B59292C4341C4E179A1F10* ___0_other, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6183,7 +6183,7 @@ IL_0026:
 		return;
 	}
 }
-// Method Definition Index: 65676
+// Method Definition Index: 65699
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Spectrum_Clone_mA45D20B98E3BDE2BB12FE569F5FA85FE26BE851F (Spectrum_tB3DBF8FDC543E15999B59292C4341C4E179A1F10* __this, Spectrum_tB3DBF8FDC543E15999B59292C4341C4E179A1F10* ___0_other, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6225,7 +6225,7 @@ IL_0005:
 		return;
 	}
 }
-// Method Definition Index: 65677
+// Method Definition Index: 65700
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* Spectrum_ToString_m8F2D9467EDF18403763609A0CF1B3B3B1732FAA9 (Spectrum_tB3DBF8FDC543E15999B59292C4341C4E179A1F10* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6333,7 +6333,7 @@ IL_005c:
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 65678
+// Method Definition Index: 65701
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Point__ctor_m68C666738E9DF755DCFA99E894367102872A52CD (Point_tE62A9AAF9CD86C87CF30310CF08E8E097B3EC370* __this, float ___0_frequency, float ___1_data, const RuntimeMethod* method) 
 {
 	{
@@ -6354,7 +6354,7 @@ IL2CPP_EXTERN_C  void Point__ctor_m68C666738E9DF755DCFA99E894367102872A52CD_Adju
 	_thisAdjusted = reinterpret_cast<Point_tE62A9AAF9CD86C87CF30310CF08E8E097B3EC370*>(__this + _offset);
 	Point__ctor_m68C666738E9DF755DCFA99E894367102872A52CD(_thisAdjusted, ___0_frequency, ___1_data, method);
 }
-// Method Definition Index: 65679
+// Method Definition Index: 65702
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t Point_CompareTo_m4767D3DEDC5B9F3A48932ACF41C4579A3385E891 (Point_tE62A9AAF9CD86C87CF30310CF08E8E097B3EC370* __this, Point_tE62A9AAF9CD86C87CF30310CF08E8E097B3EC370 ___0_other, const RuntimeMethod* method) 
 {
 	{
@@ -6376,7 +6376,7 @@ IL2CPP_EXTERN_C  int32_t Point_CompareTo_m4767D3DEDC5B9F3A48932ACF41C4579A3385E8
 	_returnValue = Point_CompareTo_m4767D3DEDC5B9F3A48932ACF41C4579A3385E891(_thisAdjusted, ___0_other, method);
 	return _returnValue;
 }
-// Method Definition Index: 65680
+// Method Definition Index: 65703
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* Point_ToString_m12ED5DC43605789C4F78BAE82C6762588C59898A (Point_tE62A9AAF9CD86C87CF30310CF08E8E097B3EC370* __this, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -6515,7 +6515,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool IntPtr_op_Equality_m7D9CDCDE
 		return (bool)((((intptr_t)L_0) == ((intptr_t)L_1))? 1 : 0);
 	}
 }
-// Method Definition Index: 65586
+// Method Definition Index: 65609
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t MetaXRAcousticSettings_get_AcousticModel_m128DCBF589EEC1D86A3B7E88BC27506A9F15671D_inline (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, const RuntimeMethod* method) 
 {
 	{
@@ -6524,7 +6524,7 @@ IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t MetaXRAcousticSettings_ge
 		return L_0;
 	}
 }
-// Method Definition Index: 65588
+// Method Definition Index: 65611
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool MetaXRAcousticSettings_get_DiffractionEnabled_m281BB8BFEDFE4E5D853CECACEDD77446E29A6CCD_inline (MetaXRAcousticSettings_tDD5A8FF53B48D70646FFC715466C85E6CE18E406* __this, const RuntimeMethod* method) 
 {
 	{

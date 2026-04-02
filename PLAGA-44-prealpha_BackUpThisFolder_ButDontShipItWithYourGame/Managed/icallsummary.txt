@@ -315,7 +315,10 @@ UnityEngine.AnimationCurve::set_keys_Injected
 UnityEngine.AnimationCurve::set_postWrapMode_Injected
 UnityEngine.AnimationCurve::set_preWrapMode_Injected
 UnityEngine.Animations.AnimationLayerMixerPlayable::SetSingleLayerOptimizationInternal
+UnityEngine.Animator::IsInIKPass_Injected
 UnityEngine.Animator::get_hasBoundPlayables_Injected
+UnityEngine.Animator::get_isHuman_Injected
+UnityEngine.Animator::get_logWarnings_Injected
 UnityEngine.Animator::GetLayerIndex_Injected
 UnityEngine.Animator::StringToHash_Injected
 UnityEngine.Animator::GetBoneTransformInternal_Injected
@@ -326,6 +329,10 @@ UnityEngine.Animator::SetBoolString_Injected
 UnityEngine.Animator::SetFloatIDDamp_Injected
 UnityEngine.Animator::SetFloatID_Injected
 UnityEngine.Animator::SetFloatString_Injected
+UnityEngine.Animator::SetGoalPosition_Injected
+UnityEngine.Animator::SetGoalRotation_Injected
+UnityEngine.Animator::SetGoalWeightPosition_Injected
+UnityEngine.Animator::SetGoalWeightRotation_Injected
 UnityEngine.Animator::SetLayerWeight_Injected
 UnityEngine.Animator::SetTriggerString_Injected
 UnityEngine.Application::get_isBatchMode
@@ -1640,6 +1647,7 @@ UnityEngine.Resources::UnloadUnusedAssets_Injected
 UnityEngine.ResourcesAPIInternal::FindShaderByName_Injected
 UnityEngine.ResourcesAPIInternal::Load_Injected
 UnityEngine.ResourcesAPIInternal::FindObjectsOfTypeAll
+UnityEngine.ResourcesAPIInternal::LoadAll_Injected
 UnityEngine.Rigidbody::get_isKinematic_Injected
 UnityEngine.Rigidbody::get_mass_Injected
 UnityEngine.Rigidbody::AddForceAtPosition_Injected

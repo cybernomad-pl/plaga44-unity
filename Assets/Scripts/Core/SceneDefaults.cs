@@ -127,7 +127,7 @@ public class SceneDefaults : MonoBehaviour
         var cam = Camera.main;
         if (cam == null) return;
 
-        cam.nearClipPlane = 0.01f;
+        cam.nearClipPlane = 0.05f; // was 0.01 -- too close, clipping through geometry
         cam.farClipPlane = 2000f;
     }
 
