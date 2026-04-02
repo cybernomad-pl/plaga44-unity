@@ -124,9 +124,15 @@ namespace Plaga44.Editor
                 var meshInstance = (GameObject)PrefabUtility.InstantiatePrefab(modelAsset);
                 meshInstance.name = variantName + "_Mesh";
                 meshInstance.transform.SetParent(root.transform);
-                meshInstance.transform.localPosition = Vector3.zero;
+                meshInstance.transform.localPosition = Vector3.zero; // stopy na Y=0 w OBJ
                 meshInstance.transform.localRotation = Quaternion.identity;
-                meshInstance.transform.localScale = Vector3.one * 0.01f; // Fuse exports in cm, Unity = meters
+                meshInstance.transform.localScale = Vector3.one * 0.01f; // Fuse cm -> Unity meters
+                // Raycast w dol zeby postawic na terenie
+                if (Physics.Raycast(root.transform.position + Vector3.up * 5f, Vector3.down, out RaycastHit hit, 50f))
+                {
+                    root.transform.position = new Vector3(root.transform.position.x, hit.point.y, root.transform.position.z);
+                    Debug.Log($"{LOG} Postawiony na terenie Y={hit.point.y:F2}");
+                }
                 Debug.Log($"{LOG} Model zaladowany: {modelPath}");
             }
             else
