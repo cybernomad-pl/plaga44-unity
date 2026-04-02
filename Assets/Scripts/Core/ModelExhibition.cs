@@ -14,6 +14,8 @@ public class ModelExhibition : MonoBehaviour
     private static readonly string[] MODEL_PATHS = {
         "PLAGA44/Characters/PINEA/PINEA_rigged",
         "PLAGA44/Characters/PINEA-NEO/PINEA-NEO_rigged",
+        "SpawnItems/Sword",
+        "SpawnItems/Pistol",
     };
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -58,28 +60,59 @@ public class ModelExhibition : MonoBehaviour
 
             var instance = Instantiate(prefab, pos, Quaternion.LookRotation(-cam.transform.forward));
             instance.name = prefab.name + "_exhibit";
+            instance.transform.localScale *= 1.2f; // 20% bigger
 
-            // Grabbable
-            var rb = instance.GetComponent<Rigidbody>();
-            if (rb == null) rb = instance.AddComponent<Rigidbody>();
-            rb.isKinematic = true;
-            rb.useGravity = false;
-
-            if (instance.GetComponent<Collider>() == null)
+            // For rigged characters: per-bone grabbable + poseable
+            var animator = instance.GetComponent<Animator>();
+            if (animator != null && animator.isHuman)
             {
-                var renderers = instance.GetComponentsInChildren<Renderer>();
-                if (renderers.Length > 0)
+                animator.enabled = false; // freeze T-pose, allow posing
+                // Add collider + grabbable to each bone
+                foreach (HumanBodyBones boneId in System.Enum.GetValues(typeof(HumanBodyBones)))
                 {
-                    var bounds = renderers[0].bounds;
-                    foreach (var r in renderers) bounds.Encapsulate(r.bounds);
-                    var box = instance.AddComponent<BoxCollider>();
-                    box.center = instance.transform.InverseTransformPoint(bounds.center);
-                    box.size = instance.transform.InverseTransformVector(bounds.size);
-                }
-            }
+                    if (boneId == HumanBodyBones.LastBone) continue;
+                    var bone = animator.GetBoneTransform(boneId);
+                    if (bone == null) continue;
 
-            var grabbable = instance.GetComponent<OVRGrabbable>();
-            if (grabbable == null) instance.AddComponent<OVRGrabbable>();
+                    if (bone.GetComponent<Collider>() == null)
+                    {
+                        var sc = bone.gameObject.AddComponent<SphereCollider>();
+                        sc.radius = 0.08f;
+                    }
+                    if (bone.GetComponent<Rigidbody>() == null)
+                    {
+                        var boneRb = bone.gameObject.AddComponent<Rigidbody>();
+                        boneRb.isKinematic = true;
+                        boneRb.useGravity = false;
+                    }
+                    if (bone.GetComponent<OVRGrabbable>() == null)
+                        bone.gameObject.AddComponent<OVRGrabbable>();
+                }
+                Debug.Log($"[EXHIBITION] {prefab.name}: per-bone grabbable (poseable)");
+            }
+            else
+            {
+                // Non-character: single grabbable
+                var rb = instance.GetComponent<Rigidbody>();
+                if (rb == null) rb = instance.AddComponent<Rigidbody>();
+                rb.isKinematic = true;
+                rb.useGravity = false;
+
+                if (instance.GetComponent<Collider>() == null)
+                {
+                    var renderers = instance.GetComponentsInChildren<Renderer>();
+                    if (renderers.Length > 0)
+                    {
+                        var bounds = renderers[0].bounds;
+                        foreach (var rend in renderers) bounds.Encapsulate(rend.bounds);
+                        var box = instance.AddComponent<BoxCollider>();
+                        box.center = instance.transform.InverseTransformPoint(bounds.center);
+                        box.size = instance.transform.InverseTransformVector(bounds.size);
+                    }
+                }
+                if (instance.GetComponent<OVRGrabbable>() == null)
+                    instance.AddComponent<OVRGrabbable>();
+            }
 
             // Label
             CreateLabel(instance.transform, prefab.name, pos + Vector3.up * 2f);

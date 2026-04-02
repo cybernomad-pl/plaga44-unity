@@ -42,30 +42,35 @@ public class ModelSpawner : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("[SPAWNER] ModelSpawner.Start() -- loading models from Resources/PLAGA44/...");
+        Debug.Log("[SPAWNER] ModelSpawner.Start() -- loading models...");
 
-        // Load all models from Resources
-        var allAssets = Resources.LoadAll<GameObject>("PLAGA44");
-        Debug.Log($"[SPAWNER] Resources.LoadAll found {allAssets.Length} GameObjects total");
+        // Explicit model paths -- no guessing
+        string[] knownModels = {
+            "PLAGA44/Characters/PINEA/PINEA_rigged",
+            "PLAGA44/Characters/PINEA-NEO/PINEA-NEO_rigged",
+            "SpawnItems/Sword",
+            "SpawnItems/Pistol",
+        };
 
-        foreach (var m in allAssets)
+        foreach (var path in knownModels)
         {
-            bool hasMesh = m.GetComponentInChildren<MeshFilter>() != null;
-            bool hasSkinned = m.GetComponentInChildren<SkinnedMeshRenderer>() != null;
-            Debug.Log($"[SPAWNER]   checking: {m.name} mesh={hasMesh} skinned={hasSkinned}");
-
-            if (!hasMesh && !hasSkinned) continue;
-
-            string path = GetResourcePath(m);
-            _modelPaths.Add(path);
-            _modelNames.Add(m.name);
-            Debug.Log($"[SPAWNER]   ADDED: {m.name} -> {path}");
+            var prefab = Resources.Load<GameObject>(path);
+            if (prefab != null)
+            {
+                _modelPaths.Add(path);
+                _modelNames.Add(prefab.name);
+                Debug.Log($"[SPAWNER] LOADED: {prefab.name} -> {path}");
+            }
+            else
+            {
+                Debug.LogWarning($"[SPAWNER] NOT FOUND: {path}");
+            }
         }
 
         if (_modelPaths.Count > 0)
             selectedName = _modelNames[0];
         else
-            Debug.LogWarning("[SPAWNER] NO MODELS FOUND IN RESOURCES!");
+            Debug.LogWarning("[SPAWNER] NO MODELS FOUND!");
 
         CreateHUD();
         Debug.Log($"[SPAWNER] READY: {_modelPaths.Count} models. RIGHT stick=browse/scale, RIGHT trigger=spawn, Y=delete.");
