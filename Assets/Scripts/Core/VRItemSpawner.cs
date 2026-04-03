@@ -8,16 +8,13 @@ using System.Collections.Generic;
 /// LEFT TRIGGER = spawn in front of player (with Rigidbody + OVRGrabbable)
 /// X = toggle menu, Y = delete last
 ///
-/// Items are registered via AddItem() or from the hardcoded list.
-/// Spawned objects get physics and grab support automatically.
+/// Loads prefabs from Resources/SpawnItems/ at startup.
+/// Blocks player movement when menu is open.
 /// </summary>
 public class VRItemSpawner : MonoBehaviour
 {
     public static bool MenuOpen { get; private set; } = false;
     public static VRItemSpawner Instance { get; private set; }
-
-    [Header("Items to spawn (assign in Inspector or auto-populated)")]
-    public List<GameObject> items = new List<GameObject>();
 
     private GameObject _canvas;
     private Text _titleText;
@@ -27,10 +24,10 @@ public class VRItemSpawner : MonoBehaviour
     private float _inputCooldown = 0;
     private float _spawnScale = 1f;
     private float _spawnDistance = 2f;
+    private List<GameObject> _prefabs = new List<GameObject>();
     private List<GameObject> _spawnedObjects = new List<GameObject>();
 
-    // Total rows = items + 3 action rows
-    private int TotalRows => items.Count + 3;
+    private int TotalRows => _prefabs.Count + 3;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoCreate()
@@ -42,44 +39,33 @@ public class VRItemSpawner : MonoBehaviour
 
     void Start()
     {
-        FindItemsInScene();
+        LoadPrefabs();
         CreateWorldCanvas();
         _canvas.SetActive(false);
-        Debug.Log($"[PLAGA44] VRItemSpawner: {items.Count} items ready");
+        Debug.Log($"[PLAGA44] VRItemSpawner: {_prefabs.Count} items loaded");
     }
 
-    /// <summary>
-    /// Scan scene for objects tagged "SpawnItem" or with OVRGrabbable.
-    /// Also finds weapon prefabs by name convention.
-    /// </summary>
-    void FindItemsInScene()
+    void LoadPrefabs()
     {
-        // Already have items assigned? Keep them.
-        if (items.Count > 0) return;
-
-        // Search for all OVRGrabbable objects in scene (they are spawnable by definition)
-        var grabbables = FindObjectsByType<OVRGrabbable>(FindObjectsSortMode.None);
-        foreach (var g in grabbables)
+        _prefabs.Clear();
+        var loaded = Resources.LoadAll<GameObject>("SpawnItems");
+        if (loaded != null)
         {
-            if (!items.Contains(g.gameObject))
-                items.Add(g.gameObject);
+            foreach (var p in loaded)
+                _prefabs.Add(p);
         }
-    }
 
-    /// <summary>
-    /// Add item at runtime. Call from other scripts to register spawnable items.
-    /// </summary>
-    public void AddItem(GameObject prefab)
-    {
-        if (prefab != null && !items.Contains(prefab))
-        {
-            items.Add(prefab);
-            RebuildCanvas();
-        }
+        // Sort: weapons by name
+        _prefabs.Sort((a, b) => string.Compare(a.name, b.name));
+
+        if (_prefabs.Count == 0)
+            Debug.LogWarning("[PLAGA44] VRItemSpawner: No prefabs in Resources/SpawnItems/");
     }
 
     void CreateWorldCanvas()
     {
+        int rowCount = TotalRows;
+
         _canvas = new GameObject("ItemSpawnerCanvas");
         _canvas.transform.SetParent(transform);
         var canvas = _canvas.AddComponent<Canvas>();
@@ -87,48 +73,32 @@ public class VRItemSpawner : MonoBehaviour
         canvas.sortingOrder = 101;
         _canvas.AddComponent<CanvasScaler>();
 
-        RebuildCanvas();
-    }
-
-    void RebuildCanvas()
-    {
-        if (_canvas == null) return;
-
-        // Clear old children except canvas component itself
-        var bg = _canvas.transform.Find("BG");
-        if (bg != null) Destroy(bg.gameObject);
-
-        int rowCount = TotalRows;
         var rt = _canvas.GetComponent<RectTransform>();
         rt.sizeDelta = new Vector2(450, 60 + rowCount * 28);
         rt.localScale = Vector3.one * 0.0008f;
 
-        // Background -- dark purple
-        var bgGo = new GameObject("BG");
-        bgGo.transform.SetParent(_canvas.transform, false);
-        var bgImg = bgGo.AddComponent<Image>();
+        var bg = new GameObject("BG");
+        bg.transform.SetParent(_canvas.transform, false);
+        var bgImg = bg.AddComponent<Image>();
         bgImg.color = new Color(0.06f, 0.02f, 0.10f, 0.93f);
-        var bgRt = bgGo.GetComponent<RectTransform>();
+        var bgRt = bg.GetComponent<RectTransform>();
         bgRt.anchorMin = Vector2.zero;
         bgRt.anchorMax = Vector2.one;
         bgRt.sizeDelta = Vector2.zero;
 
-        // Title
-        var titleGo = MakeText(bgGo.transform, "", 20, new Color(1f, 0.6f, 0.2f),
+        var titleGo = MakeText(bg.transform, "", 20, new Color(1f, 0.6f, 0.2f),
             new Vector2(10, -5), new Vector2(430, 28));
         _titleText = titleGo.GetComponent<Text>();
 
-        // Rows
         _rowTexts = new Text[rowCount];
         for (int i = 0; i < rowCount; i++)
         {
             float y = -33 - i * 28;
-            var go = MakeText(bgGo.transform, "", 18, Color.white, new Vector2(10, y), new Vector2(430, 26));
+            var go = MakeText(bg.transform, "", 18, Color.white, new Vector2(10, y), new Vector2(430, 26));
             _rowTexts[i] = go.GetComponent<Text>();
         }
 
-        // Footer
-        MakeText(bgGo.transform,
+        MakeText(bg.transform,
             "L.STICK ^v select <> scale | L.TRIG spawn | [X] menu [Y] undo",
             12, new Color(0.5f, 0.5f, 0.5f),
             new Vector2(10, -33 - rowCount * 28), new Vector2(430, 22));
@@ -160,13 +130,12 @@ public class VRItemSpawner : MonoBehaviour
             _visible = !_visible;
             _canvas.SetActive(_visible);
             MenuOpen = _visible;
+            BlockPlayerMovement(_visible);
         }
 
         // Y = quick delete last (always available)
         if (OVRInput.GetDown(OVRInput.Button.Four))
-        {
             DeleteLastSpawned();
-        }
 
         if (!_visible) return;
 
@@ -190,13 +159,13 @@ public class VRItemSpawner : MonoBehaviour
 
         if (stick.x > 0.5f)
         {
-            _spawnScale = Mathf.Min(_spawnScale * 1.5f, 100f);
-            _inputCooldown = 0.2f;
+            _spawnScale = Mathf.Min(_spawnScale * 1.2f, 100f);
+            _inputCooldown = 0.15f;
         }
         else if (stick.x < -0.5f)
         {
-            _spawnScale = Mathf.Max(_spawnScale / 1.5f, 0.01f);
-            _inputCooldown = 0.2f;
+            _spawnScale = Mathf.Max(_spawnScale / 1.2f, 0.01f);
+            _inputCooldown = 0.15f;
         }
 
         if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f)
@@ -206,6 +175,13 @@ public class VRItemSpawner : MonoBehaviour
         }
 
         UpdateDisplay();
+    }
+
+    void BlockPlayerMovement(bool block)
+    {
+        var pc = FindAnyObjectByType<OVRPlayerController>();
+        if (pc != null)
+            pc.EnableLinearMovement = !block;
     }
 
     void PositionCanvas()
@@ -239,13 +215,13 @@ public class VRItemSpawner : MonoBehaviour
 
     void Execute(int row)
     {
-        if (row < items.Count)
+        if (row < _prefabs.Count)
         {
-            SpawnItem(items[row]);
+            SpawnItem(_prefabs[row]);
         }
         else
         {
-            int action = row - items.Count;
+            int action = row - _prefabs.Count;
             if (action == 0) _spawnScale = 1f;
             else if (action == 1) DeleteLastSpawned();
             else if (action == 2) DeleteAllSpawned();
@@ -269,7 +245,6 @@ public class VRItemSpawner : MonoBehaviour
         instance.transform.localScale = Vector3.one * _spawnScale;
         instance.SetActive(true);
 
-        // Rigidbody
         var rb = instance.GetComponent<Rigidbody>();
         if (rb == null)
             rb = instance.AddComponent<Rigidbody>();
@@ -277,7 +252,6 @@ public class VRItemSpawner : MonoBehaviour
         rb.useGravity = true;
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
-        // Collider -- auto-fit box from mesh bounds
         if (instance.GetComponent<Collider>() == null &&
             instance.GetComponentInChildren<Collider>() == null)
         {
@@ -290,26 +264,28 @@ public class VRItemSpawner : MonoBehaviour
 
                 var box = instance.AddComponent<BoxCollider>();
                 box.center = instance.transform.InverseTransformPoint(bounds.center);
-                box.size = instance.transform.InverseTransformVector(bounds.size);
-                // Ensure positive size
                 box.size = new Vector3(
-                    Mathf.Abs(box.size.x),
-                    Mathf.Abs(box.size.y),
-                    Mathf.Abs(box.size.z));
-            }
-            else
-            {
-                var box = instance.AddComponent<BoxCollider>();
-                box.size = Vector3.one * 0.3f;
+                    Mathf.Abs(instance.transform.InverseTransformVector(bounds.size).x),
+                    Mathf.Abs(instance.transform.InverseTransformVector(bounds.size).y),
+                    Mathf.Abs(instance.transform.InverseTransformVector(bounds.size).z));
             }
         }
 
-        // OVRGrabbable
         if (instance.GetComponent<OVRGrabbable>() == null)
             instance.AddComponent<OVRGrabbable>();
 
+        // M249: full handler (two-handed grip, bipod, orientation, material)
+        if (source.name.Contains("M249"))
+        {
+            var grab = instance.GetComponent<OVRGrabbable>();
+            if (grab != null) M249GripFix.FixGrip(grab);
+            if (instance.GetComponent<M249Handler>() == null)
+                instance.AddComponent<M249Handler>();
+            M249MaterialSetup.ApplyToWeapon(instance);
+        }
+
         _spawnedObjects.Add(instance);
-        Debug.Log($"[PLAGA44] VRItemSpawner: Spawned '{source.name}' scale:{_spawnScale:F2} mass:{rb.mass:F1}kg");
+        Debug.Log($"[PLAGA44] VRItemSpawner: Spawned '{source.name}' scale:{_spawnScale:F2}");
     }
 
     float EstimateMass(string name)
@@ -319,8 +295,6 @@ public class VRItemSpawner : MonoBehaviour
         if (lower.Contains("rifle") || lower.Contains("scifi")) return 4f;
         if (lower.Contains("gun") || lower.Contains("pistol")) return 1.2f;
         if (lower.Contains("sword") || lower.Contains("katana")) return 1.5f;
-        if (lower.Contains("bullet")) return 0.01f;
-        if (lower.Contains("rock") || lower.Contains("stone")) return 5f;
         return 2f;
     }
 
@@ -332,7 +306,6 @@ public class VRItemSpawner : MonoBehaviour
             _spawnedObjects.RemoveAt(_spawnedObjects.Count - 1);
             if (last != null)
             {
-                Debug.Log($"[PLAGA44] VRItemSpawner: Deleted '{last.name}'");
                 Destroy(last);
                 return;
             }
@@ -345,7 +318,6 @@ public class VRItemSpawner : MonoBehaviour
         foreach (var obj in _spawnedObjects)
             if (obj != null) { Destroy(obj); count++; }
         _spawnedObjects.Clear();
-        Debug.Log($"[PLAGA44] VRItemSpawner: Deleted all ({count})");
     }
 
     void UpdateDisplay()
@@ -357,16 +329,16 @@ public class VRItemSpawner : MonoBehaviour
             bool sel = (i == _selectedRow);
             string arrow = sel ? ">>  " : "    ";
 
-            if (i < items.Count)
+            if (i < _prefabs.Count)
             {
-                var item = items[i];
-                string name = item != null ? item.name : "(null)";
+                var p = _prefabs[i];
+                string name = p != null ? p.name : "(null)";
                 string c = sel ? "#ff9933" : "#cccccc";
                 _rowTexts[i].text = $"<color={c}>{arrow}{name}</color>";
             }
             else
             {
-                int action = i - items.Count;
+                int action = i - _prefabs.Count;
                 string label = action switch
                 {
                     0 => "[RESET SCALE]",

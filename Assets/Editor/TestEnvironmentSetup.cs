@@ -545,9 +545,7 @@ namespace Plaga44.Editor
 
         static void AddDebugHUD()
         {
-            var go = new GameObject("VRInputDebug");
-            go.AddComponent<VRInputDebug>();
-            Undo.RegisterCreatedObjectUndo(go, "Add VRInputDebug");
+            // VRInputDebug removed -- no debug HUD
         }
 
         // ---- VR UI ----
