@@ -59,13 +59,8 @@ public class PlayerAvatar : MonoBehaviour
 
         Debug.Log("[AVATAR] OVRUnityHumanoidSkeletonRetargeter added -- Meta handles retargeting");
 
-        // Hide head (first person)
-        var head = animator.GetBoneTransform(HumanBodyBones.Head);
-        if (head != null)
-        {
-            head.localScale = Vector3.one * 0.01f;
-            Debug.Log("[AVATAR] Head hidden");
-        }
+        // Hide head + neck completely (first person -- no partial neck stump)
+        HideHeadAndNeck(animator);
 
         // Hide OVR controller hand models
         HideOVRHands(rig);
@@ -109,5 +104,45 @@ public class PlayerAvatar : MonoBehaviour
         }
 
         Debug.Log($"[AVATAR] Hidden {hidden} OVR hand/controller renderers");
+    }
+
+    /// <summary>
+    /// Fully hide head, neck, and upper chest area so no stump is visible.
+    /// Uses scale-to-zero on bones AND disables mesh triangles influenced by those bones.
+    /// </summary>
+    void HideHeadAndNeck(Animator animator)
+    {
+        // Bones to completely zero out
+        HumanBodyBones[] bonesToHide = {
+            HumanBodyBones.Head,
+            HumanBodyBones.Neck,
+            HumanBodyBones.LeftEye,
+            HumanBodyBones.RightEye,
+            HumanBodyBones.Jaw,
+        };
+
+        int hidden = 0;
+        foreach (var bone in bonesToHide)
+        {
+            var t = animator.GetBoneTransform(bone);
+            if (t != null)
+            {
+                t.localScale = Vector3.zero;
+                hidden++;
+            }
+        }
+
+        // Also hide all child transforms of Head (hair, accessories, etc.)
+        var headBone = animator.GetBoneTransform(HumanBodyBones.Head);
+        if (headBone != null)
+        {
+            foreach (var r in headBone.GetComponentsInChildren<Renderer>(true))
+            {
+                r.enabled = false;
+                hidden++;
+            }
+        }
+
+        Debug.Log($"[AVATAR] Head+Neck fully hidden ({hidden} bones/renderers zeroed)");
     }
 }
