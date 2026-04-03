@@ -88,8 +88,25 @@ public static class GameDesignDoc
     //
     // PINEA_rigged.fbx = base avatar for player AND bots
     // 21 bones, Unity Humanoid mapping
-    // Player: head hidden, hands=controllers, legs=IK
+    // Player: headless variant (head+neck zeroed), hands=controllers, legs=IK
     // Bots: AI-driven, same rig, same animations
+    //
+    // =========================================================================
+    // MENU INTROSPEKCJI (look-down trigger)
+    // =========================================================================
+    //
+    // When player looks down at their own body (head pitch < -45deg for 1s),
+    // INTROSPECTION MENU opens -- literally "looking inside yourself".
+    //
+    // Shows:
+    //   - Character stats (WYTRZYMALOSC, health, stamina)
+    //   - Inventory quick view
+    //   - Body condition (wounds, infections, mutations)
+    //   - Mental state (stress, morale)
+    //
+    // Closes when player looks back up (pitch > -20deg).
+    // World-space UI attached to chest area, facing camera.
+    // Does NOT pause game -- ambient awareness maintained.
     //
     // =========================================================================
 
