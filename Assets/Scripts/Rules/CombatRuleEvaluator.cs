@@ -37,7 +37,7 @@ namespace Plaga44.Rules
         /// <param name="source">What hit us.</param>
         /// <param name="zone">Where we were hit.</param>
         /// <param name="force">How hard (Newtons).</param>
-        public void ReceiveHit(ObjectType source, HitZoneType zone, float force)
+        public void ReceiveHit(ObjectType source, BodyRegion zone, float force)
         {
             if (ruleSet == null)
             {
@@ -93,13 +93,13 @@ namespace Plaga44.Rules
 
     /// <summary>
     /// Lightweight struct for passing hit data from HitDetector to CombatRuleEvaluator.
-    /// Create with: new HitEvent { source = ObjectType.Stone, zone = HitZoneType.Head, force = 12f }
+    /// Create with: new HitEvent { source = ObjectType.Stone, zone = BodyRegion.Head, force = 12f }
     /// </summary>
     [System.Serializable]
     public struct HitEvent
     {
         public ObjectType source;
-        public HitZoneType zone;
+        public BodyRegion zone;
         public float force;
     }
 }

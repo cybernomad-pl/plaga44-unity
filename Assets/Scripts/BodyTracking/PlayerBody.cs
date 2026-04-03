@@ -1,5 +1,3 @@
-// AUTO-DISABLED: requires newer Meta XR SDK APIs
-#if PLAGA44_FULL_SDK
 // PlayerBody.cs
 // PLAGA '44 -- Represents the player's physical body in VR.
 // Uses OVRBody as the joint source and exposes them to other game systems.
@@ -131,12 +129,13 @@ namespace Plaga44.BodyTracking
 #if HAS_META_XR
             if (bodyTrackingManager == null) return;
 
-            UpdateAnchor(_headJoint,       OVRSkeleton.BoneId.Body_Head);
-            UpdateAnchor(_leftHandJoint,   OVRSkeleton.BoneId.Body_LeftHandWrist);
-            UpdateAnchor(_rightHandJoint,  OVRSkeleton.BoneId.Body_RightHandWrist);
-            UpdateAnchor(_hipsJoint,       OVRSkeleton.BoneId.Body_Hips);
-            UpdateAnchor(_leftFootJoint,   OVRSkeleton.BoneId.Body_LeftFootAnkle);
-            UpdateAnchor(_rightFootJoint,  OVRSkeleton.BoneId.Body_RightFootAnkle);
+            // Use enum names via reflection to be SDK-version agnostic
+            UpdateAnchorByName(_headJoint,       "Body_Head", "Head");
+            UpdateAnchorByName(_leftHandJoint,   "Body_LeftHandWrist", "Hand_WristRoot");
+            UpdateAnchorByName(_rightHandJoint,  "Body_RightHandWrist", "Hand_WristRoot");
+            UpdateAnchorByName(_hipsJoint,       "Body_Hips", "Hips");
+            UpdateAnchorByName(_leftFootJoint,   "Body_LeftFootAnkle", "LeftFoot");
+            UpdateAnchorByName(_rightFootJoint,  "Body_RightFootAnkle", "RightFoot");
 #endif
         }
 
@@ -179,7 +178,7 @@ namespace Plaga44.BodyTracking
                 default:                   return null;
             }
 #else
-            return null;
+            #error "HAS_META_XR not defined -- Quest project requires Meta XR SDK"
 #endif
         }
 
@@ -203,14 +202,21 @@ namespace Plaga44.BodyTracking
             return go.transform;
         }
 
-        private void UpdateAnchor(Transform anchor, OVRSkeleton.BoneId boneId)
+        private void UpdateAnchorByName(Transform anchor, params string[] possibleNames)
         {
             if (anchor == null || bodyTrackingManager == null) return;
 
-            if (bodyTrackingManager.TryGetJointPose(boneId, out OVRPlugin.Posef pose))
+            foreach (var name in possibleNames)
             {
-                anchor.position = pose.Position.FromFlippedZVector3f();
-                anchor.rotation = pose.Orientation.FromFlippedZQuatf();
+                if (System.Enum.TryParse<OVRSkeleton.BoneId>(name, out var boneId))
+                {
+                    if (bodyTrackingManager.TryGetJointPose(boneId, out OVRPlugin.Posef pose))
+                    {
+                        anchor.position = pose.Position.FromFlippedZVector3f();
+                        anchor.rotation = pose.Orientation.FromFlippedZQuatf();
+                        return;
+                    }
+                }
             }
         }
 #endif
@@ -230,4 +236,3 @@ namespace Plaga44.BodyTracking
         RightFoot,
     }
 }
-#endif // PLAGA44_FULL_SDK

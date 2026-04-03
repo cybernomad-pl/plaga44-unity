@@ -1,5 +1,3 @@
-// AUTO-DISABLED: depends on classes guarded by PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // BodyTrackingSetup.cs
 // PLAGA '44 -- Editor menu: CYBERNOMAD/Scene Setup/Setup Body Tracking
 //
@@ -225,4 +223,3 @@ namespace Plaga44.Editor
     }
 }
 #endif
-#endif // PLAGA44_FULL_SDK

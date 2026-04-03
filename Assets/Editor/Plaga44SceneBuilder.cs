@@ -31,7 +31,7 @@ namespace Plaga44.Editor
         private const string LOG = "[PLAGA44]";
 
         private const string SCENE_A_PATH =
-            "Assets/PLAGA44/Environment/Terrain/Scene_A.unity";
+            "Assets/FloodedGrounds/Scenes/Scene_A.unity";
 
         private const string DEMO_SCENE_PATH =
             "Assets/Scenes/PLAGA44_Demo.unity";
@@ -720,14 +720,11 @@ namespace Plaga44.Editor
                     var child = fg.transform.GetChild(i).gameObject;
                     string cn = child.name.ToLowerInvariant();
 
-                    // Keep only nature
-                    bool isNature = cn.Contains("tree") || cn.Contains("grass") ||
-                                    cn.Contains("bush") || cn.Contains("water") ||
-                                    cn.Contains("terrain") || cn.Contains("wind") ||
-                                    cn.Contains("sun") || cn.Contains("atm_") ||
-                                    cn.Contains("fog") || cn.Contains("leaf");
+                    // Keep ONLY: water, terrain, sky-related
+                    bool keep = cn.Contains("water") || cn.Contains("terrain") ||
+                                cn.Contains("sun") || cn.Contains("fog");
 
-                    if (!isNature)
+                    if (!keep)
                     {
                         Object.DestroyImmediate(child);
                     }
@@ -751,8 +748,7 @@ namespace Plaga44.Editor
 
                 // Always keep these roots
                 if (n.Contains("terrain") || n.Contains("water") || n.Contains("sun") ||
-                    n.Contains("wind") || n.Contains("tree") || n.Contains("grass") ||
-                    n.Contains("bush") || n == "floodedgrounds" ||
+                    n.Contains("fog") || n == "floodedgrounds" || n == "environment" ||
                     n.Contains("ovr") || n.Contains("player") || n.Contains("postprocess") ||
                     n.Contains("vibration") || n.Contains("audio") || n.Contains("spawn"))
                     continue;
@@ -870,7 +866,23 @@ namespace Plaga44.Editor
                 terrain.detailObjectDensity = 1f;        // full density
                 terrain.heightmapPixelError = 1f;        // max terrain mesh quality
 
-                Debug.Log($"{LOG} Terrain: grass static, billboards DISABLED (50000m), max quality.");
+                // STRIP: usun drzewa z terrain data
+                int treeCount = terrain.terrainData.treeInstanceCount;
+                terrain.terrainData.treeInstances = new TreeInstance[0];
+                terrain.terrainData.RefreshPrototypes();
+                Debug.Log($"{LOG} Removed {treeCount} trees from terrain data");
+
+                // STRIP: usun trawe/details z terrain data
+                int detailLayers = terrain.terrainData.detailPrototypes.Length;
+                for (int i = 0; i < detailLayers; i++)
+                {
+                    int res = terrain.terrainData.detailResolution;
+                    terrain.terrainData.SetDetailLayer(0, 0, i, new int[res, res]);
+                }
+                Debug.Log($"{LOG} Cleared {detailLayers} detail layers (grass)");
+
+                terrain.Flush();
+                Debug.Log($"{LOG} Terrain: STRIPPED -- no trees, no grass, terrain+water+sky only.");
             }
         }
 

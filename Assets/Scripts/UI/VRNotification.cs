@@ -104,6 +104,7 @@ namespace Plaga44.UI
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+            StopAllCoroutines();
         }
 
         // ---- Queue processing ----

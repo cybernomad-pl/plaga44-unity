@@ -24,7 +24,7 @@ namespace Plaga44.Rules
         /// <param name="source">Object type that caused the hit (Stone, Fist, etc.)</param>
         /// <param name="zone">Hit zone on the target body (Head, Torso, etc.)</param>
         /// <param name="force">Impact force in Newtons.</param>
-        public CombatEffect Evaluate(ObjectType source, HitZoneType zone, float force)
+        public CombatEffect Evaluate(ObjectType source, BodyRegion zone, float force)
         {
             if (rules == null || rules.Length == 0)
             {
@@ -50,7 +50,7 @@ namespace Plaga44.Rules
         /// Evaluates and returns the first matching rule object (for debugging).
         /// Returns null if no rule matches.
         /// </summary>
-        public CombatRule FindMatchingRule(ObjectType source, HitZoneType zone, float force)
+        public CombatRule FindMatchingRule(ObjectType source, BodyRegion zone, float force)
         {
             if (rules == null) return null;
 

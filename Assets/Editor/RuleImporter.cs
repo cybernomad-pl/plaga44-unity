@@ -164,7 +164,7 @@ namespace Plaga44.Editor
 
                 // Apply data.
                 rule.sourceObjectType = ParseEnum<ObjectType>(entry.source, ObjectType.Any);
-                rule.hitZone          = ParseEnum<HitZoneType>(entry.hitZone, HitZoneType.Any);
+                rule.hitZone          = ParseEnum<BodyRegion>(entry.hitZone, BodyRegion.Any);
                 rule.forceThreshold   = entry.threshold;
                 rule.resultEffect     = ParseEnum<CombatEffectType>(entry.effect, CombatEffectType.None);
                 rule.stunDuration     = entry.stunDuration;

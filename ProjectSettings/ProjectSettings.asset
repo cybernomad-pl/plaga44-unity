@@ -143,10 +143,13 @@ PlayerSettings:
   loadStoreDebugModeEnabled: 0
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
-  bundleVersion: 0.1.0
+  bundleVersion: 20260402_20.24
   preloadedAssets:
   - {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   - {fileID: 11400000, guid: b7d5a360cb4976e449f1e28afbb399dd, type: 2}
+  - {fileID: 11400000, guid: 7e89183f697970646b0bba084a757c27, type: 2}
+  - {fileID: -8088265208832203451, guid: 674351d2636b4b6408b6ea05af3064f5, type: 2}
+  - {fileID: -1229386886671633865, guid: 6911fff2198bb8c4a9c8d12f109ae9c5, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -839,7 +842,7 @@ PlayerSettings:
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
     Android: USE_INPUT_SYSTEM_POSE_CONTROL;USE_STICK_CONTROL_THUMBSTICKS;HAS_META_XR;CROSS_PLATFORM_INPUT;MOBILE_INPUT
-    Standalone: USE_INPUT_SYSTEM_POSE_CONTROL;USE_STICK_CONTROL_THUMBSTICKS;CROSS_PLATFORM_INPUT
+    Standalone: USE_INPUT_SYSTEM_POSE_CONTROL;USE_STICK_CONTROL_THUMBSTICKS;HAS_META_XR;CROSS_PLATFORM_INPUT
     Windows Store Apps: USE_INPUT_SYSTEM_POSE_CONTROL;USE_STICK_CONTROL_THUMBSTICKS;MOBILE_INPUT
     iPhone: CROSS_PLATFORM_INPUT;MOBILE_INPUT
   additionalCompilerArguments: {}

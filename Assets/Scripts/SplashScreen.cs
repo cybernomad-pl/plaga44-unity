@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SplashScreen : MonoBehaviour
+namespace Plaga44.UI
+{
+    public class SplashScreen : MonoBehaviour
 {
     public float fadeDuration = 1.0f;
     [Tooltip("Use <color=#CC3333> for red parts. Leave empty for Application.productName.")]
@@ -208,5 +210,6 @@ public class SplashScreen : MonoBehaviour
         var subRect = subGO.GetComponent<RectTransform>();
         subRect.anchoredPosition = new Vector2(0, -60);
         subRect.sizeDelta = new Vector2(2000, 50);
+    }
     }
 }
