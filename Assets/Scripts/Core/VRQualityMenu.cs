@@ -884,7 +884,7 @@ public class VRQualityMenu : MonoBehaviour
         }
 
         // Toggle
-        if (OVRInput.GetDown(OVRInput.Button.Two) || OVRInput.GetDown(OVRInput.Button.Start))
+        if (OVRInput.GetDown(OVRInput.Button.Start))
         {
             _visible = !_visible;
             _canvas.SetActive(_visible);
