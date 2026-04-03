@@ -59,7 +59,7 @@ namespace Plaga44.Editor
         // MenuItem 1 -- Load PLAGA 44 Demo
         // ------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Scene/Load PLAGA 44 Demo", false, 10)]
+        [MenuItem("CYBERNOMAD/Load PLAGA 44 Demo", false, -100)]
         public static void BuildDemoScene()
         {
             if (!File.Exists(Path.Combine(Application.dataPath, "..", SCENE_A_PATH)))
@@ -954,7 +954,7 @@ namespace Plaga44.Editor
 
         static void RemoveLegacyEventSystems()
         {
-            // Usuwa wszystkie EventSystem z legacy StandaloneInputModule/TouchInputModule
+            // Usuwa wszystkie EventSystem z legacy StandaloneInputModule
             // (spamują InvalidOperationException bo projekt używa Input System package)
             var allES = Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>(
                 FindObjectsInactive.Include, FindObjectsSortMode.None);
@@ -962,16 +962,10 @@ namespace Plaga44.Editor
             {
                 if (es == null) continue;
                 var standalone = es.GetComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-                var touch = es.GetComponent<UnityEngine.EventSystems.TouchInputModule>();
                 if (standalone != null)
                 {
                     Debug.Log($"{LOG} Removing legacy StandaloneInputModule from '{es.gameObject.name}'");
                     Undo.DestroyObjectImmediate(standalone);
-                }
-                if (touch != null)
-                {
-                    Debug.Log($"{LOG} Removing legacy TouchInputModule from '{es.gameObject.name}'");
-                    Undo.DestroyObjectImmediate(touch);
                 }
                 // Jeśli EventSystem jest teraz pusty (bez input module) -- usuń cały GO
                 // (nasz AddVRUI doda nowy z InputSystemUIInputModule)
@@ -1201,7 +1195,6 @@ namespace Plaga44.Editor
         private List<string> _prefabPaths = new List<string>();
         private Vector2 _scrollCat;
         private Vector2 _scrollPrefabs;
-        private string _spawnOffset = "0 0 3"; // domyslnie 3m przed graczem
         private float _spawnY = 0f;
 
         public static void Open()

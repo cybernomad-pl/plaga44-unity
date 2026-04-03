@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // GestureTypes.cs
 // CYBERNOMAD -- Shared enums and types for the Plaga44.Input namespace.
 // Namespace: Plaga44.Input
@@ -29,4 +27,3 @@ namespace Plaga44.Input
         SignalStop
     }
 }
-#endif // PLAGA44_FULL_SDK

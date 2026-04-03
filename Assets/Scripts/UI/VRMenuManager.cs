@@ -34,7 +34,7 @@ namespace Plaga44.UI
         private const float MENU_DISTANCE = 2.0f;   // metres in front of player
         private const float CANVAS_SCALE  = 0.001f; // 1px = 1mm in world space
         private const int   CANVAS_W      = 600;
-        private const int   CANVAS_H      = 500;
+        private const int   CANVAS_H      = 660;
 
         // Colours -- dark theme
         private static readonly Color BG_COLOR      = new Color(0.10f, 0.10f, 0.10f, 0.88f);
@@ -53,6 +53,7 @@ namespace Plaga44.UI
         private GameObject _mainPanel;
         private GameObject _settingsPanel;
 
+        private Button _continueBtn;
         private Slider _volumeSlider;
         private Toggle _vignetteToggle;
         private Toggle _snapTurnToggle;
@@ -79,8 +80,11 @@ namespace Plaga44.UI
 #if HAS_META_XR
             if (_rig == null) _rig = FindFirstObjectByType<OVRCameraRig>();
 
-            if (OVRInput.GetDown(OVRInput.Button.Start))
-                Toggle();
+            // DISABLED: Start button now exclusively handled by VRQualityMenu.
+            // VRMenuManager can still be opened/closed via Open()/Close()/Toggle()
+            // from other scripts (e.g. VRQualityMenu could call it).
+            // if (OVRInput.GetDown(OVRInput.Button.Start))
+            //     Toggle();
 #endif
         }
 
@@ -98,6 +102,7 @@ namespace Plaga44.UI
             _mainPanel.SetActive(true);
             _settingsPanel.SetActive(false);
             _canvas.gameObject.SetActive(true);
+            UpdateContinueButton();
             OnMenuToggled?.Invoke(true);
         }
 
@@ -163,40 +168,55 @@ namespace Plaga44.UI
             var rt = _mainPanel.AddComponent<RectTransform>();
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(340, 440);
+            rt.sizeDelta = new Vector2(340, 600);
             rt.anchoredPosition = Vector2.zero;
 
             // Dark panel
             CreateImage(_mainPanel.transform, "Panel",
-                Vector2.zero, new Vector2(340, 440), PANEL_COLOR);
+                Vector2.zero, new Vector2(340, 600), PANEL_COLOR);
 
             // Title
             var title = CreateText(_mainPanel.transform, "Title",
-                new Vector2(0, 175), new Vector2(300, 50), TextAnchor.MiddleCenter, 36);
+                new Vector2(0, 255), new Vector2(300, 50), TextAnchor.MiddleCenter, 36);
             title.text = "MENU";
             title.color = ACCENT;
 
             // Divider
             var div = CreateImage(_mainPanel.transform, "Divider",
-                new Vector2(0, 148), new Vector2(280, 2), new Color(1, 1, 1, 0.12f));
+                new Vector2(0, 228), new Vector2(280, 2), new Color(1, 1, 1, 0.12f));
             div.raycastTarget = false;
 
-            // Buttons
+            // Buttons -- top to bottom: Continue, Resume, Save, Load, Settings, Quit
+            _continueBtn = CreateButton(_mainPanel.transform, "ContinueBtn",
+                new Vector2(0, 180), new Vector2(260, 56),
+                "CONTINUE", OnContinueClicked);
+
             CreateButton(_mainPanel.transform, "ResumeBtn",
-                new Vector2(0, 80), new Vector2(260, 56),
+                new Vector2(0, 115), new Vector2(260, 56),
                 "RESUME", OnResumeClicked);
 
+            CreateButton(_mainPanel.transform, "SaveBtn",
+                new Vector2(0, 50), new Vector2(260, 56),
+                "SAVE", OnSaveClicked);
+
+            CreateButton(_mainPanel.transform, "LoadBtn",
+                new Vector2(0, -15), new Vector2(260, 56),
+                "LOAD", OnLoadClicked);
+
             CreateButton(_mainPanel.transform, "SettingsBtn",
-                new Vector2(0, 10), new Vector2(260, 56),
+                new Vector2(0, -80), new Vector2(260, 56),
                 "SETTINGS", OnSettingsClicked);
 
             CreateButton(_mainPanel.transform, "QuitBtn",
-                new Vector2(0, -60), new Vector2(260, 56),
+                new Vector2(0, -145), new Vector2(260, 56),
                 "QUIT", OnQuitClicked, new Color(0.55f, 0.15f, 0.10f, 1f));
+
+            // Grey out CONTINUE if no save exists
+            UpdateContinueButton();
 
             // Version label
             var ver = CreateText(_mainPanel.transform, "VersionLabel",
-                new Vector2(0, -195), new Vector2(300, 28), TextAnchor.MiddleCenter, 18);
+                new Vector2(0, -265), new Vector2(300, 28), TextAnchor.MiddleCenter, 18);
             ver.text = "PLAGA '44  |  v0.1";
             ver.color = TEXT_GREY;
         }
@@ -281,6 +301,33 @@ namespace Plaga44.UI
 
         private void OnResumeClicked() => Close();
 
+        private void OnContinueClicked()
+        {
+            if (SaveManager.Instance != null && SaveManager.Instance.HasSave())
+            {
+                SaveManager.Instance.Load();
+                Close();
+            }
+        }
+
+        private void OnSaveClicked()
+        {
+            if (SaveManager.Instance != null)
+            {
+                SaveManager.Instance.Save();
+                UpdateContinueButton();
+            }
+        }
+
+        private void OnLoadClicked()
+        {
+            if (SaveManager.Instance != null && SaveManager.Instance.HasSave())
+            {
+                SaveManager.Instance.Load();
+                Close();
+            }
+        }
+
         private void OnSettingsClicked()
         {
             _mainPanel.SetActive(false);
@@ -300,6 +347,20 @@ namespace Plaga44.UI
         {
             _settingsPanel.SetActive(false);
             _mainPanel.SetActive(true);
+        }
+
+        // ---- Save/Load helpers ----
+
+        private void UpdateContinueButton()
+        {
+            if (_continueBtn == null) return;
+            bool hasSave = SaveManager.Instance != null && SaveManager.Instance.HasSave();
+            _continueBtn.interactable = hasSave;
+
+            // Dim the label when no save exists
+            var label = _continueBtn.GetComponentInChildren<Text>();
+            if (label != null)
+                label.color = hasSave ? TEXT_WHITE : TEXT_GREY;
         }
 
         // ---- Platform integration ----

@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // NetworkManager.cs
 // CYBERNOMAD -- PLAGA '44
 // Singleton abstraction over network transport (Photon/Netcode-ready).
@@ -256,4 +254,3 @@ namespace Plaga44.Networking
         }
     }
 }
-#endif // PLAGA44_FULL_SDK

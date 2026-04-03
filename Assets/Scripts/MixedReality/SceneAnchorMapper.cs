@@ -1,6 +1,5 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 #if HAS_META_XR
+#pragma warning disable CS0618 // OVRSceneManager, OVRSceneAnchor, OVRSemanticClassification are deprecated
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -126,7 +125,7 @@ namespace Plaga44.MixedReality
         private void MapAllAnchors()
         {
             // OVRSceneAnchor is the runtime component added to each discovered anchor
-            var anchors = FindObjectsOfType<OVRSceneAnchor>();
+            var anchors = FindObjectsByType<OVRSceneAnchor>(FindObjectsSortMode.None);
             Debug.Log($"[PLAGA44] Found {anchors.Length} scene anchors.");
 
             foreach (var anchor in anchors)
@@ -220,5 +219,5 @@ namespace Plaga44.MixedReality
         }
     }
 }
+#pragma warning restore CS0618
 #endif // HAS_META_XR
-#endif // PLAGA44_FULL_SDK

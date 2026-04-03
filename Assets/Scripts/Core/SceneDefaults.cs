@@ -41,9 +41,9 @@ public class SceneDefaults : MonoBehaviour
         string profile = SafeMode ? "SAFE (Quest)" : "HI-END (Editor)";
         Debug.Log($"[PLAGA44] SceneDefaults: profile={profile}");
 
-        // NO GRAVITY
-        Physics.gravity = Vector3.zero;
-        Debug.Log("[PLAGA44] SceneDefaults: GRAVITY OFF");
+        // Standard gravity -- required for player to land on terrain
+        Physics.gravity = new Vector3(0, -9.81f, 0);
+        Debug.Log("[PLAGA44] SceneDefaults: GRAVITY ON (-9.81)");
 
         ApplyResolution();
         ApplyShadows();
@@ -227,8 +227,10 @@ public class SceneDefaults : MonoBehaviour
     {
         var cam = Camera.main;
         if (cam == null) return;
+        cam.clearFlags = CameraClearFlags.Skybox;
         cam.nearClipPlane = 0.15f; // avoid seeing inside avatar/models
         cam.farClipPlane = 2000f;
+        Debug.Log("[PLAGA44] SceneDefaults: camera clearFlags -> Skybox");
     }
 
     // ========== WATER ==========

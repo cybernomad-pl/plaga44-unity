@@ -58,8 +58,6 @@ namespace Plaga44.Locomotion
         private float _snapCooldown;
         private const float SnapCooldownDuration = 0.25f;
 
-        // Smooth-turn state
-        private bool _turnReleased = true;
 
         // -------------------------------------------------------------------------
         // Events
@@ -177,12 +175,8 @@ namespace Plaga44.Locomotion
             {
                 float rotation = input.x * turnSpeed * Time.deltaTime;
                 transform.Rotate(0f, rotation, 0f, Space.World);
-                _turnReleased = false;
             }
-            else
-            {
-                _turnReleased = true;
-            }
+            // If below deadzone, nothing to do -- stick is centered.
         }
 
         // -------------------------------------------------------------------------

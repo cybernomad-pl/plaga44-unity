@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: Cybernomad
-  productName: PLAGA 44
+  productName: 'PLAGA 44 [BLEEDING EDGE]'
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -143,13 +143,10 @@ PlayerSettings:
   loadStoreDebugModeEnabled: 0
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
-  bundleVersion: 20260402_20.24
+  bundleVersion: bleeding-edge-20260403_214135
   preloadedAssets:
   - {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   - {fileID: 11400000, guid: b7d5a360cb4976e449f1e28afbb399dd, type: 2}
-  - {fileID: 11400000, guid: 7e89183f697970646b0bba084a757c27, type: 2}
-  - {fileID: -8088265208832203451, guid: 674351d2636b4b6408b6ea05af3064f5, type: 2}
-  - {fileID: -1229386886671633865, guid: 6911fff2198bb8c4a9c8d12f109ae9c5, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1

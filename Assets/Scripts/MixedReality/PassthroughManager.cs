@@ -1,5 +1,3 @@
-// AUTO-DISABLED: requires newer Meta XR SDK APIs
-#if PLAGA44_FULL_SDK
 #if HAS_META_XR
 using System.Collections;
 using UnityEngine;
@@ -46,6 +44,7 @@ namespace Plaga44.MixedReality
 
         private bool _isMRActive = false;
         private Coroutine _fadeCoroutine;
+        private OVRPassthroughColorLut _colorLutInstance;
 
         // ------------------------------------------------------------------ //
         //  Unity lifecycle                                                    //
@@ -64,6 +63,12 @@ namespace Plaga44.MixedReality
         {
             if (_passthroughLayer == null) return;
             ApplyPassthroughSettings(_isMRActive, _opacity);
+        }
+
+        private void OnDestroy()
+        {
+            _colorLutInstance?.Dispose();
+            _colorLutInstance = null;
         }
 
         // ------------------------------------------------------------------ //
@@ -147,8 +152,17 @@ namespace Plaga44.MixedReality
         {
             if (_passthroughLayer == null || _colorLUT == null) return;
 
-            // OVRPassthroughLayer.SetColorLut is available in Meta XR SDK >= v60
-            _passthroughLayer.SetColorLut(_colorLUT, _lutWeight);
+            // SDK v60+ requires OVRPassthroughColorLut wrapper around Texture2D
+            if (_colorLutInstance != null)
+            {
+                _colorLutInstance.UpdateFrom(_colorLUT);
+            }
+            else
+            {
+                _colorLutInstance = new OVRPassthroughColorLut(_colorLUT);
+            }
+
+            _passthroughLayer.SetColorLut(_colorLutInstance, _lutWeight);
         }
 
         private IEnumerator FadeOpacity(float targetOpacity)
@@ -187,4 +201,3 @@ namespace Plaga44.MixedReality
     }
 }
 #endif // HAS_META_XR
-#endif // PLAGA44_FULL_SDK

@@ -18,16 +18,19 @@ public class ModelExhibition : MonoBehaviour
         "SpawnItems/Pistol",
     };
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    static void AutoCreate()
-    {
-        var go = new GameObject("_ModelExhibition");
-        var ex = go.AddComponent<ModelExhibition>();
-        DontDestroyOnLoad(go);
-
-        // Delay spawn by 2s to let scene settle
-        ex.Invoke(nameof(SpawnExhibition), 2f);
-    }
+    // DISABLED: ModelExhibition should not auto-spawn at runtime.
+    // It spams NullReferenceException from OVRGrabbable when colliders are missing.
+    // To use manually, add ModelExhibition component to a GameObject in the scene
+    // and call SpawnExhibition() via Invoke or button.
+    //
+    // [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    // static void AutoCreate()
+    // {
+    //     var go = new GameObject("_ModelExhibition");
+    //     var ex = go.AddComponent<ModelExhibition>();
+    //     DontDestroyOnLoad(go);
+    //     ex.Invoke(nameof(SpawnExhibition), 2f);
+    // }
 
     void SpawnExhibition()
     {
@@ -86,7 +89,14 @@ public class ModelExhibition : MonoBehaviour
                         boneRb.useGravity = false;
                     }
                     if (bone.GetComponent<OVRGrabbable>() == null)
-                        bone.gameObject.AddComponent<OVRGrabbable>();
+                    {
+                        // OVRGrabbable requires a Collider on the same GO; verify before adding
+                        if (bone.GetComponent<Collider>() != null)
+                        {
+                            try { bone.gameObject.AddComponent<OVRGrabbable>(); }
+                            catch (System.Exception ex) { Debug.LogWarning($"[EXHIBITION] OVRGrabbable failed on bone {boneId}: {ex.Message}"); }
+                        }
+                    }
                 }
                 Debug.Log($"[EXHIBITION] {prefab.name}: per-bone grabbable (poseable)");
             }
@@ -111,7 +121,18 @@ public class ModelExhibition : MonoBehaviour
                     }
                 }
                 if (instance.GetComponent<OVRGrabbable>() == null)
-                    instance.AddComponent<OVRGrabbable>();
+                {
+                    // OVRGrabbable requires a Collider; only add if one exists
+                    if (instance.GetComponent<Collider>() != null)
+                    {
+                        try { instance.AddComponent<OVRGrabbable>(); }
+                        catch (System.Exception ex) { Debug.LogWarning($"[EXHIBITION] OVRGrabbable failed on {instance.name}: {ex.Message}"); }
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[EXHIBITION] Skipping OVRGrabbable on {instance.name} -- no Collider present");
+                    }
+                }
             }
 
             // Label

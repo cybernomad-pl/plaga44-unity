@@ -1,5 +1,3 @@
-// AUTO-DISABLED: not needed for demo
-#if PLAGA44_FULL_SDK
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
@@ -187,5 +185,4 @@ namespace Plaga44.Editor
         }
     }
 }
-#endif
 #endif

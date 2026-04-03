@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // MicrogestureManager.cs
 // CYBERNOMAD -- Detects thumb microgestures (swipe/tap) via OVRInput.
 // Singleton MonoBehaviour. Raises events consumed by GestureCommandMap.
@@ -218,4 +216,3 @@ namespace Plaga44.Input
         }
     }
 }
-#endif // PLAGA44_FULL_SDK

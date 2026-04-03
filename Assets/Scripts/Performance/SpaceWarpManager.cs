@@ -1,5 +1,3 @@
-// AUTO-DISABLED: requires newer Meta XR SDK APIs
-#if PLAGA44_FULL_SDK
 // SpaceWarpManager.cs
 // CYBERNOMAD -- Application SpaceWarp controller for Meta Quest 3.
 // Enables ASW (render every 2nd frame, extrapolate motion) to double effective GPU budget.
@@ -156,10 +154,7 @@ namespace Plaga44.Performance
             _isSpaceWarpActive = enabled;
 
 #if HAS_META_XR
-            OVRManager.SetSpaceWarp(enabled
-                ? OVRManager.SpaceWarpKeyword.MotionVectorDepth
-                : OVRManager.SpaceWarpKeyword.Disabled);
-
+            OVRManager.SetSpaceWarp(enabled);
             Debug.Log($"[SpaceWarpManager] Application SpaceWarp {(enabled ? "ENABLED" : "DISABLED")}");
 #else
             Debug.Log($"[SpaceWarpManager] HAS_META_XR not defined -- SpaceWarp is a no-op.");
@@ -177,4 +172,3 @@ namespace Plaga44.Performance
         }
     }
 }
-#endif // PLAGA44_FULL_SDK

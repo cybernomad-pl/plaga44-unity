@@ -7,11 +7,14 @@ namespace Plaga44.UI
     /// Always-visible version stamp in the top-left corner of the VR view.
     /// Follows the camera at a fixed distance, anchored top-left.
     /// Auto-initializes -- just add to any GameObject or let SceneDefaults pick it up.
+    ///
+    /// Reads build info from Resources/BuildInfo.txt (written by BuildInfoWriter editor script).
+    /// Format: "PLAGA44 | branch-name | 2026-04-03 22:38 | abc1234"
     /// </summary>
     public class VersionHUD : MonoBehaviour
     {
         [Header("Version String")]
-        [Tooltip("Override version text. If empty, uses build timestamp.")]
+        [Tooltip("Override version text. If empty, uses build info from Resources.")]
         public string versionOverride = "";
 
         [Header("Position")]
@@ -31,9 +34,7 @@ namespace Plaga44.UI
         private Text _label;
         private Transform _camT;
 
-        // ── Build stamp generated at compile time ────────────────────────
-        // Format: PLAGA '44 TECH DEMO, v.YYYYMMDD_HH.MM
-        private const string GAME_TITLE = "PLAGA '44 TECH DEMO";
+        private const string GAME_TITLE = "PLAGA44";
 
         void Start()
         {
@@ -63,6 +64,27 @@ namespace Plaga44.UI
             _canvasGO.transform.rotation = Quaternion.LookRotation(forward, up);
         }
 
+        /// <summary>
+        /// Reads build info from Resources/BuildInfo.txt.
+        /// Expected format (3 lines): branch, timestamp, commit hash.
+        /// Falls back to Application.version if file not found.
+        /// </summary>
+        string GetBuildInfoString()
+        {
+            var asset = Resources.Load<TextAsset>("BuildInfo");
+            if (asset != null && !string.IsNullOrWhiteSpace(asset.text))
+            {
+                string[] lines = asset.text.Split('\n');
+                string branch    = lines.Length > 0 ? lines[0].Trim() : "unknown";
+                string timestamp = lines.Length > 1 ? lines[1].Trim() : "no-time";
+                string commit    = lines.Length > 2 ? lines[2].Trim() : "no-hash";
+                return $"{GAME_TITLE} | {branch} | {timestamp} | {commit}";
+            }
+
+            // Fallback -- no BuildInfo.txt found (e.g. running in editor without pre-build)
+            return $"{GAME_TITLE} | editor | {System.DateTime.Now:yyyy-MM-dd HH:mm} | local";
+        }
+
         void BuildCanvas()
         {
             // World-space canvas
@@ -74,7 +96,7 @@ namespace Plaga44.UI
             canvas.sortingOrder = 999;
 
             var rt = _canvasGO.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(500, 40);
+            rt.sizeDelta = new Vector2(600, 40);
             rt.localScale = Vector3.one * 0.001f; // 1px = 1mm
 
             // Text
@@ -95,12 +117,12 @@ namespace Plaga44.UI
             textRT.anchorMax = new Vector2(1, 1);
             textRT.pivot = new Vector2(0, 1);
             textRT.anchoredPosition = Vector2.zero;
-            textRT.sizeDelta = new Vector2(500, 40);
+            textRT.sizeDelta = new Vector2(600, 40);
 
             // Set version string
             string version = !string.IsNullOrEmpty(versionOverride)
                 ? versionOverride
-                : $"{GAME_TITLE}, v.{Application.version}";
+                : GetBuildInfoString();
 
             _label.text = version;
         }

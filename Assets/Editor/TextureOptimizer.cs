@@ -13,7 +13,7 @@ public static class TextureOptimizer
     private const int MAX_SIZE_QUEST = 2048;
     private const TextureImporterFormat FORMAT_QUEST = TextureImporterFormat.ASTC_6x6;
 
-    [MenuItem("PLAGA44/Optimize Textures for Quest")]
+    [MenuItem("CYBERNOMAD/Build/Optimize Textures for Quest")]
     public static void OptimizeAll()
     {
         string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { "Assets" });

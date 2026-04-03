@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Reflection;
 
 /// <summary>
 /// ModelSpawner -- runtime model spawner z VR.
@@ -191,7 +192,25 @@ public class ModelSpawner : MonoBehaviour
         }
 
         var grabbable = instance.GetComponent<OVRGrabbable>();
-        if (grabbable == null) instance.AddComponent<OVRGrabbable>();
+        if (grabbable == null)
+        {
+            // OVRGrabbable.Awake() crashes with NullRef when m_grabPoints is null
+            // (serialized field not initialized when added via AddComponent at runtime).
+            // Fix: disable GameObject before AddComponent so Awake() doesn't run,
+            // set m_grabPoints via reflection, then re-enable (triggers Awake safely).
+            var col = instance.GetComponent<Collider>();
+            if (col == null) col = instance.AddComponent<BoxCollider>();
+
+            instance.SetActive(false);
+            grabbable = instance.AddComponent<OVRGrabbable>();
+
+            var field = typeof(OVRGrabbable).GetField("m_grabPoints",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            if (field != null)
+                field.SetValue(grabbable, new Collider[] { col });
+
+            instance.SetActive(true); // Awake runs now with m_grabPoints set
+        }
 
         _spawned.Add(instance);
 

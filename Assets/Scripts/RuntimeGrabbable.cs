@@ -5,7 +5,7 @@
 // When AddComponent<OVRGrabbable>() is called at runtime, Awake() fires
 // immediately -- there's no window to set m_grabPoints beforehand.
 //
-// Solution: Subclass with 'new void Awake()' that handles the null case.
+// Solution: Subclass with Awake() that handles the null case.
 // Also: ignores collision with CharacterController while grabbed,
 // so stones held near/behind head don't push the player.
 
@@ -31,7 +31,7 @@ public class RuntimeGrabbable : OVRGrabbable
         m_allowOffhandGrab = allow;
     }
 
-    new void Awake()
+    void Awake()
     {
         // m_grabPoints is protected in OVRGrabbable -- accessible here.
         if (m_grabPoints == null || m_grabPoints.Length == 0)

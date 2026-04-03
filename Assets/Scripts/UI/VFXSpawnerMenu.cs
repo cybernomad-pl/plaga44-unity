@@ -68,13 +68,16 @@ namespace Plaga44.UI
 
         // ---- Lifecycle ----
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        static void AutoCreate()
-        {
-            var go = new GameObject("_VFXSpawnerMenu");
-            Instance = go.AddComponent<VFXSpawnerMenu>();
-            DontDestroyOnLoad(go);
-        }
+        // DISABLED: VFX Spawner removed from A button to resolve input conflicts.
+        // VFX spawning can be re-enabled later via a unified menu system.
+        //
+        // [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        // static void AutoCreate()
+        // {
+        //     var go = new GameObject("_VFXSpawnerMenu");
+        //     Instance = go.AddComponent<VFXSpawnerMenu>();
+        //     DontDestroyOnLoad(go);
+        // }
 
         void Start()
         {
@@ -138,51 +141,83 @@ namespace Plaga44.UI
 #if UNITY_EDITOR
         void LoadEditorPrefabs()
         {
-            var editorPaths = new Dictionary<string, string[]>
+            // Dynamically scan known VFX asset folders for prefabs.
+            // For each category, search multiple possible root paths
+            // (GabrielAguiarProductions, any folder containing "VFX", etc.)
+            var searchRoots = new[]
             {
-                { "Projectiles", new[] {
-                    "Assets/GabrielAguiarProductions/Prefabs/Projectiles/vfx_Projectile_v1.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/Projectiles/vfx_Projectile_Electric_v1.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/Projectiles/vfx_Muzzle_v1.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/Projectiles/vfx_Muzzle_Electric_v1.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/Projectiles/vfx_Hit_v1.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/Projectiles/vfx_Hit_Electric_v1.prefab",
-                }},
-                { "AoE", new[] {
-                    "Assets/GabrielAguiarProductions/Prefabs/AoE/vfx_AreaOfEffect_Arcane_v1.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/AoE/vfx_AreaOfEffect_Arcane_v2.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/AoE/vfx_AreaOfEffect_Fire_v1.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/AoE/vfx_AreaOfEffect_Nature_v1.prefab",
-                }},
-                { "Sparks", new[] {
-                    "Assets/GabrielAguiarProductions/Prefabs/Sparks/vfx_Sparks_Loop.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/Sparks/vfx_SparksBlue_Loop.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/Sparks/vfx_SparksGreen_Loop.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/Sparks/vfx_SparksGreen_Hit.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/Sparks/vfx_SparksBlue_Hit.prefab",
-                    "Assets/GabrielAguiarProductions/Prefabs/Sparks/vfx_Sparks_Hit.prefab",
-                }},
+                "Assets/GabrielAguiarProductions/Prefabs",
+                "Assets/VFX/Prefabs",
+                "Assets/Prefabs/VFX",
+                "Assets/PLAGA44/VFX",
             };
 
-            foreach (var kvp in editorPaths)
+            foreach (var cat in _categories)
             {
-                foreach (var path in kvp.Value)
+                foreach (var root in searchRoots)
                 {
-                    var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                    if (prefab != null)
+                    string folderPath = $"{root}/{cat}";
+                    if (!UnityEditor.AssetDatabase.IsValidFolder(folderPath)) continue;
+
+                    string[] guids = UnityEditor.AssetDatabase.FindAssets("t:Prefab", new[] { folderPath });
+                    foreach (string guid in guids)
                     {
-                        _allEntries.Add(new VFXEntry
+                        string path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
+                        var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                        if (prefab != null)
                         {
-                            Name = prefab.name,
-                            Category = kvp.Key,
-                            Prefab = prefab
-                        });
+                            _allEntries.Add(new VFXEntry
+                            {
+                                Name = prefab.name,
+                                Category = cat,
+                                Prefab = prefab
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Broader fallback: scan entire project for folders named exactly
+            // "Projectiles", "AoE", or "Sparks" that contain prefabs with "vfx" in name
+            if (_allEntries.Count == 0)
+            {
+                Debug.Log("[PLAGA44] VFXSpawnerMenu: known VFX paths not found, scanning project...");
+                foreach (var cat in _categories)
+                {
+                    string[] folderGuids = UnityEditor.AssetDatabase.FindAssets($"t:Folder {cat}");
+                    foreach (string fg in folderGuids)
+                    {
+                        string folderPath = UnityEditor.AssetDatabase.GUIDToAssetPath(fg);
+                        // Only match folders that end with the category name
+                        if (!folderPath.EndsWith($"/{cat}")) continue;
+                        // Skip packages
+                        if (folderPath.StartsWith("Packages/")) continue;
+
+                        string[] prefabGuids = UnityEditor.AssetDatabase.FindAssets("t:Prefab", new[] { folderPath });
+                        foreach (string pg in prefabGuids)
+                        {
+                            string path = UnityEditor.AssetDatabase.GUIDToAssetPath(pg);
+                            var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                            if (prefab != null)
+                            {
+                                _allEntries.Add(new VFXEntry
+                                {
+                                    Name = prefab.name,
+                                    Category = cat,
+                                    Prefab = prefab
+                                });
+                            }
+                        }
                     }
                 }
             }
 
             if (_allEntries.Count > 0)
-                Debug.Log($"[PLAGA44] VFXSpawnerMenu: Loaded {_allEntries.Count} VFX from editor paths (GabrielAguiarProductions)");
+                Debug.Log($"[PLAGA44] VFXSpawnerMenu: Loaded {_allEntries.Count} VFX from editor (AssetDatabase scan)");
+            else
+                Debug.Log("[PLAGA44] VFXSpawnerMenu: No VFX prefabs found anywhere in project. " +
+                    "Import a VFX asset pack (e.g. Gabriel Aguiar Productions) with prefabs in " +
+                    "Prefabs/Projectiles/, Prefabs/AoE/, Prefabs/Sparks/ subfolders.");
         }
 #endif
 

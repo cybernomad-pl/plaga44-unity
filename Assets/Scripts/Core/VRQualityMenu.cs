@@ -9,12 +9,12 @@ using System.Collections.Generic;
 /// <summary>
 /// VR Quality Menu -- thumbstick navigation. No clicking needed.
 /// LEFT STICK up/down = select setting, left/right = adjust value
-/// B/Y = toggle menu visibility
+/// START (Menu/3-lines button, left controller) = toggle menu visibility
 /// </summary>
 public class VRQualityMenu : MonoBehaviour
 {
     /// <summary>True when menu is open -- locomotion scripts should check this and skip input.</summary>
-    public static bool MenuOpen { get; private set; } = false;
+    public static bool MenuOpen { get; set; } = false;
 
     private GameObject _canvas;
     private Text _titleText;
@@ -35,6 +35,8 @@ public class VRQualityMenu : MonoBehaviour
     private Material _waterMat;
     private Material _treeBarkMat;
     private Material _terrainMat;
+    private List<Material> _npcMats = new List<Material>();
+    private List<Material> _weaponMats = new List<Material>();
     private ColorAdjustments _colorAdj;
     private Tonemapping _tonemapping;
     private Vignette _vignette;
@@ -109,6 +111,8 @@ public class VRQualityMenu : MonoBehaviour
         var terrain = FindAnyObjectByType<Terrain>();
         if (terrain != null && terrain.materialTemplate != null)
             _terrainMat = terrain.materialTemplate;
+
+        // NPC/Weapon material scanning disabled -- UI sections are disabled
 
         // Get post-process components
         if (_postProcessVolume != null && _postProcessVolume.profile != null)
@@ -756,6 +760,106 @@ public class VRQualityMenu : MonoBehaviour
             v => { TerrainDeformer.NoiseSeed = v; TerrainDeformer.ApplyDeformation(); },
             0, 1000, 1, "F0"));
 
+        // NPC/Weapon material sliders removed -- replaced by laser pointer debug system
+        /* DISABLED -- separate feature
+        _settings.Add(new Setting("--- NPC MATERIALS ---", () => 0, v => {}, 0, 0, 0));
+
+        if (_npcMats.Count > 0)
+        {
+            var npcRef = _npcMats[0];
+            string npcColorProp = npcRef.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+
+            _settings.Add(new Setting("NPC Color R",
+                () => npcRef.GetColor(npcColorProp).r,
+                v => { foreach (var m in _npcMats) {
+                    string p = m.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+                    var c = m.GetColor(p); c.r = v; m.SetColor(p, c);
+                }}, 0, 2, 0.01f, "F2"));
+
+            _settings.Add(new Setting("NPC Color G",
+                () => npcRef.GetColor(npcColorProp).g,
+                v => { foreach (var m in _npcMats) {
+                    string p = m.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+                    var c = m.GetColor(p); c.g = v; m.SetColor(p, c);
+                }}, 0, 2, 0.01f, "F2"));
+
+            _settings.Add(new Setting("NPC Color B",
+                () => npcRef.GetColor(npcColorProp).b,
+                v => { foreach (var m in _npcMats) {
+                    string p = m.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+                    var c = m.GetColor(p); c.b = v; m.SetColor(p, c);
+                }}, 0, 2, 0.01f, "F2"));
+
+            _settings.Add(new Setting("NPC Metallic",
+                () => npcRef.HasFloat("_Metallic") ? npcRef.GetFloat("_Metallic") : 0,
+                v => { foreach (var m in _npcMats) { if (m.HasFloat("_Metallic")) m.SetFloat("_Metallic", v); } },
+                0, 1, 0.01f, "F2"));
+
+            _settings.Add(new Setting("NPC Smoothness",
+                () => npcRef.HasFloat("_Smoothness") ? npcRef.GetFloat("_Smoothness") : (npcRef.HasFloat("_Glossiness") ? npcRef.GetFloat("_Glossiness") : 0),
+                v => { foreach (var m in _npcMats) { if (m.HasFloat("_Smoothness")) m.SetFloat("_Smoothness", v); if (m.HasFloat("_Glossiness")) m.SetFloat("_Glossiness", v); } },
+                0, 1, 0.01f, "F2"));
+
+            _settings.Add(new Setting("NPC Emission",
+                () => npcRef.HasFloat("_EmissionStrength") ? npcRef.GetFloat("_EmissionStrength") : 0,
+                v => { foreach (var m in _npcMats) {
+                    if (m.HasFloat("_EmissionStrength")) m.SetFloat("_EmissionStrength", v);
+                    // Enable emission keyword if setting > 0
+                    if (v > 0) m.EnableKeyword("_EMISSION"); else m.DisableKeyword("_EMISSION");
+                    if (m.HasColor("_EmissionColor"))
+                    {
+                        var ec = m.GetColor("_EmissionColor");
+                        float maxC = Mathf.Max(ec.r, Mathf.Max(ec.g, ec.b));
+                        if (maxC < 0.01f) m.SetColor("_EmissionColor", Color.white * v);
+                    }
+                }}, 0, 5, 0.1f));
+
+            Debug.Log($"[PLAGA44] VRQualityMenu: NPC material settings added (colorProp: {npcColorProp})");
+        }
+
+        // --- WEAPON MATERIALS ---
+        _settings.Add(new Setting("--- WEAPON MATERIALS ---", () => 0, v => {}, 0, 0, 0));
+
+        if (_weaponMats.Count > 0)
+        {
+            var wpnRef = _weaponMats[0];
+            string wpnColorProp = wpnRef.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+
+            _settings.Add(new Setting("Weapon Color R",
+                () => wpnRef.GetColor(wpnColorProp).r,
+                v => { foreach (var m in _weaponMats) {
+                    string p = m.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+                    var c = m.GetColor(p); c.r = v; m.SetColor(p, c);
+                }}, 0, 2, 0.01f, "F2"));
+
+            _settings.Add(new Setting("Weapon Color G",
+                () => wpnRef.GetColor(wpnColorProp).g,
+                v => { foreach (var m in _weaponMats) {
+                    string p = m.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+                    var c = m.GetColor(p); c.g = v; m.SetColor(p, c);
+                }}, 0, 2, 0.01f, "F2"));
+
+            _settings.Add(new Setting("Weapon Color B",
+                () => wpnRef.GetColor(wpnColorProp).b,
+                v => { foreach (var m in _weaponMats) {
+                    string p = m.HasColor("_BaseColor") ? "_BaseColor" : "_Color";
+                    var c = m.GetColor(p); c.b = v; m.SetColor(p, c);
+                }}, 0, 2, 0.01f, "F2"));
+
+            _settings.Add(new Setting("Weapon Metallic",
+                () => wpnRef.HasFloat("_Metallic") ? wpnRef.GetFloat("_Metallic") : 0,
+                v => { foreach (var m in _weaponMats) { if (m.HasFloat("_Metallic")) m.SetFloat("_Metallic", v); } },
+                0, 1, 0.01f, "F2"));
+
+            _settings.Add(new Setting("Weapon Smoothness",
+                () => wpnRef.HasFloat("_Smoothness") ? wpnRef.GetFloat("_Smoothness") : (wpnRef.HasFloat("_Glossiness") ? wpnRef.GetFloat("_Glossiness") : 0),
+                v => { foreach (var m in _weaponMats) { if (m.HasFloat("_Smoothness")) m.SetFloat("_Smoothness", v); if (m.HasFloat("_Glossiness")) m.SetFloat("_Glossiness", v); } },
+                0, 1, 0.01f, "F2"));
+
+            Debug.Log($"[PLAGA44] VRQualityMenu: Weapon material settings added (colorProp: {wpnColorProp})");
+        }
+        */ // END DISABLED NPC/Weapon
+
         // --- SAVE/LOAD ---
         _settings.Add(new Setting("--- PRESETS ---", () => 0, v => {}, 0, 0, 0));
         _settings.Add(new Setting("[SAVE 1:HI-END]", () => 0, v => SavePreset(1), 0, 1, 1, "F0"));
@@ -812,6 +916,8 @@ public class VRQualityMenu : MonoBehaviour
             if (l.type == LightType.Directional) return l;
         return null;
     }
+
+    // FindNPCAndWeaponMaterials removed -- NPC/Weapon UI sections are disabled
 
     void CreateWorldCanvas()
     {
@@ -883,8 +989,14 @@ public class VRQualityMenu : MonoBehaviour
             _fpsTimer = 0;
         }
 
-        // Toggle
-        if (OVRInput.GetDown(OVRInput.Button.Start))
+        // Toggle -- only handle Start directly when SplashScreen is NOT managing menus.
+        // When SplashScreen exists, it owns the Start button and opens VRQualityMenu
+        // via reflection when the user selects SETTINGS.
+        // Don't toggle if LaserInspector is active
+        if (Plaga44.UI.LaserInspector.IsOpen) return;
+
+        bool splashOwnsStart = Plaga44.UI.SplashScreen.Instance != null;
+        if (!splashOwnsStart && OVRInput.GetDown(OVRInput.Button.Start))
         {
             _visible = !_visible;
             _canvas.SetActive(_visible);

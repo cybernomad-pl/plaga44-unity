@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // QuickActionWheel.cs
 // CYBERNOMAD -- World-space radial menu anchored to the wrist.
 //
@@ -361,4 +359,3 @@ namespace Plaga44.Input
         }
     }
 }
-#endif // PLAGA44_FULL_SDK

@@ -23,7 +23,53 @@ public class BodyTrackingBootstrap : MonoBehaviour
 
     void Start()
     {
+        // Guard: skip body tracking setup entirely when running in Editor without
+        // a connected headset. OVRSkeleton/OVRBody spam "Global joint set is invalid"
+        // hundreds of times per frame when there is no active body tracking provider.
+        if (!IsBodyTrackingAvailable())
+        {
+            Debug.Log("[PLAGA44] BodyTrackingBootstrap: body tracking not available " +
+                      "(editor without headset or unsupported platform) -- skipping setup.");
+            return;
+        }
+
         SetupBodyTracking();
+    }
+
+    /// <summary>
+    /// Returns true only when body tracking hardware is actually reachable.
+    /// In Editor Play Mode without a Quest connected, returns false to prevent
+    /// OVRSkeleton/OVRBody spam.
+    /// </summary>
+    static bool IsBodyTrackingAvailable()
+    {
+#if HAS_META_XR
+        // First check: is the OVR runtime even present?
+        try
+        {
+            if (!OVRPlugin.initialized)
+            {
+                Debug.Log("[PLAGA44] BodyTrackingBootstrap: OVRPlugin not initialized.");
+                return false;
+            }
+
+            // Check if a headset is actually connected and body tracking is supported.
+            if (!OVRPlugin.bodyTrackingSupported)
+            {
+                Debug.Log("[PLAGA44] BodyTrackingBootstrap: bodyTrackingSupported = false.");
+                return false;
+            }
+
+            return true;
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log($"[PLAGA44] BodyTrackingBootstrap: OVRPlugin check failed: {e.Message}");
+            return false;
+        }
+#else
+        return false;
+#endif
     }
 
     void SetupBodyTracking()

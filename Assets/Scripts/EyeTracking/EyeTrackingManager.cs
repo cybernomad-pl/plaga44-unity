@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // EyeTrackingManager.cs
 // PLAGA '44 -- Eye tracking manager for Meta Quest Pro / Quest 3.
 // Initializes OVREyeGaze and exposes public gaze API.
@@ -210,4 +208,3 @@ namespace Plaga44.EyeTracking
         Center
     }
 }
-#endif // PLAGA44_FULL_SDK

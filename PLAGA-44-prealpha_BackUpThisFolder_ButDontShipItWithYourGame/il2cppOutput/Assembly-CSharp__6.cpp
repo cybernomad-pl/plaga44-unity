@@ -1,0 +1,6839 @@
+﻿#include "pch-cpp.hpp"
+
+
+
+
+
+
+struct Action_1_t6F9EB113EB3F16226AEF811A2744F4111C116C87;
+struct Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A;
+struct List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B;
+struct List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D;
+struct AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31;
+struct AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2;
+struct CharU5BU5D_t799905CF001DD5F13F7DBB310181FC4D8B7D0AAB;
+struct ContactPointU5BU5D_t3570603E8D0685B71B3D8BA07031674B00C5E411;
+struct DelegateU5BU5D_tC5AB7E8F745616680F337909D3A8E6C722CDF771;
+struct GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF;
+struct IntPtrU5BU5D_tFD177F8C806A6921AD7150264CCC62FA00CAD832;
+struct ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918;
+struct StackTraceU5BU5D_t32FBCB20930EAF5BAE3F450FF75228E5450DA0DF;
+struct StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248;
+struct TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24;
+struct AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20;
+struct AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299;
+struct Behaviour_t01970CFBBA658497AE30F311C447DB0440BAB7FA;
+struct CancellationTokenSource_tAAE1E0033BCFC233801F8CB4CED5C852B350CB7B;
+struct CapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808;
+struct Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76;
+struct Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0;
+struct Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3;
+struct Coroutine_t85EA685566A254C23F3FD77AB5BDFFFF8799596B;
+struct Delegate_t;
+struct DelegateData_t9B286B493293CD2D23A5B2B5EF0E5B1324C2B77E;
+struct EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945;
+struct EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA;
+struct EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4;
+struct EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01;
+struct GameObject_t76FEDD663AB33C991A9C9A23129337651094216F;
+struct HitDetector_tB650BCFC49DCC68A070FB537DFD32FEDDD9E770A;
+struct IDictionary_t6D03155AF1FA9083817AA5B6AD7DEEACC26AB220;
+struct IEnumerator_t7B609C2FFA6EB5167D9C62A0C32A21DE2F666DAA;
+struct ImpactSound_t69F9A4B2C70A8CFB36B78FA08779E8DF509D6B86;
+struct Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3;
+struct MethodInfo_t;
+struct MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71;
+struct NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F;
+struct NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A;
+struct Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C;
+struct PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39;
+struct Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF;
+struct Rigidbody_t268697F5A994213ED97393309870968BC1C7393C;
+struct RuntimeGrabbable_t6F2541D27FCFFC88CE4FE597772DD4F4FB85B010;
+struct SafeSerializationManager_tCBB85B95DFD1634237140CD892E82D06ECB3F5E6;
+struct Shader_tADC867D36B7876EE22427FAA2CE485105F4EE692;
+struct SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376;
+struct SpawnPointMarker_t269F4B1D99EFB115B959CE012C054F6D9565981E;
+struct String_t;
+struct Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1;
+struct Void_t4861ACF8F4594C3437BB48B6E56783494B843915;
+struct WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3;
+struct PCMReaderCallback_t3396D9613664F0AFF65FB91018FD0F901CC16F1E;
+struct PCMSetPositionCallback_t8D7135A2FB40647CAEC93F5254AD59E18DEB6072;
+struct U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C;
+struct U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1;
+struct U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654;
+
+IL2CPP_EXTERN_C RuntimeClass* Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* GameObject_t76FEDD663AB33C991A9C9A23129337651094216F_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* Math_tEB65DE7CA8B083C412C969C92981C030865486CE_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* Physics_t1244C2983AEAFA149425AFFC3DF53BC91C18ED56_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* SurfaceType_tD336337593CF46AAC86CC3C88E525A676B26D871_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C RuntimeClass* WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3_il2cpp_TypeInfo_var;
+IL2CPP_EXTERN_C String_t* _stringLiteral026E10DFF0723086CAA2D219772EB5C4B18395A1;
+IL2CPP_EXTERN_C String_t* _stringLiteral055AB6080228A5CF6C4CE79E77F979B90F4FE831;
+IL2CPP_EXTERN_C String_t* _stringLiteral07246594926ABB91074BACB82AB7EB455D2E7AEA;
+IL2CPP_EXTERN_C String_t* _stringLiteral23C02924FA8C5A15B58E9DDD13C84007E2431466;
+IL2CPP_EXTERN_C String_t* _stringLiteral24D8C8FB5088AEE86AC77B2843E64DD945326575;
+IL2CPP_EXTERN_C String_t* _stringLiteral2620038B8A71EF21A205CC921576171A3CA9B0F4;
+IL2CPP_EXTERN_C String_t* _stringLiteral26FFDB5076F83B69986BBE5BF0BFE30482774198;
+IL2CPP_EXTERN_C String_t* _stringLiteral3115216612A13AA630942F3107B454951F344C9C;
+IL2CPP_EXTERN_C String_t* _stringLiteral31618832D1930B166621C70B8066B7FE5DFC2242;
+IL2CPP_EXTERN_C String_t* _stringLiteral3260331AF5DA53ABC7CA7BAF659CF8D9FC93DEC7;
+IL2CPP_EXTERN_C String_t* _stringLiteral35CB2ADFB1C230C884FAD799A04747218981B147;
+IL2CPP_EXTERN_C String_t* _stringLiteral48B109C838692AB2051BE9E1B3780D1CD2AD0E02;
+IL2CPP_EXTERN_C String_t* _stringLiteral49658256427F2D74D5B9C1283A6BAB8E8303FC6E;
+IL2CPP_EXTERN_C String_t* _stringLiteral569E8F302DB63D3AD583080CA5A786AFB8AC07C6;
+IL2CPP_EXTERN_C String_t* _stringLiteral58E2B439633B24939DD66A5E4DF617736FE6DBA6;
+IL2CPP_EXTERN_C String_t* _stringLiteral5E483B72D71C8540629685AE80C4F268D529CD74;
+IL2CPP_EXTERN_C String_t* _stringLiteral620784DA5FE9C25387FA6E6A76EC4943F6354DB3;
+IL2CPP_EXTERN_C String_t* _stringLiteral691AA6B0FFA350D9BBFA796ED4A47AEBBEC79FC8;
+IL2CPP_EXTERN_C String_t* _stringLiteral75E98C78538157035E0D0E268C0A2C76D23211BA;
+IL2CPP_EXTERN_C String_t* _stringLiteral851B12482A0DB0F48D69369381FDBA6ED6FE38CA;
+IL2CPP_EXTERN_C String_t* _stringLiteral88FEA5FAB5C7C8AC8B8FEE67EC3C8D28E0526A16;
+IL2CPP_EXTERN_C String_t* _stringLiteral8DD8D6FCBA1E38E53530F55F7B9061E65C123321;
+IL2CPP_EXTERN_C String_t* _stringLiteral8EFA98868F64A2B3A8B19242C5F644312C229306;
+IL2CPP_EXTERN_C String_t* _stringLiteral98E734F22A0C75E05BA09C0761B9655AE8739FB5;
+IL2CPP_EXTERN_C String_t* _stringLiteral9B4FEEFA76B93D58B6E47CD9FF76F6E287D0D321;
+IL2CPP_EXTERN_C String_t* _stringLiteralB01C9C3D341E46C527D16AC41798F2041A4789B6;
+IL2CPP_EXTERN_C String_t* _stringLiteralC2992F804B7374FE6B30AA4FB712BA2516BBC4FC;
+IL2CPP_EXTERN_C String_t* _stringLiteralC62C64F00567C5368CAE37F4E64E1E82FF785677;
+IL2CPP_EXTERN_C String_t* _stringLiteralCAF8804297181FF007CA835529DD4477CFD94A70;
+IL2CPP_EXTERN_C String_t* _stringLiteralD1359163B5A3DC250BCAA3F70B742D49F6AD970F;
+IL2CPP_EXTERN_C String_t* _stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58;
+IL2CPP_EXTERN_C String_t* _stringLiteralE450F1E0584599D3625983CE6C6F78FB5694BA43;
+IL2CPP_EXTERN_C String_t* _stringLiteralE8BF61EF4D6E16128D231B988541D23E92E64DA6;
+IL2CPP_EXTERN_C String_t* _stringLiteralE9C276987A94F49F88F906ABFDB3F1BE940DF8AC;
+IL2CPP_EXTERN_C String_t* _stringLiteralEA7287BFB4060DA22A828E0B42CDAE1A80BBD7AE;
+IL2CPP_EXTERN_C String_t* _stringLiteralEDAD94E0043ED228E841DC6AB528C222231F6F51;
+IL2CPP_EXTERN_C String_t* _stringLiteralF241CDA6CA298059488F9A33C9558A6821C0F5F4;
+IL2CPP_EXTERN_C String_t* _stringLiteralF5493D29BD9B73BEF0AC1F34DCEB534D51D5D1E5;
+IL2CPP_EXTERN_C String_t* _stringLiteralFE684BD539F289C65821380D14428165A10B6F33;
+IL2CPP_EXTERN_C const RuntimeMethod* Component_GetComponentInChildren_TisRenderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF_m7CBAFA50AB995C9F53D6140718FCD31D7BEC7CC8_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* Component_GetComponentInParent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mEE3CA4624CE256B40AC7BA8EDCBE6DB6E3F99952_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* Component_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mDC0EB50988F6BD42EA26B034CA9F14306EE99CE5_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* Component_GetComponent_TisHitDetector_tB650BCFC49DCC68A070FB537DFD32FEDDD9E770A_mD49FBEA885593B6CE7119B98A3DB0A28B45BD57A_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* Component_GetComponent_TisNavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F_m45B783D78932EFB8409019F84FED6DF3A492F16F_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* Component_GetComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m4B5CAD64B52D153BEA96432633CA9A45FA523DD8_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* EnemyAI_HandleDeath_mCF87AABEB5D879CC62E433543A533F5AF0AA5EFD_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* Enumerator_Dispose_m07D362A07C19B36C2FD1B4DC79DD99903D4DA95D_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* Enumerator_MoveNext_m96F4B0BD0A5485C8E8CC57D961DF6F1FA256AF27_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* Enumerator_get_Current_m7236EBE1CFCB6533F96E030500D322B13D0CA5A4_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* GameObject_AddComponent_TisAudioSource_t871AC2272F896738252F04EE949AEF5B241D3299_m0E8EFDB9B3D8DF1ADE10C56D3168A9C1BA19BF14_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* GameObject_AddComponent_TisCapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808_mE9815ABBF56D4B7806C63F85A30AE9BBDE927BCF_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* GameObject_AddComponent_TisEnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_m56EB203968AF4F76F425B8329DDCBED0BB1A5149_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* GameObject_AddComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mE06661A0877DE97B98EED1F873BE29EA8EDD31A9_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* GameObject_AddComponent_TisEnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4_m6E746025044A207217045649EBEE37C078A182DA_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* GameObject_AddComponent_TisNavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F_m3397A16630528923E44BB23514E77B32D608DDDF_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* GameObject_AddComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m03A761629A3F71B0248F1B26EF612F592B757093_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* GameObject_GetComponent_TisCollider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76_m4CB0FC4E59CE6C91F1106739EF364208A63E2597_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* GameObject_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mF81DA6EF9A63C42BCE5B791ECED9E1D1DD51439B_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* GameObject_GetComponent_TisRenderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF_m026EB44DB6238F13E2AFBECF1FBBE924CB1B040A_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* List_1_Add_m43FBF207375C6E06B8C45ECE614F9B8008FB686E_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* List_1_GetEnumerator_mA843D26C63E5963415DFCA6E49DFA27AFD9C75E8_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* List_1_Remove_mCCE85D4D5326536C4B214C73D07030F4CCD18485_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* List_1__ctor_m447372C1EF7141193B93090A77395B786C72C7BC_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* List_1_get_Count_m4C37ED2D928D63B80F55AF434730C2D64EEB9F22_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* Object_FindAnyObjectByType_TisSpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_m5500DAAC1FC72955414E571B770EE8B8B74A99BB_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* U3CHandleEnemyDeathU3Ed__13_System_Collections_IEnumerator_Reset_mD97F259700D3A373855246C354890D08DBA2D5DF_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* U3CU3Ec__DisplayClass12_0_U3CSpawnEnemyAtU3Eb__0_m79E32FDA41F2451177F1D0E2D926DCBB9466D192_RuntimeMethod_var;
+IL2CPP_EXTERN_C const RuntimeMethod* U3CU3Ec__DisplayClass9_0_U3COnDestroyU3Eb__0_m7E6BD45C96715406D57F4384933442E74EA9EACD_RuntimeMethod_var;
+struct Delegate_t_marshaled_com;
+struct Delegate_t_marshaled_pinvoke;
+struct Exception_t_marshaled_com;
+struct Exception_t_marshaled_pinvoke;
+
+struct AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31;
+struct AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2;
+struct ContactPointU5BU5D_t3570603E8D0685B71B3D8BA07031674B00C5E411;
+struct ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918;
+struct StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248;
+struct TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24;
+
+IL2CPP_EXTERN_C_BEGIN
+IL2CPP_EXTERN_C_END
+
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+struct List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B  : public RuntimeObject
+{
+	GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* ____items;
+	int32_t ____size;
+	int32_t ____version;
+	RuntimeObject* ____syncRoot;
+};
+struct List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D  : public RuntimeObject
+{
+	ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* ____items;
+	int32_t ____size;
+	int32_t ____version;
+	RuntimeObject* ____syncRoot;
+};
+struct U3CPrivateImplementationDetailsU3E_t0F5473E849A5A5185A9F4C5246F0C32816C49FCA  : public RuntimeObject
+{
+};
+struct String_t  : public RuntimeObject
+{
+	int32_t ____stringLength;
+	Il2CppChar ____firstChar;
+};
+struct ValueType_t6D9B272BD21782F0A9A14F2E41F85A50E97A986F  : public RuntimeObject
+{
+};
+struct ValueType_t6D9B272BD21782F0A9A14F2E41F85A50E97A986F_marshaled_pinvoke
+{
+};
+struct ValueType_t6D9B272BD21782F0A9A14F2E41F85A50E97A986F_marshaled_com
+{
+};
+struct YieldInstruction_tFCE35FD0907950EFEE9BC2890AC664E41C53728D  : public RuntimeObject
+{
+};
+struct YieldInstruction_tFCE35FD0907950EFEE9BC2890AC664E41C53728D_marshaled_pinvoke
+{
+};
+struct YieldInstruction_tFCE35FD0907950EFEE9BC2890AC664E41C53728D_marshaled_com
+{
+};
+struct U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C  : public RuntimeObject
+{
+	EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* ___U3CU3E4__this;
+	GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___enemy;
+};
+struct U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1  : public RuntimeObject
+{
+	GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___enemy;
+	EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* ___U3CU3E4__this;
+};
+struct U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654  : public RuntimeObject
+{
+	int32_t ___U3CU3E1__state;
+	RuntimeObject* ___U3CU3E2__current;
+	EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* ___U3CU3E4__this;
+	GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___enemy;
+};
+struct Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60 
+{
+	List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* ____list;
+	int32_t ____index;
+	int32_t ____version;
+	GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ____current;
+};
+struct Enumerator_t9473BAB568A27E2339D48C1F91319E0F6D244D7A 
+{
+	List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D* ____list;
+	int32_t ____index;
+	int32_t ____version;
+	RuntimeObject* ____current;
+};
+struct Boolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22 
+{
+	bool ___m_value;
+};
+struct Color_tD001788D726C3A7F1379BEED0260B9591F440C1F 
+{
+	float ___r;
+	float ___g;
+	float ___b;
+	float ___a;
+};
+struct Double_tE150EF3D1D43DEE85D533810AB4C742307EEDE5F 
+{
+	double ___m_value;
+};
+struct EntityId_t982FBD037EAC5CA077B1602A7EA40E3523AA0FC8 
+{
+	union
+	{
+		struct
+		{
+			int32_t ___m_Data;
+		};
+		uint8_t EntityId_t982FBD037EAC5CA077B1602A7EA40E3523AA0FC8__padding[4];
+	};
+};
+struct Enum_t2A1A94B24E3B776EEF4E5E485E290BB9D4D072E2  : public ValueType_t6D9B272BD21782F0A9A14F2E41F85A50E97A986F
+{
+};
+struct Enum_t2A1A94B24E3B776EEF4E5E485E290BB9D4D072E2_marshaled_pinvoke
+{
+};
+struct Enum_t2A1A94B24E3B776EEF4E5E485E290BB9D4D072E2_marshaled_com
+{
+};
+struct Int32_t680FF22E76F6EFAD4375103CBBFFA0421349384C 
+{
+	int32_t ___m_value;
+};
+struct IntPtr_t 
+{
+	void* ___m_value;
+};
+struct LayerMask_t97CB6BDADEDC3D6423C7BCFEA7F86DA2EC6241DB 
+{
+	int32_t ___m_Mask;
+};
+struct Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 
+{
+	float ___x;
+	float ___y;
+	float ___z;
+	float ___w;
+};
+struct Single_t4530F2FF86FCB0DC29F35385CA1BD21BE294761C 
+{
+	float ___m_value;
+};
+struct Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 
+{
+	float ___x;
+	float ___y;
+};
+struct Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 
+{
+	float ___x;
+	float ___y;
+	float ___z;
+};
+struct Void_t4861ACF8F4594C3437BB48B6E56783494B843915 
+{
+	union
+	{
+		struct
+		{
+		};
+		uint8_t Void_t4861ACF8F4594C3437BB48B6E56783494B843915__padding[1];
+	};
+};
+struct WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3  : public YieldInstruction_tFCE35FD0907950EFEE9BC2890AC664E41C53728D
+{
+	float ___m_Seconds;
+};
+struct WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3_marshaled_pinvoke : public YieldInstruction_tFCE35FD0907950EFEE9BC2890AC664E41C53728D_marshaled_pinvoke
+{
+	float ___m_Seconds;
+};
+struct WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3_marshaled_com : public YieldInstruction_tFCE35FD0907950EFEE9BC2890AC664E41C53728D_marshaled_com
+{
+	float ___m_Seconds;
+};
+#pragma pack(push, tp, 1)
+struct __StaticArrayInitTypeSizeU3D20_tA394C0A7DC4F4F05D2190B09E23BDE8536718D72 
+{
+	union
+	{
+		struct
+		{
+			union
+			{
+			};
+		};
+		uint8_t __StaticArrayInitTypeSizeU3D20_tA394C0A7DC4F4F05D2190B09E23BDE8536718D72__padding[20];
+	};
+};
+#pragma pack(pop, tp)
+struct AudioRolloffMode_tA944C7222A7D47A746407C74368B413CDA1B6B7B 
+{
+	int32_t ___value__;
+};
+struct CollisionPairEventFlags_t9DAB7B8F199928220E6ACA8E669F3B644650FBE6 
+{
+	uint16_t ___value__;
+};
+struct CollisionPairFlags_tD05FDF8CD2FA43B2AAC0078E19DB27DF01B2BA98 
+{
+	uint16_t ___value__;
+};
+struct CollisionPairHeaderFlags_tBA40F470BC1564B84C3093CEA5761804FA0650C3 
+{
+	uint16_t ___value__;
+};
+struct ContactPoint_t241857959C0D517C21F541BB04B63FA6C1EAB3F9 
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___m_Point;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___m_Normal;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___m_Impulse;
+	EntityId_t982FBD037EAC5CA077B1602A7EA40E3523AA0FC8 ___m_ThisColliderEntityId;
+	EntityId_t982FBD037EAC5CA077B1602A7EA40E3523AA0FC8 ___m_OtherColliderEntityId;
+	float ___m_Separation;
+};
+struct Coroutine_t85EA685566A254C23F3FD77AB5BDFFFF8799596B  : public YieldInstruction_tFCE35FD0907950EFEE9BC2890AC664E41C53728D
+{
+	intptr_t ___m_Ptr;
+};
+struct Coroutine_t85EA685566A254C23F3FD77AB5BDFFFF8799596B_marshaled_pinvoke : public YieldInstruction_tFCE35FD0907950EFEE9BC2890AC664E41C53728D_marshaled_pinvoke
+{
+	intptr_t ___m_Ptr;
+};
+struct Coroutine_t85EA685566A254C23F3FD77AB5BDFFFF8799596B_marshaled_com : public YieldInstruction_tFCE35FD0907950EFEE9BC2890AC664E41C53728D_marshaled_com
+{
+	intptr_t ___m_Ptr;
+};
+struct Delegate_t  : public RuntimeObject
+{
+	intptr_t ___method_ptr;
+	intptr_t ___invoke_impl;
+	RuntimeObject* ___m_target;
+	intptr_t ___method;
+	intptr_t ___delegate_trampoline;
+	intptr_t ___extra_arg;
+	intptr_t ___method_code;
+	intptr_t ___interp_method;
+	intptr_t ___interp_invoke_impl;
+	MethodInfo_t* ___method_info;
+	MethodInfo_t* ___original_method_info;
+	DelegateData_t9B286B493293CD2D23A5B2B5EF0E5B1324C2B77E* ___data;
+	bool ___method_is_virtual;
+};
+struct Delegate_t_marshaled_pinvoke
+{
+	intptr_t ___method_ptr;
+	intptr_t ___invoke_impl;
+	Il2CppIUnknown* ___m_target;
+	intptr_t ___method;
+	intptr_t ___delegate_trampoline;
+	intptr_t ___extra_arg;
+	intptr_t ___method_code;
+	intptr_t ___interp_method;
+	intptr_t ___interp_invoke_impl;
+	MethodInfo_t* ___method_info;
+	MethodInfo_t* ___original_method_info;
+	DelegateData_t9B286B493293CD2D23A5B2B5EF0E5B1324C2B77E* ___data;
+	int32_t ___method_is_virtual;
+};
+struct Delegate_t_marshaled_com
+{
+	intptr_t ___method_ptr;
+	intptr_t ___invoke_impl;
+	Il2CppIUnknown* ___m_target;
+	intptr_t ___method;
+	intptr_t ___delegate_trampoline;
+	intptr_t ___extra_arg;
+	intptr_t ___method_code;
+	intptr_t ___interp_method;
+	intptr_t ___interp_invoke_impl;
+	MethodInfo_t* ___method_info;
+	MethodInfo_t* ___original_method_info;
+	DelegateData_t9B286B493293CD2D23A5B2B5EF0E5B1324C2B77E* ___data;
+	int32_t ___method_is_virtual;
+};
+struct EnemyState_t62E4AA6BEE9C9DF65C1662D52FE335ACFE38A018 
+{
+	int32_t ___value__;
+};
+struct Exception_t  : public RuntimeObject
+{
+	String_t* ____className;
+	String_t* ____message;
+	RuntimeObject* ____data;
+	Exception_t* ____innerException;
+	String_t* ____helpURL;
+	RuntimeObject* ____stackTrace;
+	String_t* ____stackTraceString;
+	String_t* ____remoteStackTraceString;
+	int32_t ____remoteStackIndex;
+	RuntimeObject* ____dynamicMethods;
+	int32_t ____HResult;
+	String_t* ____source;
+	SafeSerializationManager_tCBB85B95DFD1634237140CD892E82D06ECB3F5E6* ____safeSerializationManager;
+	StackTraceU5BU5D_t32FBCB20930EAF5BAE3F450FF75228E5450DA0DF* ___captured_traces;
+	IntPtrU5BU5D_tFD177F8C806A6921AD7150264CCC62FA00CAD832* ___native_trace_ips;
+	int32_t ___caught_in_unmanaged;
+};
+struct Exception_t_marshaled_pinvoke
+{
+	char* ____className;
+	char* ____message;
+	RuntimeObject* ____data;
+	Exception_t_marshaled_pinvoke* ____innerException;
+	char* ____helpURL;
+	Il2CppIUnknown* ____stackTrace;
+	char* ____stackTraceString;
+	char* ____remoteStackTraceString;
+	int32_t ____remoteStackIndex;
+	Il2CppIUnknown* ____dynamicMethods;
+	int32_t ____HResult;
+	char* ____source;
+	SafeSerializationManager_tCBB85B95DFD1634237140CD892E82D06ECB3F5E6* ____safeSerializationManager;
+	StackTraceU5BU5D_t32FBCB20930EAF5BAE3F450FF75228E5450DA0DF* ___captured_traces;
+	Il2CppSafeArray* ___native_trace_ips;
+	int32_t ___caught_in_unmanaged;
+};
+struct Exception_t_marshaled_com
+{
+	Il2CppChar* ____className;
+	Il2CppChar* ____message;
+	RuntimeObject* ____data;
+	Exception_t_marshaled_com* ____innerException;
+	Il2CppChar* ____helpURL;
+	Il2CppIUnknown* ____stackTrace;
+	Il2CppChar* ____stackTraceString;
+	Il2CppChar* ____remoteStackTraceString;
+	int32_t ____remoteStackIndex;
+	Il2CppIUnknown* ____dynamicMethods;
+	int32_t ____HResult;
+	Il2CppChar* ____source;
+	SafeSerializationManager_tCBB85B95DFD1634237140CD892E82D06ECB3F5E6* ____safeSerializationManager;
+	StackTraceU5BU5D_t32FBCB20930EAF5BAE3F450FF75228E5450DA0DF* ___captured_traces;
+	Il2CppSafeArray* ___native_trace_ips;
+	int32_t ___caught_in_unmanaged;
+};
+struct ForceMode_t603F3ECB085E4FDD30C91273A469047EA64F4459 
+{
+	int32_t ___value__;
+};
+struct Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C  : public RuntimeObject
+{
+	intptr_t ___m_CachedPtr;
+};
+struct Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_marshaled_pinvoke
+{
+	intptr_t ___m_CachedPtr;
+};
+struct Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_marshaled_com
+{
+	intptr_t ___m_CachedPtr;
+};
+struct PrimitiveType_t72F3E6BA10E41F934F63C4F6DF88388E57911C44 
+{
+	int32_t ___value__;
+};
+struct QueryTriggerInteraction_t5AA443202C8B671F391534A002B7CF48A1412D23 
+{
+	int32_t ___value__;
+};
+struct RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5 
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___m_Point;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___m_Normal;
+	uint32_t ___m_FaceID;
+	float ___m_Distance;
+	Vector2_t1FD6F485C871E832B347AB2DC8CBA08B739D8DF7 ___m_UV;
+	EntityId_t982FBD037EAC5CA077B1602A7EA40E3523AA0FC8 ___m_Collider;
+};
+struct RigidbodyConstraints_tE93C9173FB4F24EF4D38166A288214D28D8E85C8 
+{
+	int32_t ___value__;
+};
+struct StringComparison_tE14A55CCFA001A5AC85D754179BF2888F45CC94D 
+{
+	int32_t ___value__;
+};
+struct SurfaceType_tD336337593CF46AAC86CC3C88E525A676B26D871 
+{
+	int32_t ___value__;
+};
+struct TraversalMode_tB1E9E72F6F87706BDA58B9CD9FB7DCC54A62E372 
+{
+	int32_t ___value__;
+};
+struct AudioResource_t35B84706031E4F08C928B1640B804839F4B6500A  : public Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C
+{
+};
+struct Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3  : public Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C
+{
+};
+struct ContactPair_t096319945A27108A2DA384393A9ED390BE4356FD 
+{
+	EntityId_t982FBD037EAC5CA077B1602A7EA40E3523AA0FC8 ___m_ColliderID;
+	EntityId_t982FBD037EAC5CA077B1602A7EA40E3523AA0FC8 ___m_OtherColliderID;
+	intptr_t ___m_StartPtr;
+	uint32_t ___m_NbPoints;
+	uint16_t ___m_Flags;
+	uint16_t ___m_Events;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___m_ImpulseSum;
+};
+struct ContactPairHeader_tA8C64AAEEF017149E77A6600B10A10F1A1C5648B 
+{
+	EntityId_t982FBD037EAC5CA077B1602A7EA40E3523AA0FC8 ___m_BodyID;
+	EntityId_t982FBD037EAC5CA077B1602A7EA40E3523AA0FC8 ___m_OtherBodyID;
+	intptr_t ___m_StartPtr;
+	uint32_t ___m_NbPairs;
+	uint16_t ___m_Flags;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___m_RelativeVelocity;
+};
+struct GameObject_t76FEDD663AB33C991A9C9A23129337651094216F  : public Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C
+{
+};
+struct Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3  : public Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C
+{
+};
+struct MulticastDelegate_t  : public Delegate_t
+{
+	DelegateU5BU5D_tC5AB7E8F745616680F337909D3A8E6C722CDF771* ___delegates;
+};
+struct MulticastDelegate_t_marshaled_pinvoke : public Delegate_t_marshaled_pinvoke
+{
+	Delegate_t_marshaled_pinvoke** ___delegates;
+};
+struct MulticastDelegate_t_marshaled_com : public Delegate_t_marshaled_com
+{
+	Delegate_t_marshaled_com** ___delegates;
+};
+struct Shader_tADC867D36B7876EE22427FAA2CE485105F4EE692  : public Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C
+{
+};
+struct SystemException_tCC48D868298F4C0705279823E34B00F4FBDB7295  : public Exception_t
+{
+};
+struct Action_1_t6F9EB113EB3F16226AEF811A2744F4111C116C87  : public MulticastDelegate_t
+{
+};
+struct Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A  : public MulticastDelegate_t
+{
+};
+struct AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20  : public AudioResource_t35B84706031E4F08C928B1640B804839F4B6500A
+{
+	PCMReaderCallback_t3396D9613664F0AFF65FB91018FD0F901CC16F1E* ___m_PCMReaderCallback;
+	PCMSetPositionCallback_t8D7135A2FB40647CAEC93F5254AD59E18DEB6072* ___m_PCMSetPositionCallback;
+};
+struct Behaviour_t01970CFBBA658497AE30F311C447DB0440BAB7FA  : public Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3
+{
+};
+struct Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76  : public Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3
+{
+};
+struct Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0  : public RuntimeObject
+{
+	ContactPairHeader_tA8C64AAEEF017149E77A6600B10A10F1A1C5648B ___m_Header;
+	ContactPair_t096319945A27108A2DA384393A9ED390BE4356FD ___m_Pair;
+	bool ___m_Flipped;
+	ContactPointU5BU5D_t3570603E8D0685B71B3D8BA07031674B00C5E411* ___m_LegacyContacts;
+};
+struct NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A  : public SystemException_tCC48D868298F4C0705279823E34B00F4FBDB7295
+{
+};
+struct Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF  : public Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3
+{
+};
+struct Rigidbody_t268697F5A994213ED97393309870968BC1C7393C  : public Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3
+{
+};
+struct Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1  : public Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3
+{
+};
+struct AudioBehaviour_t2DC0BEF7B020C952F3D2DA5AAAC88501C7EEB941  : public Behaviour_t01970CFBBA658497AE30F311C447DB0440BAB7FA
+{
+};
+struct CapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808  : public Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76
+{
+};
+struct MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71  : public Behaviour_t01970CFBBA658497AE30F311C447DB0440BAB7FA
+{
+	CancellationTokenSource_tAAE1E0033BCFC233801F8CB4CED5C852B350CB7B* ___m_CancellationTokenSource;
+};
+struct NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F  : public Behaviour_t01970CFBBA658497AE30F311C447DB0440BAB7FA
+{
+};
+struct AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299  : public AudioBehaviour_t2DC0BEF7B020C952F3D2DA5AAAC88501C7EEB941
+{
+};
+struct EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	float ___visionHalfAngle;
+	float ___visionRange;
+	float ___hearingRadius;
+	LayerMask_t97CB6BDADEDC3D6423C7BCFEA7F86DA2EC6241DB ___visionBlockMask;
+	float ___patrolSpeed;
+	float ___chaseSpeed;
+	float ___meleeRange;
+	float ___meleeDamage;
+	float ___meleeRate;
+	float ___lostSightTimeout;
+	float ___alertTimeout;
+	PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* ___patrolPath;
+	float ___waypointArrivalDistance;
+	Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* ___playerTransform;
+	int32_t ____state;
+	NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* ____agent;
+	EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* ____health;
+	Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* ____renderer;
+	int32_t ____patrolIndex;
+	int32_t ____patrolDirection;
+	float ____lostSightTimer;
+	float ____alertTimer;
+	float ____meleeTimer;
+	float ____alertConfirmTimer;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ____lastKnownPlayerPos;
+};
+struct EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	float ___maxHP;
+	float ____currentHP;
+	Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* ___OnDeath;
+};
+struct EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	String_t* ___zoneName;
+	EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* ___enemyHealth;
+	float ___damagePerNewton;
+	float ___minForceThreshold;
+};
+struct EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* ___spawnPoints;
+	int32_t ___maxEnemies;
+	float ___respawnDelay;
+	PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* ___patrolPath;
+	float ___enemyHP;
+	List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* ____liveEnemies;
+	int32_t ____spawnCounter;
+};
+struct HitDetector_tB650BCFC49DCC68A070FB537DFD32FEDDD9E770A  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* ___thrower;
+	Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* ____rb;
+	RuntimeGrabbable_t6F2541D27FCFFC88CE4FE597772DD4F4FB85B010* ____grabbable;
+	bool ____missFired;
+};
+struct ImpactSound_t69F9A4B2C70A8CFB36B78FA08779E8DF509D6B86  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	int32_t ____surfaceType;
+	AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* ____stoneClips;
+	AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* ____metalClips;
+	AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* ____woodClips;
+	AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* ____fleshClips;
+	AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* ____concreteClips;
+	float ____minImpulseThreshold;
+	float ____maxImpulseForFullVolume;
+	float ____maxVolume;
+	float ____pitchVariance;
+	float ____cooldown;
+	float ____lastPlayTime;
+};
+struct PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* ___waypoints;
+	int32_t ___mode;
+};
+struct SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	String_t* ____expectedSpatializerPlugin;
+	bool ____autoEnableSpatializer;
+	int32_t ____poolSize;
+	float ____defaultSpatialBlend;
+	float ____dopplerLevel;
+	int32_t ____rolloffMode;
+	float ____maxDistance;
+	AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2* ____pool;
+	int32_t ____poolHead;
+};
+struct SpawnPointMarker_t269F4B1D99EFB115B959CE012C054F6D9565981E  : public MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71
+{
+	String_t* ___pointLabel;
+	bool ___isActive;
+};
+struct List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B_StaticFields
+{
+	GameObjectU5BU5D_tFF67550DFCE87096D7A3734EA15B75896B2722CF* ___s_emptyArray;
+};
+struct List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D_StaticFields
+{
+	ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* ___s_emptyArray;
+};
+struct U3CPrivateImplementationDetailsU3E_t0F5473E849A5A5185A9F4C5246F0C32816C49FCA_StaticFields
+{
+	__StaticArrayInitTypeSizeU3D20_tA394C0A7DC4F4F05D2190B09E23BDE8536718D72 ___5BFAF376BB5876B69AB0B0104A14BF5DD2FB05E48F53778B5B10EC516AC4B4D6;
+};
+struct String_t_StaticFields
+{
+	String_t* ___Empty;
+};
+struct Boolean_t09A6377A54BE2F9E6985A8149F19234FD7DDFE22_StaticFields
+{
+	String_t* ___TrueString;
+	String_t* ___FalseString;
+};
+struct IntPtr_t_StaticFields
+{
+	intptr_t ___Zero;
+};
+struct Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974_StaticFields
+{
+	Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 ___identityQuaternion;
+};
+struct Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_StaticFields
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___zeroVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___oneVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___upVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___downVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___leftVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___rightVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___forwardVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___backVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___positiveInfinityVector;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___negativeInfinityVector;
+};
+struct Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_StaticFields
+{
+	int32_t ___OffsetOfInstanceIDInCPlusPlusObject;
+};
+struct Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3_StaticFields
+{
+	int32_t ___k_ColorId;
+	int32_t ___k_MainTexId;
+};
+struct EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields
+{
+	Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___ColorPatrol;
+	Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___ColorAlert;
+	Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___ColorChase;
+	Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___ColorAttack;
+	Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___ColorDead;
+};
+struct SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_StaticFields
+{
+	SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* ____instance;
+};
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+struct ContactPointU5BU5D_t3570603E8D0685B71B3D8BA07031674B00C5E411  : public RuntimeArray
+{
+	ALIGN_FIELD (8) ContactPoint_t241857959C0D517C21F541BB04B63FA6C1EAB3F9 m_Items[1];
+
+	inline ContactPoint_t241857959C0D517C21F541BB04B63FA6C1EAB3F9 GetAt(il2cpp_array_size_t index) const
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items[index];
+	}
+	inline ContactPoint_t241857959C0D517C21F541BB04B63FA6C1EAB3F9* GetAddressAt(il2cpp_array_size_t index)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items + index;
+	}
+	inline void SetAt(il2cpp_array_size_t index, ContactPoint_t241857959C0D517C21F541BB04B63FA6C1EAB3F9 value)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		m_Items[index] = value;
+	}
+	inline ContactPoint_t241857959C0D517C21F541BB04B63FA6C1EAB3F9 GetAtUnchecked(il2cpp_array_size_t index) const
+	{
+		return m_Items[index];
+	}
+	inline ContactPoint_t241857959C0D517C21F541BB04B63FA6C1EAB3F9* GetAddressAtUnchecked(il2cpp_array_size_t index)
+	{
+		return m_Items + index;
+	}
+	inline void SetAtUnchecked(il2cpp_array_size_t index, ContactPoint_t241857959C0D517C21F541BB04B63FA6C1EAB3F9 value)
+	{
+		m_Items[index] = value;
+	}
+};
+struct AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31  : public RuntimeArray
+{
+	ALIGN_FIELD (8) AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* m_Items[1];
+
+	inline AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* GetAt(il2cpp_array_size_t index) const
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items[index];
+	}
+	inline AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20** GetAddressAt(il2cpp_array_size_t index)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items + index;
+	}
+	inline void SetAt(il2cpp_array_size_t index, AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* value)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+	inline AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* GetAtUnchecked(il2cpp_array_size_t index) const
+	{
+		return m_Items[index];
+	}
+	inline AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20** GetAddressAtUnchecked(il2cpp_array_size_t index)
+	{
+		return m_Items + index;
+	}
+	inline void SetAtUnchecked(il2cpp_array_size_t index, AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* value)
+	{
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+};
+struct StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248  : public RuntimeArray
+{
+	ALIGN_FIELD (8) String_t* m_Items[1];
+
+	inline String_t* GetAt(il2cpp_array_size_t index) const
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items[index];
+	}
+	inline String_t** GetAddressAt(il2cpp_array_size_t index)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items + index;
+	}
+	inline void SetAt(il2cpp_array_size_t index, String_t* value)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+	inline String_t* GetAtUnchecked(il2cpp_array_size_t index) const
+	{
+		return m_Items[index];
+	}
+	inline String_t** GetAddressAtUnchecked(il2cpp_array_size_t index)
+	{
+		return m_Items + index;
+	}
+	inline void SetAtUnchecked(il2cpp_array_size_t index, String_t* value)
+	{
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+};
+struct AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2  : public RuntimeArray
+{
+	ALIGN_FIELD (8) AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* m_Items[1];
+
+	inline AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* GetAt(il2cpp_array_size_t index) const
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items[index];
+	}
+	inline AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299** GetAddressAt(il2cpp_array_size_t index)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items + index;
+	}
+	inline void SetAt(il2cpp_array_size_t index, AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* value)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+	inline AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* GetAtUnchecked(il2cpp_array_size_t index) const
+	{
+		return m_Items[index];
+	}
+	inline AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299** GetAddressAtUnchecked(il2cpp_array_size_t index)
+	{
+		return m_Items + index;
+	}
+	inline void SetAtUnchecked(il2cpp_array_size_t index, AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* value)
+	{
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+};
+struct ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918  : public RuntimeArray
+{
+	ALIGN_FIELD (8) RuntimeObject* m_Items[1];
+
+	inline RuntimeObject* GetAt(il2cpp_array_size_t index) const
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items[index];
+	}
+	inline RuntimeObject** GetAddressAt(il2cpp_array_size_t index)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items + index;
+	}
+	inline void SetAt(il2cpp_array_size_t index, RuntimeObject* value)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+	inline RuntimeObject* GetAtUnchecked(il2cpp_array_size_t index) const
+	{
+		return m_Items[index];
+	}
+	inline RuntimeObject** GetAddressAtUnchecked(il2cpp_array_size_t index)
+	{
+		return m_Items + index;
+	}
+	inline void SetAtUnchecked(il2cpp_array_size_t index, RuntimeObject* value)
+	{
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+};
+struct TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24  : public RuntimeArray
+{
+	ALIGN_FIELD (8) Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* m_Items[1];
+
+	inline Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* GetAt(il2cpp_array_size_t index) const
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items[index];
+	}
+	inline Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1** GetAddressAt(il2cpp_array_size_t index)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		return m_Items + index;
+	}
+	inline void SetAt(il2cpp_array_size_t index, Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* value)
+	{
+		IL2CPP_ARRAY_BOUNDS_CHECK(index, (uint32_t)(this)->max_length);
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+	inline Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* GetAtUnchecked(il2cpp_array_size_t index) const
+	{
+		return m_Items[index];
+	}
+	inline Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1** GetAddressAtUnchecked(il2cpp_array_size_t index)
+	{
+		return m_Items + index;
+	}
+	inline void SetAtUnchecked(il2cpp_array_size_t index, Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* value)
+	{
+		m_Items[index] = value;
+		Il2CppCodeGenWriteBarrier((void**)m_Items + index, (void*)value);
+	}
+};
+
+
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* Object_FindAnyObjectByType_TisRuntimeObject_mE7A79400E013891ADB85E4C6A5CF95B447D374BA_gshared (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* GameObject_AddComponent_TisRuntimeObject_m69B93700FACCF372F5753371C6E8FB780800B824_gshared (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* Component_GetComponent_TisRuntimeObject_m7181F81CAEC2CF53F5D2BC79B7425C16E1F80D33_gshared (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* Component_GetComponentInChildren_TisRuntimeObject_mE483A27E876DE8E4E6901D6814837F81D7C42F65_gshared (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Action_1__ctor_m2E1DFA67718FC1A0B6E5DFEB78831FFE9C059EB4_gshared (Action_1_t6F9EB113EB3F16226AEF811A2744F4111C116C87* __this, RuntimeObject* ___0_object, intptr_t ___1_method, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Action_1_Invoke_mF2422B2DD29F74CE66F791C3F68E288EC7C3DB9E_gshared_inline (Action_1_t6F9EB113EB3F16226AEF811A2744F4111C116C87* __this, RuntimeObject* ___0_obj, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* Component_GetComponentInParent_TisRuntimeObject_m6746D6BB99912B1B509746C993906492F86CD119_gshared (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Enumerator_t9473BAB568A27E2339D48C1F91319E0F6D244D7A List_1_GetEnumerator_mD8294A7FA2BEB1929487127D476F8EC1CDC23BFC_gshared (List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Enumerator_Dispose_mD9DC3E3C3697830A4823047AB29A77DBBB5ED419_gshared (Enumerator_t9473BAB568A27E2339D48C1F91319E0F6D244D7A* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR RuntimeObject* Enumerator_get_Current_m6330F15D18EE4F547C05DF9BF83C5EB710376027_gshared_inline (Enumerator_t9473BAB568A27E2339D48C1F91319E0F6D244D7A* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* GameObject_GetComponent_TisRuntimeObject_m6EAED4AA356F0F48288F67899E5958792395563B_gshared (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Enumerator_MoveNext_mE921CC8F29FBBDE7CC3209A0ED0D921D58D00BCB_gshared (Enumerator_t9473BAB568A27E2339D48C1F91319E0F6D244D7A* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t List_1_get_Count_m4407E4C389F22B8CEC282C15D56516658746C383_gshared_inline (List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void List_1_Add_mEBCF994CC3814631017F46A387B1A192ED6C85C7_gshared_inline (List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D* __this, RuntimeObject* ___0_item, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void List_1__ctor_m7F078BB342729BDF11327FD89D7872265328F690_gshared (List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool List_1_Remove_m4DFA48F4CEB9169601E75FC28517C5C06EFA5AD7_gshared (List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D* __this, RuntimeObject* ___0_item, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_NO_INLINE IL2CPP_METHOD_ATTR void List_1_AddWithResize_m79A9BF770BEF9C06BE40D5401E55E375F2726CC4_gshared (List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D* __this, RuntimeObject* ___0_item, const RuntimeMethod* method) ;
+
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Collision_get_impulse_mBA2EDD39B7F495FF335FB867B244253602C7EF5D (Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_get_magnitude_mF0D6017E90B345F1F52D1CC564C640F1A847AF2D_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Time_get_time_m3A271BB1B20041144AC5B7863B71AB1F0150374B (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* ImpactSound_PickClip_mDB5E9CBCBDF587E0EFA2B7618EBD2AD304D358FE (ImpactSound_t69F9A4B2C70A8CFB36B78FA08779E8DF509D6B86* __this, int32_t ___0_surface, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605 (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___0_x, Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___1_y, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* Component_get_gameObject_m57AEFBB14DB39EC476F740BA000E170355DE691B (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392 (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_Format_mA0534D6E2AE4D67A6BD8D45B3321323930EB930C (String_t* ___0_format, RuntimeObject* ___1_arg0, RuntimeObject* ___2_arg1, RuntimeObject* ___3_arg2, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9 (RuntimeObject* ___0_message, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Clamp01_mA7E048DBDA832D399A581BE4D6DED9FA44CE0F14_inline (float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR ContactPointU5BU5D_t3570603E8D0685B71B3D8BA07031674B00C5E411* Collision_get_contacts_m2E8E27E0399230DFA4303A4F4D81C1BD55CBC473 (Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371 (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1 (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ContactPoint_get_point_mCCDFDACC5D8DB469898060A56A3CC45132911208 (ContactPoint_t241857959C0D517C21F541BB04B63FA6C1EAB3F9* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* SpatialAudioManager_get_Instance_m84A958239B96EC120DEA66398D58186D0337C84D (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602 (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___0_x, Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___1_y, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpatialAudioManager_PlayAtPosition_m5A0F006EE2FFD3C29D23FC19E706D39345677265 (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* ___0_clip, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_position, float ___2_volume, float ___3_pitchVariance, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_PlayClipAtPoint_mF9D129487C356127ADA3AB5C0A67C7D00F26E3DD (AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* ___0_clip, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_position, float ___2_volume, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t Random_Range_m6763D9767F033357F88B6637F048F4ACA4123B68 (int32_t ___0_minInclusive, int32_t ___1_maxExclusive, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MonoBehaviour__ctor_m592DB0105CA0BC97AA1C5F4AD27B12D68A3B7C1E (MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71* __this, const RuntimeMethod* method) ;
+inline SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* Object_FindAnyObjectByType_TisSpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_m5500DAAC1FC72955414E571B770EE8B8B74A99BB (const RuntimeMethod* method)
+{
+	return ((  SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* (*) (const RuntimeMethod*))Object_FindAnyObjectByType_TisRuntimeObject_mE7A79400E013891ADB85E4C6A5CF95B447D374BA_gshared)(method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Object_Destroy_mE97D0A766419A81296E8D4E5C23D01D3FE91ACBB (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___0_obj, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Object_DontDestroyOnLoad_m4B70C3AEF886C176543D1295507B6455C9DCAEA7 (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___0_target, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpatialAudioManager_ConfigureSpatializer_m3EDFBB3262BA64FC246D9EEA40FE1E2053FC49A3 (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpatialAudioManager_BuildPool_m5EBB856B72ADC463CFCEDE4D41686360A969C61B (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* AudioSettings_GetSpatializerPluginName_m60C2C3FA09CB0422D1EDAE5185F20BF01689BF00 (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B (String_t* ___0_str0, String_t* ___1_str1, String_t* ___2_str2, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB (RuntimeObject* ___0_message, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool String_IsNullOrEmpty_mEA9E3FB005AC28FE02E69FCF95A7B8456192B478 (String_t* ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool String_op_Inequality_m8C940F3CFC42866709D7CA931B3D77B4BE94BCB6 (String_t* ___0_a, String_t* ___1_b, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_Concat_m647EBF831F54B6DF7D5AFA5FD012CF4EE7571B6A (StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* ___0_values, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_Format_mA8DBB4C2516B9723C5A41E6CB1E2FAF4BBE96DD8 (String_t* ___0_format, RuntimeObject* ___1_arg0, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameObject__ctor_m37D512B05D292F954792225E6C6EEE95293A9B88 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, String_t* ___0_name, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Transform_SetParent_m6677538B60246D958DD91F931C50F969CCBB5250 (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* ___0_p, const RuntimeMethod* method) ;
+inline AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* GameObject_AddComponent_TisAudioSource_t871AC2272F896738252F04EE949AEF5B241D3299_m0E8EFDB9B3D8DF1ADE10C56D3168A9C1BA19BF14 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method)
+{
+	return ((  AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* (*) (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))GameObject_AddComponent_TisRuntimeObject_m69B93700FACCF372F5753371C6E8FB780800B824_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_set_playOnAwake_m7EACC6ECEF12D7BA86A4E5A53603F1C8F9E11949 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, bool ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_set_spatialBlend_mCEE7A3E87A8C146E048B2CA3413FDC7BDB7BE001 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_set_dopplerLevel_mB9AC5164E5AF16ACECA3B8E29F5C8573C37E40D6 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_set_rolloffMode_m441D9552D8648D6040E66EE2C2650A79DC5E6FB4 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, int32_t ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_set_maxDistance_m4BF310D54761500A77A6C4841A0BBDBD09225813 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_set_spatialize_mDFA357EDCB0C59EF11F53C845F7ACBF6BF7F7B3C (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, bool ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_set_spatializePostEffects_m7CC219B7790E27667D49F4A36C8F62FFF399DA54 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, bool ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_Format_mFB7DA489BD99F4670881FF50EC017BFB0A5C0987 (String_t* ___0_format, RuntimeObject* ___1_arg0, RuntimeObject* ___2_arg1, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool AudioSource_get_isPlaying_mC203303F2F7146B2C056CB47B9391463FDF408FC (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_Stop_m318F17F17A147C77FF6E0A5A7A6BE057DB90F537 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* SpatialAudioManager_GetPooledSource_mF95273372310EF5DE9C98520554E8A92F6597576 (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Transform_set_position_mA1A817124BB41B685043DED2A9BA48CDF37C4156 (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_set_clip_mFF441895E274286C88D9C75ED5CA1B1B39528D70 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_set_volume_mD902BBDBBDE0E3C148609BF3C05096148E90F2C0 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Random_Range_m5236C99A7D8AE6AC9190592DC66016652A2D2494 (float ___0_minInclusive, float ___1_maxInclusive, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_set_pitch_mD14631FC99BF38AAFB356D9C45546BC16CF9E811 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void AudioSource_Play_m95DF07111C61D0E0F00257A00384D31531D590C3 (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool String_op_Equality_m030E1B219352228970A076136E455C4E568C02C1 (String_t* ___0_a, String_t* ___1_b, const RuntimeMethod* method) ;
+inline NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* Component_GetComponent_TisNavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F_m45B783D78932EFB8409019F84FED6DF3A492F16F (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method)
+{
+	return ((  NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* (*) (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3*, const RuntimeMethod*))Component_GetComponent_TisRuntimeObject_m7181F81CAEC2CF53F5D2BC79B7425C16E1F80D33_gshared)(__this, method);
+}
+inline EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* Component_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mDC0EB50988F6BD42EA26B034CA9F14306EE99CE5 (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method)
+{
+	return ((  EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* (*) (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3*, const RuntimeMethod*))Component_GetComponent_TisRuntimeObject_m7181F81CAEC2CF53F5D2BC79B7425C16E1F80D33_gshared)(__this, method);
+}
+inline Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* Component_GetComponentInChildren_TisRenderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF_m7CBAFA50AB995C9F53D6140718FCD31D7BEC7CC8 (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method)
+{
+	return ((  Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* (*) (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3*, const RuntimeMethod*))Component_GetComponentInChildren_TisRuntimeObject_mE483A27E876DE8E4E6901D6814837F81D7C42F65_gshared)(__this, method);
+}
+inline void Action_1__ctor_m9DC2953C55C4D7D4B7BEFE03D84DA1F9362D652C (Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* __this, RuntimeObject* ___0_object, intptr_t ___1_method, const RuntimeMethod* method)
+{
+	((  void (*) (Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*, RuntimeObject*, intptr_t, const RuntimeMethod*))Action_1__ctor_m2E1DFA67718FC1A0B6E5DFEB78831FFE9C059EB4_gshared)(__this, ___0_object, ___1_method, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHealth_add_OnDeath_m0319084DFD62F6604E7ED2AFE7A1BF48D79A50D1 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* GameObject_FindWithTag_mDF825E000B03F4F3DE9D4F2EBABC96BFA34B62E5 (String_t* ___0_tag, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool PatrolPath_get_HasWaypoints_m03A93E87E564013CFED58313E62D57F05839F93A (PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, int32_t ___0_next, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_UpdateIdle_mAB2B83F9E1734DB1007467DBB4A296E15DF5A681 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_UpdatePatrol_mB38BCDA3401A42984F22144A80072589FF905441 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_UpdateAlert_mA8466E278913490569EEE7C885BE33E5AE1D05C4 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_UpdateChase_mF5EEAB18C29279ECF3600017BFFFD025FAE5A29E (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_UpdateAttack_m348EDEFB050943BCD77F5153DF8D17901F9CFA1B (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHealth_remove_OnDeath_m2AB10C92639496946AC853CC4B4695964FEAE881 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NavMeshAgent_set_isStopped_mF374E697F39845233B84D8C4873DEABC3AA490DF (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, bool ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_SetColor_m515B85C3585EB87DEE44DA7D522F2DD734D0D7B1 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___0_c, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NavMeshAgent_set_speed_m820E45289B3AE7DEE16F2F4BF163EAC361E64646 (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_MoveToNextWaypoint_m27F16338E6C399F0CC25BF4588007DA36C3B33F5 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Behaviour_set_enabled_mF1DCFE60EB09E0529FE9476CA804A3AA2D72B16A (Behaviour_t01970CFBBA658497AE30F311C447DB0440BAB7FA* __this, bool ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_EnableRagdoll_m1699A0034475A33A9C99BB5D18BE8D8182FC2483 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_CheckPlayerDetection_mBF996630DFE33B77EB4468A707487FA8013A6371 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool NavMeshAgent_get_pathPending_mA806A4DC1E06CA32A4E7E71B6846B516EC8C2487 (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float NavMeshAgent_get_remainingDistance_m051C1B408E2740A95B5A5577C5EC7222311AA73A (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t PatrolPath_GetNextIndex_m0E1DB2644FFBCAB930E5630A21CBDDA07FD8BB20 (PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* __this, int32_t ___0_currentIndex, int32_t* ___1_direction, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Time_get_deltaTime_mC3195000401F0FD167DD2F948FD2BC58330D0865 (const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EnemyAI_CanSeePlayer_mBE7AD9861FE0452BDF7392EE22EEF9103F3FD55A (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_Distance_m2314DB9B8BD01157E013DF87BEA557375C7F9FF9_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_b, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_TurnTowards_m822C7561D8183F091E9EED1732759B39EC6ED1E1 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_target, float ___1_degreesPerSecond, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool NavMeshAgent_SetDestination_mD5D960933827F1F14B29CF4A3B6F305C064EBF46 (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_target, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_DealMeleeDamage_mEF43D2772CA51046D0258E4A10F1FFFB6D70828D (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EnemyAI_IsPlayerWithinHearing_m089FC6899D492FDACBD2BE96F9E42C54CBE213A4 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline (const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, float ___1_d, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_b, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Subtraction_mE42023FF80067CB44A1D4A27EB7CF2B24CABB828_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_b, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Transform_get_forward_mFCFACF7165FDAB21E80E384C494DF278386CEE2F (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_Angle_mB16906B482814C140FE5BA9D041D2DC11E42A68D_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_from, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_to, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_normalized_m736BBF65D5CDA7A18414370D15B4DFCC1E466F07_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t LayerMask_op_Implicit_m7F5A5B9D079281AC445ED39DEE1FCFA9D795810D (LayerMask_t97CB6BDADEDC3D6423C7BCFEA7F86DA2EC6241DB ___0_mask, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Physics_Raycast_mA782767AD4F149FBEA32C71460DFF061B7563688 (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_origin, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_direction, RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5* ___2_hitInfo, float ___3_maxDistance, int32_t ___4_layerMask, int32_t ___5_queryTriggerInteraction, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* RaycastHit_get_transform_m89DB7FCFC50E0213A37CBE089400064B8FA19155 (RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool Transform_IsChildOf_mFE071BE1E775E825401FE0A9B9BE49E39D256CEA (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* ___0_parent, const RuntimeMethod* method) ;
+inline Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* Component_GetComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m4B5CAD64B52D153BEA96432633CA9A45FA523DD8 (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method)
+{
+	return ((  Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* (*) (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3*, const RuntimeMethod*))Component_GetComponent_TisRuntimeObject_m7181F81CAEC2CF53F5D2BC79B7425C16E1F80D33_gshared)(__this, method);
+}
+inline Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* GameObject_AddComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m03A761629A3F71B0248F1B26EF612F592B757093 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method)
+{
+	return ((  Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* (*) (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))GameObject_AddComponent_TisRuntimeObject_m69B93700FACCF372F5753371C6E8FB780800B824_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Rigidbody_set_mass_mC7F886DEDB57C742A16F8B6B779F69AFE164CA4B (Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Rigidbody_set_linearDamping_m42BB8ADA5D26250A11256502D08BDC2DAB980242 (Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Rigidbody_set_angularDamping_m2763171B779080FC724173D87C34015ABED51671 (Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Rigidbody_set_isKinematic_m6C3FD3EA358DADA3B191F2449CF1C4F8B22695ED (Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* __this, bool ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Rigidbody_set_useGravity_m1B1B22E093F9DC92D7BEEBBE6B02642B3B6C4389 (Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* __this, bool ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Rigidbody_AddForce_mBDBC288D0E266BC1B62E3649B4FCE46E7EA9CCBC (Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_force, int32_t ___1_mode, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Transform_get_right_mC6DC057C23313802E2186A9E0DB760D795A758A4 (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Rigidbody_AddTorque_m7922F76C73DACF9E1610D72726C01709C14F0937 (Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_torque, int32_t ___1_mode, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 PatrolPath_GetWaypointPosition_m8AC767B08869BE51107A0F38013E06D01877EFD2 (PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* __this, int32_t ___0_index, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_zero_m0C1249C3F25B1C70EAD3CC8B31259975A457AE39_inline (const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool Vector3_op_Inequality_m9F170CDFBF1E490E559DA5D06D6547501A402BBF_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_lhs, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_rhs, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool Vector3_op_Equality_mCDCBB8D2EDC3D3BF20F31A25ACB34705D352B479_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_lhs, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_rhs, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 Quaternion_LookRotation_mDB2CCA75B8E1AB98104F2A6E1A1EA57D0D1298D7_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_forward, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 Transform_get_rotation_m32AF40CA0D50C797DA639A696F8EAEC7524C179C (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 Quaternion_RotateTowards_m50EF9D609C80CD423CDA856EA3481DE2004633A3_inline (Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 ___0_from, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 ___1_to, float ___2_maxDegreesDelta, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Transform_set_rotation_m61340DE74726CF0F9946743A727C4D444397331D (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* Renderer_get_material_m5BA2A00816C4CC66580D4B2E409CF10718C15656 (Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Material_set_color_m5C32DEBB215FF9EE35E7B575297D8C2F29CC2A2D (Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* __this, Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR LayerMask_t97CB6BDADEDC3D6423C7BCFEA7F86DA2EC6241DB LayerMask_op_Implicit_m01C8996A2CB2085328B9C33539C43139660D8222 (int32_t ___0_intVal, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Color__ctor_mCD6889CDE39F18704CD6EA8E2EFBFA48BA3E13B0_inline (Color_tD001788D726C3A7F1379BEED0260B9591F440C1F* __this, float ___0_r, float ___1_g, float ___2_b, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Delegate_t* Delegate_Combine_m1F725AEF318BE6F0426863490691A6F4606E7D00 (Delegate_t* ___0_a, Delegate_t* ___1_b, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Delegate_t* Delegate_Remove_m8B7DD5661308FA972E23CA1CC3FC9CEB355504E3 (Delegate_t* ___0_source, Delegate_t* ___1_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EnemyHealth_get_IsDead_m6EEAEDD6EFAF728FC9219967396DCAC4DAE8B0D4 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B (String_t* ___0_a, String_t* ___1_b, int32_t ___2_comparisonType, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Max_mF5379E63D2BBAC76D090748695D833934F8AD051_inline (float ___0_a, float ___1_b, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* String_Format_m918500C1EFB475181349A79989BB79BB36102894 (String_t* ___0_format, ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* ___1_args, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHealth_Die_m1B434F913AB18EFB0C07738597696A9A2F0E4A03 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, String_t* ___0_killingZone, const RuntimeMethod* method) ;
+inline void Action_1_Invoke_m690438AAE38F9762172E3AE0A33D0B42ACD35790_inline (Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* __this, String_t* ___0_obj, const RuntimeMethod* method)
+{
+	((  void (*) (Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*, String_t*, const RuntimeMethod*))Action_1_Invoke_mF2422B2DD29F74CE66F791C3F68E288EC7C3DB9E_gshared_inline)(__this, ___0_obj, method);
+}
+inline EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* Component_GetComponentInParent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mEE3CA4624CE256B40AC7BA8EDCBE6DB6E3F99952 (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method)
+{
+	return ((  EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* (*) (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3*, const RuntimeMethod*))Component_GetComponentInParent_TisRuntimeObject_m6746D6BB99912B1B509746C993906492F86CD119_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76* Collision_get_collider_mBB5A086C78FE4BE0589E216F899B611673ADD25D (Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* __this, const RuntimeMethod* method) ;
+inline HitDetector_tB650BCFC49DCC68A070FB537DFD32FEDDD9E770A* Component_GetComponent_TisHitDetector_tB650BCFC49DCC68A070FB537DFD32FEDDD9E770A_mD49FBEA885593B6CE7119B98A3DB0A28B45BD57A (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3* __this, const RuntimeMethod* method)
+{
+	return ((  HitDetector_tB650BCFC49DCC68A070FB537DFD32FEDDD9E770A* (*) (Component_t39FBE53E5EFCF4409111FB22C15FF73717632EC3*, const RuntimeMethod*))Component_GetComponent_TisRuntimeObject_m7181F81CAEC2CF53F5D2BC79B7425C16E1F80D33_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* Collision_get_rigidbody_mD7A14B9C8AA98352340D2AB0097FC3A424FBB81B (Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Rigidbody_get_linearVelocity_m367F5415641E5FB968440A91BAE2FCB8CAEA2C8C (Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float Rigidbody_get_mass_m09DDDDC437499B83B3BD0D77C134BFDC3E667054 (Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHealth_TakeDamage_mB3D060750DAC88EDFC77D977C92C7AAF2F2B7B9C (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, float ___0_amount, String_t* ___1_zone, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemySpawner_SpawnInitialEnemies_mD6D2530139F3AC71820ECA828F6CB316AC7F1427 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void MonoBehaviour_StopAllCoroutines_m872033451D42013A99867D09337490017E9ED318 (MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71* __this, const RuntimeMethod* method) ;
+inline Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60 List_1_GetEnumerator_mA843D26C63E5963415DFCA6E49DFA27AFD9C75E8 (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* __this, const RuntimeMethod* method)
+{
+	return ((  Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60 (*) (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B*, const RuntimeMethod*))List_1_GetEnumerator_mD8294A7FA2BEB1929487127D476F8EC1CDC23BFC_gshared)(__this, method);
+}
+inline void Enumerator_Dispose_m07D362A07C19B36C2FD1B4DC79DD99903D4DA95D (Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60* __this, const RuntimeMethod* method)
+{
+	((  void (*) (Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60*, const RuntimeMethod*))Enumerator_Dispose_mD9DC3E3C3697830A4823047AB29A77DBBB5ED419_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass9_0__ctor_mD838B455059A8ABACE17D74AC09EC92E2BF6DF35 (U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1* __this, const RuntimeMethod* method) ;
+inline GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* Enumerator_get_Current_m7236EBE1CFCB6533F96E030500D322B13D0CA5A4_inline (Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60* __this, const RuntimeMethod* method)
+{
+	return ((  GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* (*) (Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60*, const RuntimeMethod*))Enumerator_get_Current_m6330F15D18EE4F547C05DF9BF83C5EB710376027_gshared_inline)(__this, method);
+}
+inline EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* GameObject_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mF81DA6EF9A63C42BCE5B791ECED9E1D1DD51439B (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method)
+{
+	return ((  EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* (*) (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))GameObject_GetComponent_TisRuntimeObject_m6EAED4AA356F0F48288F67899E5958792395563B_gshared)(__this, method);
+}
+inline bool Enumerator_MoveNext_m96F4B0BD0A5485C8E8CC57D961DF6F1FA256AF27 (Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60* __this, const RuntimeMethod* method)
+{
+	return ((  bool (*) (Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60*, const RuntimeMethod*))Enumerator_MoveNext_mE921CC8F29FBBDE7CC3209A0ED0D921D58D00BCB_gshared)(__this, method);
+}
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_Min_m888083F74FF5655778F0403BB5E9608BEFDEA8CB_inline (int32_t ___0_a, int32_t ___1_b, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* EnemySpawner_GetSpawnPoint_mFEF2536274D77EC0125C109DACEC1B92CDEB530B (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, int32_t ___0_index, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemySpawner_SpawnEnemyAt_m464F5539B22ADBFF67C8779BC04C1FBD7A596F01 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* ___0_spawnPoint, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass12_0__ctor_mBA9256BB4E758E2C4B22390AE8520B9F6E225B37 (U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* __this, const RuntimeMethod* method) ;
+inline int32_t List_1_get_Count_m4C37ED2D928D63B80F55AF434730C2D64EEB9F22_inline (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* __this, const RuntimeMethod* method)
+{
+	return ((  int32_t (*) (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B*, const RuntimeMethod*))List_1_get_Count_m4407E4C389F22B8CEC282C15D56516658746C383_gshared_inline)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* EnemySpawner_CreateEnemyCapsule_m622E594D16A7D9A63B8BFD146FA586B908B1BFC3 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_position, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 ___1_rotation, const RuntimeMethod* method) ;
+inline void List_1_Add_m43FBF207375C6E06B8C45ECE614F9B8008FB686E_inline (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_item, const RuntimeMethod* method)
+{
+	((  void (*) (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B*, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))List_1_Add_mEBCF994CC3814631017F46A387B1A192ED6C85C7_gshared_inline)(__this, ___0_item, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleEnemyDeathU3Ed__13__ctor_mFE54500FFB5175DC0A6F3CCCDB71D3D9A40D3925 (U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654* __this, int32_t ___0_U3CU3E1__state, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void GameObject_set_tag_m0A41528AFD8C83E1CEC5D769921159897CDD2B24 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, String_t* ___0_value, const RuntimeMethod* method) ;
+inline CapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808* GameObject_AddComponent_TisCapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808_mE9815ABBF56D4B7806C63F85A30AE9BBDE927BCF (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method)
+{
+	return ((  CapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808* (*) (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))GameObject_AddComponent_TisRuntimeObject_m69B93700FACCF372F5753371C6E8FB780800B824_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CapsuleCollider_set_height_m5DAE3DC5AD851E30C5A29AC7A22F36BE1E205BBB (CapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CapsuleCollider_set_radius_mB301C0086FE0D251683512184B0F6DDE264BA985 (CapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Vector3__ctor_m376936E6B999EF1ECBE57D990A386303E2283DE0_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, float ___0_x, float ___1_y, float ___2_z, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void CapsuleCollider_set_center_m242D92DAEF25887C6A87A0777E4E624C0A431A2E (CapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Rigidbody_set_constraints_mE81BF0DAEB980E320538231E092CA4663885A9A3 (Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* __this, int32_t ___0_value, const RuntimeMethod* method) ;
+inline NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* GameObject_AddComponent_TisNavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F_m3397A16630528923E44BB23514E77B32D608DDDF (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method)
+{
+	return ((  NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* (*) (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))GameObject_AddComponent_TisRuntimeObject_m69B93700FACCF372F5753371C6E8FB780800B824_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NavMeshAgent_set_height_mD2993FBF9895084E9F92025808E3307B92E057DA (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NavMeshAgent_set_radius_m34F08DD2BD01A5DDA17FE1B02EE03D361B44F1AC (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NavMeshAgent_set_baseOffset_m6BB6CF6115E987B0A6268D708148723119C9B122 (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NavMeshAgent_set_angularSpeed_mD2AE9EE187EF1C45F519576B5FC8581DC6B7D683 (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NavMeshAgent_set_acceleration_mEAA92D7837B8D726891846DBBB6114DB13CD597E (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NavMeshAgent_set_stoppingDistance_m288A6280B55AAFF8578286747E19AF409C7C177F (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, float ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NavMeshAgent_set_autoBraking_m3BBDC74E6ADC3EB8BE0381C97B1D8715C1BC5283 (NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* __this, bool ___0_value, const RuntimeMethod* method) ;
+inline EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* GameObject_AddComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mE06661A0877DE97B98EED1F873BE29EA8EDD31A9 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method)
+{
+	return ((  EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* (*) (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))GameObject_AddComponent_TisRuntimeObject_m69B93700FACCF372F5753371C6E8FB780800B824_gshared)(__this, method);
+}
+inline EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* GameObject_AddComponent_TisEnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_m56EB203968AF4F76F425B8329DDCBED0BB1A5149 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method)
+{
+	return ((  EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* (*) (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))GameObject_AddComponent_TisRuntimeObject_m69B93700FACCF372F5753371C6E8FB780800B824_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* GameObject_CreatePrimitive_m13C0A691E679A83DD595913200A1DD9A906EB47B (int32_t ___0_type, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Object_set_name_mC79E6DC8FFD72479C90F0C4CC7F42A0FEAF5AE47 (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* __this, String_t* ___0_value, const RuntimeMethod* method) ;
+inline Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76* GameObject_GetComponent_TisCollider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76_m4CB0FC4E59CE6C91F1106739EF364208A63E2597 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method)
+{
+	return ((  Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76* (*) (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))GameObject_GetComponent_TisRuntimeObject_m6EAED4AA356F0F48288F67899E5958792395563B_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Transform_set_localPosition_mDE1C997F7D79C0885210B7732B4BA50EE7D73134 (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Transform_set_localScale_mBA79E811BAF6C47B80FF76414C12B47B3CD03633 (Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemySpawner_ApplyEnemyMaterial_m3F76E6B5C1111F93087998E80BE5894A711982F8 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_go, Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___1_color, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_one_mC9B289F1E15C42C597180C9FE6FB492495B51D02_inline (const RuntimeMethod* method) ;
+inline EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4* GameObject_AddComponent_TisEnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4_m6E746025044A207217045649EBEE37C078A182DA (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method)
+{
+	return ((  EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4* (*) (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))GameObject_AddComponent_TisRuntimeObject_m69B93700FACCF372F5753371C6E8FB780800B824_gshared)(__this, method);
+}
+inline Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* GameObject_GetComponent_TisRenderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF_m026EB44DB6238F13E2AFBECF1FBBE924CB1B040A (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* __this, const RuntimeMethod* method)
+{
+	return ((  Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* (*) (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))GameObject_GetComponent_TisRuntimeObject_m6EAED4AA356F0F48288F67899E5958792395563B_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Shader_tADC867D36B7876EE22427FAA2CE485105F4EE692* Shader_Find_m183AA54F78320212DDEC811592F98456898A41C5 (String_t* ___0_name, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Material__ctor_m7FDF47105D66D19591BE505A0C42B0F90D88C9BF (Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* __this, Shader_tADC867D36B7876EE22427FAA2CE485105F4EE692* ___0_shader, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Renderer_set_material_m21E88977071E0A914D62F3D9CFF0193B3117C45A (Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* __this, Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* ___0_value, const RuntimeMethod* method) ;
+inline void List_1__ctor_m447372C1EF7141193B93090A77395B786C72C7BC (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* __this, const RuntimeMethod* method)
+{
+	((  void (*) (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B*, const RuntimeMethod*))List_1__ctor_m7F078BB342729BDF11327FD89D7872265328F690_gshared)(__this, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Object__ctor_mE837C6B9FA8C6D5D109F4B2EC885D79919AC0EA2 (RuntimeObject* __this, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* EnemySpawner_HandleEnemyDeath_m7A1BDF397FEE4B82282D2A25A8A5808C30A5CB79 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_enemy, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Coroutine_t85EA685566A254C23F3FD77AB5BDFFFF8799596B* MonoBehaviour_StartCoroutine_m4CAFF732AA28CD3BDC5363B44A863575530EC812 (MonoBehaviour_t532A11E69716D348D8AA7F854AFCBFCB8AD17F71* __this, RuntimeObject* ___0_routine, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void WaitForSeconds__ctor_m579F95BADEDBAB4B3A7E302C6EE3995926EF2EFC (WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3* __this, float ___0_seconds, const RuntimeMethod* method) ;
+inline bool List_1_Remove_mCCE85D4D5326536C4B214C73D07030F4CCD18485 (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_item, const RuntimeMethod* method)
+{
+	return ((  bool (*) (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B*, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*, const RuntimeMethod*))List_1_Remove_m4DFA48F4CEB9169601E75FC28517C5C06EFA5AD7_gshared)(__this, ___0_item, method);
+}
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void Object_Destroy_m064F2A066491D2DC4FFCFBDBE5FCFFB807A04436 (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C* ___0_obj, float ___1_t, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_Max_m7FA442918DE37E3A00106D1F2E789D65829792B8_inline (int32_t ___0_a, int32_t ___1_b, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void NotSupportedException__ctor_m1398D0CDE19B36AA3DE9392879738C1EA2439CDF (NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_get_sqrMagnitude_m43C27DEC47C4811FB30AB474FF2131A963B66FC8_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_Dot_m9B5EBE36643126708DB3F444C59C11FA30803DBB_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* ___0_lhs, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* ___1_rhs, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Clamp_mEB9AEA827D27D20FCC787F7375156AF46BB12BBF_inline (float ___0_value, float ___1_min, float ___2_max, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_Normalize_m1DE89849FE2019B6AA0031306896F3B800849399_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* ___0_value, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 Quaternion_Internal_LookRotation_m489E6A5E916949FFE91C0B11A60C6016D996C1E0 (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* ___0_forward, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* ___1_upwards, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Quaternion_Angle_m6F61044E1B167471D24A2B26A85AF2C064F46BC9_inline (Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___0_a, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___1_b, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Min_m747CA71A9483CDB394B13BD0AD048EE17E48FFE4_inline (float ___0_a, float ___1_b, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 Quaternion_SlerpUnclamped_m6EE729E421AF8BF8672942540951427AF8AC856C_inline (Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___0_a, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___1_b, float ___2_t, const RuntimeMethod* method) ;
+inline void List_1_AddWithResize_m79A9BF770BEF9C06BE40D5401E55E375F2726CC4 (List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D* __this, RuntimeObject* ___0_item, const RuntimeMethod* method)
+{
+	((  void (*) (List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D*, RuntimeObject*, const RuntimeMethod*))List_1_AddWithResize_m79A9BF770BEF9C06BE40D5401E55E375F2726CC4_gshared)(__this, ___0_item, method);
+}
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Quaternion_Dot_m80E67A0F9F1FD9EAD0C8EEF7D5396ADF612FA105_inline (Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___0_a, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___1_b, const RuntimeMethod* method) ;
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool Quaternion_IsEqualUsingDot_m9C672201C918C2D1E739F559DBE4406F95997CBD_inline (float ___0_dot, const RuntimeMethod* method) ;
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 Quaternion_Internal_SlerpUnclamped_m4EFC678DD99CE1E8E8AACF1A647558B75E2C231A (Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___0_a, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___1_b, float ___2_t, const RuntimeMethod* method) ;
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49324
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ImpactSound_OnCollisionEnter_m913197533BCADE3E2035ABA4C49ABC620FA2FAA1 (ImpactSound_t69F9A4B2C70A8CFB36B78FA08779E8DF509D6B86* __this, Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* ___0_collision, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&SurfaceType_tD336337593CF46AAC86CC3C88E525A676B26D871_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral26FFDB5076F83B69986BBE5BF0BFE30482774198);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral3115216612A13AA630942F3107B454951F344C9C);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral5E483B72D71C8540629685AE80C4F268D529CD74);
+		s_Il2CppMethodInitialized = true;
+	}
+	float V_0 = 0.0f;
+	float V_1 = 0.0f;
+	AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* V_2 = NULL;
+	float V_3 = 0.0f;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_4;
+	memset((&V_4), 0, sizeof(V_4));
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_5;
+	memset((&V_5), 0, sizeof(V_5));
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 G_B9_0;
+	memset((&G_B9_0), 0, sizeof(G_B9_0));
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:81>
+		Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* L_0 = ___0_collision;
+		NullCheck(L_0);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_1;
+		L_1 = Collision_get_impulse_mBA2EDD39B7F495FF335FB867B244253602C7EF5D(L_0, NULL);
+		V_5 = L_1;
+		float L_2;
+		L_2 = Vector3_get_magnitude_mF0D6017E90B345F1F52D1CC564C640F1A847AF2D_inline((&V_5), NULL);
+		V_0 = L_2;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:82>
+		float L_3 = V_0;
+		float L_4 = __this->____minImpulseThreshold;
+		if ((!(((float)L_3) < ((float)L_4))))
+		{
+			goto IL_001a;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:83>
+		return;
+	}
+
+IL_001a:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:85>
+		float L_5;
+		L_5 = Time_get_time_m3A271BB1B20041144AC5B7863B71AB1F0150374B(NULL);
+		V_1 = L_5;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:86>
+		float L_6 = V_1;
+		float L_7 = __this->____lastPlayTime;
+		float L_8 = __this->____cooldown;
+		if ((!(((float)((float)il2cpp_codegen_subtract(L_6, L_7))) < ((float)L_8))))
+		{
+			goto IL_0031;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:87>
+		return;
+	}
+
+IL_0031:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:89>
+		int32_t L_9 = __this->____surfaceType;
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_10;
+		L_10 = ImpactSound_PickClip_mDB5E9CBCBDF587E0EFA2B7618EBD2AD304D358FE(__this, L_9, NULL);
+		V_2 = L_10;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:90>
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_11 = V_2;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_12;
+		L_12 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_11, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_12)
+		{
+			goto IL_0072;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:92>
+		int32_t L_13 = __this->____surfaceType;
+		int32_t L_14 = L_13;
+		RuntimeObject* L_15 = Box(SurfaceType_tD336337593CF46AAC86CC3C88E525A676B26D871_il2cpp_TypeInfo_var, &L_14);
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_16;
+		L_16 = Component_get_gameObject_m57AEFBB14DB39EC476F740BA000E170355DE691B(__this, NULL);
+		NullCheck(L_16);
+		String_t* L_17;
+		L_17 = Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392(L_16, NULL);
+		String_t* L_18;
+		L_18 = String_Format_mA0534D6E2AE4D67A6BD8D45B3321323930EB930C(_stringLiteral3115216612A13AA630942F3107B454951F344C9C, _stringLiteral26FFDB5076F83B69986BBE5BF0BFE30482774198, L_15, L_17, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(L_18, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:93>
+		return;
+	}
+
+IL_0072:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:96>
+		float L_19 = V_0;
+		float L_20 = __this->____maxImpulseForFullVolume;
+		float L_21;
+		L_21 = Mathf_Clamp01_mA7E048DBDA832D399A581BE4D6DED9FA44CE0F14_inline(((float)(L_19/L_20)), NULL);
+		float L_22 = __this->____maxVolume;
+		V_3 = ((float)il2cpp_codegen_multiply(L_21, L_22));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:99>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:100>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:101>
+		Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* L_23 = ___0_collision;
+		NullCheck(L_23);
+		ContactPointU5BU5D_t3570603E8D0685B71B3D8BA07031674B00C5E411* L_24;
+		L_24 = Collision_get_contacts_m2E8E27E0399230DFA4303A4F4D81C1BD55CBC473(L_23, NULL);
+		NullCheck(L_24);
+		if ((((RuntimeArray*)L_24)->max_length))
+		{
+			goto IL_009d;
+		}
+	}
+	{
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_25;
+		L_25 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_25);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_26;
+		L_26 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_25, NULL);
+		G_B9_0 = L_26;
+		goto IL_00ae;
+	}
+
+IL_009d:
+	{
+		Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* L_27 = ___0_collision;
+		NullCheck(L_27);
+		ContactPointU5BU5D_t3570603E8D0685B71B3D8BA07031674B00C5E411* L_28;
+		L_28 = Collision_get_contacts_m2E8E27E0399230DFA4303A4F4D81C1BD55CBC473(L_27, NULL);
+		NullCheck(L_28);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_29;
+		L_29 = ContactPoint_get_point_mCCDFDACC5D8DB469898060A56A3CC45132911208(((L_28)->GetAddressAt(static_cast<il2cpp_array_size_t>(0))), NULL);
+		G_B9_0 = L_29;
+	}
+
+IL_00ae:
+	{
+		V_4 = G_B9_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:103>
+		SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* L_30;
+		L_30 = SpatialAudioManager_get_Instance_m84A958239B96EC120DEA66398D58186D0337C84D(NULL);
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_31;
+		L_31 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_30, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_31)
+		{
+			goto IL_00d3;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:105>
+		SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* L_32;
+		L_32 = SpatialAudioManager_get_Instance_m84A958239B96EC120DEA66398D58186D0337C84D(NULL);
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_33 = V_2;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_34 = V_4;
+		float L_35 = V_3;
+		float L_36 = __this->____pitchVariance;
+		NullCheck(L_32);
+		SpatialAudioManager_PlayAtPosition_m5A0F006EE2FFD3C29D23FC19E706D39345677265(L_32, L_33, L_34, L_35, L_36, NULL);
+		goto IL_00e6;
+	}
+
+IL_00d3:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:110>
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_37 = V_2;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_38 = V_4;
+		float L_39 = V_3;
+		AudioSource_PlayClipAtPoint_mF9D129487C356127ADA3AB5C0A67C7D00F26E3DD(L_37, L_38, L_39, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:111>
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteral5E483B72D71C8540629685AE80C4F268D529CD74, NULL);
+	}
+
+IL_00e6:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:114>
+		float L_40 = V_1;
+		__this->____lastPlayTime = L_40;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:115>
+		return;
+	}
+}
+// Method Definition Index: 49325
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* ImpactSound_PickClip_mDB5E9CBCBDF587E0EFA2B7618EBD2AD304D358FE (ImpactSound_t69F9A4B2C70A8CFB36B78FA08779E8DF509D6B86* __this, int32_t ___0_surface, const RuntimeMethod* method) 
+{
+	AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* V_0 = NULL;
+	AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* V_1 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:123>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:124>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:125>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:126>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:127>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:128>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:129>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:130>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:131>
+		int32_t L_0 = ___0_surface;
+		switch (L_0)
+		{
+			case 0:
+			{
+				goto IL_001c;
+			}
+			case 1:
+			{
+				goto IL_0025;
+			}
+			case 2:
+			{
+				goto IL_002e;
+			}
+			case 3:
+			{
+				goto IL_0037;
+			}
+			case 4:
+			{
+				goto IL_0040;
+			}
+		}
+	}
+	{
+		goto IL_0049;
+	}
+
+IL_001c:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:125>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_1 = __this->____stoneClips;
+		V_1 = L_1;
+		goto IL_0050;
+	}
+
+IL_0025:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:126>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_2 = __this->____metalClips;
+		V_1 = L_2;
+		goto IL_0050;
+	}
+
+IL_002e:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:127>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_3 = __this->____woodClips;
+		V_1 = L_3;
+		goto IL_0050;
+	}
+
+IL_0037:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:128>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_4 = __this->____fleshClips;
+		V_1 = L_4;
+		goto IL_0050;
+	}
+
+IL_0040:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:129>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_5 = __this->____concreteClips;
+		V_1 = L_5;
+		goto IL_0050;
+	}
+
+IL_0049:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:130>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_6 = __this->____stoneClips;
+		V_1 = L_6;
+	}
+
+IL_0050:
+	{
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_7 = V_1;
+		V_0 = L_7;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:133>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_8 = V_0;
+		if (!L_8)
+		{
+			goto IL_0059;
+		}
+	}
+	{
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_9 = V_0;
+		NullCheck(L_9);
+		if ((((RuntimeArray*)L_9)->max_length))
+		{
+			goto IL_005b;
+		}
+	}
+
+IL_0059:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:134>
+		return (AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20*)NULL;
+	}
+
+IL_005b:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:136>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_10 = V_0;
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_11 = V_0;
+		NullCheck(L_11);
+		int32_t L_12;
+		L_12 = Random_Range_m6763D9767F033357F88B6637F048F4ACA4123B68(0, ((int32_t)(((RuntimeArray*)L_11)->max_length)), NULL);
+		NullCheck(L_10);
+		int32_t L_13 = L_12;
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_14 = (L_10)->GetAt(static_cast<il2cpp_array_size_t>(L_13));
+		return L_14;
+	}
+}
+// Method Definition Index: 49326
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ImpactSound_PlayImpactAt_m143D285379CE6D0DB5B2F16B220A8DE35F1C5B72 (ImpactSound_t69F9A4B2C70A8CFB36B78FA08779E8DF509D6B86* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_worldPosition, float ___1_volume, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&SurfaceType_tD336337593CF46AAC86CC3C88E525A676B26D871_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral26FFDB5076F83B69986BBE5BF0BFE30482774198);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral31618832D1930B166621C70B8066B7FE5DFC2242);
+		s_Il2CppMethodInitialized = true;
+	}
+	AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* V_0 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:150>
+		int32_t L_0 = __this->____surfaceType;
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_1;
+		L_1 = ImpactSound_PickClip_mDB5E9CBCBDF587E0EFA2B7618EBD2AD304D358FE(__this, L_0, NULL);
+		V_0 = L_1;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:151>
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_2 = V_0;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_3;
+		L_3 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_2, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_3)
+		{
+			goto IL_0041;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:153>
+		int32_t L_4 = __this->____surfaceType;
+		int32_t L_5 = L_4;
+		RuntimeObject* L_6 = Box(SurfaceType_tD336337593CF46AAC86CC3C88E525A676B26D871_il2cpp_TypeInfo_var, &L_5);
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_7;
+		L_7 = Component_get_gameObject_m57AEFBB14DB39EC476F740BA000E170355DE691B(__this, NULL);
+		NullCheck(L_7);
+		String_t* L_8;
+		L_8 = Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392(L_7, NULL);
+		String_t* L_9;
+		L_9 = String_Format_mA0534D6E2AE4D67A6BD8D45B3321323930EB930C(_stringLiteral31618832D1930B166621C70B8066B7FE5DFC2242, _stringLiteral26FFDB5076F83B69986BBE5BF0BFE30482774198, L_6, L_8, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(L_9, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:154>
+		return;
+	}
+
+IL_0041:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:157>
+		SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* L_10;
+		L_10 = SpatialAudioManager_get_Instance_m84A958239B96EC120DEA66398D58186D0337C84D(NULL);
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_11;
+		L_11 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_10, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_11)
+		{
+			goto IL_0062;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:158>
+		SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* L_12;
+		L_12 = SpatialAudioManager_get_Instance_m84A958239B96EC120DEA66398D58186D0337C84D(NULL);
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_13 = V_0;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_14 = ___0_worldPosition;
+		float L_15 = ___1_volume;
+		float L_16 = __this->____pitchVariance;
+		NullCheck(L_12);
+		SpatialAudioManager_PlayAtPosition_m5A0F006EE2FFD3C29D23FC19E706D39345677265(L_12, L_13, L_14, L_15, L_16, NULL);
+		return;
+	}
+
+IL_0062:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:160>
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_17 = V_0;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_18 = ___0_worldPosition;
+		float L_19 = ___1_volume;
+		AudioSource_PlayClipAtPoint_mF9D129487C356127ADA3AB5C0A67C7D00F26E3DD(L_17, L_18, L_19, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:161>
+		return;
+	}
+}
+// Method Definition Index: 49327
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ImpactSound_SetSurfaceType_mA196CDCA20B66CF58CAF2E7755FA2FC5F19F89BE (ImpactSound_t69F9A4B2C70A8CFB36B78FA08779E8DF509D6B86* __this, int32_t ___0_newType, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:168>
+		int32_t L_0 = ___0_newType;
+		__this->____surfaceType = L_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:169>
+		return;
+	}
+}
+// Method Definition Index: 49328
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t ImpactSound_get_CurrentSurface_m18DE45050CB51079A3A0C990CDC1912F66C29207 (ImpactSound_t69F9A4B2C70A8CFB36B78FA08779E8DF509D6B86* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:171>
+		int32_t L_0 = __this->____surfaceType;
+		return L_0;
+	}
+}
+// Method Definition Index: 49329
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void ImpactSound__ctor_mA24B227334895F93FDA4C7976824C50FAAFA9ED2 (ImpactSound_t69F9A4B2C70A8CFB36B78FA08779E8DF509D6B86* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:38>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_0 = (AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31*)(AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31*)SZArrayNew(AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31_il2cpp_TypeInfo_var, (uint32_t)0);
+		__this->____stoneClips = L_0;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____stoneClips), (void*)L_0);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:41>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_1 = (AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31*)(AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31*)SZArrayNew(AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31_il2cpp_TypeInfo_var, (uint32_t)0);
+		__this->____metalClips = L_1;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____metalClips), (void*)L_1);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:44>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_2 = (AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31*)(AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31*)SZArrayNew(AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31_il2cpp_TypeInfo_var, (uint32_t)0);
+		__this->____woodClips = L_2;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____woodClips), (void*)L_2);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:47>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_3 = (AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31*)(AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31*)SZArrayNew(AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31_il2cpp_TypeInfo_var, (uint32_t)0);
+		__this->____fleshClips = L_3;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____fleshClips), (void*)L_3);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:50>
+		AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31* L_4 = (AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31*)(AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31*)SZArrayNew(AudioClipU5BU5D_t916722468F7EDCFA833318C35CD7D41097D75D31_il2cpp_TypeInfo_var, (uint32_t)0);
+		__this->____concreteClips = L_4;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____concreteClips), (void*)L_4);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:54>
+		__this->____minImpulseThreshold = (0.5f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:57>
+		__this->____maxImpulseForFullVolume = (10.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:60>
+		__this->____maxVolume = (1.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:63>
+		__this->____pitchVariance = (0.0799999982f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:67>
+		__this->____cooldown = (0.100000001f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/ImpactSound.cs:73>
+		__this->____lastPlayTime = (-999.0f);
+		MonoBehaviour__ctor_m592DB0105CA0BC97AA1C5F4AD27B12D68A3B7C1E(__this, NULL);
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49330
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* SpatialAudioManager_get_Instance_m84A958239B96EC120DEA66398D58186D0337C84D (const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_FindAnyObjectByType_TisSpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_m5500DAAC1FC72955414E571B770EE8B8B74A99BB_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralFE684BD539F289C65821380D14428165A10B6F33);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:51>
+		SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* L_0 = ((SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_StaticFields*)il2cpp_codegen_static_fields_for(SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var))->____instance;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_002e;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:53>
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* L_2;
+		L_2 = Object_FindAnyObjectByType_TisSpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_m5500DAAC1FC72955414E571B770EE8B8B74A99BB(Object_FindAnyObjectByType_TisSpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_m5500DAAC1FC72955414E571B770EE8B8B74A99BB_RuntimeMethod_var);
+		((SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_StaticFields*)il2cpp_codegen_static_fields_for(SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var))->____instance = L_2;
+		Il2CppCodeGenWriteBarrier((void**)(&((SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_StaticFields*)il2cpp_codegen_static_fields_for(SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var))->____instance), (void*)L_2);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:54>
+		SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* L_3 = ((SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_StaticFields*)il2cpp_codegen_static_fields_for(SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var))->____instance;
+		bool L_4;
+		L_4 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_3, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_4)
+		{
+			goto IL_002e;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:55>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:56>
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteralFE684BD539F289C65821380D14428165A10B6F33, NULL);
+	}
+
+IL_002e:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:58>
+		SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* L_5 = ((SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_StaticFields*)il2cpp_codegen_static_fields_for(SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var))->____instance;
+		return L_5;
+	}
+}
+// Method Definition Index: 49331
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpatialAudioManager_Awake_mE04C2A8C3733808C885323504E605EA5AE52BC83 (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralE450F1E0584599D3625983CE6C6F78FB5694BA43);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:75>
+		SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* L_0 = ((SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_StaticFields*)il2cpp_codegen_static_fields_for(SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var))->____instance;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_0030;
+		}
+	}
+	{
+		SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* L_2 = ((SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_StaticFields*)il2cpp_codegen_static_fields_for(SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var))->____instance;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_3;
+		L_3 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_2, __this, NULL);
+		if (!L_3)
+		{
+			goto IL_0030;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:77>
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteralE450F1E0584599D3625983CE6C6F78FB5694BA43, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:78>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_4;
+		L_4 = Component_get_gameObject_m57AEFBB14DB39EC476F740BA000E170355DE691B(__this, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		Object_Destroy_mE97D0A766419A81296E8D4E5C23D01D3FE91ACBB(L_4, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:79>
+		return;
+	}
+
+IL_0030:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:82>
+		((SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_StaticFields*)il2cpp_codegen_static_fields_for(SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var))->____instance = __this;
+		Il2CppCodeGenWriteBarrier((void**)(&((SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_StaticFields*)il2cpp_codegen_static_fields_for(SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376_il2cpp_TypeInfo_var))->____instance), (void*)__this);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:83>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_5;
+		L_5 = Component_get_gameObject_m57AEFBB14DB39EC476F740BA000E170355DE691B(__this, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		Object_DontDestroyOnLoad_m4B70C3AEF886C176543D1295507B6455C9DCAEA7(L_5, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:85>
+		SpatialAudioManager_ConfigureSpatializer_m3EDFBB3262BA64FC246D9EEA40FE1E2053FC49A3(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:86>
+		SpatialAudioManager_BuildPool_m5EBB856B72ADC463CFCEDE4D41686360A969C61B(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:87>
+		return;
+	}
+}
+// Method Definition Index: 49332
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpatialAudioManager_ConfigureSpatializer_m3EDFBB3262BA64FC246D9EEA40FE1E2053FC49A3 (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral24D8C8FB5088AEE86AC77B2843E64DD945326575);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral49658256427F2D74D5B9C1283A6BAB8E8303FC6E);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral88FEA5FAB5C7C8AC8B8FEE67EC3C8D28E0526A16);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralB01C9C3D341E46C527D16AC41798F2041A4789B6);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralC62C64F00567C5368CAE37F4E64E1E82FF785677);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralEA7287BFB4060DA22A828E0B42CDAE1A80BBD7AE);
+		s_Il2CppMethodInitialized = true;
+	}
+	String_t* V_0 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:95>
+		String_t* L_0;
+		L_0 = AudioSettings_GetSpatializerPluginName_m60C2C3FA09CB0422D1EDAE5185F20BF01689BF00(NULL);
+		V_0 = L_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:96>
+		String_t* L_1 = V_0;
+		String_t* L_2;
+		L_2 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(_stringLiteral24D8C8FB5088AEE86AC77B2843E64DD945326575, L_1, _stringLiteralC62C64F00567C5368CAE37F4E64E1E82FF785677, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_2, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:98>
+		String_t* L_3 = V_0;
+		bool L_4;
+		L_4 = String_IsNullOrEmpty_mEA9E3FB005AC28FE02E69FCF95A7B8456192B478(L_3, NULL);
+		if (L_4)
+		{
+			goto IL_0031;
+		}
+	}
+	{
+		String_t* L_5 = V_0;
+		String_t* L_6 = __this->____expectedSpatializerPlugin;
+		bool L_7;
+		L_7 = String_op_Inequality_m8C940F3CFC42866709D7CA931B3D77B4BE94BCB6(L_5, L_6, NULL);
+		if (!L_7)
+		{
+			goto IL_0067;
+		}
+	}
+
+IL_0031:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:102>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:103>
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_8 = (StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248*)(StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248*)SZArrayNew(StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248_il2cpp_TypeInfo_var, (uint32_t)5);
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_9 = L_8;
+		NullCheck(L_9);
+		(L_9)->SetAt(static_cast<il2cpp_array_size_t>(0), (String_t*)_stringLiteral88FEA5FAB5C7C8AC8B8FEE67EC3C8D28E0526A16);
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_10 = L_9;
+		String_t* L_11 = __this->____expectedSpatializerPlugin;
+		NullCheck(L_10);
+		(L_10)->SetAt(static_cast<il2cpp_array_size_t>(1), (String_t*)L_11);
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_12 = L_10;
+		NullCheck(L_12);
+		(L_12)->SetAt(static_cast<il2cpp_array_size_t>(2), (String_t*)_stringLiteralEA7287BFB4060DA22A828E0B42CDAE1A80BBD7AE);
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_13 = L_12;
+		String_t* L_14 = V_0;
+		NullCheck(L_13);
+		(L_13)->SetAt(static_cast<il2cpp_array_size_t>(3), (String_t*)L_14);
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_15 = L_13;
+		NullCheck(L_15);
+		(L_15)->SetAt(static_cast<il2cpp_array_size_t>(4), (String_t*)_stringLiteralB01C9C3D341E46C527D16AC41798F2041A4789B6);
+		String_t* L_16;
+		L_16 = String_Concat_m647EBF831F54B6DF7D5AFA5FD012CF4EE7571B6A(L_15, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(L_16, NULL);
+		return;
+	}
+
+IL_0067:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:107>
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(_stringLiteral49658256427F2D74D5B9C1283A6BAB8E8303FC6E, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:109>
+		return;
+	}
+}
+// Method Definition Index: 49333
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpatialAudioManager_BuildPool_m5EBB856B72ADC463CFCEDE4D41686360A969C61B (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_AddComponent_TisAudioSource_t871AC2272F896738252F04EE949AEF5B241D3299_m0E8EFDB9B3D8DF1ADE10C56D3168A9C1BA19BF14_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_t76FEDD663AB33C991A9C9A23129337651094216F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral055AB6080228A5CF6C4CE79E77F979B90F4FE831);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral48B109C838692AB2051BE9E1B3780D1CD2AD0E02);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral691AA6B0FFA350D9BBFA796ED4A47AEBBEC79FC8);
+		s_Il2CppMethodInitialized = true;
+	}
+	int32_t V_0 = 0;
+	AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* V_1 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:117>
+		int32_t L_0 = __this->____poolSize;
+		AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2* L_1 = (AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2*)(AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2*)SZArrayNew(AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2_il2cpp_TypeInfo_var, (uint32_t)L_0);
+		__this->____pool = L_1;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____pool), (void*)L_1);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:118>
+		V_0 = 0;
+		goto IL_0093;
+	}
+
+IL_0015:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:120>
+		int32_t L_2 = V_0;
+		int32_t L_3 = L_2;
+		RuntimeObject* L_4 = Box(il2cpp_defaults.int32_class, &L_3);
+		String_t* L_5;
+		L_5 = String_Format_mA8DBB4C2516B9723C5A41E6CB1E2FAF4BBE96DD8(_stringLiteral055AB6080228A5CF6C4CE79E77F979B90F4FE831, L_4, NULL);
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_6 = (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*)il2cpp_codegen_object_new(GameObject_t76FEDD663AB33C991A9C9A23129337651094216F_il2cpp_TypeInfo_var);
+		GameObject__ctor_m37D512B05D292F954792225E6C6EEE95293A9B88(L_6, L_5, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:121>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_7 = L_6;
+		NullCheck(L_7);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_8;
+		L_8 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_7, NULL);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_9;
+		L_9 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_8);
+		Transform_SetParent_m6677538B60246D958DD91F931C50F969CCBB5250(L_8, L_9, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:122>
+		NullCheck(L_7);
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_10;
+		L_10 = GameObject_AddComponent_TisAudioSource_t871AC2272F896738252F04EE949AEF5B241D3299_m0E8EFDB9B3D8DF1ADE10C56D3168A9C1BA19BF14(L_7, GameObject_AddComponent_TisAudioSource_t871AC2272F896738252F04EE949AEF5B241D3299_m0E8EFDB9B3D8DF1ADE10C56D3168A9C1BA19BF14_RuntimeMethod_var);
+		V_1 = L_10;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:124>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_11 = V_1;
+		NullCheck(L_11);
+		AudioSource_set_playOnAwake_m7EACC6ECEF12D7BA86A4E5A53603F1C8F9E11949(L_11, (bool)0, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:125>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_12 = V_1;
+		float L_13 = __this->____defaultSpatialBlend;
+		NullCheck(L_12);
+		AudioSource_set_spatialBlend_mCEE7A3E87A8C146E048B2CA3413FDC7BDB7BE001(L_12, L_13, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:126>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_14 = V_1;
+		float L_15 = __this->____dopplerLevel;
+		NullCheck(L_14);
+		AudioSource_set_dopplerLevel_mB9AC5164E5AF16ACECA3B8E29F5C8573C37E40D6(L_14, L_15, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:127>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_16 = V_1;
+		int32_t L_17 = __this->____rolloffMode;
+		NullCheck(L_16);
+		AudioSource_set_rolloffMode_m441D9552D8648D6040E66EE2C2650A79DC5E6FB4(L_16, L_17, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:128>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_18 = V_1;
+		float L_19 = __this->____maxDistance;
+		NullCheck(L_18);
+		AudioSource_set_maxDistance_m4BF310D54761500A77A6C4841A0BBDBD09225813(L_18, L_19, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:129>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_20 = V_1;
+		NullCheck(L_20);
+		AudioSource_set_spatialize_mDFA357EDCB0C59EF11F53C845F7ACBF6BF7F7B3C(L_20, (bool)1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:130>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_21 = V_1;
+		NullCheck(L_21);
+		AudioSource_set_spatializePostEffects_m7CC219B7790E27667D49F4A36C8F62FFF399DA54(L_21, (bool)0, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:132>
+		AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2* L_22 = __this->____pool;
+		int32_t L_23 = V_0;
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_24 = V_1;
+		NullCheck(L_22);
+		(L_22)->SetAt(static_cast<il2cpp_array_size_t>(L_23), (AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299*)L_24);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:118>
+		int32_t L_25 = V_0;
+		V_0 = ((int32_t)il2cpp_codegen_add(L_25, 1));
+	}
+
+IL_0093:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:118>
+		int32_t L_26 = V_0;
+		int32_t L_27 = __this->____poolSize;
+		if ((((int32_t)L_26) < ((int32_t)L_27)))
+		{
+			goto IL_0015;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:135>
+		int32_t L_28 = __this->____poolSize;
+		int32_t L_29 = L_28;
+		RuntimeObject* L_30 = Box(il2cpp_defaults.int32_class, &L_29);
+		String_t* L_31;
+		L_31 = String_Format_mFB7DA489BD99F4670881FF50EC017BFB0A5C0987(_stringLiteral48B109C838692AB2051BE9E1B3780D1CD2AD0E02, _stringLiteral691AA6B0FFA350D9BBFA796ED4A47AEBBEC79FC8, L_30, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_31, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:136>
+		return;
+	}
+}
+// Method Definition Index: 49334
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* SpatialAudioManager_GetPooledSource_mF95273372310EF5DE9C98520554E8A92F6597576 (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralC2992F804B7374FE6B30AA4FB712BA2516BBC4FC);
+		s_Il2CppMethodInitialized = true;
+	}
+	int32_t V_0 = 0;
+	int32_t V_1 = 0;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:145>
+		V_0 = 0;
+		goto IL_0040;
+	}
+
+IL_0004:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:147>
+		int32_t L_0 = __this->____poolHead;
+		int32_t L_1 = V_0;
+		int32_t L_2 = __this->____poolSize;
+		V_1 = ((int32_t)(((int32_t)il2cpp_codegen_add(L_0, L_1))%L_2));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:148>
+		AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2* L_3 = __this->____pool;
+		int32_t L_4 = V_1;
+		NullCheck(L_3);
+		int32_t L_5 = L_4;
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_6 = (L_3)->GetAt(static_cast<il2cpp_array_size_t>(L_5));
+		NullCheck(L_6);
+		bool L_7;
+		L_7 = AudioSource_get_isPlaying_mC203303F2F7146B2C056CB47B9391463FDF408FC(L_6, NULL);
+		if (L_7)
+		{
+			goto IL_003c;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:150>
+		int32_t L_8 = V_1;
+		int32_t L_9 = __this->____poolSize;
+		__this->____poolHead = ((int32_t)(((int32_t)il2cpp_codegen_add(L_8, 1))%L_9));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:151>
+		AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2* L_10 = __this->____pool;
+		int32_t L_11 = V_1;
+		NullCheck(L_10);
+		int32_t L_12 = L_11;
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_13 = (L_10)->GetAt(static_cast<il2cpp_array_size_t>(L_12));
+		return L_13;
+	}
+
+IL_003c:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:145>
+		int32_t L_14 = V_0;
+		V_0 = ((int32_t)il2cpp_codegen_add(L_14, 1));
+	}
+
+IL_0040:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:145>
+		int32_t L_15 = V_0;
+		int32_t L_16 = __this->____poolSize;
+		if ((((int32_t)L_15) < ((int32_t)L_16)))
+		{
+			goto IL_0004;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:156>
+		AudioSourceU5BU5D_tBBF6E920E0DC80D53D4BB2A8D4C80D244EF170B2* L_17 = __this->____pool;
+		int32_t L_18 = __this->____poolHead;
+		NullCheck(L_17);
+		int32_t L_19 = L_18;
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_20 = (L_17)->GetAt(static_cast<il2cpp_array_size_t>(L_19));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:157>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_21 = L_20;
+		NullCheck(L_21);
+		AudioSource_Stop_m318F17F17A147C77FF6E0A5A7A6BE057DB90F537(L_21, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:158>
+		int32_t L_22 = __this->____poolHead;
+		int32_t L_23 = __this->____poolSize;
+		__this->____poolHead = ((int32_t)(((int32_t)il2cpp_codegen_add(L_22, 1))%L_23));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:159>
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteralC2992F804B7374FE6B30AA4FB712BA2516BBC4FC, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:160>
+		return L_21;
+	}
+}
+// Method Definition Index: 49335
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpatialAudioManager_PlayAtPosition_m5A0F006EE2FFD3C29D23FC19E706D39345677265 (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* ___0_clip, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_position, float ___2_volume, float ___3_pitchVariance, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral58E2B439633B24939DD66A5E4DF617736FE6DBA6);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:177>
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_0 = ___0_clip;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_0014;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:179>
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_LogWarning_m33EF1B897E0C7C6FF538989610BFAFFEF4628CA9(_stringLiteral58E2B439633B24939DD66A5E4DF617736FE6DBA6, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:180>
+		return;
+	}
+
+IL_0014:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:183>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_2;
+		L_2 = SpatialAudioManager_GetPooledSource_mF95273372310EF5DE9C98520554E8A92F6597576(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:184>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_3 = L_2;
+		NullCheck(L_3);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_4;
+		L_4 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(L_3, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_5 = ___1_position;
+		NullCheck(L_4);
+		Transform_set_position_mA1A817124BB41B685043DED2A9BA48CDF37C4156(L_4, L_5, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:185>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_6 = L_3;
+		AudioClip_t5D272C4EB4F2D3ED49F1C346DEA373CF6D585F20* L_7 = ___0_clip;
+		NullCheck(L_6);
+		AudioSource_set_clip_mFF441895E274286C88D9C75ED5CA1B1B39528D70(L_6, L_7, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:186>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_8 = L_6;
+		float L_9 = ___2_volume;
+		NullCheck(L_8);
+		AudioSource_set_volume_mD902BBDBBDE0E3C148609BF3C05096148E90F2C0(L_8, L_9, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:187>
+		AudioSource_t871AC2272F896738252F04EE949AEF5B241D3299* L_10 = L_8;
+		float L_11 = ___3_pitchVariance;
+		float L_12 = ___3_pitchVariance;
+		float L_13;
+		L_13 = Random_Range_m5236C99A7D8AE6AC9190592DC66016652A2D2494(((-L_11)), L_12, NULL);
+		NullCheck(L_10);
+		AudioSource_set_pitch_mD14631FC99BF38AAFB356D9C45546BC16CF9E811(L_10, ((float)il2cpp_codegen_add((1.0f), L_13)), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:188>
+		NullCheck(L_10);
+		AudioSource_Play_m95DF07111C61D0E0F00257A00384D31531D590C3(L_10, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:189>
+		return;
+	}
+}
+// Method Definition Index: 49336
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool SpatialAudioManager_IsSpatializerActive_m63D7FBE1F616635B177AAC91A6C2EBE01DC441DA (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:196>
+		String_t* L_0;
+		L_0 = AudioSettings_GetSpatializerPluginName_m60C2C3FA09CB0422D1EDAE5185F20BF01689BF00(NULL);
+		String_t* L_1 = __this->____expectedSpatializerPlugin;
+		bool L_2;
+		L_2 = String_op_Equality_m030E1B219352228970A076136E455C4E568C02C1(L_0, L_1, NULL);
+		return L_2;
+	}
+}
+// Method Definition Index: 49337
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR String_t* SpatialAudioManager_GetActiveSpatializerName_m3702A38CF6CD2FEE70133BF578F24A3F9F90820C (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:204>
+		String_t* L_0;
+		L_0 = AudioSettings_GetSpatializerPluginName_m60C2C3FA09CB0422D1EDAE5185F20BF01689BF00(NULL);
+		return L_0;
+	}
+}
+// Method Definition Index: 49338
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpatialAudioManager__ctor_mFD6576D21F17B125DE9BB538374C0122D0267C2E (SpatialAudioManager_tE5107B9178E7BDF649D51426191FB0627458B376* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral8EFA98868F64A2B3A8B19242C5F644312C229306);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:20>
+		__this->____expectedSpatializerPlugin = _stringLiteral8EFA98868F64A2B3A8B19242C5F644312C229306;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____expectedSpatializerPlugin), (void*)_stringLiteral8EFA98868F64A2B3A8B19242C5F644312C229306);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:23>
+		__this->____autoEnableSpatializer = (bool)1;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:27>
+		__this->____poolSize = ((int32_t)16);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:30>
+		__this->____defaultSpatialBlend = (1.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:33>
+		__this->____dopplerLevel = (0.5f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/Audio/SpatialAudioManager.cs:39>
+		__this->____maxDistance = (50.0f);
+		MonoBehaviour__ctor_m592DB0105CA0BC97AA1C5F4AD27B12D68A3B7C1E(__this, NULL);
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49339
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t EnemyAI_get_CurrentState_m8DC98700B057DC221DA5BDC6AE5F5E2207B804CE (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:111>
+		int32_t L_0 = __this->____state;
+		return L_0;
+	}
+}
+// Method Definition Index: 49340
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EnemyAI_get_IsDead_mFC027B4B0D5E8D8D1C1B7FFA6E94052F10B9C957 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:112>
+		int32_t L_0 = __this->____state;
+		return (bool)((((int32_t)L_0) == ((int32_t)5))? 1 : 0);
+	}
+}
+// Method Definition Index: 49341
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_Awake_m22B14140FAA734834FAB38C3C2F698081E74DD28 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Component_GetComponentInChildren_TisRenderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF_m7CBAFA50AB995C9F53D6140718FCD31D7BEC7CC8_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Component_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mDC0EB50988F6BD42EA26B034CA9F14306EE99CE5_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Component_GetComponent_TisNavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F_m45B783D78932EFB8409019F84FED6DF3A492F16F_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&EnemyAI_HandleDeath_mCF87AABEB5D879CC62E433543A533F5AF0AA5EFD_RuntimeMethod_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:118>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_0;
+		L_0 = Component_GetComponent_TisNavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F_m45B783D78932EFB8409019F84FED6DF3A492F16F(__this, Component_GetComponent_TisNavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F_m45B783D78932EFB8409019F84FED6DF3A492F16F_RuntimeMethod_var);
+		__this->____agent = L_0;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____agent), (void*)L_0);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:119>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_1;
+		L_1 = Component_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mDC0EB50988F6BD42EA26B034CA9F14306EE99CE5(__this, Component_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mDC0EB50988F6BD42EA26B034CA9F14306EE99CE5_RuntimeMethod_var);
+		__this->____health = L_1;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____health), (void*)L_1);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:120>
+		Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* L_2;
+		L_2 = Component_GetComponentInChildren_TisRenderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF_m7CBAFA50AB995C9F53D6140718FCD31D7BEC7CC8(__this, Component_GetComponentInChildren_TisRenderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF_m7CBAFA50AB995C9F53D6140718FCD31D7BEC7CC8_RuntimeMethod_var);
+		__this->____renderer = L_2;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____renderer), (void*)L_2);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:122>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_3 = __this->____health;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_4 = (Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*)il2cpp_codegen_object_new(Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var);
+		Action_1__ctor_m9DC2953C55C4D7D4B7BEFE03D84DA1F9362D652C(L_4, __this, (intptr_t)((void*)EnemyAI_HandleDeath_mCF87AABEB5D879CC62E433543A533F5AF0AA5EFD_RuntimeMethod_var), NULL);
+		NullCheck(L_3);
+		EnemyHealth_add_OnDeath_m0319084DFD62F6604E7ED2AFE7A1BF48D79A50D1(L_3, L_4, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:123>
+		return;
+	}
+}
+// Method Definition Index: 49342
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_Start_mABA342FF6BB5748EE0E4CE8764B43E68AB793757 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralCAF8804297181FF007CA835529DD4477CFD94A70);
+		s_Il2CppMethodInitialized = true;
+	}
+	GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* V_0 = NULL;
+	EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* G_B5_0 = NULL;
+	EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* G_B4_0 = NULL;
+	EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* G_B6_0 = NULL;
+	int32_t G_B7_0 = 0;
+	EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* G_B7_1 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:128>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_0 = __this->___playerTransform;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_002e;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:130>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_2;
+		L_2 = GameObject_FindWithTag_mDF825E000B03F4F3DE9D4F2EBABC96BFA34B62E5(_stringLiteralCAF8804297181FF007CA835529DD4477CFD94A70, NULL);
+		V_0 = L_2;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:131>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_3 = V_0;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_4;
+		L_4 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_3, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_4)
+		{
+			goto IL_002e;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:132>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_5 = V_0;
+		NullCheck(L_5);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_6;
+		L_6 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_5, NULL);
+		__this->___playerTransform = L_6;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___playerTransform), (void*)L_6);
+	}
+
+IL_002e:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:135>
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_7 = __this->___patrolPath;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_8;
+		L_8 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_7, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_8)
+		{
+			G_B5_0 = __this;
+			goto IL_004a;
+		}
+		G_B4_0 = __this;
+	}
+	{
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_9 = __this->___patrolPath;
+		NullCheck(L_9);
+		bool L_10;
+		L_10 = PatrolPath_get_HasWaypoints_m03A93E87E564013CFED58313E62D57F05839F93A(L_9, NULL);
+		if (L_10)
+		{
+			G_B6_0 = G_B4_0;
+			goto IL_004d;
+		}
+		G_B5_0 = G_B4_0;
+	}
+
+IL_004a:
+	{
+		G_B7_0 = 0;
+		G_B7_1 = G_B5_0;
+		goto IL_004e;
+	}
+
+IL_004d:
+	{
+		G_B7_0 = 1;
+		G_B7_1 = G_B6_0;
+	}
+
+IL_004e:
+	{
+		NullCheck(G_B7_1);
+		EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D(G_B7_1, G_B7_0, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:136>
+		return;
+	}
+}
+// Method Definition Index: 49343
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_Update_mFE936A7BCC5427CA82C723CD89449341B3A35B96 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	int32_t V_0 = 0;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:140>
+		int32_t L_0 = __this->____state;
+		if ((!(((uint32_t)L_0) == ((uint32_t)5))))
+		{
+			goto IL_000a;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:140>
+		return;
+	}
+
+IL_000a:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:142>
+		int32_t L_1 = __this->____state;
+		V_0 = L_1;
+		int32_t L_2 = V_0;
+		switch (L_2)
+		{
+			case 0:
+			{
+				goto IL_002c;
+			}
+			case 1:
+			{
+				goto IL_0033;
+			}
+			case 2:
+			{
+				goto IL_003a;
+			}
+			case 3:
+			{
+				goto IL_0041;
+			}
+			case 4:
+			{
+				goto IL_0048;
+			}
+		}
+	}
+	{
+		return;
+	}
+
+IL_002c:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:144>
+		EnemyAI_UpdateIdle_mAB2B83F9E1734DB1007467DBB4A296E15DF5A681(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:144>
+		return;
+	}
+
+IL_0033:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:145>
+		EnemyAI_UpdatePatrol_mB38BCDA3401A42984F22144A80072589FF905441(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:145>
+		return;
+	}
+
+IL_003a:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:146>
+		EnemyAI_UpdateAlert_mA8466E278913490569EEE7C885BE33E5AE1D05C4(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:146>
+		return;
+	}
+
+IL_0041:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:147>
+		EnemyAI_UpdateChase_mF5EEAB18C29279ECF3600017BFFFD025FAE5A29E(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:147>
+		return;
+	}
+
+IL_0048:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:148>
+		EnemyAI_UpdateAttack_m348EDEFB050943BCD77F5153DF8D17901F9CFA1B(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:150>
+		return;
+	}
+}
+// Method Definition Index: 49344
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_OnDestroy_m628F32579018A17486935F5CB3015ED44EEBB589 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&EnemyAI_HandleDeath_mCF87AABEB5D879CC62E433543A533F5AF0AA5EFD_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:154>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_0 = __this->____health;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_0025;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:155>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_2 = __this->____health;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_3 = (Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*)il2cpp_codegen_object_new(Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var);
+		Action_1__ctor_m9DC2953C55C4D7D4B7BEFE03D84DA1F9362D652C(L_3, __this, (intptr_t)((void*)EnemyAI_HandleDeath_mCF87AABEB5D879CC62E433543A533F5AF0AA5EFD_RuntimeMethod_var), NULL);
+		NullCheck(L_2);
+		EnemyHealth_remove_OnDeath_m2AB10C92639496946AC853CC4B4695964FEAE881(L_2, L_3, NULL);
+	}
+
+IL_0025:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:156>
+		return;
+	}
+}
+// Method Definition Index: 49345
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, int32_t ___0_next, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:162>
+		int32_t L_0 = ___0_next;
+		__this->____state = L_0;
+		int32_t L_1 = ___0_next;
+		switch (L_1)
+		{
+			case 0:
+			{
+				goto IL_0026;
+			}
+			case 1:
+			{
+				goto IL_003e;
+			}
+			case 2:
+			{
+				goto IL_006d;
+			}
+			case 3:
+			{
+				goto IL_00ac;
+			}
+			case 4:
+			{
+				goto IL_00e0;
+			}
+			case 5:
+			{
+				goto IL_0104;
+			}
+		}
+	}
+	{
+		return;
+	}
+
+IL_0026:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:167>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_2 = __this->____agent;
+		NullCheck(L_2);
+		NavMeshAgent_set_isStopped_mF374E697F39845233B84D8C4873DEABC3AA490DF(L_2, (bool)1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:168>
+		il2cpp_codegen_runtime_class_init_inline(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var);
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_3 = ((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorPatrol;
+		EnemyAI_SetColor_m515B85C3585EB87DEE44DA7D522F2DD734D0D7B1(__this, L_3, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:169>
+		return;
+	}
+
+IL_003e:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:172>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_4 = __this->____agent;
+		NullCheck(L_4);
+		NavMeshAgent_set_isStopped_mF374E697F39845233B84D8C4873DEABC3AA490DF(L_4, (bool)0, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:173>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_5 = __this->____agent;
+		float L_6 = __this->___patrolSpeed;
+		NullCheck(L_5);
+		NavMeshAgent_set_speed_m820E45289B3AE7DEE16F2F4BF163EAC361E64646(L_5, L_6, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:174>
+		il2cpp_codegen_runtime_class_init_inline(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var);
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_7 = ((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorPatrol;
+		EnemyAI_SetColor_m515B85C3585EB87DEE44DA7D522F2DD734D0D7B1(__this, L_7, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:175>
+		EnemyAI_MoveToNextWaypoint_m27F16338E6C399F0CC25BF4588007DA36C3B33F5(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:176>
+		return;
+	}
+
+IL_006d:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:179>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_8 = __this->____agent;
+		NullCheck(L_8);
+		NavMeshAgent_set_isStopped_mF374E697F39845233B84D8C4873DEABC3AA490DF(L_8, (bool)1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:180>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_9 = __this->____agent;
+		float L_10 = __this->___patrolSpeed;
+		NullCheck(L_9);
+		NavMeshAgent_set_speed_m820E45289B3AE7DEE16F2F4BF163EAC361E64646(L_9, L_10, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:181>
+		__this->____alertTimer = (0.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:182>
+		__this->____alertConfirmTimer = (0.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:183>
+		il2cpp_codegen_runtime_class_init_inline(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var);
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_11 = ((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorAlert;
+		EnemyAI_SetColor_m515B85C3585EB87DEE44DA7D522F2DD734D0D7B1(__this, L_11, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:184>
+		return;
+	}
+
+IL_00ac:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:187>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_12 = __this->____agent;
+		NullCheck(L_12);
+		NavMeshAgent_set_isStopped_mF374E697F39845233B84D8C4873DEABC3AA490DF(L_12, (bool)0, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:188>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_13 = __this->____agent;
+		float L_14 = __this->___chaseSpeed;
+		NullCheck(L_13);
+		NavMeshAgent_set_speed_m820E45289B3AE7DEE16F2F4BF163EAC361E64646(L_13, L_14, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:189>
+		__this->____lostSightTimer = (0.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:190>
+		il2cpp_codegen_runtime_class_init_inline(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var);
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_15 = ((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorChase;
+		EnemyAI_SetColor_m515B85C3585EB87DEE44DA7D522F2DD734D0D7B1(__this, L_15, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:191>
+		return;
+	}
+
+IL_00e0:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:194>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_16 = __this->____agent;
+		NullCheck(L_16);
+		NavMeshAgent_set_isStopped_mF374E697F39845233B84D8C4873DEABC3AA490DF(L_16, (bool)1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:195>
+		float L_17 = __this->___meleeRate;
+		__this->____meleeTimer = L_17;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:196>
+		il2cpp_codegen_runtime_class_init_inline(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var);
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_18 = ((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorAttack;
+		EnemyAI_SetColor_m515B85C3585EB87DEE44DA7D522F2DD734D0D7B1(__this, L_18, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:197>
+		return;
+	}
+
+IL_0104:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:200>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_19 = __this->____agent;
+		NullCheck(L_19);
+		Behaviour_set_enabled_mF1DCFE60EB09E0529FE9476CA804A3AA2D72B16A(L_19, (bool)0, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:201>
+		il2cpp_codegen_runtime_class_init_inline(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var);
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_20 = ((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorDead;
+		EnemyAI_SetColor_m515B85C3585EB87DEE44DA7D522F2DD734D0D7B1(__this, L_20, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:203>
+		EnemyAI_EnableRagdoll_m1699A0034475A33A9C99BB5D18BE8D8182FC2483(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:206>
+		return;
+	}
+}
+// Method Definition Index: 49346
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_UpdateIdle_mAB2B83F9E1734DB1007467DBB4A296E15DF5A681 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:213>
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_0 = __this->___patrolPath;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_0023;
+		}
+	}
+	{
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_2 = __this->___patrolPath;
+		NullCheck(L_2);
+		bool L_3;
+		L_3 = PatrolPath_get_HasWaypoints_m03A93E87E564013CFED58313E62D57F05839F93A(L_2, NULL);
+		if (!L_3)
+		{
+			goto IL_0023;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:215>
+		EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D(__this, 1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:216>
+		return;
+	}
+
+IL_0023:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:218>
+		EnemyAI_CheckPlayerDetection_mBF996630DFE33B77EB4468A707487FA8013A6371(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:219>
+		return;
+	}
+}
+// Method Definition Index: 49347
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_UpdatePatrol_mB38BCDA3401A42984F22144A80072589FF905441 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:223>
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_0 = __this->___patrolPath;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (L_1)
+		{
+			goto IL_001b;
+		}
+	}
+	{
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_2 = __this->___patrolPath;
+		NullCheck(L_2);
+		bool L_3;
+		L_3 = PatrolPath_get_HasWaypoints_m03A93E87E564013CFED58313E62D57F05839F93A(L_2, NULL);
+		if (L_3)
+		{
+			goto IL_0023;
+		}
+	}
+
+IL_001b:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:225>
+		EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D(__this, 0, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:226>
+		return;
+	}
+
+IL_0023:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:229>
+		EnemyAI_CheckPlayerDetection_mBF996630DFE33B77EB4468A707487FA8013A6371(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:232>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_4 = __this->____agent;
+		NullCheck(L_4);
+		bool L_5;
+		L_5 = NavMeshAgent_get_pathPending_mA806A4DC1E06CA32A4E7E71B6846B516EC8C2487(L_4, NULL);
+		if (L_5)
+		{
+			goto IL_006c;
+		}
+	}
+	{
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_6 = __this->____agent;
+		NullCheck(L_6);
+		float L_7;
+		L_7 = NavMeshAgent_get_remainingDistance_m051C1B408E2740A95B5A5577C5EC7222311AA73A(L_6, NULL);
+		float L_8 = __this->___waypointArrivalDistance;
+		if ((!(((float)L_7) <= ((float)L_8))))
+		{
+			goto IL_006c;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:234>
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_9 = __this->___patrolPath;
+		int32_t L_10 = __this->____patrolIndex;
+		int32_t* L_11 = (int32_t*)(&__this->____patrolDirection);
+		NullCheck(L_9);
+		int32_t L_12;
+		L_12 = PatrolPath_GetNextIndex_m0E1DB2644FFBCAB930E5630A21CBDDA07FD8BB20(L_9, L_10, L_11, NULL);
+		__this->____patrolIndex = L_12;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:235>
+		EnemyAI_MoveToNextWaypoint_m27F16338E6C399F0CC25BF4588007DA36C3B33F5(__this, NULL);
+	}
+
+IL_006c:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:237>
+		return;
+	}
+}
+// Method Definition Index: 49348
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_UpdateAlert_mA8466E278913490569EEE7C885BE33E5AE1D05C4 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral35CB2ADFB1C230C884FAD799A04747218981B147);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralF5493D29BD9B73BEF0AC1F34DCEB534D51D5D1E5);
+		s_Il2CppMethodInitialized = true;
+	}
+	bool V_0 = false;
+	bool G_B2_0 = false;
+	bool G_B1_0 = false;
+	int32_t G_B3_0 = 0;
+	bool G_B3_1 = false;
+	EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* G_B12_0 = NULL;
+	EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* G_B11_0 = NULL;
+	EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* G_B13_0 = NULL;
+	int32_t G_B14_0 = 0;
+	EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* G_B14_1 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:241>
+		float L_0 = __this->____alertTimer;
+		float L_1;
+		L_1 = Time_get_deltaTime_mC3195000401F0FD167DD2F948FD2BC58330D0865(NULL);
+		__this->____alertTimer = ((float)il2cpp_codegen_add(L_0, L_1));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:243>
+		bool L_2;
+		L_2 = EnemyAI_CanSeePlayer_mBE7AD9861FE0452BDF7392EE22EEF9103F3FD55A(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:244>
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:245>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_3 = __this->___playerTransform;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_4;
+		L_4 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_3, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_4)
+		{
+			G_B2_0 = L_2;
+			goto IL_004e;
+		}
+		G_B1_0 = L_2;
+	}
+	{
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_5;
+		L_5 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_5);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6;
+		L_6 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_5, NULL);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_7 = __this->___playerTransform;
+		NullCheck(L_7);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8;
+		L_8 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_7, NULL);
+		float L_9;
+		L_9 = Vector3_Distance_m2314DB9B8BD01157E013DF87BEA557375C7F9FF9_inline(L_6, L_8, NULL);
+		float L_10 = __this->___hearingRadius;
+		G_B3_0 = ((((int32_t)((!(((float)L_9) <= ((float)L_10)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
+		G_B3_1 = G_B1_0;
+		goto IL_004f;
+	}
+
+IL_004e:
+	{
+		G_B3_0 = 0;
+		G_B3_1 = G_B2_0;
+	}
+
+IL_004f:
+	{
+		V_0 = (bool)G_B3_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:247>
+		bool L_11 = V_0;
+		if (!((int32_t)((int32_t)G_B3_1|(int32_t)L_11)))
+		{
+			goto IL_00a0;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:249>
+		float L_12 = __this->____alertConfirmTimer;
+		float L_13;
+		L_13 = Time_get_deltaTime_mC3195000401F0FD167DD2F948FD2BC58330D0865(NULL);
+		__this->____alertConfirmTimer = ((float)il2cpp_codegen_add(L_12, L_13));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:251>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_14 = __this->___playerTransform;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_15;
+		L_15 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_14, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_15)
+		{
+			goto IL_008a;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:252>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_16 = __this->___playerTransform;
+		NullCheck(L_16);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_17;
+		L_17 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_16, NULL);
+		EnemyAI_TurnTowards_m822C7561D8183F091E9EED1732759B39EC6ED1E1(__this, L_17, (90.0f), NULL);
+	}
+
+IL_008a:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:255>
+		float L_18 = __this->____alertConfirmTimer;
+		if ((!(((float)L_18) >= ((float)(0.400000006f)))))
+		{
+			goto IL_00ab;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:257>
+		EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D(__this, 3, NULL);
+		goto IL_00ab;
+	}
+
+IL_00a0:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:262>
+		__this->____alertConfirmTimer = (0.0f);
+	}
+
+IL_00ab:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:266>
+		float L_19 = __this->____alertTimer;
+		float L_20 = __this->___alertTimeout;
+		if ((!(((float)L_19) >= ((float)L_20))))
+		{
+			goto IL_00f8;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:268>
+		String_t* L_21;
+		L_21 = Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392(__this, NULL);
+		String_t* L_22;
+		L_22 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(_stringLiteral35CB2ADFB1C230C884FAD799A04747218981B147, L_21, _stringLiteralF5493D29BD9B73BEF0AC1F34DCEB534D51D5D1E5, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_22, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:269>
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_23 = __this->___patrolPath;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_24;
+		L_24 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_23, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_24)
+		{
+			G_B12_0 = __this;
+			goto IL_00ef;
+		}
+		G_B11_0 = __this;
+	}
+	{
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_25 = __this->___patrolPath;
+		NullCheck(L_25);
+		bool L_26;
+		L_26 = PatrolPath_get_HasWaypoints_m03A93E87E564013CFED58313E62D57F05839F93A(L_25, NULL);
+		if (L_26)
+		{
+			G_B13_0 = G_B11_0;
+			goto IL_00f2;
+		}
+		G_B12_0 = G_B11_0;
+	}
+
+IL_00ef:
+	{
+		G_B14_0 = 0;
+		G_B14_1 = G_B12_0;
+		goto IL_00f3;
+	}
+
+IL_00f2:
+	{
+		G_B14_0 = 1;
+		G_B14_1 = G_B13_0;
+	}
+
+IL_00f3:
+	{
+		NullCheck(G_B14_1);
+		EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D(G_B14_1, G_B14_0, NULL);
+	}
+
+IL_00f8:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:271>
+		return;
+	}
+}
+// Method Definition Index: 49349
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_UpdateChase_mF5EEAB18C29279ECF3600017BFFFD025FAE5A29E (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral35CB2ADFB1C230C884FAD799A04747218981B147);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral98E734F22A0C75E05BA09C0761B9655AE8739FB5);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:275>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_0 = __this->___playerTransform;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_000f;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:275>
+		return;
+	}
+
+IL_000f:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:277>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_2;
+		L_2 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_2);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_3;
+		L_3 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_2, NULL);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_4 = __this->___playerTransform;
+		NullCheck(L_4);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_5;
+		L_5 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_4, NULL);
+		float L_6;
+		L_6 = Vector3_Distance_m2314DB9B8BD01157E013DF87BEA557375C7F9FF9_inline(L_3, L_5, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:280>
+		float L_7 = __this->___meleeRange;
+		if ((!(((float)L_6) <= ((float)L_7))))
+		{
+			goto IL_003a;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:282>
+		EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D(__this, 4, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:283>
+		return;
+	}
+
+IL_003a:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:287>
+		bool L_8;
+		L_8 = EnemyAI_CanSeePlayer_mBE7AD9861FE0452BDF7392EE22EEF9103F3FD55A(__this, NULL);
+		if (!L_8)
+		{
+			goto IL_0071;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:289>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_9 = __this->___playerTransform;
+		NullCheck(L_9);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_10;
+		L_10 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_9, NULL);
+		__this->____lastKnownPlayerPos = L_10;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:290>
+		__this->____lostSightTimer = (0.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:291>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_11 = __this->____agent;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_12 = __this->____lastKnownPlayerPos;
+		NullCheck(L_11);
+		bool L_13;
+		L_13 = NavMeshAgent_SetDestination_mD5D960933827F1F14B29CF4A3B6F305C064EBF46(L_11, L_12, NULL);
+		return;
+	}
+
+IL_0071:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:295>
+		float L_14 = __this->____lostSightTimer;
+		float L_15;
+		L_15 = Time_get_deltaTime_mC3195000401F0FD167DD2F948FD2BC58330D0865(NULL);
+		__this->____lostSightTimer = ((float)il2cpp_codegen_add(L_14, L_15));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:298>
+		float L_16 = __this->____lostSightTimer;
+		float L_17 = __this->___lostSightTimeout;
+		if ((((float)L_16) < ((float)L_17)))
+		{
+			goto IL_00b2;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:304>
+		String_t* L_18;
+		L_18 = Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392(__this, NULL);
+		String_t* L_19;
+		L_19 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(_stringLiteral35CB2ADFB1C230C884FAD799A04747218981B147, L_18, _stringLiteral98E734F22A0C75E05BA09C0761B9655AE8739FB5, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_19, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:305>
+		EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D(__this, 2, NULL);
+	}
+
+IL_00b2:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:308>
+		return;
+	}
+}
+// Method Definition Index: 49350
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_UpdateAttack_m348EDEFB050943BCD77F5153DF8D17901F9CFA1B (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:312>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_0 = __this->___playerTransform;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_000f;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:312>
+		return;
+	}
+
+IL_000f:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:314>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_2;
+		L_2 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_2);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_3;
+		L_3 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_2, NULL);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_4 = __this->___playerTransform;
+		NullCheck(L_4);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_5;
+		L_5 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_4, NULL);
+		float L_6;
+		L_6 = Vector3_Distance_m2314DB9B8BD01157E013DF87BEA557375C7F9FF9_inline(L_3, L_5, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:317>
+		float L_7 = __this->___meleeRange;
+		if ((!(((float)L_6) > ((float)((float)il2cpp_codegen_add(L_7, (0.300000012f)))))))
+		{
+			goto IL_0040;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:319>
+		EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D(__this, 3, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:320>
+		return;
+	}
+
+IL_0040:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:324>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_8 = __this->___playerTransform;
+		NullCheck(L_8);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_9;
+		L_9 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_8, NULL);
+		EnemyAI_TurnTowards_m822C7561D8183F091E9EED1732759B39EC6ED1E1(__this, L_9, (360.0f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:327>
+		float L_10 = __this->____meleeTimer;
+		float L_11;
+		L_11 = Time_get_deltaTime_mC3195000401F0FD167DD2F948FD2BC58330D0865(NULL);
+		__this->____meleeTimer = ((float)il2cpp_codegen_add(L_10, L_11));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:328>
+		float L_12 = __this->____meleeTimer;
+		float L_13 = __this->___meleeRate;
+		if ((!(((float)L_12) >= ((float)L_13))))
+		{
+			goto IL_0087;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:330>
+		__this->____meleeTimer = (0.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:331>
+		EnemyAI_DealMeleeDamage_mEF43D2772CA51046D0258E4A10F1FFFB6D70828D(__this, NULL);
+	}
+
+IL_0087:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:333>
+		return;
+	}
+}
+// Method Definition Index: 49351
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_CheckPlayerDetection_mBF996630DFE33B77EB4468A707487FA8013A6371 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:339>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_0 = __this->___playerTransform;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_000f;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:339>
+		return;
+	}
+
+IL_000f:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:341>
+		bool L_2;
+		L_2 = EnemyAI_CanSeePlayer_mBE7AD9861FE0452BDF7392EE22EEF9103F3FD55A(__this, NULL);
+		if (L_2)
+		{
+			goto IL_001f;
+		}
+	}
+	{
+		bool L_3;
+		L_3 = EnemyAI_IsPlayerWithinHearing_m089FC6899D492FDACBD2BE96F9E42C54CBE213A4(__this, NULL);
+		if (!L_3)
+		{
+			goto IL_0026;
+		}
+	}
+
+IL_001f:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:342>
+		EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D(__this, 2, NULL);
+	}
+
+IL_0026:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:343>
+		return;
+	}
+}
+// Method Definition Index: 49352
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EnemyAI_CanSeePlayer_mBE7AD9861FE0452BDF7392EE22EEF9103F3FD55A (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Physics_t1244C2983AEAFA149425AFFC3DF53BC91C18ED56_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_1;
+	memset((&V_1), 0, sizeof(V_1));
+	float V_2 = 0.0f;
+	RaycastHit_t6F30BD0B38B56401CA833A1B87BD74F2ACD2F2B5 V_3;
+	memset((&V_3), 0, sizeof(V_3));
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:347>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_0 = __this->___playerTransform;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_0010;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:347>
+		return (bool)0;
+	}
+
+IL_0010:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:349>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_2;
+		L_2 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_2);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_3;
+		L_3 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_2, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_4;
+		L_4 = Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline(NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_5;
+		L_5 = Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline(L_4, (1.5f), NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6;
+		L_6 = Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline(L_3, L_5, NULL);
+		V_0 = L_6;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:350>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_7 = __this->___playerTransform;
+		NullCheck(L_7);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8;
+		L_8 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_7, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_9 = V_0;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_10;
+		L_10 = Vector3_op_Subtraction_mE42023FF80067CB44A1D4A27EB7CF2B24CABB828_inline(L_8, L_9, NULL);
+		V_1 = L_10;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:351>
+		float L_11;
+		L_11 = Vector3_get_magnitude_mF0D6017E90B345F1F52D1CC564C640F1A847AF2D_inline((&V_1), NULL);
+		V_2 = L_11;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:353>
+		float L_12 = V_2;
+		float L_13 = __this->___visionRange;
+		if ((!(((float)L_12) > ((float)L_13))))
+		{
+			goto IL_0055;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:353>
+		return (bool)0;
+	}
+
+IL_0055:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:355>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_14;
+		L_14 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_14);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_15;
+		L_15 = Transform_get_forward_mFCFACF7165FDAB21E80E384C494DF278386CEE2F(L_14, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_16 = V_1;
+		float L_17;
+		L_17 = Vector3_Angle_mB16906B482814C140FE5BA9D041D2DC11E42A68D_inline(L_15, L_16, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:356>
+		float L_18 = __this->___visionHalfAngle;
+		if ((!(((float)L_17) > ((float)L_18))))
+		{
+			goto IL_0070;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:356>
+		return (bool)0;
+	}
+
+IL_0070:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:359>
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_19 = V_0;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_20;
+		L_20 = Vector3_get_normalized_m736BBF65D5CDA7A18414370D15B4DFCC1E466F07_inline((&V_1), NULL);
+		float L_21 = V_2;
+		LayerMask_t97CB6BDADEDC3D6423C7BCFEA7F86DA2EC6241DB L_22 = __this->___visionBlockMask;
+		int32_t L_23;
+		L_23 = LayerMask_op_Implicit_m7F5A5B9D079281AC445ED39DEE1FCFA9D795810D(L_22, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Physics_t1244C2983AEAFA149425AFFC3DF53BC91C18ED56_il2cpp_TypeInfo_var);
+		bool L_24;
+		L_24 = Physics_Raycast_mA782767AD4F149FBEA32C71460DFF061B7563688(L_19, L_20, (&V_3), L_21, L_23, 1, NULL);
+		if (!L_24)
+		{
+			goto IL_00b7;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:362>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_25;
+		L_25 = RaycastHit_get_transform_m89DB7FCFC50E0213A37CBE089400064B8FA19155((&V_3), NULL);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_26 = __this->___playerTransform;
+		NullCheck(L_25);
+		bool L_27;
+		L_27 = Transform_IsChildOf_mFE071BE1E775E825401FE0A9B9BE49E39D256CEA(L_25, L_26, NULL);
+		if (L_27)
+		{
+			goto IL_00b5;
+		}
+	}
+	{
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_28;
+		L_28 = RaycastHit_get_transform_m89DB7FCFC50E0213A37CBE089400064B8FA19155((&V_3), NULL);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_29 = __this->___playerTransform;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_30;
+		L_30 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_28, L_29, NULL);
+		return L_30;
+	}
+
+IL_00b5:
+	{
+		return (bool)1;
+	}
+
+IL_00b7:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:366>
+		return (bool)1;
+	}
+}
+// Method Definition Index: 49353
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EnemyAI_IsPlayerWithinHearing_m089FC6899D492FDACBD2BE96F9E42C54CBE213A4 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:371>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_0 = __this->___playerTransform;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_0010;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:371>
+		return (bool)0;
+	}
+
+IL_0010:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:372>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_2;
+		L_2 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_2);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_3;
+		L_3 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_2, NULL);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_4 = __this->___playerTransform;
+		NullCheck(L_4);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_5;
+		L_5 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_4, NULL);
+		float L_6;
+		L_6 = Vector3_Distance_m2314DB9B8BD01157E013DF87BEA557375C7F9FF9_inline(L_3, L_5, NULL);
+		float L_7 = __this->___hearingRadius;
+		return (bool)((((int32_t)((!(((float)L_6) <= ((float)L_7)))? 1 : 0)) == ((int32_t)0))? 1 : 0);
+	}
+}
+// Method Definition Index: 49354
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_DealMeleeDamage_mEF43D2772CA51046D0258E4A10F1FFFB6D70828D (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral620784DA5FE9C25387FA6E6A76EC4943F6354DB3);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:380>
+		String_t* L_0;
+		L_0 = Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392(__this, NULL);
+		float L_1 = __this->___meleeDamage;
+		float L_2 = L_1;
+		RuntimeObject* L_3 = Box(il2cpp_defaults.single_class, &L_2);
+		String_t* L_4;
+		L_4 = String_Format_mA0534D6E2AE4D67A6BD8D45B3321323930EB930C(_stringLiteral620784DA5FE9C25387FA6E6A76EC4943F6354DB3, _stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58, L_0, L_3, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_4, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:381>
+		return;
+	}
+}
+// Method Definition Index: 49355
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_HandleDeath_mCF87AABEB5D879CC62E433543A533F5AF0AA5EFD (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, String_t* ___0_killingZone, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:387>
+		EnemyAI_EnterState_mA846BB6F8CEE91377E150D4A7E18331E8479160D(__this, 5, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:388>
+		return;
+	}
+}
+// Method Definition Index: 49356
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_EnableRagdoll_m1699A0034475A33A9C99BB5D18BE8D8182FC2483 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Component_GetComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m4B5CAD64B52D153BEA96432633CA9A45FA523DD8_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_AddComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m03A761629A3F71B0248F1B26EF612F592B757093_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral35CB2ADFB1C230C884FAD799A04747218981B147);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralD1359163B5A3DC250BCAA3F70B742D49F6AD970F);
+		s_Il2CppMethodInitialized = true;
+	}
+	Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* V_0 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:394>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_0;
+		L_0 = Component_GetComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m4B5CAD64B52D153BEA96432633CA9A45FA523DD8(__this, Component_GetComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m4B5CAD64B52D153BEA96432633CA9A45FA523DD8_RuntimeMethod_var);
+		V_0 = L_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:395>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_1 = V_0;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_2;
+		L_2 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_1, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_2)
+		{
+			goto IL_003d;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:397>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_3;
+		L_3 = Component_get_gameObject_m57AEFBB14DB39EC476F740BA000E170355DE691B(__this, NULL);
+		NullCheck(L_3);
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_4;
+		L_4 = GameObject_AddComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m03A761629A3F71B0248F1B26EF612F592B757093(L_3, GameObject_AddComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m03A761629A3F71B0248F1B26EF612F592B757093_RuntimeMethod_var);
+		V_0 = L_4;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:398>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_5 = V_0;
+		NullCheck(L_5);
+		Rigidbody_set_mass_mC7F886DEDB57C742A16F8B6B779F69AFE164CA4B(L_5, (70.0f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:399>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_6 = V_0;
+		NullCheck(L_6);
+		Rigidbody_set_linearDamping_m42BB8ADA5D26250A11256502D08BDC2DAB980242(L_6, (1.0f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:400>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_7 = V_0;
+		NullCheck(L_7);
+		Rigidbody_set_angularDamping_m2763171B779080FC724173D87C34015ABED51671(L_7, (2.0f), NULL);
+	}
+
+IL_003d:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:402>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_8 = V_0;
+		NullCheck(L_8);
+		Rigidbody_set_isKinematic_m6C3FD3EA358DADA3B191F2449CF1C4F8B22695ED(L_8, (bool)0, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:403>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_9 = V_0;
+		NullCheck(L_9);
+		Rigidbody_set_useGravity_m1B1B22E093F9DC92D7BEEBBE6B02642B3B6C4389(L_9, (bool)1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:406>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_10 = V_0;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_11;
+		L_11 = Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline(NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_12;
+		L_12 = Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline(L_11, (2.0f), NULL);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_13;
+		L_13 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_13);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_14;
+		L_14 = Transform_get_forward_mFCFACF7165FDAB21E80E384C494DF278386CEE2F(L_13, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_15;
+		L_15 = Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline(L_14, (-1.0f), NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_16;
+		L_16 = Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline(L_12, L_15, NULL);
+		NullCheck(L_10);
+		Rigidbody_AddForce_mBDBC288D0E266BC1B62E3649B4FCE46E7EA9CCBC(L_10, L_16, 1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:407>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_17 = V_0;
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_18;
+		L_18 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_18);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_19;
+		L_19 = Transform_get_right_mC6DC057C23313802E2186A9E0DB760D795A758A4(L_18, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_20;
+		L_20 = Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline(L_19, (5.0f), NULL);
+		NullCheck(L_17);
+		Rigidbody_AddTorque_m7922F76C73DACF9E1610D72726C01709C14F0937(L_17, L_20, 1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:409>
+		String_t* L_21;
+		L_21 = Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392(__this, NULL);
+		String_t* L_22;
+		L_22 = String_Concat_m8855A6DE10F84DA7F4EC113CADDB59873A25573B(_stringLiteral35CB2ADFB1C230C884FAD799A04747218981B147, L_21, _stringLiteralD1359163B5A3DC250BCAA3F70B742D49F6AD970F, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_22, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:410>
+		return;
+	}
+}
+// Method Definition Index: 49357
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_MoveToNextWaypoint_m27F16338E6C399F0CC25BF4588007DA36C3B33F5 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:416>
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_0 = __this->___patrolPath;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (L_1)
+		{
+			goto IL_001b;
+		}
+	}
+	{
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_2 = __this->___patrolPath;
+		NullCheck(L_2);
+		bool L_3;
+		L_3 = PatrolPath_get_HasWaypoints_m03A93E87E564013CFED58313E62D57F05839F93A(L_2, NULL);
+		if (L_3)
+		{
+			goto IL_001c;
+		}
+	}
+
+IL_001b:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:416>
+		return;
+	}
+
+IL_001c:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:417>
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_4 = __this->___patrolPath;
+		int32_t L_5 = __this->____patrolIndex;
+		NullCheck(L_4);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6;
+		L_6 = PatrolPath_GetWaypointPosition_m8AC767B08869BE51107A0F38013E06D01877EFD2(L_4, L_5, NULL);
+		V_0 = L_6;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:418>
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_7 = V_0;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8;
+		L_8 = Vector3_get_zero_m0C1249C3F25B1C70EAD3CC8B31259975A457AE39_inline(NULL);
+		bool L_9;
+		L_9 = Vector3_op_Inequality_m9F170CDFBF1E490E559DA5D06D6547501A402BBF_inline(L_7, L_8, NULL);
+		if (!L_9)
+		{
+			goto IL_0048;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:419>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_10 = __this->____agent;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_11 = V_0;
+		NullCheck(L_10);
+		bool L_12;
+		L_12 = NavMeshAgent_SetDestination_mD5D960933827F1F14B29CF4A3B6F305C064EBF46(L_10, L_11, NULL);
+	}
+
+IL_0048:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:420>
+		return;
+	}
+}
+// Method Definition Index: 49358
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_TurnTowards_m822C7561D8183F091E9EED1732759B39EC6ED1E1 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_target, float ___1_degreesPerSecond, const RuntimeMethod* method) 
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 V_1;
+	memset((&V_1), 0, sizeof(V_1));
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_2;
+	memset((&V_2), 0, sizeof(V_2));
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:426>
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ___0_target;
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_1;
+		L_1 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_1);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_2;
+		L_2 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_1, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_3;
+		L_3 = Vector3_op_Subtraction_mE42023FF80067CB44A1D4A27EB7CF2B24CABB828_inline(L_0, L_2, NULL);
+		V_2 = L_3;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_4;
+		L_4 = Vector3_get_normalized_m736BBF65D5CDA7A18414370D15B4DFCC1E466F07_inline((&V_2), NULL);
+		V_0 = L_4;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:427>
+		(&V_0)->___y = (0.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:428>
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_5 = V_0;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6;
+		L_6 = Vector3_get_zero_m0C1249C3F25B1C70EAD3CC8B31259975A457AE39_inline(NULL);
+		bool L_7;
+		L_7 = Vector3_op_Equality_mCDCBB8D2EDC3D3BF20F31A25ACB34705D352B479_inline(L_5, L_6, NULL);
+		if (!L_7)
+		{
+			goto IL_0034;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:428>
+		return;
+	}
+
+IL_0034:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:429>
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8 = V_0;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_9;
+		L_9 = Quaternion_LookRotation_mDB2CCA75B8E1AB98104F2A6E1A1EA57D0D1298D7_inline(L_8, NULL);
+		V_1 = L_9;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:430>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_10;
+		L_10 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_11;
+		L_11 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_11);
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_12;
+		L_12 = Transform_get_rotation_m32AF40CA0D50C797DA639A696F8EAEC7524C179C(L_11, NULL);
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_13 = V_1;
+		float L_14 = ___1_degreesPerSecond;
+		float L_15;
+		L_15 = Time_get_deltaTime_mC3195000401F0FD167DD2F948FD2BC58330D0865(NULL);
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_16;
+		L_16 = Quaternion_RotateTowards_m50EF9D609C80CD423CDA856EA3481DE2004633A3_inline(L_12, L_13, ((float)il2cpp_codegen_multiply(L_14, L_15)), NULL);
+		NullCheck(L_10);
+		Transform_set_rotation_m61340DE74726CF0F9946743A727C4D444397331D(L_10, L_16, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:431>
+		return;
+	}
+}
+// Method Definition Index: 49359
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI_SetColor_m515B85C3585EB87DEE44DA7D522F2DD734D0D7B1 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___0_c, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:435>
+		Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* L_0 = __this->____renderer;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_000f;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:435>
+		return;
+	}
+
+IL_000f:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:437>
+		Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* L_2 = __this->____renderer;
+		NullCheck(L_2);
+		Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* L_3;
+		L_3 = Renderer_get_material_m5BA2A00816C4CC66580D4B2E409CF10718C15656(L_2, NULL);
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_4 = ___0_c;
+		NullCheck(L_3);
+		Material_set_color_m5C32DEBB215FF9EE35E7B575297D8C2F29CC2A2D(L_3, L_4, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:438>
+		return;
+	}
+}
+// Method Definition Index: 49360
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI__ctor_m69C1781C20AEBDF9DE72902B4B7E6B5043A74EB2 (EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:35>
+		__this->___visionHalfAngle = (60.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:38>
+		__this->___visionRange = (15.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:41>
+		__this->___hearingRadius = (5.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:44>
+		LayerMask_t97CB6BDADEDC3D6423C7BCFEA7F86DA2EC6241DB L_0;
+		L_0 = LayerMask_op_Implicit_m01C8996A2CB2085328B9C33539C43139660D8222((-1), NULL);
+		__this->___visionBlockMask = L_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:48>
+		__this->___patrolSpeed = (1.79999995f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:51>
+		__this->___chaseSpeed = (4.5f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:55>
+		__this->___meleeRange = (2.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:58>
+		__this->___meleeDamage = (20.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:61>
+		__this->___meleeRate = (1.5f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:65>
+		__this->___lostSightTimeout = (5.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:68>
+		__this->___alertTimeout = (3.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:74>
+		__this->___waypointArrivalDistance = (0.5f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:92>
+		__this->____patrolDirection = 1;
+		MonoBehaviour__ctor_m592DB0105CA0BC97AA1C5F4AD27B12D68A3B7C1E(__this, NULL);
+		return;
+	}
+}
+// Method Definition Index: 49361
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyAI__cctor_m444660AF0CA28263A35DBC1474CF52CEFC983008 (const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:103>
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_0;
+		memset((&L_0), 0, sizeof(L_0));
+		Color__ctor_mCD6889CDE39F18704CD6EA8E2EFBFA48BA3E13B0_inline((&L_0), (0.150000006f), (0.75f), (0.150000006f), NULL);
+		((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorPatrol = L_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:104>
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_1;
+		memset((&L_1), 0, sizeof(L_1));
+		Color__ctor_mCD6889CDE39F18704CD6EA8E2EFBFA48BA3E13B0_inline((&L_1), (0.949999988f), (0.850000024f), (0.0f), NULL);
+		((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorAlert = L_1;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:105>
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_2;
+		memset((&L_2), 0, sizeof(L_2));
+		Color__ctor_mCD6889CDE39F18704CD6EA8E2EFBFA48BA3E13B0_inline((&L_2), (0.949999988f), (0.449999988f), (0.0f), NULL);
+		((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorChase = L_2;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:106>
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_3;
+		memset((&L_3), 0, sizeof(L_3));
+		Color__ctor_mCD6889CDE39F18704CD6EA8E2EFBFA48BA3E13B0_inline((&L_3), (0.850000024f), (0.0f), (0.0500000007f), NULL);
+		((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorAttack = L_3;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyAI.cs:107>
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_4;
+		memset((&L_4), 0, sizeof(L_4));
+		Color__ctor_mCD6889CDE39F18704CD6EA8E2EFBFA48BA3E13B0_inline((&L_4), (0.349999994f), (0.349999994f), (0.349999994f), NULL);
+		((EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_StaticFields*)il2cpp_codegen_static_fields_for(EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_il2cpp_TypeInfo_var))->___ColorDead = L_4;
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49362
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float EnemyHealth_get_CurrentHP_mA6D924D0BF3B37C691BE63406E37B404C7EB0192 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:23>
+		float L_0 = __this->____currentHP;
+		return L_0;
+	}
+}
+// Method Definition Index: 49363
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool EnemyHealth_get_IsDead_m6EEAEDD6EFAF728FC9219967396DCAC4DAE8B0D4 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:24>
+		float L_0 = __this->____currentHP;
+		return (bool)((((int32_t)((!(((float)L_0) <= ((float)(0.0f))))? 1 : 0)) == ((int32_t)0))? 1 : 0);
+	}
+}
+// Method Definition Index: 49364
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHealth_add_OnDeath_m0319084DFD62F6604E7ED2AFE7A1BF48D79A50D1 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* ___0_value, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* V_0 = NULL;
+	Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* V_1 = NULL;
+	Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* V_2 = NULL;
+	{
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_0 = __this->___OnDeath;
+		V_0 = L_0;
+	}
+
+IL_0007:
+	{
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_1 = V_0;
+		V_1 = L_1;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_2 = V_1;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_3 = ___0_value;
+		Delegate_t* L_4;
+		L_4 = Delegate_Combine_m1F725AEF318BE6F0426863490691A6F4606E7D00(L_2, L_3, NULL);
+		V_2 = ((Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*)Castclass((RuntimeObject*)L_4, Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var));
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A** L_5 = (Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A**)(&__this->___OnDeath);
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_6 = V_2;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_7 = V_1;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_8;
+		L_8 = InterlockedCompareExchangeImpl<Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*>(L_5, L_6, L_7);
+		V_0 = L_8;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_9 = V_0;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_10 = V_1;
+		if ((!(((RuntimeObject*)(Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*)L_9) == ((RuntimeObject*)(Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*)L_10))))
+		{
+			goto IL_0007;
+		}
+	}
+	{
+		return;
+	}
+}
+// Method Definition Index: 49365
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHealth_remove_OnDeath_m2AB10C92639496946AC853CC4B4695964FEAE881 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* ___0_value, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* V_0 = NULL;
+	Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* V_1 = NULL;
+	Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* V_2 = NULL;
+	{
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_0 = __this->___OnDeath;
+		V_0 = L_0;
+	}
+
+IL_0007:
+	{
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_1 = V_0;
+		V_1 = L_1;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_2 = V_1;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_3 = ___0_value;
+		Delegate_t* L_4;
+		L_4 = Delegate_Remove_m8B7DD5661308FA972E23CA1CC3FC9CEB355504E3(L_2, L_3, NULL);
+		V_2 = ((Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*)Castclass((RuntimeObject*)L_4, Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var));
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A** L_5 = (Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A**)(&__this->___OnDeath);
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_6 = V_2;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_7 = V_1;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_8;
+		L_8 = InterlockedCompareExchangeImpl<Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*>(L_5, L_6, L_7);
+		V_0 = L_8;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_9 = V_0;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_10 = V_1;
+		if ((!(((RuntimeObject*)(Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*)L_9) == ((RuntimeObject*)(Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*)L_10))))
+		{
+			goto IL_0007;
+		}
+	}
+	{
+		return;
+	}
+}
+// Method Definition Index: 49366
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHealth_Awake_mE8CCDB16701B765BA9B4C73F68A1422C315AA106 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:33>
+		float L_0 = __this->___maxHP;
+		__this->____currentHP = L_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:34>
+		return;
+	}
+}
+// Method Definition Index: 49367
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHealth_TakeDamage_mB3D060750DAC88EDFC77D977C92C7AAF2F2B7B9C (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, float ___0_amount, String_t* ___1_zone, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral8DD8D6FCBA1E38E53530F55F7B9061E65C123321);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralEDAD94E0043ED228E841DC6AB528C222231F6F51);
+		s_Il2CppMethodInitialized = true;
+	}
+	float V_0 = 0.0f;
+	float V_1 = 0.0f;
+	float G_B5_0 = 0.0f;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:44>
+		bool L_0;
+		L_0 = EnemyHealth_get_IsDead_m6EEAEDD6EFAF728FC9219967396DCAC4DAE8B0D4(__this, NULL);
+		if (!L_0)
+		{
+			goto IL_0009;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:44>
+		return;
+	}
+
+IL_0009:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:46>
+		String_t* L_1 = ___1_zone;
+		bool L_2;
+		L_2 = String_Equals_mCC34895D0DB2AD440C9D8767032215BC86B5C48B(L_1, _stringLiteral8DD8D6FCBA1E38E53530F55F7B9061E65C123321, 5, NULL);
+		if (L_2)
+		{
+			goto IL_001e;
+		}
+	}
+	{
+		G_B5_0 = (1.0f);
+		goto IL_0023;
+	}
+
+IL_001e:
+	{
+		G_B5_0 = (2.0f);
+	}
+
+IL_0023:
+	{
+		V_0 = G_B5_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:47>
+		float L_3 = ___0_amount;
+		float L_4 = V_0;
+		V_1 = ((float)il2cpp_codegen_multiply(L_3, L_4));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:49>
+		float L_5 = __this->____currentHP;
+		float L_6 = V_1;
+		__this->____currentHP = ((float)il2cpp_codegen_subtract(L_5, L_6));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:50>
+		float L_7 = __this->____currentHP;
+		float L_8;
+		L_8 = Mathf_Max_mF5379E63D2BBAC76D090748695D833934F8AD051_inline((0.0f), L_7, NULL);
+		__this->____currentHP = L_8;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:52>
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_9 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)7);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_10 = L_9;
+		NullCheck(L_10);
+		ArrayElementTypeCheck (L_10, _stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58);
+		(L_10)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)_stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_11 = L_10;
+		String_t* L_12;
+		L_12 = Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392(__this, NULL);
+		NullCheck(L_11);
+		ArrayElementTypeCheck (L_11, L_12);
+		(L_11)->SetAt(static_cast<il2cpp_array_size_t>(1), (RuntimeObject*)L_12);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_13 = L_11;
+		float L_14 = V_1;
+		float L_15 = L_14;
+		RuntimeObject* L_16 = Box(il2cpp_defaults.single_class, &L_15);
+		NullCheck(L_13);
+		ArrayElementTypeCheck (L_13, L_16);
+		(L_13)->SetAt(static_cast<il2cpp_array_size_t>(2), (RuntimeObject*)L_16);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_17 = L_13;
+		String_t* L_18 = ___1_zone;
+		NullCheck(L_17);
+		ArrayElementTypeCheck (L_17, L_18);
+		(L_17)->SetAt(static_cast<il2cpp_array_size_t>(3), (RuntimeObject*)L_18);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_19 = L_17;
+		float L_20 = V_0;
+		float L_21 = L_20;
+		RuntimeObject* L_22 = Box(il2cpp_defaults.single_class, &L_21);
+		NullCheck(L_19);
+		ArrayElementTypeCheck (L_19, L_22);
+		(L_19)->SetAt(static_cast<il2cpp_array_size_t>(4), (RuntimeObject*)L_22);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_23 = L_19;
+		float L_24 = __this->____currentHP;
+		float L_25 = L_24;
+		RuntimeObject* L_26 = Box(il2cpp_defaults.single_class, &L_25);
+		NullCheck(L_23);
+		ArrayElementTypeCheck (L_23, L_26);
+		(L_23)->SetAt(static_cast<il2cpp_array_size_t>(5), (RuntimeObject*)L_26);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_27 = L_23;
+		float L_28 = __this->___maxHP;
+		float L_29 = L_28;
+		RuntimeObject* L_30 = Box(il2cpp_defaults.single_class, &L_29);
+		NullCheck(L_27);
+		ArrayElementTypeCheck (L_27, L_30);
+		(L_27)->SetAt(static_cast<il2cpp_array_size_t>(6), (RuntimeObject*)L_30);
+		String_t* L_31;
+		L_31 = String_Format_m918500C1EFB475181349A79989BB79BB36102894(_stringLiteralEDAD94E0043ED228E841DC6AB528C222231F6F51, L_27, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_31, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:54>
+		float L_32 = __this->____currentHP;
+		if ((!(((float)L_32) <= ((float)(0.0f)))))
+		{
+			goto IL_00b8;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:56>
+		String_t* L_33 = ___1_zone;
+		EnemyHealth_Die_m1B434F913AB18EFB0C07738597696A9A2F0E4A03(__this, L_33, NULL);
+	}
+
+IL_00b8:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:58>
+		return;
+	}
+}
+// Method Definition Index: 49368
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHealth_Die_m1B434F913AB18EFB0C07738597696A9A2F0E4A03 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, String_t* ___0_killingZone, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral026E10DFF0723086CAA2D219772EB5C4B18395A1);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral23C02924FA8C5A15B58E9DDD13C84007E2431466);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralF241CDA6CA298059488F9A33C9558A6821C0F5F4);
+		s_Il2CppMethodInitialized = true;
+	}
+	Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* G_B2_0 = NULL;
+	Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* G_B1_0 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:64>
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_0 = (StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248*)(StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248*)SZArrayNew(StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248_il2cpp_TypeInfo_var, (uint32_t)5);
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_1 = L_0;
+		NullCheck(L_1);
+		(L_1)->SetAt(static_cast<il2cpp_array_size_t>(0), (String_t*)_stringLiteral026E10DFF0723086CAA2D219772EB5C4B18395A1);
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_2 = L_1;
+		String_t* L_3;
+		L_3 = Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392(__this, NULL);
+		NullCheck(L_2);
+		(L_2)->SetAt(static_cast<il2cpp_array_size_t>(1), (String_t*)L_3);
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_4 = L_2;
+		NullCheck(L_4);
+		(L_4)->SetAt(static_cast<il2cpp_array_size_t>(2), (String_t*)_stringLiteralF241CDA6CA298059488F9A33C9558A6821C0F5F4);
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_5 = L_4;
+		String_t* L_6 = ___0_killingZone;
+		NullCheck(L_5);
+		(L_5)->SetAt(static_cast<il2cpp_array_size_t>(3), (String_t*)L_6);
+		StringU5BU5D_t7674CD946EC0CE7B3AE0BE70E6EE85F2ECD9F248* L_7 = L_5;
+		NullCheck(L_7);
+		(L_7)->SetAt(static_cast<il2cpp_array_size_t>(4), (String_t*)_stringLiteral23C02924FA8C5A15B58E9DDD13C84007E2431466);
+		String_t* L_8;
+		L_8 = String_Concat_m647EBF831F54B6DF7D5AFA5FD012CF4EE7571B6A(L_7, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_8, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:65>
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_9 = __this->___OnDeath;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_10 = L_9;
+		if (L_10)
+		{
+			G_B2_0 = L_10;
+			goto IL_0040;
+		}
+		G_B1_0 = L_10;
+	}
+	{
+		return;
+	}
+
+IL_0040:
+	{
+		String_t* L_11 = ___0_killingZone;
+		NullCheck(G_B2_0);
+		Action_1_Invoke_m690438AAE38F9762172E3AE0A33D0B42ACD35790_inline(G_B2_0, L_11, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:66>
+		return;
+	}
+}
+// Method Definition Index: 49369
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHealth__ctor_mF3EEA1BA1F6C6612AA5C63C98ADDFBFAA55306C4 (EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHealth.cs:18>
+		__this->___maxHP = (100.0f);
+		MonoBehaviour__ctor_m592DB0105CA0BC97AA1C5F4AD27B12D68A3B7C1E(__this, NULL);
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49370
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHitReceiver_Awake_mF2AE33D63AD09488D5D37132E42F6D6CD388A7F7 (EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Component_GetComponentInParent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mEE3CA4624CE256B40AC7BA8EDCBE6DB6E3F99952_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:39>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_0 = __this->___enemyHealth;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_1)
+		{
+			goto IL_001a;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:40>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_2;
+		L_2 = Component_GetComponentInParent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mEE3CA4624CE256B40AC7BA8EDCBE6DB6E3F99952(__this, Component_GetComponentInParent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mEE3CA4624CE256B40AC7BA8EDCBE6DB6E3F99952_RuntimeMethod_var);
+		__this->___enemyHealth = L_2;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___enemyHealth), (void*)L_2);
+	}
+
+IL_001a:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:41>
+		return;
+	}
+}
+// Method Definition Index: 49371
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHitReceiver_OnCollisionEnter_mF53FFCF8342AA4AA8D0FFB3E456B2017C22FE7EB (EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4* __this, Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* ___0_collision, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Component_GetComponent_TisHitDetector_tB650BCFC49DCC68A070FB537DFD32FEDDD9E770A_mD49FBEA885593B6CE7119B98A3DB0A28B45BD57A_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralE8BF61EF4D6E16128D231B988541D23E92E64DA6);
+		s_Il2CppMethodInitialized = true;
+	}
+	Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* V_0 = NULL;
+	float V_1 = 0.0f;
+	float V_2 = 0.0f;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_3;
+	memset((&V_3), 0, sizeof(V_3));
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:45>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_0 = __this->___enemyHealth;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_1;
+		L_1 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_0, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (L_1)
+		{
+			goto IL_001b;
+		}
+	}
+	{
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_2 = __this->___enemyHealth;
+		NullCheck(L_2);
+		bool L_3;
+		L_3 = EnemyHealth_get_IsDead_m6EEAEDD6EFAF728FC9219967396DCAC4DAE8B0D4(L_2, NULL);
+		if (!L_3)
+		{
+			goto IL_001c;
+		}
+	}
+
+IL_001b:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:45>
+		return;
+	}
+
+IL_001c:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:48>
+		Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* L_4 = ___0_collision;
+		NullCheck(L_4);
+		Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76* L_5;
+		L_5 = Collision_get_collider_mBB5A086C78FE4BE0589E216F899B611673ADD25D(L_4, NULL);
+		NullCheck(L_5);
+		HitDetector_tB650BCFC49DCC68A070FB537DFD32FEDDD9E770A* L_6;
+		L_6 = Component_GetComponent_TisHitDetector_tB650BCFC49DCC68A070FB537DFD32FEDDD9E770A_mD49FBEA885593B6CE7119B98A3DB0A28B45BD57A(L_5, Component_GetComponent_TisHitDetector_tB650BCFC49DCC68A070FB537DFD32FEDDD9E770A_mD49FBEA885593B6CE7119B98A3DB0A28B45BD57A_RuntimeMethod_var);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:49>
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_7;
+		L_7 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_6, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_7)
+		{
+			goto IL_0030;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:49>
+		return;
+	}
+
+IL_0030:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:51>
+		Collision_tBCC6AEBD9A63E6DA2E50660DAC03CDCB1FF7A9B0* L_8 = ___0_collision;
+		NullCheck(L_8);
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_9;
+		L_9 = Collision_get_rigidbody_mD7A14B9C8AA98352340D2AB0097FC3A424FBB81B(L_8, NULL);
+		V_0 = L_9;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:52>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_10 = V_0;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_11;
+		L_11 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_10, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_11)
+		{
+			goto IL_0041;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:52>
+		return;
+	}
+
+IL_0041:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:54>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_12 = V_0;
+		NullCheck(L_12);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_13;
+		L_13 = Rigidbody_get_linearVelocity_m367F5415641E5FB968440A91BAE2FCB8CAEA2C8C(L_12, NULL);
+		V_3 = L_13;
+		float L_14;
+		L_14 = Vector3_get_magnitude_mF0D6017E90B345F1F52D1CC564C640F1A847AF2D_inline((&V_3), NULL);
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_15 = V_0;
+		NullCheck(L_15);
+		float L_16;
+		L_16 = Rigidbody_get_mass_m09DDDDC437499B83B3BD0D77C134BFDC3E667054(L_15, NULL);
+		V_1 = ((float)il2cpp_codegen_multiply(L_14, L_16));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:55>
+		float L_17 = V_1;
+		float L_18 = __this->___minForceThreshold;
+		if ((!(((float)L_17) < ((float)L_18))))
+		{
+			goto IL_0061;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:55>
+		return;
+	}
+
+IL_0061:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:57>
+		float L_19 = V_1;
+		float L_20 = __this->___damagePerNewton;
+		V_2 = ((float)il2cpp_codegen_multiply(L_19, L_20));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:58>
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_21 = (ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918*)SZArrayNew(ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918_il2cpp_TypeInfo_var, (uint32_t)5);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_22 = L_21;
+		NullCheck(L_22);
+		ArrayElementTypeCheck (L_22, _stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58);
+		(L_22)->SetAt(static_cast<il2cpp_array_size_t>(0), (RuntimeObject*)_stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_23 = L_22;
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_24 = __this->___enemyHealth;
+		NullCheck(L_24);
+		String_t* L_25;
+		L_25 = Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392(L_24, NULL);
+		NullCheck(L_23);
+		ArrayElementTypeCheck (L_23, L_25);
+		(L_23)->SetAt(static_cast<il2cpp_array_size_t>(1), (RuntimeObject*)L_25);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_26 = L_23;
+		String_t* L_27 = __this->___zoneName;
+		NullCheck(L_26);
+		ArrayElementTypeCheck (L_26, L_27);
+		(L_26)->SetAt(static_cast<il2cpp_array_size_t>(2), (RuntimeObject*)L_27);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_28 = L_26;
+		float L_29 = V_1;
+		float L_30 = L_29;
+		RuntimeObject* L_31 = Box(il2cpp_defaults.single_class, &L_30);
+		NullCheck(L_28);
+		ArrayElementTypeCheck (L_28, L_31);
+		(L_28)->SetAt(static_cast<il2cpp_array_size_t>(3), (RuntimeObject*)L_31);
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_32 = L_28;
+		float L_33 = V_2;
+		float L_34 = L_33;
+		RuntimeObject* L_35 = Box(il2cpp_defaults.single_class, &L_34);
+		NullCheck(L_32);
+		ArrayElementTypeCheck (L_32, L_35);
+		(L_32)->SetAt(static_cast<il2cpp_array_size_t>(4), (RuntimeObject*)L_35);
+		String_t* L_36;
+		L_36 = String_Format_m918500C1EFB475181349A79989BB79BB36102894(_stringLiteralE8BF61EF4D6E16128D231B988541D23E92E64DA6, L_32, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_36, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:60>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_37 = __this->___enemyHealth;
+		float L_38 = V_2;
+		String_t* L_39 = __this->___zoneName;
+		NullCheck(L_37);
+		EnemyHealth_TakeDamage_mB3D060750DAC88EDFC77D977C92C7AAF2F2B7B9C(L_37, L_38, L_39, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:61>
+		return;
+	}
+}
+// Method Definition Index: 49372
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemyHitReceiver__ctor_m9E0F783C4C78F9ACCD2BE469CAA325486FD381DD (EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral75E98C78538157035E0D0E268C0A2C76D23211BA);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:25>
+		__this->___zoneName = _stringLiteral75E98C78538157035E0D0E268C0A2C76D23211BA;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___zoneName), (void*)_stringLiteral75E98C78538157035E0D0E268C0A2C76D23211BA);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:31>
+		__this->___damagePerNewton = (3.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemyHitReceiver.cs:34>
+		__this->___minForceThreshold = (1.5f);
+		MonoBehaviour__ctor_m592DB0105CA0BC97AA1C5F4AD27B12D68A3B7C1E(__this, NULL);
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49373
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemySpawner_Start_m7084F6E6F370E513C8D58C6B5F535A83E4F63410 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:49>
+		EnemySpawner_SpawnInitialEnemies_mD6D2530139F3AC71820ECA828F6CB316AC7F1427(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:50>
+		return;
+	}
+}
+// Method Definition Index: 49374
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemySpawner_OnDestroy_m21522D096C19675C16B05B1C543D551E7AF33BD4 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Enumerator_Dispose_m07D362A07C19B36C2FD1B4DC79DD99903D4DA95D_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Enumerator_MoveNext_m96F4B0BD0A5485C8E8CC57D961DF6F1FA256AF27_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Enumerator_get_Current_m7236EBE1CFCB6533F96E030500D322B13D0CA5A4_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mF81DA6EF9A63C42BCE5B791ECED9E1D1DD51439B_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&List_1_GetEnumerator_mA843D26C63E5963415DFCA6E49DFA27AFD9C75E8_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&U3CU3Ec__DisplayClass9_0_U3COnDestroyU3Eb__0_m7E6BD45C96715406D57F4384933442E74EA9EACD_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1* V_1 = NULL;
+	EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* V_2 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:54>
+		MonoBehaviour_StopAllCoroutines_m872033451D42013A99867D09337490017E9ED318(__this, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:56>
+		List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* L_0 = __this->____liveEnemies;
+		NullCheck(L_0);
+		Enumerator_t88BD1282EF117E59AACFC9EC55B89F0B9EDACE60 L_1;
+		L_1 = List_1_GetEnumerator_mA843D26C63E5963415DFCA6E49DFA27AFD9C75E8(L_0, List_1_GetEnumerator_mA843D26C63E5963415DFCA6E49DFA27AFD9C75E8_RuntimeMethod_var);
+		V_0 = L_1;
+	}
+	{
+		auto __finallyBlock = il2cpp::utils::Finally([&]
+		{
+
+FINALLY_006e:
+			{
+				Enumerator_Dispose_m07D362A07C19B36C2FD1B4DC79DD99903D4DA95D((&V_0), Enumerator_Dispose_m07D362A07C19B36C2FD1B4DC79DD99903D4DA95D_RuntimeMethod_var);
+				return;
+			}
+		});
+		try
+		{
+			{
+				goto IL_0063_1;
+			}
+
+IL_0014_1:
+			{
+				U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1* L_2 = (U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1*)il2cpp_codegen_object_new(U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1_il2cpp_TypeInfo_var);
+				U3CU3Ec__DisplayClass9_0__ctor_mD838B455059A8ABACE17D74AC09EC92E2BF6DF35(L_2, NULL);
+				V_1 = L_2;
+				U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1* L_3 = V_1;
+				NullCheck(L_3);
+				L_3->___U3CU3E4__this = __this;
+				Il2CppCodeGenWriteBarrier((void**)(&L_3->___U3CU3E4__this), (void*)__this);
+				//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:56>
+				U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1* L_4 = V_1;
+				GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_5;
+				L_5 = Enumerator_get_Current_m7236EBE1CFCB6533F96E030500D322B13D0CA5A4_inline((&V_0), Enumerator_get_Current_m7236EBE1CFCB6533F96E030500D322B13D0CA5A4_RuntimeMethod_var);
+				NullCheck(L_4);
+				L_4->___enemy = L_5;
+				Il2CppCodeGenWriteBarrier((void**)(&L_4->___enemy), (void*)L_5);
+				//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:58>
+				U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1* L_6 = V_1;
+				NullCheck(L_6);
+				GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_7 = L_6->___enemy;
+				il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+				bool L_8;
+				L_8 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_7, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+				if (!L_8)
+				{
+					goto IL_0063_1;
+				}
+			}
+			{
+				//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:60>
+				U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1* L_9 = V_1;
+				NullCheck(L_9);
+				GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_10 = L_9->___enemy;
+				NullCheck(L_10);
+				EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_11;
+				L_11 = GameObject_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mF81DA6EF9A63C42BCE5B791ECED9E1D1DD51439B(L_10, GameObject_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mF81DA6EF9A63C42BCE5B791ECED9E1D1DD51439B_RuntimeMethod_var);
+				V_2 = L_11;
+				//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:61>
+				EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_12 = V_2;
+				il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+				bool L_13;
+				L_13 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_12, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+				if (!L_13)
+				{
+					goto IL_0063_1;
+				}
+			}
+			{
+				//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:63>
+				EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_14 = V_2;
+				U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1* L_15 = V_1;
+				Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_16 = (Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*)il2cpp_codegen_object_new(Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var);
+				Action_1__ctor_m9DC2953C55C4D7D4B7BEFE03D84DA1F9362D652C(L_16, L_15, (intptr_t)((void*)U3CU3Ec__DisplayClass9_0_U3COnDestroyU3Eb__0_m7E6BD45C96715406D57F4384933442E74EA9EACD_RuntimeMethod_var), NULL);
+				NullCheck(L_14);
+				EnemyHealth_remove_OnDeath_m2AB10C92639496946AC853CC4B4695964FEAE881(L_14, L_16, NULL);
+			}
+
+IL_0063_1:
+			{
+				//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:56>
+				bool L_17;
+				L_17 = Enumerator_MoveNext_m96F4B0BD0A5485C8E8CC57D961DF6F1FA256AF27((&V_0), Enumerator_MoveNext_m96F4B0BD0A5485C8E8CC57D961DF6F1FA256AF27_RuntimeMethod_var);
+				if (L_17)
+				{
+					goto IL_0014_1;
+				}
+			}
+			{
+				goto IL_007c;
+			}
+		}
+		catch(Il2CppExceptionWrapper& e)
+		{
+			__finallyBlock.StoreException(e.ex);
+		}
+	}
+
+IL_007c:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:67>
+		return;
+	}
+}
+// Method Definition Index: 49375
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemySpawner_SpawnInitialEnemies_mD6D2530139F3AC71820ECA828F6CB316AC7F1427 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, const RuntimeMethod* method) 
+{
+	int32_t V_0 = 0;
+	int32_t V_1 = 0;
+	int32_t G_B2_0 = 0;
+	int32_t G_B1_0 = 0;
+	int32_t G_B3_0 = 0;
+	int32_t G_B3_1 = 0;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:73>
+		int32_t L_0 = __this->___maxEnemies;
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_1 = __this->___spawnPoints;
+		NullCheck(L_1);
+		if ((((RuntimeArray*)L_1)->max_length))
+		{
+			G_B2_0 = L_0;
+			goto IL_0012;
+		}
+		G_B1_0 = L_0;
+	}
+	{
+		G_B3_0 = 1;
+		G_B3_1 = G_B1_0;
+		goto IL_001a;
+	}
+
+IL_0012:
+	{
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_2 = __this->___spawnPoints;
+		NullCheck(L_2);
+		G_B3_0 = ((int32_t)(((RuntimeArray*)L_2)->max_length));
+		G_B3_1 = G_B2_0;
+	}
+
+IL_001a:
+	{
+		int32_t L_3;
+		L_3 = Mathf_Min_m888083F74FF5655778F0403BB5E9608BEFDEA8CB_inline(G_B3_1, G_B3_0, NULL);
+		V_0 = L_3;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:74>
+		V_1 = 0;
+		goto IL_0035;
+	}
+
+IL_0024:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:76>
+		int32_t L_4 = V_1;
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_5;
+		L_5 = EnemySpawner_GetSpawnPoint_mFEF2536274D77EC0125C109DACEC1B92CDEB530B(__this, L_4, NULL);
+		EnemySpawner_SpawnEnemyAt_m464F5539B22ADBFF67C8779BC04C1FBD7A596F01(__this, L_5, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:74>
+		int32_t L_6 = V_1;
+		V_1 = ((int32_t)il2cpp_codegen_add(L_6, 1));
+	}
+
+IL_0035:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:74>
+		int32_t L_7 = V_1;
+		int32_t L_8 = V_0;
+		if ((((int32_t)L_7) < ((int32_t)L_8)))
+		{
+			goto IL_0024;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:78>
+		return;
+	}
+}
+// Method Definition Index: 49376
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* EnemySpawner_GetSpawnPoint_mFEF2536274D77EC0125C109DACEC1B92CDEB530B (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, int32_t ___0_index, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:82>
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_0 = __this->___spawnPoints;
+		if (!L_0)
+		{
+			goto IL_0025;
+		}
+	}
+	{
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_1 = __this->___spawnPoints;
+		NullCheck(L_1);
+		if (!(((RuntimeArray*)L_1)->max_length))
+		{
+			goto IL_0025;
+		}
+	}
+	{
+		int32_t L_2 = ___0_index;
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_3 = __this->___spawnPoints;
+		NullCheck(L_3);
+		if ((((int32_t)L_2) >= ((int32_t)((int32_t)(((RuntimeArray*)L_3)->max_length)))))
+		{
+			goto IL_0025;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:83>
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_4 = __this->___spawnPoints;
+		int32_t L_5 = ___0_index;
+		NullCheck(L_4);
+		int32_t L_6 = L_5;
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_7 = (L_4)->GetAt(static_cast<il2cpp_array_size_t>(L_6));
+		return L_7;
+	}
+
+IL_0025:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:84>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_8;
+		L_8 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		return L_8;
+	}
+}
+// Method Definition Index: 49377
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemySpawner_SpawnEnemyAt_m464F5539B22ADBFF67C8779BC04C1FBD7A596F01 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* ___0_spawnPoint, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mF81DA6EF9A63C42BCE5B791ECED9E1D1DD51439B_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&List_1_Add_m43FBF207375C6E06B8C45ECE614F9B8008FB686E_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&List_1_get_Count_m4C37ED2D928D63B80F55AF434730C2D64EEB9F22_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&U3CU3Ec__DisplayClass12_0_U3CSpawnEnemyAtU3Eb__0_m79E32FDA41F2451177F1D0E2D926DCBB9466D192_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral569E8F302DB63D3AD583080CA5A786AFB8AC07C6);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58);
+		s_Il2CppMethodInitialized = true;
+	}
+	U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* V_0 = NULL;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_1;
+	memset((&V_1), 0, sizeof(V_1));
+	Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 V_2;
+	memset((&V_2), 0, sizeof(V_2));
+	EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* V_3 = NULL;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 G_B5_0;
+	memset((&G_B5_0), 0, sizeof(G_B5_0));
+	Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 G_B8_0;
+	memset((&G_B8_0), 0, sizeof(G_B8_0));
+	{
+		U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* L_0 = (U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C*)il2cpp_codegen_object_new(U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C_il2cpp_TypeInfo_var);
+		U3CU3Ec__DisplayClass12_0__ctor_mBA9256BB4E758E2C4B22390AE8520B9F6E225B37(L_0, NULL);
+		V_0 = L_0;
+		U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* L_1 = V_0;
+		NullCheck(L_1);
+		L_1->___U3CU3E4__this = __this;
+		Il2CppCodeGenWriteBarrier((void**)(&L_1->___U3CU3E4__this), (void*)__this);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:89>
+		List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* L_2 = __this->____liveEnemies;
+		NullCheck(L_2);
+		int32_t L_3;
+		L_3 = List_1_get_Count_m4C37ED2D928D63B80F55AF434730C2D64EEB9F22_inline(L_2, List_1_get_Count_m4C37ED2D928D63B80F55AF434730C2D64EEB9F22_RuntimeMethod_var);
+		int32_t L_4 = __this->___maxEnemies;
+		if ((((int32_t)L_3) < ((int32_t)L_4)))
+		{
+			goto IL_0021;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:89>
+		return;
+	}
+
+IL_0021:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:91>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_5 = ___0_spawnPoint;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_6;
+		L_6 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_5, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (L_6)
+		{
+			goto IL_0037;
+		}
+	}
+	{
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_7;
+		L_7 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_7);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8;
+		L_8 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_7, NULL);
+		G_B5_0 = L_8;
+		goto IL_003d;
+	}
+
+IL_0037:
+	{
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_9 = ___0_spawnPoint;
+		NullCheck(L_9);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_10;
+		L_10 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_9, NULL);
+		G_B5_0 = L_10;
+	}
+
+IL_003d:
+	{
+		V_1 = G_B5_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:92>
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_11 = ___0_spawnPoint;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_12;
+		L_12 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_11, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (L_12)
+		{
+			goto IL_0054;
+		}
+	}
+	{
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_13;
+		L_13 = Component_get_transform_m2919A1D81931E6932C7F06D4C2F0AB8DDA9A5371(__this, NULL);
+		NullCheck(L_13);
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_14;
+		L_14 = Transform_get_rotation_m32AF40CA0D50C797DA639A696F8EAEC7524C179C(L_13, NULL);
+		G_B8_0 = L_14;
+		goto IL_005a;
+	}
+
+IL_0054:
+	{
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_15 = ___0_spawnPoint;
+		NullCheck(L_15);
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_16;
+		L_16 = Transform_get_rotation_m32AF40CA0D50C797DA639A696F8EAEC7524C179C(L_15, NULL);
+		G_B8_0 = L_16;
+	}
+
+IL_005a:
+	{
+		V_2 = G_B8_0;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:94>
+		U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* L_17 = V_0;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_18 = V_1;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_19 = V_2;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_20;
+		L_20 = EnemySpawner_CreateEnemyCapsule_m622E594D16A7D9A63B8BFD146FA586B908B1BFC3(__this, L_18, L_19, NULL);
+		NullCheck(L_17);
+		L_17->___enemy = L_20;
+		Il2CppCodeGenWriteBarrier((void**)(&L_17->___enemy), (void*)L_20);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:95>
+		List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* L_21 = __this->____liveEnemies;
+		U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* L_22 = V_0;
+		NullCheck(L_22);
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_23 = L_22->___enemy;
+		NullCheck(L_21);
+		List_1_Add_m43FBF207375C6E06B8C45ECE614F9B8008FB686E_inline(L_21, L_23, List_1_Add_m43FBF207375C6E06B8C45ECE614F9B8008FB686E_RuntimeMethod_var);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:98>
+		U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* L_24 = V_0;
+		NullCheck(L_24);
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_25 = L_24->___enemy;
+		NullCheck(L_25);
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_26;
+		L_26 = GameObject_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mF81DA6EF9A63C42BCE5B791ECED9E1D1DD51439B(L_25, GameObject_GetComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mF81DA6EF9A63C42BCE5B791ECED9E1D1DD51439B_RuntimeMethod_var);
+		V_3 = L_26;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:99>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_27 = V_3;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_28;
+		L_28 = Object_op_Inequality_mD0BE578448EAA61948F25C32F8DD55AB1F778602(L_27, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_28)
+		{
+			goto IL_00a1;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:101>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_29 = V_3;
+		U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* L_30 = V_0;
+		Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A* L_31 = (Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A*)il2cpp_codegen_object_new(Action_1_t3CB5D1A819C3ED3F99E9E39F890F18633253949A_il2cpp_TypeInfo_var);
+		Action_1__ctor_m9DC2953C55C4D7D4B7BEFE03D84DA1F9362D652C(L_31, L_30, (intptr_t)((void*)U3CU3Ec__DisplayClass12_0_U3CSpawnEnemyAtU3Eb__0_m79E32FDA41F2451177F1D0E2D926DCBB9466D192_RuntimeMethod_var), NULL);
+		NullCheck(L_29);
+		EnemyHealth_add_OnDeath_m0319084DFD62F6604E7ED2AFE7A1BF48D79A50D1(L_29, L_31, NULL);
+	}
+
+IL_00a1:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:104>
+		U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* L_32 = V_0;
+		NullCheck(L_32);
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_33 = L_32->___enemy;
+		NullCheck(L_33);
+		String_t* L_34;
+		L_34 = Object_get_name_mAC2F6B897CF1303BA4249B4CB55271AFACBB6392(L_33, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_35 = V_1;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_36 = L_35;
+		RuntimeObject* L_37 = Box(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var, &L_36);
+		String_t* L_38;
+		L_38 = String_Format_mA0534D6E2AE4D67A6BD8D45B3321323930EB930C(_stringLiteral569E8F302DB63D3AD583080CA5A786AFB8AC07C6, _stringLiteralDA93C063B13196FF0B835EDAD3BD91365A37CA58, L_34, L_37, NULL);
+		il2cpp_codegen_runtime_class_init_inline(Debug_t8394C7EEAECA3689C2C9B9DE9C7166D73596276F_il2cpp_TypeInfo_var);
+		Debug_Log_m87A9A3C761FF5C43ED8A53B16190A53D08F818BB(L_38, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:105>
+		return;
+	}
+}
+// Method Definition Index: 49378
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* EnemySpawner_HandleEnemyDeath_m7A1BDF397FEE4B82282D2A25A8A5808C30A5CB79 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_enemy, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654* L_0 = (U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654*)il2cpp_codegen_object_new(U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654_il2cpp_TypeInfo_var);
+		U3CHandleEnemyDeathU3Ed__13__ctor_mFE54500FFB5175DC0A6F3CCCDB71D3D9A40D3925(L_0, 0, NULL);
+		U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654* L_1 = L_0;
+		NullCheck(L_1);
+		L_1->___U3CU3E4__this = __this;
+		Il2CppCodeGenWriteBarrier((void**)(&L_1->___U3CU3E4__this), (void*)__this);
+		U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654* L_2 = L_1;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_3 = ___0_enemy;
+		NullCheck(L_2);
+		L_2->___enemy = L_3;
+		Il2CppCodeGenWriteBarrier((void**)(&L_2->___enemy), (void*)L_3);
+		return L_2;
+	}
+}
+// Method Definition Index: 49379
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* EnemySpawner_CreateEnemyCapsule_m622E594D16A7D9A63B8BFD146FA586B908B1BFC3 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_position, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 ___1_rotation, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_AddComponent_TisCapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808_mE9815ABBF56D4B7806C63F85A30AE9BBDE927BCF_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_AddComponent_TisEnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_m56EB203968AF4F76F425B8329DDCBED0BB1A5149_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_AddComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mE06661A0877DE97B98EED1F873BE29EA8EDD31A9_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_AddComponent_TisEnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4_m6E746025044A207217045649EBEE37C078A182DA_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_AddComponent_TisNavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F_m3397A16630528923E44BB23514E77B32D608DDDF_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_AddComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m03A761629A3F71B0248F1B26EF612F592B757093_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_GetComponent_TisCollider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76_m4CB0FC4E59CE6C91F1106739EF364208A63E2597_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_t76FEDD663AB33C991A9C9A23129337651094216F_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral07246594926ABB91074BACB82AB7EB455D2E7AEA);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral3260331AF5DA53ABC7CA7BAF659CF8D9FC93DEC7);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral75E98C78538157035E0D0E268C0A2C76D23211BA);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral8DD8D6FCBA1E38E53530F55F7B9061E65C123321);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteralE9C276987A94F49F88F906ABFDB3F1BE940DF8AC);
+		s_Il2CppMethodInitialized = true;
+	}
+	GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* V_0 = NULL;
+	EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* V_1 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:135>
+		int32_t L_0 = __this->____spawnCounter;
+		__this->____spawnCounter = ((int32_t)il2cpp_codegen_add(L_0, 1));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:136>
+		int32_t L_1 = __this->____spawnCounter;
+		int32_t L_2 = L_1;
+		RuntimeObject* L_3 = Box(il2cpp_defaults.int32_class, &L_2);
+		String_t* L_4;
+		L_4 = String_Format_mA8DBB4C2516B9723C5A41E6CB1E2FAF4BBE96DD8(_stringLiteral07246594926ABB91074BACB82AB7EB455D2E7AEA, L_3, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:139>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_5 = (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F*)il2cpp_codegen_object_new(GameObject_t76FEDD663AB33C991A9C9A23129337651094216F_il2cpp_TypeInfo_var);
+		GameObject__ctor_m37D512B05D292F954792225E6C6EEE95293A9B88(L_5, L_4, NULL);
+		V_0 = L_5;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:140>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_6 = V_0;
+		NullCheck(L_6);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_7;
+		L_7 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_6, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8 = ___0_position;
+		NullCheck(L_7);
+		Transform_set_position_mA1A817124BB41B685043DED2A9BA48CDF37C4156(L_7, L_8, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:141>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_9 = V_0;
+		NullCheck(L_9);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_10;
+		L_10 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_9, NULL);
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_11 = ___1_rotation;
+		NullCheck(L_10);
+		Transform_set_rotation_m61340DE74726CF0F9946743A727C4D444397331D(L_10, L_11, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:142>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_12 = V_0;
+		NullCheck(L_12);
+		GameObject_set_tag_m0A41528AFD8C83E1CEC5D769921159897CDD2B24(L_12, _stringLiteral3260331AF5DA53ABC7CA7BAF659CF8D9FC93DEC7, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:145>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_13 = V_0;
+		NullCheck(L_13);
+		CapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808* L_14;
+		L_14 = GameObject_AddComponent_TisCapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808_mE9815ABBF56D4B7806C63F85A30AE9BBDE927BCF(L_13, GameObject_AddComponent_TisCapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808_mE9815ABBF56D4B7806C63F85A30AE9BBDE927BCF_RuntimeMethod_var);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:146>
+		CapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808* L_15 = L_14;
+		NullCheck(L_15);
+		CapsuleCollider_set_height_m5DAE3DC5AD851E30C5A29AC7A22F36BE1E205BBB(L_15, (1.79999995f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:147>
+		CapsuleCollider_t3A1671C74F0836ABEF5D01A7470B5B2BE290A808* L_16 = L_15;
+		NullCheck(L_16);
+		CapsuleCollider_set_radius_mB301C0086FE0D251683512184B0F6DDE264BA985(L_16, (0.349999994f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:148>
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_17;
+		memset((&L_17), 0, sizeof(L_17));
+		Vector3__ctor_m376936E6B999EF1ECBE57D990A386303E2283DE0_inline((&L_17), (0.0f), (0.899999976f), (0.0f), NULL);
+		NullCheck(L_16);
+		CapsuleCollider_set_center_m242D92DAEF25887C6A87A0777E4E624C0A431A2E(L_16, L_17, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:151>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_18 = V_0;
+		NullCheck(L_18);
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_19;
+		L_19 = GameObject_AddComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m03A761629A3F71B0248F1B26EF612F592B757093(L_18, GameObject_AddComponent_TisRigidbody_t268697F5A994213ED97393309870968BC1C7393C_m03A761629A3F71B0248F1B26EF612F592B757093_RuntimeMethod_var);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:152>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_20 = L_19;
+		NullCheck(L_20);
+		Rigidbody_set_isKinematic_m6C3FD3EA358DADA3B191F2449CF1C4F8B22695ED(L_20, (bool)1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:153>
+		Rigidbody_t268697F5A994213ED97393309870968BC1C7393C* L_21 = L_20;
+		NullCheck(L_21);
+		Rigidbody_set_useGravity_m1B1B22E093F9DC92D7BEEBBE6B02642B3B6C4389(L_21, (bool)0, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:154>
+		NullCheck(L_21);
+		Rigidbody_set_constraints_mE81BF0DAEB980E320538231E092CA4663885A9A3(L_21, ((int32_t)112), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:157>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_22 = V_0;
+		NullCheck(L_22);
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_23;
+		L_23 = GameObject_AddComponent_TisNavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F_m3397A16630528923E44BB23514E77B32D608DDDF(L_22, GameObject_AddComponent_TisNavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F_m3397A16630528923E44BB23514E77B32D608DDDF_RuntimeMethod_var);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:158>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_24 = L_23;
+		NullCheck(L_24);
+		NavMeshAgent_set_height_mD2993FBF9895084E9F92025808E3307B92E057DA(L_24, (1.79999995f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:159>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_25 = L_24;
+		NullCheck(L_25);
+		NavMeshAgent_set_radius_m34F08DD2BD01A5DDA17FE1B02EE03D361B44F1AC(L_25, (0.349999994f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:160>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_26 = L_25;
+		NullCheck(L_26);
+		NavMeshAgent_set_baseOffset_m6BB6CF6115E987B0A6268D708148723119C9B122(L_26, (0.0f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:161>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_27 = L_26;
+		NullCheck(L_27);
+		NavMeshAgent_set_speed_m820E45289B3AE7DEE16F2F4BF163EAC361E64646(L_27, (2.0f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:162>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_28 = L_27;
+		NullCheck(L_28);
+		NavMeshAgent_set_angularSpeed_mD2AE9EE187EF1C45F519576B5FC8581DC6B7D683(L_28, (180.0f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:163>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_29 = L_28;
+		NullCheck(L_29);
+		NavMeshAgent_set_acceleration_mEAA92D7837B8D726891846DBBB6114DB13CD597E(L_29, (8.0f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:164>
+		NavMeshAgent_t5D0CCC0B3B78242F286C9BD8EDD87C3CCBD0A66F* L_30 = L_29;
+		NullCheck(L_30);
+		NavMeshAgent_set_stoppingDistance_m288A6280B55AAFF8578286747E19AF409C7C177F(L_30, (0.300000012f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:165>
+		NullCheck(L_30);
+		NavMeshAgent_set_autoBraking_m3BBDC74E6ADC3EB8BE0381C97B1D8715C1BC5283(L_30, (bool)1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:168>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_31 = V_0;
+		NullCheck(L_31);
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_32;
+		L_32 = GameObject_AddComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mE06661A0877DE97B98EED1F873BE29EA8EDD31A9(L_31, GameObject_AddComponent_TisEnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA_mE06661A0877DE97B98EED1F873BE29EA8EDD31A9_RuntimeMethod_var);
+		V_1 = L_32;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:169>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_33 = V_1;
+		float L_34 = __this->___enemyHP;
+		NullCheck(L_33);
+		L_33->___maxHP = L_34;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:172>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_35 = V_0;
+		NullCheck(L_35);
+		EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* L_36;
+		L_36 = GameObject_AddComponent_TisEnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_m56EB203968AF4F76F425B8329DDCBED0BB1A5149(L_35, GameObject_AddComponent_TisEnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945_m56EB203968AF4F76F425B8329DDCBED0BB1A5149_RuntimeMethod_var);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:173>
+		EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* L_37 = L_36;
+		PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* L_38 = __this->___patrolPath;
+		NullCheck(L_37);
+		L_37->___patrolPath = L_38;
+		Il2CppCodeGenWriteBarrier((void**)(&L_37->___patrolPath), (void*)L_38);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:174>
+		EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* L_39 = L_37;
+		NullCheck(L_39);
+		L_39->___visionRange = (15.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:175>
+		EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* L_40 = L_39;
+		NullCheck(L_40);
+		L_40->___visionHalfAngle = (60.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:176>
+		EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* L_41 = L_40;
+		NullCheck(L_41);
+		L_41->___hearingRadius = (5.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:177>
+		EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* L_42 = L_41;
+		NullCheck(L_42);
+		L_42->___patrolSpeed = (1.79999995f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:178>
+		EnemyAI_t45BC9C930C6CFCD4D4B636E3AC299CEEF6B73945* L_43 = L_42;
+		NullCheck(L_43);
+		L_43->___chaseSpeed = (4.5f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:179>
+		NullCheck(L_43);
+		L_43->___meleeRange = (2.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:182>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_44;
+		L_44 = GameObject_CreatePrimitive_m13C0A691E679A83DD595913200A1DD9A906EB47B(1, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:183>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_45 = L_44;
+		NullCheck(L_45);
+		Object_set_name_mC79E6DC8FFD72479C90F0C4CC7F42A0FEAF5AE47(L_45, _stringLiteralE9C276987A94F49F88F906ABFDB3F1BE940DF8AC, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:184>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_46 = L_45;
+		NullCheck(L_46);
+		Collider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76* L_47;
+		L_47 = GameObject_GetComponent_TisCollider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76_m4CB0FC4E59CE6C91F1106739EF364208A63E2597(L_46, GameObject_GetComponent_TisCollider_t1CC3163924FCD6C4CC2E816373A929C1E3D55E76_m4CB0FC4E59CE6C91F1106739EF364208A63E2597_RuntimeMethod_var);
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		Object_Destroy_mE97D0A766419A81296E8D4E5C23D01D3FE91ACBB(L_47, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:185>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_48 = L_46;
+		NullCheck(L_48);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_49;
+		L_49 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_48, NULL);
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_50 = V_0;
+		NullCheck(L_50);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_51;
+		L_51 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_50, NULL);
+		NullCheck(L_49);
+		Transform_SetParent_m6677538B60246D958DD91F931C50F969CCBB5250(L_49, L_51, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:186>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_52 = L_48;
+		NullCheck(L_52);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_53;
+		L_53 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_52, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_54;
+		memset((&L_54), 0, sizeof(L_54));
+		Vector3__ctor_m376936E6B999EF1ECBE57D990A386303E2283DE0_inline((&L_54), (0.0f), (0.899999976f), (0.0f), NULL);
+		NullCheck(L_53);
+		Transform_set_localPosition_mDE1C997F7D79C0885210B7732B4BA50EE7D73134(L_53, L_54, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:187>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_55 = L_52;
+		NullCheck(L_55);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_56;
+		L_56 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_55, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_57;
+		memset((&L_57), 0, sizeof(L_57));
+		Vector3__ctor_m376936E6B999EF1ECBE57D990A386303E2283DE0_inline((&L_57), (0.699999988f), (0.899999976f), (0.699999988f), NULL);
+		NullCheck(L_56);
+		Transform_set_localScale_mBA79E811BAF6C47B80FF76414C12B47B3CD03633(L_56, L_57, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:188>
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_58;
+		memset((&L_58), 0, sizeof(L_58));
+		Color__ctor_mCD6889CDE39F18704CD6EA8E2EFBFA48BA3E13B0_inline((&L_58), (0.150000006f), (0.75f), (0.150000006f), NULL);
+		EnemySpawner_ApplyEnemyMaterial_m3F76E6B5C1111F93087998E80BE5894A711982F8(L_55, L_58, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:191>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_59;
+		L_59 = GameObject_CreatePrimitive_m13C0A691E679A83DD595913200A1DD9A906EB47B(0, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:192>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_60 = L_59;
+		NullCheck(L_60);
+		Object_set_name_mC79E6DC8FFD72479C90F0C4CC7F42A0FEAF5AE47(L_60, _stringLiteral8DD8D6FCBA1E38E53530F55F7B9061E65C123321, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:193>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_61 = L_60;
+		NullCheck(L_61);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_62;
+		L_62 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_61, NULL);
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_63 = V_0;
+		NullCheck(L_63);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_64;
+		L_64 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_63, NULL);
+		NullCheck(L_62);
+		Transform_SetParent_m6677538B60246D958DD91F931C50F969CCBB5250(L_62, L_64, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:194>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_65 = L_61;
+		NullCheck(L_65);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_66;
+		L_66 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_65, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_67;
+		memset((&L_67), 0, sizeof(L_67));
+		Vector3__ctor_m376936E6B999EF1ECBE57D990A386303E2283DE0_inline((&L_67), (0.0f), (1.75f), (0.0f), NULL);
+		NullCheck(L_66);
+		Transform_set_localPosition_mDE1C997F7D79C0885210B7732B4BA50EE7D73134(L_66, L_67, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:195>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_68 = L_65;
+		NullCheck(L_68);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_69;
+		L_69 = GameObject_get_transform_m0BC10ADFA1632166AE5544BDF9038A2650C2AE56(L_68, NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_70;
+		L_70 = Vector3_get_one_mC9B289F1E15C42C597180C9FE6FB492495B51D02_inline(NULL);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_71;
+		L_71 = Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline(L_70, (0.280000001f), NULL);
+		NullCheck(L_69);
+		Transform_set_localScale_mBA79E811BAF6C47B80FF76414C12B47B3CD03633(L_69, L_71, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:196>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_72 = L_68;
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_73;
+		memset((&L_73), 0, sizeof(L_73));
+		Color__ctor_mCD6889CDE39F18704CD6EA8E2EFBFA48BA3E13B0_inline((&L_73), (0.100000001f), (0.550000012f), (0.100000001f), NULL);
+		EnemySpawner_ApplyEnemyMaterial_m3F76E6B5C1111F93087998E80BE5894A711982F8(L_72, L_73, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:199>
+		NullCheck(L_72);
+		EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4* L_74;
+		L_74 = GameObject_AddComponent_TisEnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4_m6E746025044A207217045649EBEE37C078A182DA(L_72, GameObject_AddComponent_TisEnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4_m6E746025044A207217045649EBEE37C078A182DA_RuntimeMethod_var);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:200>
+		EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4* L_75 = L_74;
+		NullCheck(L_75);
+		L_75->___zoneName = _stringLiteral8DD8D6FCBA1E38E53530F55F7B9061E65C123321;
+		Il2CppCodeGenWriteBarrier((void**)(&L_75->___zoneName), (void*)_stringLiteral8DD8D6FCBA1E38E53530F55F7B9061E65C123321);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:201>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_76 = V_1;
+		NullCheck(L_75);
+		L_75->___enemyHealth = L_76;
+		Il2CppCodeGenWriteBarrier((void**)(&L_75->___enemyHealth), (void*)L_76);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:204>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_77 = V_0;
+		NullCheck(L_77);
+		EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4* L_78;
+		L_78 = GameObject_AddComponent_TisEnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4_m6E746025044A207217045649EBEE37C078A182DA(L_77, GameObject_AddComponent_TisEnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4_m6E746025044A207217045649EBEE37C078A182DA_RuntimeMethod_var);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:205>
+		EnemyHitReceiver_tDEC47695B74676E1E69E6798238CAA7801921FD4* L_79 = L_78;
+		NullCheck(L_79);
+		L_79->___zoneName = _stringLiteral75E98C78538157035E0D0E268C0A2C76D23211BA;
+		Il2CppCodeGenWriteBarrier((void**)(&L_79->___zoneName), (void*)_stringLiteral75E98C78538157035E0D0E268C0A2C76D23211BA);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:206>
+		EnemyHealth_t8B8F978AAE24FB5C9EFCAB8B38B63116BBEC49EA* L_80 = V_1;
+		NullCheck(L_79);
+		L_79->___enemyHealth = L_80;
+		Il2CppCodeGenWriteBarrier((void**)(&L_79->___enemyHealth), (void*)L_80);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:208>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_81 = V_0;
+		return L_81;
+	}
+}
+// Method Definition Index: 49380
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemySpawner_ApplyEnemyMaterial_m3F76E6B5C1111F93087998E80BE5894A711982F8 (GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* ___0_go, Color_tD001788D726C3A7F1379BEED0260B9591F440C1F ___1_color, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&GameObject_GetComponent_TisRenderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF_m026EB44DB6238F13E2AFBECF1FBBE924CB1B040A_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral2620038B8A71EF21A205CC921576171A3CA9B0F4);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral9B4FEEFA76B93D58B6E47CD9FF76F6E287D0D321);
+		s_Il2CppMethodInitialized = true;
+	}
+	Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* V_0 = NULL;
+	Shader_tADC867D36B7876EE22427FAA2CE485105F4EE692* V_1 = NULL;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:213>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_0 = ___0_go;
+		NullCheck(L_0);
+		Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* L_1;
+		L_1 = GameObject_GetComponent_TisRenderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF_m026EB44DB6238F13E2AFBECF1FBBE924CB1B040A(L_0, GameObject_GetComponent_TisRenderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF_m026EB44DB6238F13E2AFBECF1FBBE924CB1B040A_RuntimeMethod_var);
+		V_0 = L_1;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:214>
+		Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* L_2 = V_0;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_3;
+		L_3 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_2, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_3)
+		{
+			goto IL_0011;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:214>
+		return;
+	}
+
+IL_0011:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:215>
+		Shader_tADC867D36B7876EE22427FAA2CE485105F4EE692* L_4;
+		L_4 = Shader_Find_m183AA54F78320212DDEC811592F98456898A41C5(_stringLiteral9B4FEEFA76B93D58B6E47CD9FF76F6E287D0D321, NULL);
+		V_1 = L_4;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:216>
+		Shader_tADC867D36B7876EE22427FAA2CE485105F4EE692* L_5 = V_1;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_6;
+		L_6 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_5, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_6)
+		{
+			goto IL_0030;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:216>
+		Shader_tADC867D36B7876EE22427FAA2CE485105F4EE692* L_7;
+		L_7 = Shader_Find_m183AA54F78320212DDEC811592F98456898A41C5(_stringLiteral2620038B8A71EF21A205CC921576171A3CA9B0F4, NULL);
+		V_1 = L_7;
+	}
+
+IL_0030:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:217>
+		Renderer_t320575F223BCB177A982E5DDB5DB19FAA89E7FBF* L_8 = V_0;
+		Shader_tADC867D36B7876EE22427FAA2CE485105F4EE692* L_9 = V_1;
+		Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* L_10 = (Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3*)il2cpp_codegen_object_new(Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3_il2cpp_TypeInfo_var);
+		Material__ctor_m7FDF47105D66D19591BE505A0C42B0F90D88C9BF(L_10, L_9, NULL);
+		Material_t18053F08F347D0DCA5E1140EC7EC4533DD8A14E3* L_11 = L_10;
+		Color_tD001788D726C3A7F1379BEED0260B9591F440C1F L_12 = ___1_color;
+		NullCheck(L_11);
+		Material_set_color_m5C32DEBB215FF9EE35E7B575297D8C2F29CC2A2D(L_11, L_12, NULL);
+		NullCheck(L_8);
+		Renderer_set_material_m21E88977071E0A914D62F3D9CFF0193B3117C45A(L_8, L_11, NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:218>
+		return;
+	}
+}
+// Method Definition Index: 49381
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void EnemySpawner__ctor_m12637542BBCC8FBDAC54D4DF1D7C28F4131D7111 (EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&List_1__ctor_m447372C1EF7141193B93090A77395B786C72C7BC_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:25>
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_0 = (TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24*)(TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24*)SZArrayNew(TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24_il2cpp_TypeInfo_var, (uint32_t)0);
+		__this->___spawnPoints = L_0;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___spawnPoints), (void*)L_0);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:28>
+		__this->___maxEnemies = 5;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:31>
+		__this->___respawnDelay = (30.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:38>
+		__this->___enemyHP = (100.0f);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:42>
+		List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* L_1 = (List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B*)il2cpp_codegen_object_new(List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B_il2cpp_TypeInfo_var);
+		List_1__ctor_m447372C1EF7141193B93090A77395B786C72C7BC(L_1, List_1__ctor_m447372C1EF7141193B93090A77395B786C72C7BC_RuntimeMethod_var);
+		__this->____liveEnemies = L_1;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->____liveEnemies), (void*)L_1);
+		MonoBehaviour__ctor_m592DB0105CA0BC97AA1C5F4AD27B12D68A3B7C1E(__this, NULL);
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49382
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass12_0__ctor_mBA9256BB4E758E2C4B22390AE8520B9F6E225B37 (U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* __this, const RuntimeMethod* method) 
+{
+	{
+		Object__ctor_mE837C6B9FA8C6D5D109F4B2EC885D79919AC0EA2(__this, NULL);
+		return;
+	}
+}
+// Method Definition Index: 49383
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass12_0_U3CSpawnEnemyAtU3Eb__0_m79E32FDA41F2451177F1D0E2D926DCBB9466D192 (U3CU3Ec__DisplayClass12_0_tD9854E7EB435A80E0D2673A7BB4A6FD7A270625C* __this, String_t* ___0__, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:101>
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_0 = __this->___U3CU3E4__this;
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_1 = __this->___U3CU3E4__this;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_2 = __this->___enemy;
+		NullCheck(L_1);
+		RuntimeObject* L_3;
+		L_3 = EnemySpawner_HandleEnemyDeath_m7A1BDF397FEE4B82282D2A25A8A5808C30A5CB79(L_1, L_2, NULL);
+		NullCheck(L_0);
+		Coroutine_t85EA685566A254C23F3FD77AB5BDFFFF8799596B* L_4;
+		L_4 = MonoBehaviour_StartCoroutine_m4CAFF732AA28CD3BDC5363B44A863575530EC812(L_0, L_3, NULL);
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49384
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass9_0__ctor_mD838B455059A8ABACE17D74AC09EC92E2BF6DF35 (U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1* __this, const RuntimeMethod* method) 
+{
+	{
+		Object__ctor_mE837C6B9FA8C6D5D109F4B2EC885D79919AC0EA2(__this, NULL);
+		return;
+	}
+}
+// Method Definition Index: 49385
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CU3Ec__DisplayClass9_0_U3COnDestroyU3Eb__0_m7E6BD45C96715406D57F4384933442E74EA9EACD (U3CU3Ec__DisplayClass9_0_tD8B480744B503AFFE443B355E12C3FB4424FB5C1* __this, String_t* ___0__, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:63>
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_0 = __this->___U3CU3E4__this;
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_1 = __this->___U3CU3E4__this;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_2 = __this->___enemy;
+		NullCheck(L_1);
+		RuntimeObject* L_3;
+		L_3 = EnemySpawner_HandleEnemyDeath_m7A1BDF397FEE4B82282D2A25A8A5808C30A5CB79(L_1, L_2, NULL);
+		NullCheck(L_0);
+		Coroutine_t85EA685566A254C23F3FD77AB5BDFFFF8799596B* L_4;
+		L_4 = MonoBehaviour_StartCoroutine_m4CAFF732AA28CD3BDC5363B44A863575530EC812(L_0, L_3, NULL);
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49386
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleEnemyDeathU3Ed__13__ctor_mFE54500FFB5175DC0A6F3CCCDB71D3D9A40D3925 (U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654* __this, int32_t ___0_U3CU3E1__state, const RuntimeMethod* method) 
+{
+	{
+		Object__ctor_mE837C6B9FA8C6D5D109F4B2EC885D79919AC0EA2(__this, NULL);
+		int32_t L_0 = ___0_U3CU3E1__state;
+		__this->___U3CU3E1__state = L_0;
+		return;
+	}
+}
+// Method Definition Index: 49387
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleEnemyDeathU3Ed__13_System_IDisposable_Dispose_m4EF1B617675881C1879B599AEB43878FC05131EA (U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654* __this, const RuntimeMethod* method) 
+{
+	{
+		return;
+	}
+}
+// Method Definition Index: 49388
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool U3CHandleEnemyDeathU3Ed__13_MoveNext_m276489D323336D69D3B769158550A7F6EEDAE516 (U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&List_1_Remove_mCCE85D4D5326536C4B214C73D07030F4CCD18485_RuntimeMethod_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	int32_t V_0 = 0;
+	EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* V_1 = NULL;
+	int32_t V_2 = 0;
+	{
+		int32_t L_0 = __this->___U3CU3E1__state;
+		V_0 = L_0;
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_1 = __this->___U3CU3E4__this;
+		V_1 = L_1;
+		int32_t L_2 = V_0;
+		switch (L_2)
+		{
+			case 0:
+			{
+				goto IL_0022;
+			}
+			case 1:
+			{
+				goto IL_0042;
+			}
+			case 2:
+			{
+				goto IL_0098;
+			}
+		}
+	}
+	{
+		return (bool)0;
+	}
+
+IL_0022:
+	{
+		__this->___U3CU3E1__state = (-1);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:110>
+		WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3* L_3 = (WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3*)il2cpp_codegen_object_new(WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3_il2cpp_TypeInfo_var);
+		WaitForSeconds__ctor_m579F95BADEDBAB4B3A7E302C6EE3995926EF2EFC(L_3, (5.0f), NULL);
+		__this->___U3CU3E2__current = L_3;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CU3E2__current), (void*)L_3);
+		__this->___U3CU3E1__state = 1;
+		return (bool)1;
+	}
+
+IL_0042:
+	{
+		__this->___U3CU3E1__state = (-1);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:112>
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_4 = V_1;
+		NullCheck(L_4);
+		List_1_tB951CE80B58D1BF9650862451D8DAD8C231F207B* L_5 = L_4->____liveEnemies;
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_6 = __this->___enemy;
+		NullCheck(L_5);
+		bool L_7;
+		L_7 = List_1_Remove_mCCE85D4D5326536C4B214C73D07030F4CCD18485(L_5, L_6, List_1_Remove_mCCE85D4D5326536C4B214C73D07030F4CCD18485_RuntimeMethod_var);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:113>
+		GameObject_t76FEDD663AB33C991A9C9A23129337651094216F* L_8 = __this->___enemy;
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		Object_Destroy_m064F2A066491D2DC4FFCFBDBE5FCFFB807A04436(L_8, (2.0f), NULL);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:115>
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_9 = V_1;
+		NullCheck(L_9);
+		float L_10 = L_9->___respawnDelay;
+		if ((!(((float)L_10) > ((float)(0.0f)))))
+		{
+			goto IL_00c1;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:117>
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_11 = V_1;
+		NullCheck(L_11);
+		float L_12 = L_11->___respawnDelay;
+		WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3* L_13 = (WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3*)il2cpp_codegen_object_new(WaitForSeconds_tF179DF251655B8DF044952E70A60DF4B358A3DD3_il2cpp_TypeInfo_var);
+		WaitForSeconds__ctor_m579F95BADEDBAB4B3A7E302C6EE3995926EF2EFC(L_13, ((float)il2cpp_codegen_subtract(L_12, (5.0f))), NULL);
+		__this->___U3CU3E2__current = L_13;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___U3CU3E2__current), (void*)L_13);
+		__this->___U3CU3E1__state = 2;
+		return (bool)1;
+	}
+
+IL_0098:
+	{
+		__this->___U3CU3E1__state = (-1);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:119>
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_14 = V_1;
+		NullCheck(L_14);
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_15 = L_14->___spawnPoints;
+		NullCheck(L_15);
+		int32_t L_16;
+		L_16 = Mathf_Max_m7FA442918DE37E3A00106D1F2E789D65829792B8_inline(1, ((int32_t)(((RuntimeArray*)L_15)->max_length)), NULL);
+		int32_t L_17;
+		L_17 = Random_Range_m6763D9767F033357F88B6637F048F4ACA4123B68(0, L_16, NULL);
+		V_2 = L_17;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:120>
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_18 = V_1;
+		EnemySpawner_t5B9AD0F8C0EDAAEF58E46D5B418A1D11B7D95E01* L_19 = V_1;
+		int32_t L_20 = V_2;
+		NullCheck(L_19);
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_21;
+		L_21 = EnemySpawner_GetSpawnPoint_mFEF2536274D77EC0125C109DACEC1B92CDEB530B(L_19, L_20, NULL);
+		NullCheck(L_18);
+		EnemySpawner_SpawnEnemyAt_m464F5539B22ADBFF67C8779BC04C1FBD7A596F01(L_18, L_21, NULL);
+	}
+
+IL_00c1:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/EnemySpawner.cs:122>
+		return (bool)0;
+	}
+}
+// Method Definition Index: 49389
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CHandleEnemyDeathU3Ed__13_System_Collections_Generic_IEnumeratorU3CSystem_ObjectU3E_get_Current_m15297A5AA375C36819DBABEFFD89AED127EC6DDA (U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654* __this, const RuntimeMethod* method) 
+{
+	{
+		RuntimeObject* L_0 = __this->___U3CU3E2__current;
+		return L_0;
+	}
+}
+// Method Definition Index: 49390
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void U3CHandleEnemyDeathU3Ed__13_System_Collections_IEnumerator_Reset_mD97F259700D3A373855246C354890D08DBA2D5DF (U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654* __this, const RuntimeMethod* method) 
+{
+	{
+		NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A* L_0 = (NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A*)il2cpp_codegen_object_new(((RuntimeClass*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&NotSupportedException_t1429765983D409BD2986508963C98D214E4EBF4A_il2cpp_TypeInfo_var)));
+		NotSupportedException__ctor_m1398D0CDE19B36AA3DE9392879738C1EA2439CDF(L_0, NULL);
+		IL2CPP_RAISE_MANAGED_EXCEPTION(L_0, ((RuntimeMethod*)il2cpp_codegen_initialize_runtime_metadata_inline((uintptr_t*)&U3CHandleEnemyDeathU3Ed__13_System_Collections_IEnumerator_Reset_mD97F259700D3A373855246C354890D08DBA2D5DF_RuntimeMethod_var)));
+	}
+}
+// Method Definition Index: 49391
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR RuntimeObject* U3CHandleEnemyDeathU3Ed__13_System_Collections_IEnumerator_get_Current_m4D2A96EF50A7AAECEBFAF24D5BFE7B3FBBA1A9F7 (U3CHandleEnemyDeathU3Ed__13_tBE58F383FB887B3DAAEA4709CB8D278F392DC654* __this, const RuntimeMethod* method) 
+{
+	{
+		RuntimeObject* L_0 = __this->___U3CU3E2__current;
+		return L_0;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49392
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t PatrolPath_GetNextIndex_m0E1DB2644FFBCAB930E5630A21CBDDA07FD8BB20 (PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* __this, int32_t ___0_currentIndex, int32_t* ___1_direction, const RuntimeMethod* method) 
+{
+	int32_t V_0 = 0;
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:28>
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_0 = __this->___waypoints;
+		if (!L_0)
+		{
+			goto IL_0011;
+		}
+	}
+	{
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_1 = __this->___waypoints;
+		NullCheck(L_1);
+		if ((((RuntimeArray*)L_1)->max_length))
+		{
+			goto IL_0013;
+		}
+	}
+
+IL_0011:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:28>
+		return 0;
+	}
+
+IL_0013:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:30>
+		int32_t L_2 = __this->___mode;
+		if (L_2)
+		{
+			goto IL_0028;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:32>
+		int32_t L_3 = ___0_currentIndex;
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_4 = __this->___waypoints;
+		NullCheck(L_4);
+		return ((int32_t)(((int32_t)il2cpp_codegen_add(L_3, 1))%((int32_t)(((RuntimeArray*)L_4)->max_length))));
+	}
+
+IL_0028:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:36>
+		int32_t L_5 = ___0_currentIndex;
+		int32_t* L_6 = ___1_direction;
+		int32_t L_7 = *((int32_t*)L_6);
+		V_0 = ((int32_t)il2cpp_codegen_add(L_5, L_7));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:37>
+		int32_t L_8 = V_0;
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_9 = __this->___waypoints;
+		NullCheck(L_9);
+		if ((((int32_t)L_8) < ((int32_t)((int32_t)(((RuntimeArray*)L_9)->max_length)))))
+		{
+			goto IL_004e;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:39>
+		int32_t* L_10 = ___1_direction;
+		*((int32_t*)L_10) = (int32_t)(-1);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:40>
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_11 = __this->___waypoints;
+		NullCheck(L_11);
+		V_0 = ((int32_t)il2cpp_codegen_subtract(((int32_t)(((RuntimeArray*)L_11)->max_length)), 2));
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:41>
+		int32_t L_12 = V_0;
+		if ((((int32_t)L_12) >= ((int32_t)0)))
+		{
+			goto IL_0064;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:41>
+		V_0 = 0;
+		goto IL_0064;
+	}
+
+IL_004e:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:43>
+		int32_t L_13 = V_0;
+		if ((((int32_t)L_13) >= ((int32_t)0)))
+		{
+			goto IL_0064;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:45>
+		int32_t* L_14 = ___1_direction;
+		*((int32_t*)L_14) = (int32_t)1;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:46>
+		V_0 = 1;
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:47>
+		int32_t L_15 = V_0;
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_16 = __this->___waypoints;
+		NullCheck(L_16);
+		if ((((int32_t)L_15) < ((int32_t)((int32_t)(((RuntimeArray*)L_16)->max_length)))))
+		{
+			goto IL_0064;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:47>
+		V_0 = 0;
+	}
+
+IL_0064:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:49>
+		int32_t L_17 = V_0;
+		return L_17;
+	}
+}
+// Method Definition Index: 49393
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 PatrolPath_GetWaypointPosition_m8AC767B08869BE51107A0F38013E06D01877EFD2 (PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* __this, int32_t ___0_index, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:55>
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_0 = __this->___waypoints;
+		if (!L_0)
+		{
+			goto IL_0017;
+		}
+	}
+	{
+		int32_t L_1 = ___0_index;
+		if ((((int32_t)L_1) < ((int32_t)0)))
+		{
+			goto IL_0017;
+		}
+	}
+	{
+		int32_t L_2 = ___0_index;
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_3 = __this->___waypoints;
+		NullCheck(L_3);
+		if ((((int32_t)L_2) < ((int32_t)((int32_t)(((RuntimeArray*)L_3)->max_length)))))
+		{
+			goto IL_001d;
+		}
+	}
+
+IL_0017:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:55>
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_4;
+		L_4 = Vector3_get_zero_m0C1249C3F25B1C70EAD3CC8B31259975A457AE39_inline(NULL);
+		return L_4;
+	}
+
+IL_001d:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:56>
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_5 = __this->___waypoints;
+		int32_t L_6 = ___0_index;
+		NullCheck(L_5);
+		int32_t L_7 = L_6;
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_8 = (L_5)->GetAt(static_cast<il2cpp_array_size_t>(L_7));
+		il2cpp_codegen_runtime_class_init_inline(Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C_il2cpp_TypeInfo_var);
+		bool L_9;
+		L_9 = Object_op_Equality_mB6120F782D83091EF56A198FCEBCF066DB4A9605(L_8, (Object_tC12DECB6760A7F2CBF65D9DCF18D044C2D97152C*)NULL, NULL);
+		if (!L_9)
+		{
+			goto IL_0033;
+		}
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:56>
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_10;
+		L_10 = Vector3_get_zero_m0C1249C3F25B1C70EAD3CC8B31259975A457AE39_inline(NULL);
+		return L_10;
+	}
+
+IL_0033:
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:57>
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_11 = __this->___waypoints;
+		int32_t L_12 = ___0_index;
+		NullCheck(L_11);
+		int32_t L_13 = L_12;
+		Transform_tB27202C6F4E36D225EE28A13E4D662BF99785DB1* L_14 = (L_11)->GetAt(static_cast<il2cpp_array_size_t>(L_13));
+		NullCheck(L_14);
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_15;
+		L_15 = Transform_get_position_m69CD5FA214FDAE7BB701552943674846C220FDE1(L_14, NULL);
+		return L_15;
+	}
+}
+// Method Definition Index: 49394
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool PatrolPath_get_HasWaypoints_m03A93E87E564013CFED58313E62D57F05839F93A (PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* __this, const RuntimeMethod* method) 
+{
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:60>
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_0 = __this->___waypoints;
+		if (!L_0)
+		{
+			goto IL_0013;
+		}
+	}
+	{
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_1 = __this->___waypoints;
+		NullCheck(L_1);
+		return (bool)((!(((uint32_t)(((RuntimeArray*)L_1)->max_length)) <= ((uint32_t)0)))? 1 : 0);
+	}
+
+IL_0013:
+	{
+		return (bool)0;
+	}
+}
+// Method Definition Index: 49395
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void PatrolPath__ctor_m6235736AB8C051761798B5125151CEED99A7DE8B (PatrolPath_t87F7742BA18332346738EF90787767CEB9F43E39* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/PatrolPath.cs:15>
+		TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24* L_0 = (TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24*)(TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24*)SZArrayNew(TransformU5BU5D_tBB9C5F5686CAE82E3D97D43DF0F3D68ABF75EC24_il2cpp_TypeInfo_var, (uint32_t)0);
+		__this->___waypoints = L_0;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___waypoints), (void*)L_0);
+		MonoBehaviour__ctor_m592DB0105CA0BC97AA1C5F4AD27B12D68A3B7C1E(__this, NULL);
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+// Method Definition Index: 49396
+IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void SpawnPointMarker__ctor_m1E7335269C96DD15D72C0C141186B9AD2A80DCDB (SpawnPointMarker_t269F4B1D99EFB115B959CE012C054F6D9565981E* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&_stringLiteral851B12482A0DB0F48D69369381FDBA6ED6FE38CA);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/SpawnPointMarker.cs:13>
+		__this->___pointLabel = _stringLiteral851B12482A0DB0F48D69369381FDBA6ED6FE38CA;
+		Il2CppCodeGenWriteBarrier((void**)(&__this->___pointLabel), (void*)_stringLiteral851B12482A0DB0F48D69369381FDBA6ED6FE38CA);
+		//<source_info:C:/Users/boris/Desktop/PLAGA44/testbed/plaga44-unity/Assets/Scripts/AI/SpawnPointMarker.cs:16>
+		__this->___isActive = (bool)1;
+		MonoBehaviour__ctor_m592DB0105CA0BC97AA1C5F4AD27B12D68A3B7C1E(__this, NULL);
+		return;
+	}
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winvalid-offsetof"
+#pragma clang diagnostic ignored "-Wunused-variable"
+#endif
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
+// Method Definition Index: 39412
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_get_magnitude_mF0D6017E90B345F1F52D1CC564C640F1A847AF2D_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Math_tEB65DE7CA8B083C412C969C92981C030865486CE_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		float L_0 = __this->___x;
+		float L_1 = __this->___x;
+		float L_2 = __this->___y;
+		float L_3 = __this->___y;
+		float L_4 = __this->___z;
+		float L_5 = __this->___z;
+		il2cpp_codegen_runtime_class_init_inline(Math_tEB65DE7CA8B083C412C969C92981C030865486CE_il2cpp_TypeInfo_var);
+		double L_6;
+		L_6 = sqrt(((double)((float)il2cpp_codegen_add(((float)il2cpp_codegen_add(((float)il2cpp_codegen_multiply(L_0, L_1)), ((float)il2cpp_codegen_multiply(L_2, L_3)))), ((float)il2cpp_codegen_multiply(L_4, L_5))))));
+		return ((float)L_6);
+	}
+}
+// Method Definition Index: 39533
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Clamp01_mA7E048DBDA832D399A581BE4D6DED9FA44CE0F14_inline (float ___0_value, const RuntimeMethod* method) 
+{
+	bool V_0 = false;
+	float V_1 = 0.0f;
+	bool V_2 = false;
+	{
+		float L_0 = ___0_value;
+		V_0 = (bool)((((float)L_0) < ((float)(0.0f)))? 1 : 0);
+		bool L_1 = V_0;
+		if (!L_1)
+		{
+			goto IL_0015;
+		}
+	}
+	{
+		V_1 = (0.0f);
+		goto IL_002d;
+	}
+
+IL_0015:
+	{
+		float L_2 = ___0_value;
+		V_2 = (bool)((((float)L_2) > ((float)(1.0f)))? 1 : 0);
+		bool L_3 = V_2;
+		if (!L_3)
+		{
+			goto IL_0029;
+		}
+	}
+	{
+		V_1 = (1.0f);
+		goto IL_002d;
+	}
+
+IL_0029:
+	{
+		float L_4 = ___0_value;
+		V_1 = L_4;
+		goto IL_002d;
+	}
+
+IL_002d:
+	{
+		float L_5 = V_1;
+		return L_5;
+	}
+}
+// Method Definition Index: 39409
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_Distance_m2314DB9B8BD01157E013DF87BEA557375C7F9FF9_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_b, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Math_tEB65DE7CA8B083C412C969C92981C030865486CE_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	float V_0 = 0.0f;
+	float V_1 = 0.0f;
+	float V_2 = 0.0f;
+	float V_3 = 0.0f;
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ___0_a;
+		float L_1 = L_0.___x;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_2 = ___1_b;
+		float L_3 = L_2.___x;
+		V_0 = ((float)il2cpp_codegen_subtract(L_1, L_3));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_4 = ___0_a;
+		float L_5 = L_4.___y;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6 = ___1_b;
+		float L_7 = L_6.___y;
+		V_1 = ((float)il2cpp_codegen_subtract(L_5, L_7));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8 = ___0_a;
+		float L_9 = L_8.___z;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_10 = ___1_b;
+		float L_11 = L_10.___z;
+		V_2 = ((float)il2cpp_codegen_subtract(L_9, L_11));
+		float L_12 = V_0;
+		float L_13 = V_0;
+		float L_14 = V_1;
+		float L_15 = V_1;
+		float L_16 = V_2;
+		float L_17 = V_2;
+		il2cpp_codegen_runtime_class_init_inline(Math_tEB65DE7CA8B083C412C969C92981C030865486CE_il2cpp_TypeInfo_var);
+		double L_18;
+		L_18 = sqrt(((double)((float)il2cpp_codegen_add(((float)il2cpp_codegen_add(((float)il2cpp_codegen_multiply(L_12, L_13)), ((float)il2cpp_codegen_multiply(L_14, L_15)))), ((float)il2cpp_codegen_multiply(L_16, L_17))))));
+		V_3 = ((float)L_18);
+		goto IL_0040;
+	}
+
+IL_0040:
+	{
+		float L_19 = V_3;
+		return L_19;
+	}
+}
+// Method Definition Index: 39423
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline (const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ((Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_StaticFields*)il2cpp_codegen_static_fields_for(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var))->___upVector;
+		return L_0;
+	}
+}
+// Method Definition Index: 39430
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Multiply_m87BA7C578F96C8E49BB07088DAAC4649F83B0353_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, float ___1_d, const RuntimeMethod* method) 
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	{
+		il2cpp_codegen_initobj((&V_0), sizeof(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ___0_a;
+		float L_1 = L_0.___x;
+		float L_2 = ___1_d;
+		(&V_0)->___x = ((float)il2cpp_codegen_multiply(L_1, L_2));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_3 = ___0_a;
+		float L_4 = L_3.___y;
+		float L_5 = ___1_d;
+		(&V_0)->___y = ((float)il2cpp_codegen_multiply(L_4, L_5));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6 = ___0_a;
+		float L_7 = L_6.___z;
+		float L_8 = ___1_d;
+		(&V_0)->___z = ((float)il2cpp_codegen_multiply(L_7, L_8));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_9 = V_0;
+		return L_9;
+	}
+}
+// Method Definition Index: 39427
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Addition_m78C0EC70CB66E8DCAC225743D82B268DAEE92067_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_b, const RuntimeMethod* method) 
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	{
+		il2cpp_codegen_initobj((&V_0), sizeof(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ___0_a;
+		float L_1 = L_0.___x;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_2 = ___1_b;
+		float L_3 = L_2.___x;
+		(&V_0)->___x = ((float)il2cpp_codegen_add(L_1, L_3));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_4 = ___0_a;
+		float L_5 = L_4.___y;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6 = ___1_b;
+		float L_7 = L_6.___y;
+		(&V_0)->___y = ((float)il2cpp_codegen_add(L_5, L_7));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8 = ___0_a;
+		float L_9 = L_8.___z;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_10 = ___1_b;
+		float L_11 = L_10.___z;
+		(&V_0)->___z = ((float)il2cpp_codegen_add(L_9, L_11));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_12 = V_0;
+		return L_12;
+	}
+}
+// Method Definition Index: 39428
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_op_Subtraction_mE42023FF80067CB44A1D4A27EB7CF2B24CABB828_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_a, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_b, const RuntimeMethod* method) 
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	{
+		il2cpp_codegen_initobj((&V_0), sizeof(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ___0_a;
+		float L_1 = L_0.___x;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_2 = ___1_b;
+		float L_3 = L_2.___x;
+		(&V_0)->___x = ((float)il2cpp_codegen_subtract(L_1, L_3));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_4 = ___0_a;
+		float L_5 = L_4.___y;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6 = ___1_b;
+		float L_7 = L_6.___y;
+		(&V_0)->___y = ((float)il2cpp_codegen_subtract(L_5, L_7));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8 = ___0_a;
+		float L_9 = L_8.___z;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_10 = ___1_b;
+		float L_11 = L_10.___z;
+		(&V_0)->___z = ((float)il2cpp_codegen_subtract(L_9, L_11));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_12 = V_0;
+		return L_12;
+	}
+}
+// Method Definition Index: 39406
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_Angle_mB16906B482814C140FE5BA9D041D2DC11E42A68D_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_from, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_to, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Math_tEB65DE7CA8B083C412C969C92981C030865486CE_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	float V_0 = 0.0f;
+	float V_1 = 0.0f;
+	bool V_2 = false;
+	float V_3 = 0.0f;
+	{
+		float L_0;
+		L_0 = Vector3_get_sqrMagnitude_m43C27DEC47C4811FB30AB474FF2131A963B66FC8_inline((&___0_from), NULL);
+		float L_1;
+		L_1 = Vector3_get_sqrMagnitude_m43C27DEC47C4811FB30AB474FF2131A963B66FC8_inline((&___1_to), NULL);
+		il2cpp_codegen_runtime_class_init_inline(Math_tEB65DE7CA8B083C412C969C92981C030865486CE_il2cpp_TypeInfo_var);
+		double L_2;
+		L_2 = sqrt(((double)((float)il2cpp_codegen_multiply(L_0, L_1))));
+		V_0 = ((float)L_2);
+		float L_3 = V_0;
+		V_2 = (bool)((((float)L_3) < ((float)(1.0E-15f)))? 1 : 0);
+		bool L_4 = V_2;
+		if (!L_4)
+		{
+			goto IL_002c;
+		}
+	}
+	{
+		V_3 = (0.0f);
+		goto IL_0058;
+	}
+
+IL_002c:
+	{
+		float L_5;
+		L_5 = Vector3_Dot_m9B5EBE36643126708DB3F444C59C11FA30803DBB_inline((&___0_from), (&___1_to), NULL);
+		float L_6 = V_0;
+		float L_7;
+		L_7 = Mathf_Clamp_mEB9AEA827D27D20FCC787F7375156AF46BB12BBF_inline(((float)(L_5/L_6)), (-1.0f), (1.0f), NULL);
+		V_1 = L_7;
+		float L_8 = V_1;
+		il2cpp_codegen_runtime_class_init_inline(Math_tEB65DE7CA8B083C412C969C92981C030865486CE_il2cpp_TypeInfo_var);
+		double L_9;
+		L_9 = acos(((double)L_8));
+		V_3 = ((float)il2cpp_codegen_multiply(((float)L_9), (57.2957802f)));
+		goto IL_0058;
+	}
+
+IL_0058:
+	{
+		float L_10 = V_3;
+		return L_10;
+	}
+}
+// Method Definition Index: 39401
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_normalized_m736BBF65D5CDA7A18414370D15B4DFCC1E466F07_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, const RuntimeMethod* method) 
+{
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0;
+		L_0 = Vector3_Normalize_m1DE89849FE2019B6AA0031306896F3B800849399_inline(__this, NULL);
+		return L_0;
+	}
+}
+// Method Definition Index: 39419
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_zero_m0C1249C3F25B1C70EAD3CC8B31259975A457AE39_inline (const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ((Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_StaticFields*)il2cpp_codegen_static_fields_for(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var))->___zeroVector;
+		return L_0;
+	}
+}
+// Method Definition Index: 39434
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool Vector3_op_Inequality_m9F170CDFBF1E490E559DA5D06D6547501A402BBF_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_lhs, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_rhs, const RuntimeMethod* method) 
+{
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ___0_lhs;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_1 = ___1_rhs;
+		bool L_2;
+		L_2 = Vector3_op_Equality_mCDCBB8D2EDC3D3BF20F31A25ACB34705D352B479_inline(L_0, L_1, NULL);
+		return (bool)((((int32_t)L_2) == ((int32_t)0))? 1 : 0);
+	}
+}
+// Method Definition Index: 39433
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool Vector3_op_Equality_mCDCBB8D2EDC3D3BF20F31A25ACB34705D352B479_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_lhs, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___1_rhs, const RuntimeMethod* method) 
+{
+	float V_0 = 0.0f;
+	float V_1 = 0.0f;
+	float V_2 = 0.0f;
+	float V_3 = 0.0f;
+	bool V_4 = false;
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ___0_lhs;
+		float L_1 = L_0.___x;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_2 = ___1_rhs;
+		float L_3 = L_2.___x;
+		V_0 = ((float)il2cpp_codegen_subtract(L_1, L_3));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_4 = ___0_lhs;
+		float L_5 = L_4.___y;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_6 = ___1_rhs;
+		float L_7 = L_6.___y;
+		V_1 = ((float)il2cpp_codegen_subtract(L_5, L_7));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_8 = ___0_lhs;
+		float L_9 = L_8.___z;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_10 = ___1_rhs;
+		float L_11 = L_10.___z;
+		V_2 = ((float)il2cpp_codegen_subtract(L_9, L_11));
+		float L_12 = V_0;
+		float L_13 = V_0;
+		float L_14 = V_1;
+		float L_15 = V_1;
+		float L_16 = V_2;
+		float L_17 = V_2;
+		V_3 = ((float)il2cpp_codegen_add(((float)il2cpp_codegen_add(((float)il2cpp_codegen_multiply(L_12, L_13)), ((float)il2cpp_codegen_multiply(L_14, L_15)))), ((float)il2cpp_codegen_multiply(L_16, L_17))));
+		float L_18 = V_3;
+		V_4 = (bool)((((float)L_18) < ((float)(9.99999944E-11f)))? 1 : 0);
+		goto IL_0043;
+	}
+
+IL_0043:
+	{
+		bool L_19 = V_4;
+		return L_19;
+	}
+}
+// Method Definition Index: 39459
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 Quaternion_LookRotation_mDB2CCA75B8E1AB98104F2A6E1A1EA57D0D1298D7_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 ___0_forward, const RuntimeMethod* method) 
+{
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_0;
+	memset((&V_0), 0, sizeof(V_0));
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0;
+		L_0 = Vector3_get_up_m128AF3FDC820BF59D5DE86D973E7DE3F20C3AEBA_inline(NULL);
+		V_0 = L_0;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_1;
+		L_1 = Quaternion_Internal_LookRotation_m489E6A5E916949FFE91C0B11A60C6016D996C1E0((&___0_forward), (&V_0), NULL);
+		return L_1;
+	}
+}
+// Method Definition Index: 39480
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 Quaternion_RotateTowards_m50EF9D609C80CD423CDA856EA3481DE2004633A3_inline (Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 ___0_from, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 ___1_to, float ___2_maxDegreesDelta, const RuntimeMethod* method) 
+{
+	float V_0 = 0.0f;
+	bool V_1 = false;
+	Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 V_2;
+	memset((&V_2), 0, sizeof(V_2));
+	{
+		float L_0;
+		L_0 = Quaternion_Angle_m6F61044E1B167471D24A2B26A85AF2C064F46BC9_inline((&___0_from), (&___1_to), NULL);
+		V_0 = L_0;
+		float L_1 = V_0;
+		V_1 = (bool)((((float)L_1) == ((float)(0.0f)))? 1 : 0);
+		bool L_2 = V_1;
+		if (!L_2)
+		{
+			goto IL_001b;
+		}
+	}
+	{
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_3 = ___1_to;
+		V_2 = L_3;
+		goto IL_0034;
+	}
+
+IL_001b:
+	{
+		float L_4 = ___2_maxDegreesDelta;
+		float L_5 = V_0;
+		float L_6;
+		L_6 = Mathf_Min_m747CA71A9483CDB394B13BD0AD048EE17E48FFE4_inline((1.0f), ((float)(L_4/L_5)), NULL);
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_7;
+		L_7 = Quaternion_SlerpUnclamped_m6EE729E421AF8BF8672942540951427AF8AC856C_inline((&___0_from), (&___1_to), L_6, NULL);
+		V_2 = L_7;
+		goto IL_0034;
+	}
+
+IL_0034:
+	{
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_8 = V_2;
+		return L_8;
+	}
+}
+// Method Definition Index: 39238
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Color__ctor_mCD6889CDE39F18704CD6EA8E2EFBFA48BA3E13B0_inline (Color_tD001788D726C3A7F1379BEED0260B9591F440C1F* __this, float ___0_r, float ___1_g, float ___2_b, const RuntimeMethod* method) 
+{
+	{
+		float L_0 = ___0_r;
+		__this->___r = L_0;
+		float L_1 = ___1_g;
+		__this->___g = L_1;
+		float L_2 = ___2_b;
+		__this->___b = L_2;
+		__this->___a = (1.0f);
+		return;
+	}
+}
+// Method Definition Index: 39517
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Max_mF5379E63D2BBAC76D090748695D833934F8AD051_inline (float ___0_a, float ___1_b, const RuntimeMethod* method) 
+{
+	float V_0 = 0.0f;
+	float G_B3_0 = 0.0f;
+	{
+		float L_0 = ___0_a;
+		float L_1 = ___1_b;
+		if ((((float)L_0) > ((float)L_1)))
+		{
+			goto IL_0008;
+		}
+	}
+	{
+		float L_2 = ___1_b;
+		G_B3_0 = L_2;
+		goto IL_0009;
+	}
+
+IL_0008:
+	{
+		float L_3 = ___0_a;
+		G_B3_0 = L_3;
+	}
+
+IL_0009:
+	{
+		V_0 = G_B3_0;
+		goto IL_000c;
+	}
+
+IL_000c:
+	{
+		float L_4 = V_0;
+		return L_4;
+	}
+}
+// Method Definition Index: 39516
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_Min_m888083F74FF5655778F0403BB5E9608BEFDEA8CB_inline (int32_t ___0_a, int32_t ___1_b, const RuntimeMethod* method) 
+{
+	int32_t V_0 = 0;
+	int32_t G_B3_0 = 0;
+	{
+		int32_t L_0 = ___0_a;
+		int32_t L_1 = ___1_b;
+		if ((((int32_t)L_0) < ((int32_t)L_1)))
+		{
+			goto IL_0008;
+		}
+	}
+	{
+		int32_t L_2 = ___1_b;
+		G_B3_0 = L_2;
+		goto IL_0009;
+	}
+
+IL_0008:
+	{
+		int32_t L_3 = ___0_a;
+		G_B3_0 = L_3;
+	}
+
+IL_0009:
+	{
+		V_0 = G_B3_0;
+		goto IL_000c;
+	}
+
+IL_000c:
+	{
+		int32_t L_4 = V_0;
+		return L_4;
+	}
+}
+// Method Definition Index: 39387
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Vector3__ctor_m376936E6B999EF1ECBE57D990A386303E2283DE0_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, float ___0_x, float ___1_y, float ___2_z, const RuntimeMethod* method) 
+{
+	{
+		float L_0 = ___0_x;
+		__this->___x = L_0;
+		float L_1 = ___1_y;
+		__this->___y = L_1;
+		float L_2 = ___2_z;
+		__this->___z = L_2;
+		return;
+	}
+}
+// Method Definition Index: 39420
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_get_one_mC9B289F1E15C42C597180C9FE6FB492495B51D02_inline (const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_0 = ((Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_StaticFields*)il2cpp_codegen_static_fields_for(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var))->___oneVector;
+		return L_0;
+	}
+}
+// Method Definition Index: 39519
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t Mathf_Max_m7FA442918DE37E3A00106D1F2E789D65829792B8_inline (int32_t ___0_a, int32_t ___1_b, const RuntimeMethod* method) 
+{
+	int32_t V_0 = 0;
+	int32_t G_B3_0 = 0;
+	{
+		int32_t L_0 = ___0_a;
+		int32_t L_1 = ___1_b;
+		if ((((int32_t)L_0) > ((int32_t)L_1)))
+		{
+			goto IL_0008;
+		}
+	}
+	{
+		int32_t L_2 = ___1_b;
+		G_B3_0 = L_2;
+		goto IL_0009;
+	}
+
+IL_0008:
+	{
+		int32_t L_3 = ___0_a;
+		G_B3_0 = L_3;
+	}
+
+IL_0009:
+	{
+		V_0 = G_B3_0;
+		goto IL_000c;
+	}
+
+IL_000c:
+	{
+		int32_t L_4 = V_0;
+		return L_4;
+	}
+}
+// Method Definition Index: 12412
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Action_1_Invoke_mF2422B2DD29F74CE66F791C3F68E288EC7C3DB9E_gshared_inline (Action_1_t6F9EB113EB3F16226AEF811A2744F4111C116C87* __this, RuntimeObject* ___0_obj, const RuntimeMethod* method) 
+{
+	typedef void (*FunctionPointerType) (RuntimeObject*, RuntimeObject*, const RuntimeMethod*);
+	((FunctionPointerType)__this->___invoke_impl)((Il2CppObject*)__this->___method_code, ___0_obj, reinterpret_cast<RuntimeMethod*>(__this->___method));
+}
+// Method Definition Index: 20980
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR RuntimeObject* Enumerator_get_Current_m6330F15D18EE4F547C05DF9BF83C5EB710376027_gshared_inline (Enumerator_t9473BAB568A27E2339D48C1F91319E0F6D244D7A* __this, const RuntimeMethod* method) 
+{
+	{
+		RuntimeObject* L_0 = __this->____current;
+		return L_0;
+	}
+}
+// Method Definition Index: 20923
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR int32_t List_1_get_Count_m4407E4C389F22B8CEC282C15D56516658746C383_gshared_inline (List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D* __this, const RuntimeMethod* method) 
+{
+	{
+		int32_t L_0 = __this->____size;
+		return L_0;
+	}
+}
+// Method Definition Index: 20932
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void List_1_Add_mEBCF994CC3814631017F46A387B1A192ED6C85C7_gshared_inline (List_1_tA239CB83DE5615F348BB0507E45F490F4F7C9A8D* __this, RuntimeObject* ___0_item, const RuntimeMethod* method) 
+{
+	ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* V_0 = NULL;
+	int32_t V_1 = 0;
+	{
+		int32_t L_0 = __this->____version;
+		__this->____version = ((int32_t)il2cpp_codegen_add(L_0, 1));
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_1 = __this->____items;
+		V_0 = L_1;
+		int32_t L_2 = __this->____size;
+		V_1 = L_2;
+		int32_t L_3 = V_1;
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_4 = V_0;
+		NullCheck(L_4);
+		if ((!(((uint32_t)L_3) < ((uint32_t)((int32_t)(((RuntimeArray*)L_4)->max_length))))))
+		{
+			goto IL_0034;
+		}
+	}
+	{
+		int32_t L_5 = V_1;
+		__this->____size = ((int32_t)il2cpp_codegen_add(L_5, 1));
+		ObjectU5BU5D_t8061030B0A12A55D5AD8652A20C922FE99450918* L_6 = V_0;
+		int32_t L_7 = V_1;
+		RuntimeObject* L_8 = ___0_item;
+		NullCheck(L_6);
+		(L_6)->SetAt(static_cast<il2cpp_array_size_t>(L_7), (RuntimeObject*)L_8);
+		return;
+	}
+
+IL_0034:
+	{
+		RuntimeObject* L_9 = ___0_item;
+		List_1_AddWithResize_m79A9BF770BEF9C06BE40D5401E55E375F2726CC4(__this, L_9, il2cpp_rgctx_method(method->klass->rgctx_data, 14));
+		return;
+	}
+}
+// Method Definition Index: 39414
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_get_sqrMagnitude_m43C27DEC47C4811FB30AB474FF2131A963B66FC8_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* __this, const RuntimeMethod* method) 
+{
+	{
+		float L_0 = __this->___x;
+		float L_1 = __this->___x;
+		float L_2 = __this->___y;
+		float L_3 = __this->___y;
+		float L_4 = __this->___z;
+		float L_5 = __this->___z;
+		return ((float)il2cpp_codegen_add(((float)il2cpp_codegen_add(((float)il2cpp_codegen_multiply(L_0, L_1)), ((float)il2cpp_codegen_multiply(L_2, L_3)))), ((float)il2cpp_codegen_multiply(L_4, L_5))));
+	}
+}
+// Method Definition Index: 39403
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Vector3_Dot_m9B5EBE36643126708DB3F444C59C11FA30803DBB_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* ___0_lhs, Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* ___1_rhs, const RuntimeMethod* method) 
+{
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_0 = ___0_lhs;
+		float L_1 = L_0->___x;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_2 = ___1_rhs;
+		float L_3 = L_2->___x;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_4 = ___0_lhs;
+		float L_5 = L_4->___y;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_6 = ___1_rhs;
+		float L_7 = L_6->___y;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_8 = ___0_lhs;
+		float L_9 = L_8->___z;
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_10 = ___1_rhs;
+		float L_11 = L_10->___z;
+		return ((float)il2cpp_codegen_add(((float)il2cpp_codegen_add(((float)il2cpp_codegen_multiply(L_1, L_3)), ((float)il2cpp_codegen_multiply(L_5, L_7)))), ((float)il2cpp_codegen_multiply(L_9, L_11))));
+	}
+}
+// Method Definition Index: 39531
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Clamp_mEB9AEA827D27D20FCC787F7375156AF46BB12BBF_inline (float ___0_value, float ___1_min, float ___2_max, const RuntimeMethod* method) 
+{
+	bool V_0 = false;
+	bool V_1 = false;
+	float V_2 = 0.0f;
+	{
+		float L_0 = ___0_value;
+		float L_1 = ___1_min;
+		V_0 = (bool)((((float)L_0) < ((float)L_1))? 1 : 0);
+		bool L_2 = V_0;
+		if (!L_2)
+		{
+			goto IL_000e;
+		}
+	}
+	{
+		float L_3 = ___1_min;
+		___0_value = L_3;
+		goto IL_0019;
+	}
+
+IL_000e:
+	{
+		float L_4 = ___0_value;
+		float L_5 = ___2_max;
+		V_1 = (bool)((((float)L_4) > ((float)L_5))? 1 : 0);
+		bool L_6 = V_1;
+		if (!L_6)
+		{
+			goto IL_0019;
+		}
+	}
+	{
+		float L_7 = ___2_max;
+		___0_value = L_7;
+	}
+
+IL_0019:
+	{
+		float L_8 = ___0_value;
+		V_2 = L_8;
+		goto IL_001d;
+	}
+
+IL_001d:
+	{
+		float L_9 = V_2;
+		return L_9;
+	}
+}
+// Method Definition Index: 39399
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 Vector3_Normalize_m1DE89849FE2019B6AA0031306896F3B800849399_inline (Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* ___0_value, const RuntimeMethod* method) 
+{
+	static bool s_Il2CppMethodInitialized;
+	if (!s_Il2CppMethodInitialized)
+	{
+		il2cpp_codegen_initialize_runtime_metadata((uintptr_t*)&Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var);
+		s_Il2CppMethodInitialized = true;
+	}
+	float V_0 = 0.0f;
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_1;
+	memset((&V_1), 0, sizeof(V_1));
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 V_2;
+	memset((&V_2), 0, sizeof(V_2));
+	Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 G_B3_0;
+	memset((&G_B3_0), 0, sizeof(G_B3_0));
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_0 = ___0_value;
+		float L_1;
+		L_1 = Vector3_get_magnitude_mF0D6017E90B345F1F52D1CC564C640F1A847AF2D_inline(L_0, NULL);
+		V_0 = L_1;
+		float L_2 = V_0;
+		if ((((float)L_2) > ((float)(9.99999975E-06f))))
+		{
+			goto IL_0017;
+		}
+	}
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_3 = ((Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_StaticFields*)il2cpp_codegen_static_fields_for(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2_il2cpp_TypeInfo_var))->___zeroVector;
+		G_B3_0 = L_3;
+		goto IL_004d;
+	}
+
+IL_0017:
+	{
+		il2cpp_codegen_initobj((&V_1), sizeof(Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_4 = ___0_value;
+		float L_5 = L_4->___x;
+		float L_6 = V_0;
+		(&V_1)->___x = ((float)(L_5/L_6));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_7 = ___0_value;
+		float L_8 = L_7->___y;
+		float L_9 = V_0;
+		(&V_1)->___y = ((float)(L_8/L_9));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2* L_10 = ___0_value;
+		float L_11 = L_10->___z;
+		float L_12 = V_0;
+		(&V_1)->___z = ((float)(L_11/L_12));
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_13 = V_1;
+		G_B3_0 = L_13;
+	}
+
+IL_004d:
+	{
+		V_2 = G_B3_0;
+		goto IL_0050;
+	}
+
+IL_0050:
+	{
+		Vector3_t24C512C7B96BBABAD472002D0BA2BDA40A5A80B2 L_14 = V_2;
+		return L_14;
+	}
+}
+// Method Definition Index: 39474
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Quaternion_Angle_m6F61044E1B167471D24A2B26A85AF2C064F46BC9_inline (Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___0_a, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___1_b, const RuntimeMethod* method) 
+{
+	float V_0 = 0.0f;
+	float V_1 = 0.0f;
+	float G_B3_0 = 0.0f;
+	{
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_0 = ___0_a;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_1 = ___1_b;
+		float L_2;
+		L_2 = Quaternion_Dot_m80E67A0F9F1FD9EAD0C8EEF7D5396ADF612FA105_inline(L_0, L_1, NULL);
+		float L_3;
+		L_3 = fabsf(L_2);
+		float L_4;
+		L_4 = Mathf_Min_m747CA71A9483CDB394B13BD0AD048EE17E48FFE4_inline(L_3, (1.0f), NULL);
+		V_0 = L_4;
+		float L_5 = V_0;
+		bool L_6;
+		L_6 = Quaternion_IsEqualUsingDot_m9C672201C918C2D1E739F559DBE4406F95997CBD_inline(L_5, NULL);
+		if (L_6)
+		{
+			goto IL_0034;
+		}
+	}
+	{
+		float L_7 = V_0;
+		float L_8;
+		L_8 = acosf(L_7);
+		G_B3_0 = ((float)il2cpp_codegen_multiply(((float)il2cpp_codegen_multiply(L_8, (2.0f))), (57.2957802f)));
+		goto IL_0039;
+	}
+
+IL_0034:
+	{
+		G_B3_0 = (0.0f);
+	}
+
+IL_0039:
+	{
+		V_1 = G_B3_0;
+		goto IL_003c;
+	}
+
+IL_003c:
+	{
+		float L_9 = V_1;
+		return L_9;
+	}
+}
+// Method Definition Index: 39515
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Mathf_Min_m747CA71A9483CDB394B13BD0AD048EE17E48FFE4_inline (float ___0_a, float ___1_b, const RuntimeMethod* method) 
+{
+	float V_0 = 0.0f;
+	float G_B3_0 = 0.0f;
+	{
+		float L_0 = ___0_a;
+		float L_1 = ___1_b;
+		if ((((float)L_0) < ((float)L_1)))
+		{
+			goto IL_0008;
+		}
+	}
+	{
+		float L_2 = ___1_b;
+		G_B3_0 = L_2;
+		goto IL_0009;
+	}
+
+IL_0008:
+	{
+		float L_3 = ___0_a;
+		G_B3_0 = L_3;
+	}
+
+IL_0009:
+	{
+		V_0 = G_B3_0;
+		goto IL_000c;
+	}
+
+IL_000c:
+	{
+		float L_4 = V_0;
+		return L_4;
+	}
+}
+// Method Definition Index: 39450
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 Quaternion_SlerpUnclamped_m6EE729E421AF8BF8672942540951427AF8AC856C_inline (Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___0_a, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___1_b, float ___2_t, const RuntimeMethod* method) 
+{
+	{
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_0 = ___0_a;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_1 = ___1_b;
+		float L_2 = ___2_t;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974 L_3;
+		L_3 = Quaternion_Internal_SlerpUnclamped_m4EFC678DD99CE1E8E8AACF1A647558B75E2C231A(L_0, L_1, L_2, NULL);
+		return L_3;
+	}
+}
+// Method Definition Index: 39469
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR float Quaternion_Dot_m80E67A0F9F1FD9EAD0C8EEF7D5396ADF612FA105_inline (Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___0_a, Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* ___1_b, const RuntimeMethod* method) 
+{
+	{
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_0 = ___0_a;
+		float L_1 = L_0->___x;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_2 = ___1_b;
+		float L_3 = L_2->___x;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_4 = ___0_a;
+		float L_5 = L_4->___y;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_6 = ___1_b;
+		float L_7 = L_6->___y;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_8 = ___0_a;
+		float L_9 = L_8->___z;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_10 = ___1_b;
+		float L_11 = L_10->___z;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_12 = ___0_a;
+		float L_13 = L_12->___w;
+		Quaternion_tDA59F214EF07D7700B26E40E562F267AF7306974* L_14 = ___1_b;
+		float L_15 = L_14->___w;
+		return ((float)il2cpp_codegen_add(((float)il2cpp_codegen_add(((float)il2cpp_codegen_add(((float)il2cpp_codegen_multiply(L_1, L_3)), ((float)il2cpp_codegen_multiply(L_5, L_7)))), ((float)il2cpp_codegen_multiply(L_9, L_11)))), ((float)il2cpp_codegen_multiply(L_13, L_15))));
+	}
+}
+// Method Definition Index: 39467
+IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR bool Quaternion_IsEqualUsingDot_m9C672201C918C2D1E739F559DBE4406F95997CBD_inline (float ___0_dot, const RuntimeMethod* method) 
+{
+	{
+		float L_0 = ___0_dot;
+		return (bool)((((float)L_0) > ((float)(0.999998987f)))? 1 : 0);
+	}
+}

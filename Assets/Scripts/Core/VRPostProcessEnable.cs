@@ -27,6 +27,13 @@ public class PostProcessHelper : MonoBehaviour
         int enabled = 0;
         foreach (var cam in cams)
         {
+            // OVRCameraRig cameras default to SolidColor (black) -- force Skybox
+            if (cam.clearFlags != CameraClearFlags.Skybox)
+            {
+                cam.clearFlags = CameraClearFlags.Skybox;
+                Debug.Log($"[POSTFX] {cam.name}: clearFlags -> Skybox");
+            }
+
             var data = cam.GetComponent<UniversalAdditionalCameraData>();
             if (data == null)
                 data = cam.gameObject.AddComponent<UniversalAdditionalCameraData>();

@@ -1,5 +1,3 @@
-// AUTO-DISABLED: requires newer Meta XR SDK APIs
-#if PLAGA44_FULL_SDK
 // VoiceChat.cs
 // CYBERNOMAD -- PLAGA '44
 // Voice chat placeholder. Stubbed API ready for Photon Voice / Vivox integration.
@@ -241,15 +239,22 @@ namespace Plaga44.Networking
             if (!EnableLipSync || LipSyncContext != null) return;
 
 #if HAS_META_XR
-            // Try to find OVRLipSyncContext anywhere on this GameObject or children
-            var ctx = GetComponentInChildren<OVRLipSyncContext>();
-            if (ctx != null)
+            // OVRLipSyncContext lives in com.meta.xr.sdk.lipsync (separate package).
+            // Use reflection to avoid a hard compile dependency on that package.
+            var lipSyncType = System.Type.GetType("OVRLipSyncContext, Meta.XR.LipSync");
+            if (lipSyncType == null)
+                lipSyncType = System.Type.GetType("OVRLipSyncContext, Assembly-CSharp");
+
+            if (lipSyncType != null)
             {
-                LipSyncContext = ctx;
-                Debug.Log("[VoiceChat] OVRLipSyncContext auto-detected.");
+                var ctx = GetComponentInChildren(lipSyncType);
+                if (ctx != null)
+                {
+                    LipSyncContext = ctx;
+                    Debug.Log("[VoiceChat] OVRLipSyncContext auto-detected via reflection.");
+                }
             }
 #endif
         }
     }
 }
-#endif // PLAGA44_FULL_SDK

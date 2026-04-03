@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // FaceExpressionDebug.cs
 // CYBERNOMAD -- In-headset HUD showing top 5 active face expressions in real time.
 // World-space canvas, follows head (attached to CenterEyeAnchor).
@@ -247,4 +245,3 @@ namespace Plaga44.FaceTracking
         }
     }
 }
-#endif // PLAGA44_FULL_SDK

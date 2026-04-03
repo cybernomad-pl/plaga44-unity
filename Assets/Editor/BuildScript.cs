@@ -9,7 +9,7 @@ public static class BuildScript
     private static readonly string BuildDir = "Builds";
     private static readonly string ApkName = "plaga44.apk";
 
-    [MenuItem("PLAGA44/Build APK (Quest)")]
+    [MenuItem("CYBERNOMAD/Build/Build APK (Quest)")]
     public static void BuildQuest()
     {
         var scenes = EditorBuildSettings.scenes

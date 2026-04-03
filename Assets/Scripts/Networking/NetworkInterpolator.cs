@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // NetworkInterpolator.cs
 // CYBERNOMAD -- PLAGA '44
 // Smooths out remote player movement by maintaining a small snapshot buffer
@@ -208,4 +206,3 @@ namespace Plaga44.Networking
 #endif
     }
 }
-#endif // PLAGA44_FULL_SDK

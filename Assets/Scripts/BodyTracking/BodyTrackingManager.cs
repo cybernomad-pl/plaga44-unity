@@ -33,7 +33,7 @@ namespace Plaga44.BodyTracking
         // -- runtime state --
 
         private bool _initialized = false;
-        private bool _trackingActive = true;
+        private bool _trackingActive = false;
 
 #if HAS_META_XR
         [Header("Tracking Configuration (Meta XR)")]
@@ -185,8 +185,10 @@ namespace Plaga44.BodyTracking
                 // OVRSkeleton.SkeletonType.Body = 23 (Meta XR SDK v74+).
                 SetSkeletonTypeViaReflection(_skeleton, (int)OVRSkeleton.SkeletonType.Body);
 
-                _skeleton.enabled = true;
-                Debug.Log($"{LOG} OVRSkeleton debug visualization enabled.");
+                // Start disabled -- will be enabled when tracking becomes active.
+                // Prevents "Global joint set is invalid" spam in editor without headset.
+                _skeleton.enabled = false;
+                Debug.Log($"{LOG} OVRSkeleton added for debug visualization (starts disabled, activates with tracking).");
             }
             else if (_skeleton != null)
             {
@@ -248,13 +250,18 @@ namespace Plaga44.BodyTracking
             if (_isTrackedProp != null)
                 _trackingActive = (bool)_isTrackedProp.GetValue(_ovrBody);
             else
-                _trackingActive = _ovrBody.enabled; // fallback: assume active if component is on
+                _trackingActive = false; // no tracking property found = no tracking data
 
             if (_trackingActive != wasActive)
             {
                 Debug.Log(_trackingActive
                     ? $"{LOG} Body tracking ACTIVE."
                     : $"{LOG} Body tracking LOST.");
+
+                // Disable OVRSkeleton when tracking drops to prevent
+                // "Global joint set is invalid" spam in editor/without headset.
+                if (_skeleton != null)
+                    _skeleton.enabled = _trackingActive;
             }
 #else
             #error "HAS_META_XR not defined -- Quest project requires Meta XR SDK"

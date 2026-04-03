@@ -1,5 +1,3 @@
-// AUTO-DISABLED: depends on classes guarded by PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
@@ -87,7 +85,7 @@ namespace Plaga44.Editor
             if (passthroughLayer == null)
             {
                 passthroughLayer = Undo.AddComponent<OVRPassthroughLayer>(ovrManager.gameObject);
-                passthroughLayer.projectionSurfaceType = OVRPassthroughLayer.ProjectionSurfaceType.Reconstruction;
+                passthroughLayer.projectionSurfaceType = OVRPassthroughLayer.ProjectionSurfaceType.Reconstructed;
                 Debug.Log($"{LOG} Added OVRPassthroughLayer (Reconstruction surface)");
             }
             else
@@ -110,7 +108,7 @@ namespace Plaga44.Editor
 
         private static OVRManager FindOrCreateOVRManager()
         {
-            var existing = Object.FindObjectOfType<OVRManager>();
+            var existing = Object.FindFirstObjectByType<OVRManager>();
             if (existing != null)
             {
                 Debug.Log($"{LOG} Found existing OVRManager on '{existing.gameObject.name}'");
@@ -133,7 +131,8 @@ namespace Plaga44.Editor
 
         private static void SetupOVRSceneManager()
         {
-            var sceneManager = Object.FindObjectOfType<OVRSceneManager>();
+#pragma warning disable CS0618 // OVRSceneManager deprecated since Meta XR SDK v65 -- kept for backward compat until MRUK migration
+            var sceneManager = Object.FindFirstObjectByType<OVRSceneManager>();
 
             if (sceneManager == null)
             {
@@ -146,6 +145,7 @@ namespace Plaga44.Editor
             {
                 Debug.Log($"{LOG} OVRSceneManager already present on '{sceneManager.gameObject.name}'");
             }
+#pragma warning restore CS0618
 
             // Add SceneAnchorMapper if missing
             var mapper = sceneManager.GetComponent<SceneAnchorMapper>();
@@ -163,4 +163,3 @@ namespace Plaga44.Editor
     }
 }
 #endif // UNITY_EDITOR
-#endif // PLAGA44_FULL_SDK

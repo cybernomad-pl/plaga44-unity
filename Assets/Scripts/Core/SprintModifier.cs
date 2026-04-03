@@ -20,6 +20,7 @@ public class SprintModifier : MonoBehaviour
 
     // Jump state
     private float _verticalVelocity;
+    private Vector3 _jumpHorizontalVelocity;
     private float _jumpTimer;
     private const float Gravity = 9.81f;
 
@@ -78,6 +79,15 @@ public class SprintModifier : MonoBehaviour
         if (bPressed && _jumpTimer <= 0f && HandsAreEmpty())
         {
             _verticalVelocity = jumpForce;
+            // Capture forward momentum at jump start
+            Vector2 stick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
+            Transform head = _pc.transform;
+            Vector3 forward = head.forward;
+            Vector3 right = head.right;
+            forward.y = 0f; forward.Normalize();
+            right.y = 0f; right.Normalize();
+            float speed = _sprinting ? _baseSpeed * sprintMultiplier : _baseSpeed;
+            _jumpHorizontalVelocity = (forward * stick.y + right * stick.x) * speed * 0.4f;
             _jumpTimer = jumpCooldown;
             Debug.Log("[PLAGA44] JUMP");
         }
@@ -88,6 +98,7 @@ public class SprintModifier : MonoBehaviour
         if (grounded && _verticalVelocity < 0f)
         {
             _verticalVelocity = -0.5f; // small downward to keep grounded
+            _jumpHorizontalVelocity = Vector3.zero; // stop air movement on land
         }
         else
         {
@@ -96,13 +107,15 @@ public class SprintModifier : MonoBehaviour
             _verticalVelocity -= g * Time.deltaTime;
         }
 
+        Vector3 move = Vector3.up * _verticalVelocity * Time.deltaTime + _jumpHorizontalVelocity * Time.deltaTime;
+
         if (_cc != null)
         {
-            _cc.Move(Vector3.up * _verticalVelocity * Time.deltaTime);
+            _cc.Move(move);
         }
         else
         {
-            _pc.transform.position += Vector3.up * _verticalVelocity * Time.deltaTime;
+            _pc.transform.position += move;
         }
     }
 

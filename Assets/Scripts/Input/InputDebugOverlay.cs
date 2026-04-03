@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // InputDebugOverlay.cs
 // CYBERNOMAD -- Real-time debug HUD showing detected microgestures.
 //
@@ -322,4 +320,3 @@ namespace Plaga44.Input
         }
     }
 }
-#endif // PLAGA44_FULL_SDK

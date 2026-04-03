@@ -95,7 +95,7 @@ namespace Plaga44.Audio
             string active = AudioSettings.GetSpatializerPluginName();
             Debug.Log($"{LOG} Active spatializer plugin: \"{active}\"");
 
-            if (string.IsNullOrEmpty(active) || active != _expectedSpatializerPlugin)
+            if (_autoEnableSpatializer && (string.IsNullOrEmpty(active) || active != _expectedSpatializerPlugin))
             {
                 // SetSpatializerPluginName was removed in Unity 6.
                 // Spatializer must be configured in Project Settings > Audio.

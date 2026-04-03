@@ -260,7 +260,7 @@ inline void Action_1_Invoke_m690438AAE38F9762172E3AE0A33D0B42ACD35790_inline (Ac
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 70972
+// Method Definition Index: 72002
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool XRSettings_get_isDeviceActive_m0C8A5F7EC76EF392020137915E4DD8E75EBDD6B8 (const RuntimeMethod* method) 
 {
 	typedef bool (*XRSettings_get_isDeviceActive_m0C8A5F7EC76EF392020137915E4DD8E75EBDD6B8_ftn) ();
@@ -270,7 +270,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR bool XRSettings_get_isDeviceActive_m0C8A5F7EC
 	bool icallRetVal = _il2cpp_icall_func();
 	return icallRetVal;
 }
-// Method Definition Index: 70973
+// Method Definition Index: 72003
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float XRSettings_get_eyeTextureResolutionScale_m335B9DB51528FCA7534FCD6828796395D63ADA90 (const RuntimeMethod* method) 
 {
 	typedef float (*XRSettings_get_eyeTextureResolutionScale_m335B9DB51528FCA7534FCD6828796395D63ADA90_ftn) ();
@@ -280,7 +280,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float XRSettings_get_eyeTextureResolutionScal
 	float icallRetVal = _il2cpp_icall_func();
 	return icallRetVal;
 }
-// Method Definition Index: 70974
+// Method Definition Index: 72004
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void XRSettings_set_eyeTextureResolutionScale_m92F1029D68F387D9B0C2DB35DFAB2FD82C64A30B (float ___0_value, const RuntimeMethod* method) 
 {
 	typedef void (*XRSettings_set_eyeTextureResolutionScale_m92F1029D68F387D9B0C2DB35DFAB2FD82C64A30B_ftn) (float);
@@ -289,7 +289,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void XRSettings_set_eyeTextureResolutionScale
 	_il2cpp_icall_func = (XRSettings_set_eyeTextureResolutionScale_m92F1029D68F387D9B0C2DB35DFAB2FD82C64A30B_ftn)il2cpp_codegen_resolve_icall ("UnityEngine.XR.XRSettings::set_eyeTextureResolutionScale(System.Single)");
 	_il2cpp_icall_func(___0_value);
 }
-// Method Definition Index: 70975
+// Method Definition Index: 72005
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t XRSettings_get_eyeTextureWidth_m3B18AF3F3382398E2A818B2B01AA1FE90FEB3AAF (const RuntimeMethod* method) 
 {
 	typedef int32_t (*XRSettings_get_eyeTextureWidth_m3B18AF3F3382398E2A818B2B01AA1FE90FEB3AAF_ftn) ();
@@ -299,7 +299,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t XRSettings_get_eyeTextureWidth_m3B18A
 	int32_t icallRetVal = _il2cpp_icall_func();
 	return icallRetVal;
 }
-// Method Definition Index: 70976
+// Method Definition Index: 72006
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t XRSettings_get_eyeTextureHeight_mCF4B2EC6851A8B8A8C4E6FC085A621B3166DB67A (const RuntimeMethod* method) 
 {
 	typedef int32_t (*XRSettings_get_eyeTextureHeight_mCF4B2EC6851A8B8A8C4E6FC085A621B3166DB67A_ftn) ();
@@ -309,7 +309,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR int32_t XRSettings_get_eyeTextureHeight_mCF4B
 	int32_t icallRetVal = _il2cpp_icall_func();
 	return icallRetVal;
 }
-// Method Definition Index: 70977
+// Method Definition Index: 72007
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float XRSettings_get_renderViewportScale_mB35A32F5FE6B2EEE0CEF95ADFC04F171B6E5F5D1 (const RuntimeMethod* method) 
 {
 	float V_0 = 0.0f;
@@ -326,7 +326,7 @@ IL_0009:
 		return L_1;
 	}
 }
-// Method Definition Index: 70978
+// Method Definition Index: 72008
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void XRSettings_set_renderViewportScale_m96E308EEAE4B92F92ACD2866E3958070FA3E5313 (float ___0_value, const RuntimeMethod* method) 
 {
 	bool V_0 = false;
@@ -371,7 +371,7 @@ IL_0028:
 		return;
 	}
 }
-// Method Definition Index: 70979
+// Method Definition Index: 72009
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float XRSettings_get_renderViewportScaleInternal_mC9FFB83588F0865E76B78FB334AE6AAF0FF2EC24 (const RuntimeMethod* method) 
 {
 	typedef float (*XRSettings_get_renderViewportScaleInternal_mC9FFB83588F0865E76B78FB334AE6AAF0FF2EC24_ftn) ();
@@ -381,7 +381,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR float XRSettings_get_renderViewportScaleInter
 	float icallRetVal = _il2cpp_icall_func();
 	return icallRetVal;
 }
-// Method Definition Index: 70980
+// Method Definition Index: 72010
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void XRSettings_set_renderViewportScaleInternal_m938F25CB6C2F43493823E5C00A9A42EC721110B3 (float ___0_value, const RuntimeMethod* method) 
 {
 	typedef void (*XRSettings_set_renderViewportScaleInternal_m938F25CB6C2F43493823E5C00A9A42EC721110B3_ftn) (float);
@@ -398,7 +398,7 @@ IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void XRSettings_set_renderViewportScaleIntern
 #pragma clang diagnostic ignored "-Winvalid-offsetof"
 #pragma clang diagnostic ignored "-Wunused-variable"
 #endif
-// Method Definition Index: 70981
+// Method Definition Index: 72011
 IL2CPP_EXTERN_C IL2CPP_METHOD_ATTR void XRDevice_InvokeDeviceLoaded_mBE2198DE44A72E2F5059566C46B9907D82782790 (String_t* ___0_loadedDeviceName, const RuntimeMethod* method) 
 {
 	static bool s_Il2CppMethodInitialized;
@@ -432,7 +432,7 @@ IL_001b:
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-// Method Definition Index: 12411
+// Method Definition Index: 12412
 IL2CPP_MANAGED_FORCE_INLINE IL2CPP_METHOD_ATTR void Action_1_Invoke_mF2422B2DD29F74CE66F791C3F68E288EC7C3DB9E_gshared_inline (Action_1_t6F9EB113EB3F16226AEF811A2744F4111C116C87* __this, RuntimeObject* ___0_obj, const RuntimeMethod* method) 
 {
 	typedef void (*FunctionPointerType) (RuntimeObject*, RuntimeObject*, const RuntimeMethod*);

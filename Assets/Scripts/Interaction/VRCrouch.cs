@@ -10,24 +10,23 @@ public class VRCrouch : MonoBehaviour
     private Transform _trackingSpace;
     private InputAction _crouchAction;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    static void AutoAttach()
-    {
-        var pc = Object.FindAnyObjectByType<OVRPlayerController>();
-        if (pc == null)
-        {
-            Debug.LogWarning("[CROUCH] No OVRPlayerController found.");
-            return;
-        }
-        if (pc.GetComponent<VRCrouch>() == null)
-            pc.gameObject.AddComponent<VRCrouch>();
-    }
+    // DISABLED: Button-based crouch removed from A button.
+    // Crouch is now physical only (headset Y position via CrouchDetector.cs).
+    // To re-enable, uncomment AutoAttach and rebuild.
+    //
+    // [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    // static void AutoAttach()
+    // {
+    //     var pc = Object.FindAnyObjectByType<OVRPlayerController>();
+    //     if (pc == null) { Debug.LogWarning("[CROUCH] No OVRPlayerController found."); return; }
+    //     if (pc.GetComponent<VRCrouch>() == null) pc.gameObject.AddComponent<VRCrouch>();
+    // }
 
     void OnEnable()
     {
         _crouchAction = new InputAction("Crouch", InputActionType.Button);
+        // Only A button (right controller) -- X is used by Item Spawner
         _crouchAction.AddBinding("<XRController>{RightHand}/primaryButton");
-        _crouchAction.AddBinding("<XRController>{LeftHand}/primaryButton");
         _crouchAction.AddBinding("<Keyboard>/c");
         _crouchAction.performed += _ => {
             _crouching = !_crouching;

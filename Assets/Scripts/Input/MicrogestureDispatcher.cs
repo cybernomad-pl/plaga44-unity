@@ -1,5 +1,3 @@
-// AUTO-DISABLED: PLAGA44_FULL_SDK
-#if PLAGA44_FULL_SDK
 // MicrogestureDispatcher.cs
 // CYBERNOMAD -- Glue MonoBehaviour: wires MicrogestureManager events to GestureCommandMap.
 //
@@ -130,4 +128,3 @@ namespace Plaga44.Input
         }
     }
 }
-#endif // PLAGA44_FULL_SDK
