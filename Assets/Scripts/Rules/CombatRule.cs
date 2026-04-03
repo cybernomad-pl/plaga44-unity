@@ -18,10 +18,12 @@ namespace Plaga44.Rules
     }
 
     /// <summary>
-    /// Enum of hit zones on the target body.
+    /// Abstract body region categories for combat rule matching.
     /// Maps to Neo4j HitZone nodes.
+    /// Unlike Gameplay.HitZoneType (granular anatomical zones), these are
+    /// broad regions used as rule conditions with wildcard support.
     /// </summary>
-    public enum HitZoneType
+    public enum BodyRegion
     {
         Any = 0,
         Head = 1,
@@ -46,8 +48,8 @@ namespace Plaga44.Rules
         [Tooltip("Type of object that must cause the hit. Use Any to match all objects.")]
         public ObjectType sourceObjectType = ObjectType.Any;
 
-        [Tooltip("Body zone that must be hit. Use Any to match all zones.")]
-        public HitZoneType hitZone = HitZoneType.Any;
+        [Tooltip("Body region that must be hit. Use Any to match all regions.")]
+        public BodyRegion hitZone = BodyRegion.Any;
 
         [Tooltip("Minimum force (in Newtons) required to trigger this rule.")]
         [Min(0f)]
@@ -76,12 +78,12 @@ namespace Plaga44.Rules
 
         /// <summary>
         /// Returns true if this rule matches the given source, zone, and force.
-        /// ObjectType.Any and HitZoneType.Any act as wildcards.
+        /// ObjectType.Any and BodyRegion.Any act as wildcards.
         /// </summary>
-        public bool Matches(ObjectType source, HitZoneType zone, float force)
+        public bool Matches(ObjectType source, BodyRegion zone, float force)
         {
             bool sourceMatch = (sourceObjectType == ObjectType.Any) || (sourceObjectType == source);
-            bool zoneMatch = (hitZone == HitZoneType.Any) || (hitZone == zone);
+            bool zoneMatch = (hitZone == BodyRegion.Any) || (hitZone == zone);
             bool forceMatch = force >= forceThreshold;
             return sourceMatch && zoneMatch && forceMatch;
         }
