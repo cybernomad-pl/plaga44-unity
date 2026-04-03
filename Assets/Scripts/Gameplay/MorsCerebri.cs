@@ -8,7 +8,7 @@ namespace Plaga44.Gameplay
     /// Listens for hit events from HitDetector. If BodyZone == Head and
     /// incoming force >= forceThreshold, triggers ragdoll death sequence.
     ///
-    /// Wiring: HitDetector calls OnHit(HitData) on this component.
+    /// Wiring: HitDetector calls OnHit(HitData) on this component (BodyZone enum for zone ID).
     /// Requires: RagdollController on the same GameObject.
     /// </summary>
     [RequireComponent(typeof(RagdollController))]
