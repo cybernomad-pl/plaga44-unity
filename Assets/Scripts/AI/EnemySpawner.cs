@@ -49,6 +49,23 @@ namespace Plaga44.AI
             SpawnInitialEnemies();
         }
 
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+            // Unsubscribe from all enemy death events
+            foreach (var enemy in _liveEnemies)
+            {
+                if (enemy != null)
+                {
+                    var health = enemy.GetComponent<EnemyHealth>();
+                    if (health != null)
+                    {
+                        health.OnDeath -= (_) => StartCoroutine(HandleEnemyDeath(enemy));
+                    }
+                }
+            }
+        }
+
         // ---- Spawn logic ----
 
         private void SpawnInitialEnemies()

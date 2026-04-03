@@ -89,6 +89,11 @@ namespace Plaga44.Feedback
             DontDestroyOnLoad(gameObject);
         }
 
+        private void OnDestroy()
+        {
+            StopAllCoroutines();
+        }
+
         // --- Public API ----------------------------------------------------------
 
         /// <summary>Play grab feedback on the given controller.</summary>
