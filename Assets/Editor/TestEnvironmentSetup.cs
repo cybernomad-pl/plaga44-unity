@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using Plaga44.AI;
+using Plaga44.UI;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
