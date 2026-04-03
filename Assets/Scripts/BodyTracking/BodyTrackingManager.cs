@@ -1,5 +1,3 @@
-// AUTO-DISABLED: requires newer Meta XR SDK APIs
-#if PLAGA44_FULL_SDK
 // BodyTrackingManager.cs
 // PLAGA '44 -- Initializes OVRBody for Meta Movement SDK body tracking.
 // Configures tracking fidelity (High) and joint set (FullBody).
@@ -30,12 +28,12 @@ namespace Plaga44.BodyTracking
 
         [Header("Tracking Configuration")]
         [Tooltip("Show OVRSkeleton debug visualization. Requires OVRSkeleton component on same GO.")]
-        public bool showDebugSkeleton = false;
+        public bool showDebugSkeleton = true;
 
         // -- runtime state --
 
         private bool _initialized = false;
-        private bool _trackingActive = false;
+        private bool _trackingActive = true;
 
 #if HAS_META_XR
         [Header("Tracking Configuration (Meta XR)")]
@@ -75,13 +73,35 @@ namespace Plaga44.BodyTracking
 
         private void Awake()
         {
+            // Guard: Quest 2 nie obsluguje body tracking
+            if (!IsBodyTrackingSupported())
+            {
+                Debug.Log($"{LOG} Body tracking NOT supported on this device -- disabling.");
+                enabled = false;
+                return;
+            }
             InitializeBodyTracking();
         }
 
         private void OnEnable()
         {
+            if (!IsBodyTrackingSupported())
+            {
+                enabled = false;
+                return;
+            }
             if (!_initialized)
                 InitializeBodyTracking();
+        }
+
+        private static bool IsBodyTrackingSupported()
+        {
+#if HAS_META_XR
+            try { return OVRPlugin.bodyTrackingSupported; }
+            catch { return false; }
+#else
+            return false;
+#endif
         }
 
         private void Update()
@@ -116,30 +136,35 @@ namespace Plaga44.BodyTracking
             _initialized = true;
             Debug.Log($"{LOG} BodyTrackingManager initialized. Fidelity={trackingFidelity}, JointSet={jointSet}");
 #else
-            Debug.LogWarning($"{LOG} HAS_META_XR not defined. Body tracking unavailable. " +
-                             "Run CYBERNOMAD/Scene Setup/Setup Body Tracking.");
-            _initialized = true;
+            #error "HAS_META_XR not defined -- Quest project requires Meta XR SDK"
 #endif
         }
 
         private void ApplyBodyTrackingConfiguration()
         {
 #if HAS_META_XR
-            // OVRPlugin.RequestBodyTrackingFidelity sets the fidelity level.
-            // Available since Meta XR SDK v50.
-            bool fidelityOk = OVRPlugin.RequestBodyTrackingFidelity(
-                (OVRPlugin.BodyTrackingFidelity2)trackingFidelity);
+            // Try SDK v74+ API, gracefully skip if not available
+            try
+            {
+                var method = typeof(OVRPlugin).GetMethod("RequestBodyTrackingFidelity");
+                if (method != null)
+                {
+                    bool ok = (bool)method.Invoke(null, new object[] { trackingFidelity });
+                    Debug.Log($"{LOG} Body tracking fidelity: {trackingFidelity} (ok={ok})");
+                }
+                else
+                {
+                    Debug.Log($"{LOG} RequestBodyTrackingFidelity not available in this SDK version.");
+                }
 
-            if (!fidelityOk)
-                Debug.LogWarning($"{LOG} RequestBodyTrackingFidelity({trackingFidelity}) returned false. " +
-                                 "Body tracking permission may not be granted.");
-            else
-                Debug.Log($"{LOG} Body tracking fidelity set to: {trackingFidelity}");
-
-            // Configure OVRBody properties directly.
-            _ovrBody.ProvidedSkeletonType = jointSet == OVRPlugin.BodyJointSet.FullBody
-                ? OVRPlugin.BodyJointSet.FullBody
-                : OVRPlugin.BodyJointSet.UpperBody;
+                var prop = _ovrBody.GetType().GetProperty("ProvidedSkeletonType");
+                if (prop != null)
+                    prop.SetValue(_ovrBody, jointSet);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"{LOG} Body tracking config failed (SDK version mismatch?): {e.Message}");
+            }
 #endif
         }
 
@@ -190,13 +215,40 @@ namespace Plaga44.BodyTracking
         }
 #endif
 
+        private System.Reflection.PropertyInfo _isTrackedProp;
+        private System.Reflection.PropertyInfo _jointLocationsProp;
+        private bool _reflectionInit;
+
+        private void InitReflection()
+        {
+#if HAS_META_XR
+            if (_reflectionInit || _ovrBody == null) return;
+            _reflectionInit = true;
+            var bodyType = _ovrBody.GetType();
+
+            // Try SDK v74+ API first, then older
+            _isTrackedProp = bodyType.GetProperty("IsBodyTracked")
+                          ?? bodyType.GetProperty("IsTracked");
+            _jointLocationsProp = bodyType.GetProperty("JointLocations")
+                               ?? bodyType.GetProperty("BodyState");
+
+            Debug.Log($"{LOG} OVRBody reflection: IsTracked={_isTrackedProp?.Name ?? "N/A"}, " +
+                      $"Joints={_jointLocationsProp?.Name ?? "N/A"}");
+#endif
+        }
+
         private void UpdateTrackingState()
         {
 #if HAS_META_XR
             if (_ovrBody == null) return;
+            InitReflection();
 
             bool wasActive = _trackingActive;
-            _trackingActive = _ovrBody.IsBodyTracked;
+
+            if (_isTrackedProp != null)
+                _trackingActive = (bool)_isTrackedProp.GetValue(_ovrBody);
+            else
+                _trackingActive = _ovrBody.enabled; // fallback: assume active if component is on
 
             if (_trackingActive != wasActive)
             {
@@ -205,29 +257,37 @@ namespace Plaga44.BodyTracking
                     : $"{LOG} Body tracking LOST.");
             }
 #else
-            _trackingActive = false;
+            #error "HAS_META_XR not defined -- Quest project requires Meta XR SDK"
 #endif
         }
 
         private void CacheJoints()
         {
 #if HAS_META_XR
-            if (_ovrBody == null || !_ovrBody.IsBodyTracked) return;
+            if (_ovrBody == null || !_trackingActive) return;
+            InitReflection();
 
-            // OVRBody.JointLocations is an IReadOnlyList<OVRPlugin.BodyJointLocation>
-            // available in Meta XR SDK v74+.
-            var jointLocations = _ovrBody.JointLocations;
+            // Try to read joint locations via reflection (SDK version agnostic)
+            if (_jointLocationsProp == null) return;
+
+            var jointLocations = _jointLocationsProp.GetValue(_ovrBody) as System.Collections.IList;
             if (jointLocations == null) return;
 
             _joints.Clear();
             for (int i = 0; i < jointLocations.Count; i++)
             {
                 var loc = jointLocations[i];
-                // Only cache joints with valid orientation and position flags.
-                if ((loc.LocationFlags & OVRPlugin.SpaceLocationFlags.OrientationValid) != 0
-                    && (loc.LocationFlags & OVRPlugin.SpaceLocationFlags.PositionValid) != 0)
+                if (loc == null) continue;
+
+                // Try to extract Pose via reflection
+                var locType = loc.GetType();
+                var poseProp = locType.GetField("Pose") ?? locType.GetField("pose");
+                var flagsProp = locType.GetField("LocationFlags") ?? locType.GetField("locationFlags");
+
+                if (poseProp != null)
                 {
-                    _joints[(OVRSkeleton.BoneId)i] = loc.Pose;
+                    var pose = (OVRPlugin.Posef)poseProp.GetValue(loc);
+                    _joints[(OVRSkeleton.BoneId)i] = pose;
                 }
             }
 #endif
@@ -250,4 +310,3 @@ namespace Plaga44.BodyTracking
 #endif
     }
 }
-#endif // PLAGA44_FULL_SDK
