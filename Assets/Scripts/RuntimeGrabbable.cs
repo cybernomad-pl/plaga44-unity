@@ -11,6 +11,8 @@
 
 using UnityEngine;
 
+namespace Plaga44.Interaction
+{
 public class RuntimeGrabbable : OVRGrabbable
 {
     // Controller that last grabbed this object -- used for haptic feedback on release/hit.
@@ -91,3 +93,4 @@ public class RuntimeGrabbable : OVRGrabbable
         }
     }
 }
+} // namespace Plaga44.Interaction

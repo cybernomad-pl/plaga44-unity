@@ -2764,7 +2764,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fc357ab418efed144aef741408dd8c65, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::HandCollisionIgnore
+  m_EditorClassIdentifier: Assembly-CSharp::Plaga44.Core.HandCollisionIgnore
 --- !u!4 &973012411 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 416152, guid: 81d633455a8cc814e89ff68eb1deb8e7, type: 3}

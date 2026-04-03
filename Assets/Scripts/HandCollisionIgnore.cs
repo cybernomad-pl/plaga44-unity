@@ -6,6 +6,8 @@
 
 using UnityEngine;
 
+namespace Plaga44.Core
+{
 public class HandCollisionIgnore : MonoBehaviour
 {
     void Start()
@@ -39,3 +41,4 @@ public class HandCollisionIgnore : MonoBehaviour
         Debug.Log($"[PLAGA44] HandCollisionIgnore: {count} colliders now ignore CharacterController.");
     }
 }
+} // namespace Plaga44.Core

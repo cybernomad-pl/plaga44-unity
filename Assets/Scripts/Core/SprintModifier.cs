@@ -4,6 +4,8 @@
 
 using UnityEngine;
 
+namespace Plaga44.Core
+{
 public class SprintModifier : MonoBehaviour
 {
     [Header("Sprint")]
@@ -117,3 +119,4 @@ public class SprintModifier : MonoBehaviour
         return true;
     }
 }
+} // namespace Plaga44.Core

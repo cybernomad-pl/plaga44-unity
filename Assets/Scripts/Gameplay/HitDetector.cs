@@ -1,3 +1,4 @@
+using Plaga44.Interaction;
 using UnityEngine;
 
 namespace Plaga44.Gameplay

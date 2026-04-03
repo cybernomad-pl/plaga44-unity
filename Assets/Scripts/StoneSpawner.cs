@@ -4,6 +4,7 @@
 // Compound collider: SphereCollider (grab point) + cross-shaped BoxColliders (physics).
 // OVRGrabbable.Awake() needs a Collider on root GO -- SphereCollider stays for that.
 
+using Plaga44.Interaction;
 using UnityEngine;
 
 public class StoneSpawner : MonoBehaviour
