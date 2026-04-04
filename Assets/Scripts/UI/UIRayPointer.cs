@@ -62,8 +62,11 @@ namespace Plaga44.UI
 #if HAS_META_XR
             bool menuOpen = VRMenuManager.MenuOpen;
 
-            _line.enabled = menuOpen;
-            if (!menuOpen)
+            // Don't show laser during splash/main-menu screens
+            bool splashActive = SplashScreen.IsMenuOpen;
+
+            _line.enabled = menuOpen && !splashActive;
+            if (!menuOpen || splashActive)
             {
                 ClearHover();
                 return;

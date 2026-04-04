@@ -1,9 +1,7 @@
 // VFXSpawnerMenu.cs
-// CYBERNOMAD -- World-space VR menu for spawning VFX prefabs.
-// Toggle: A button (Button.One, right controller)
-// Navigation: LEFT STICK up/down = select, left/right = category
-// Spawn: LEFT TRIGGER
-// Delete Last / Delete All: menu actions at bottom of list
+// CYBERNOMAD -- VFX spawning backend. Controlled by VRMenuManager (Spawner > VFX tab).
+// No own input handling -- all interaction via public API: GetVFXList(), SpawnCurrent(),
+// DeleteLast(), DeleteAll().
 //
 // Loads prefabs from Resources/VFXPrefabs/{Category}/ at startup.
 // To use: copy VFX prefabs into Assets/Resources/VFXPrefabs/Projectiles/,
@@ -19,7 +17,6 @@ namespace Plaga44.UI
 {
     public class VFXSpawnerMenu : MonoBehaviour
     {
-        public static bool MenuOpen { get; private set; } = false;
         public static VFXSpawnerMenu Instance { get; private set; }
 
         // ---- Public API for VRMenuManager ----
@@ -294,8 +291,10 @@ namespace Plaga44.UI
             _spawnedObjects.Add(instance);
 
             // Haptic feedback
+#if HAS_META_XR
             OVRInput.SetControllerVibration(0.3f, 0.3f, OVRInput.Controller.LTouch);
             Invoke(nameof(StopHaptic), 0.08f);
+#endif
 
             Debug.Log($"[PLAGA44] VFXSpawnerMenu: Spawned '{entry.Name}' ({entry.Category}) at {pos}");
             UpdateDisplay();
@@ -303,7 +302,9 @@ namespace Plaga44.UI
 
         void StopHaptic()
         {
+#if HAS_META_XR
             OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch);
+#endif
         }
 
         void DeleteLastSpawned()
@@ -458,9 +459,10 @@ namespace Plaga44.UI
             var camLook = Camera.main;
             if (camLook != null)
             {
+                // Canvas text renders on +Z face -- forward must point toward the player.
                 _canvasGO.transform.rotation = Quaternion.Slerp(
                     _canvasGO.transform.rotation,
-                    Quaternion.LookRotation(_canvasGO.transform.position - camLook.transform.position),
+                    Quaternion.LookRotation(camLook.transform.position - _canvasGO.transform.position),
                     Time.deltaTime * 8f);
             }
         }

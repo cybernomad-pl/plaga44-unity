@@ -3,17 +3,14 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 /// <summary>
-/// VR Item Spawner -- runtime debug menu on LEFT controller.
-/// LEFT STICK up/down = select, left/right = scale
-/// LEFT TRIGGER = spawn in front of player (with Rigidbody + OVRGrabbable)
-/// X = toggle menu, Y = delete last
+/// VR Item Spawner -- spawning backend. Controlled by VRMenuManager (Spawner > Items/Weapons tabs).
+/// No own input -- all interaction via public API: GetItemList(), GetWeaponList(),
+/// SpawnCurrent(), SpawnCurrentWeapon(), DeleteLast(), DeleteAll(), SelectItem(), SelectWeapon().
 ///
 /// Loads prefabs from Resources/SpawnItems/ at startup.
-/// Blocks player movement when menu is open.
 /// </summary>
 public class VRItemSpawner : MonoBehaviour
 {
-    public static bool MenuOpen { get; private set; } = false;
     public static VRItemSpawner Instance { get; private set; }
 
     // ---- Public API for VRMenuManager ----
@@ -55,16 +52,36 @@ public class VRItemSpawner : MonoBehaviour
         return sb.ToString();
     }
 
-    /// <summary>Spawn the first available item.</summary>
+    /// <summary>Spawn the currently selected item (by selectedIndex).</summary>
     public void SpawnCurrent()
     {
         if (_prefabs.Count == 0) return;
-        SpawnItem(_prefabs[0]);
+        int idx = Mathf.Clamp(_selectedRow, 0, _prefabs.Count - 1);
+        SpawnItem(_prefabs[idx]);
     }
 
-    /// <summary>Spawn the first weapon-category item.</summary>
+    /// <summary>Spawn the currently selected weapon-category item (by weaponIndex).</summary>
     public void SpawnCurrentWeapon()
     {
+        var weapons = GetWeaponPrefabs();
+        if (weapons.Count == 0) return;
+        int idx = Mathf.Clamp(_selectedWeaponRow, 0, weapons.Count - 1);
+        SpawnItem(weapons[idx]);
+    }
+
+    /// <summary>Select item by index (called from VRMenuManager spawner UI).</summary>
+    public void SelectItem(int index) => _selectedRow = Mathf.Clamp(index, 0, Mathf.Max(0, _prefabs.Count - 1));
+
+    /// <summary>Select weapon by index (called from VRMenuManager spawner UI).</summary>
+    public void SelectWeapon(int index)
+    {
+        var weapons = GetWeaponPrefabs();
+        _selectedWeaponRow = Mathf.Clamp(index, 0, Mathf.Max(0, weapons.Count - 1));
+    }
+
+    private List<GameObject> GetWeaponPrefabs()
+    {
+        var weapons = new List<GameObject>();
         foreach (var p in _prefabs)
         {
             if (p == null) continue;
@@ -73,10 +90,10 @@ public class VRItemSpawner : MonoBehaviour
                 lower.Contains("pistol") || lower.Contains("sword") || lower.Contains("katana") ||
                 lower.Contains("weapon") || lower.Contains("scifi"))
             {
-                SpawnItem(p);
-                return;
+                weapons.Add(p);
             }
         }
+        return weapons;
     }
 
     /// <summary>Delete last spawned item.</summary>
@@ -90,6 +107,7 @@ public class VRItemSpawner : MonoBehaviour
     private Text[] _rowTexts;
     private bool _visible = false;
     private int _selectedRow = 0;
+    private int _selectedWeaponRow = 0;
     private float _inputCooldown = 0;
     private float _spawnScale = 1f;
     private float _spawnDistance = 2f;
@@ -196,10 +214,7 @@ public class VRItemSpawner : MonoBehaviour
         // Input handling REMOVED -- VRMenuManager owns all menu input now.
         // VRItemSpawner is controlled via public API (GetItemList, SpawnCurrent, etc.)
         // from VRMenuManager's Spawner sub-panel.
-
-        // Y = quick delete last (kept -- this is a dedicated shortcut, not a menu toggle)
-        if (OVRInput.GetDown(OVRInput.Button.Four))
-            DeleteLastSpawned();
+        // Y button (Button.Four) is handled by ModelSpawner -- no duplicate here.
     }
 
     void BlockPlayerMovement(bool block)
@@ -232,8 +247,9 @@ public class VRItemSpawner : MonoBehaviour
         var camLook = Camera.main;
         if (camLook != null)
         {
+            // Canvas text renders on +Z face -- forward must point toward the player.
             _canvas.transform.rotation = Quaternion.Slerp(_canvas.transform.rotation,
-                Quaternion.LookRotation(_canvas.transform.position - camLook.transform.position),
+                Quaternion.LookRotation(camLook.transform.position - _canvas.transform.position),
                 Time.deltaTime * 8f);
         }
     }

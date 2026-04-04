@@ -77,6 +77,13 @@ namespace Plaga44.UI
                 if (_camT == null) return;
             }
 
+            // Don't trigger introspection while any menu is open
+            if (VRMenuManager.MenuOpen || VRQualityMenu.MenuOpen)
+            {
+                _lookDownTimer = 0f;
+                return;
+            }
+
             float pitch = _camT.eulerAngles.x;
             // Normalize: Unity gives 0-360, we want -180 to 180
             if (pitch > 180f) pitch -= 360f;

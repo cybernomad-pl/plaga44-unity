@@ -92,8 +92,9 @@ namespace Plaga44.IK
             // Pin hips each frame
             PinHips();
 
-            // Eject on button press (after cooldown)
-            if (_seatedTime >= ejectCooldown)
+            // Eject on button press (after cooldown). Block when menus are open.
+            if (_seatedTime >= ejectCooldown
+                && !Plaga44.UI.VRMenuManager.MenuOpen && !VRQualityMenu.MenuOpen)
             {
 #if HAS_META_XR
                 if (OVRInput.GetDown(ejectButton))

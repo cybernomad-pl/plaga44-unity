@@ -58,6 +58,9 @@ public class M249Disassembly : MonoBehaviour
 
     void Update()
     {
+        // Block weapon interaction while any menu is open
+        if (Plaga44.UI.VRMenuManager.MenuOpen || VRQualityMenu.MenuOpen) return;
+
         CheckIndexFingerPointing();
         CheckDisassembleInput();
         CheckReattach();

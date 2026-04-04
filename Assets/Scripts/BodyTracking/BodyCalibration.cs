@@ -64,6 +64,9 @@ namespace Plaga44.BodyTracking
 
         private void Update()
         {
+            // Don't trigger calibration while menus are open
+            if (Plaga44.UI.VRMenuManager.MenuOpen || VRQualityMenu.MenuOpen) return;
+
             if (calibrateOnBothThumbsticks && BothThumbstickPressed())
                 CalibrateNow();
         }
