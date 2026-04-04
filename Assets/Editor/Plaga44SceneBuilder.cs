@@ -108,6 +108,7 @@ namespace Plaga44.Editor
                 EnsureOVRCameraRig();
 
             MaterialUpgrader.UpgradeMaterials();
+            FixWaterMaterials();
 
             SpawnItems();
             SetupWeaponManagers();
@@ -393,6 +394,44 @@ namespace Plaga44.Editor
         {
             new Vector3(457.94f, 16.45f, 409.63f),  // bridge gate entrance
         };
+
+        static void FixWaterMaterials()
+        {
+            // Assign WaterMaterial.mat to all water objects in scene
+            var waterMat = AssetDatabase.LoadAssetAtPath<Material>("Assets/PLAGA44/Shaders/WaterMaterial.mat");
+            if (waterMat == null)
+            {
+                Debug.LogWarning($"{LOG} WaterMaterial.mat not found at Assets/PLAGA44/Shaders/WaterMaterial.mat");
+                return;
+            }
+
+            int fixed_ = 0;
+            var renderers = Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None);
+            foreach (var r in renderers)
+            {
+                if (r == null) continue;
+                string n = r.gameObject.name.ToLowerInvariant();
+                if (!n.Contains("water") && !n.Contains("3d_water")) continue;
+
+                var mats = r.sharedMaterials;
+                bool changed = false;
+                for (int i = 0; i < mats.Length; i++)
+                {
+                    if (mats[i] == null || mats[i].shader.name.Contains("Error") || mats[i].name.Contains("Default-Material"))
+                    {
+                        mats[i] = waterMat;
+                        changed = true;
+                    }
+                }
+                if (changed)
+                {
+                    r.sharedMaterials = mats;
+                    fixed_++;
+                    Debug.Log($"{LOG} Fixed water material on '{r.gameObject.name}'");
+                }
+            }
+            Debug.Log($"{LOG} FixWaterMaterials: {fixed_} objects fixed");
+        }
 
         static void FixParticleMaterials()
         {
