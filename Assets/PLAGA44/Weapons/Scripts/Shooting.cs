@@ -26,7 +26,7 @@ public class Shooting : MonoBehaviour
         //elapsed time
         elapsedTime += Time.deltaTime;
 
-        if (!VRQualityMenu.MenuOpen && OVRInput.GetDown(ShootingButton, OVRInput.Controller.RTouch))
+        if (!Plaga44.UI.VRMenuManager.MenuOpen && !VRQualityMenu.MenuOpen && OVRInput.GetDown(ShootingButton, OVRInput.Controller.RTouch))
         {
             if (elapsedTime > fireRate)
             {

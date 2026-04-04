@@ -60,7 +60,7 @@ namespace Plaga44.UI
         private void Update()
         {
 #if HAS_META_XR
-            bool menuOpen = VRMenuManager.Instance != null && VRMenuManager.Instance.IsOpen;
+            bool menuOpen = VRMenuManager.MenuOpen;
 
             _line.enabled = menuOpen;
             if (!menuOpen)

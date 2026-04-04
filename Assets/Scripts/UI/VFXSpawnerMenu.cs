@@ -22,6 +22,35 @@ namespace Plaga44.UI
         public static bool MenuOpen { get; private set; } = false;
         public static VFXSpawnerMenu Instance { get; private set; }
 
+        // ---- Public API for VRMenuManager ----
+
+        /// <summary>Get formatted list of VFX entries for current category.</summary>
+        public string GetVFXList()
+        {
+            if (_allEntries.Count == 0) return "<color=#666666>No VFX prefabs loaded.</color>";
+            var sb = new System.Text.StringBuilder();
+            foreach (var entry in _allEntries)
+            {
+                sb.AppendLine($"<color=#66aaff>[{entry.Category}]</color> {entry.Name}");
+            }
+            sb.AppendLine($"\n<color=#888888>{_spawnedObjects.Count} active VFX</color>");
+            return sb.ToString();
+        }
+
+        /// <summary>Spawn the first VFX entry (or current selection if available).</summary>
+        public void SpawnCurrent()
+        {
+            if (_allEntries.Count == 0) return;
+            int idx = Mathf.Clamp(_selectedRow, 0, _allEntries.Count - 1);
+            SpawnVFX(_allEntries[idx]);
+        }
+
+        /// <summary>Delete last spawned VFX.</summary>
+        public void DeleteLast() => DeleteLastSpawned();
+
+        /// <summary>Delete all spawned VFX.</summary>
+        public void DeleteAll() => DeleteAllSpawned();
+
         // ---- Categories ----
 
         private struct VFXEntry
@@ -74,6 +103,12 @@ namespace Plaga44.UI
             var go = new GameObject("_VFXSpawnerMenu");
             Instance = go.AddComponent<VFXSpawnerMenu>();
             DontDestroyOnLoad(go);
+        }
+
+        void Awake()
+        {
+            if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+            Instance = this;
         }
 
         void Start()
@@ -202,63 +237,12 @@ namespace Plaga44.UI
 
         void Update()
         {
-            // A button (right controller) = toggle VFX menu
-            if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.RTouch))
-            {
-                // Don't open if other menus are active
-                if (!_visible && VRItemSpawner.MenuOpen) return;
+            // Input handling REMOVED -- VRMenuManager owns all menu input now.
+            // VFXSpawnerMenu is controlled via public API (GetVFXList, SpawnCurrent, etc.)
+            // from VRMenuManager's Spawner sub-panel.
 
-                _visible = !_visible;
-                _canvasGO.SetActive(_visible);
-                MenuOpen = _visible;
-                BlockPlayerMovement(_visible);
-            }
-
-            if (!_visible) return;
-
-            PositionCanvas();
-
-            _inputCooldown -= Time.unscaledDeltaTime;
-            if (_inputCooldown > 0f) return;
-
-            Vector2 stick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
-
-            // Up/Down = navigate rows
-            if (stick.y > 0.5f)
-            {
-                _selectedRow = (_selectedRow - 1 + TotalRows) % TotalRows;
-                _inputCooldown = 0.18f;
-            }
-            else if (stick.y < -0.5f)
-            {
-                _selectedRow = (_selectedRow + 1) % TotalRows;
-                _inputCooldown = 0.18f;
-            }
-
-            // Left/Right = switch category
-            if (stick.x > 0.6f)
-            {
-                _currentCategory = (_currentCategory + 1) % _categories.Length;
-                FilterByCategory();
-                RebuildCanvas();
-                _inputCooldown = 0.25f;
-            }
-            else if (stick.x < -0.6f)
-            {
-                _currentCategory = (_currentCategory - 1 + _categories.Length) % _categories.Length;
-                FilterByCategory();
-                RebuildCanvas();
-                _inputCooldown = 0.25f;
-            }
-
-            // Left trigger = execute selection
-            if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f)
-            {
-                Execute(_selectedRow);
-                _inputCooldown = 0.35f;
-            }
-
-            UpdateDisplay();
+            // Keep the canvas hidden -- VFXSpawnerMenu no longer has its own UI.
+            // All display is handled by VRMenuManager.
         }
 
         void Execute(int row)
