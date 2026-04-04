@@ -31,6 +31,7 @@ Shader "Flooded_Grounds/PBR_Water"
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             #pragma multi_compile_fog
+            #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -58,6 +59,7 @@ Shader "Flooded_Grounds/PBR_Water"
                 float3 normalOS   : NORMAL;
                 float4 tangentOS  : TANGENT;
                 float2 uv         : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -70,11 +72,14 @@ Shader "Flooded_Grounds/PBR_Water"
                 float3 tangentWS   : TEXCOORD4;
                 float3 bitangentWS : TEXCOORD5;
                 float  fogFactor   : TEXCOORD6;
+                UNITY_VERTEX_OUTPUT_STEREO
             };
 
             Varyings vert(Attributes IN)
             {
                 Varyings OUT = (Varyings)0;
+                UNITY_SETUP_INSTANCE_ID(IN);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
 
                 float phase = _Time.y * _WaveFreq;
                 float wo = (IN.positionOS.x + IN.positionOS.z * 2.0) * 8.0;
@@ -99,6 +104,7 @@ Shader "Flooded_Grounds/PBR_Water"
 
             half4 frag(Varyings IN) : SV_Target
             {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
                 half4 n1 = SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, IN.uv1);
                 half4 n2 = SAMPLE_TEXTURE2D(_BumpMap2, sampler_BumpMap2, IN.uv2);
 
