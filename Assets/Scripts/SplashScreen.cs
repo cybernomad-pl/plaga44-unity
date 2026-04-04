@@ -124,6 +124,13 @@ namespace Plaga44.UI
 
         private void Start()
         {
+#if LOCOMOTION_ONLY
+            // Skip splash entirely — go straight to game scene
+            Debug.Log("[PLAGA44] LOCOMOTION_ONLY: skipping splash, loading game scene");
+            Plaga44.GameState.SetState(Plaga44.GamePhase.Playing);
+            UnityEngine.SceneManagement.SceneManager.LoadScene(gameSceneName);
+            return;
+#endif
             CreateCanvas();
             CreateSplashElements();
             CreateMenuContainer();
