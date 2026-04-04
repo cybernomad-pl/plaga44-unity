@@ -38,11 +38,11 @@ public class M249Disassembly : MonoBehaviour
     private Transform _lastHighlighted;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void AutoCreate()
+    {
 #if LOCOMOTION_ONLY
         return;
 #endif
-    static void AutoCreate()
-    {
         // Szukaj M249 w scenie
         var m249s = FindObjectsByType<Transform>(FindObjectsSortMode.None);
         foreach (var t in m249s)

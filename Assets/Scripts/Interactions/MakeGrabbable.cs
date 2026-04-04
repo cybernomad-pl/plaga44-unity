@@ -32,6 +32,9 @@ public class MakeGrabbable : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoRun()
     {
+#if LOCOMOTION_ONLY
+        return;
+#endif
         var go = new GameObject("_MakeGrabbable");
         go.AddComponent<MakeGrabbable>();
         DontDestroyOnLoad(go);

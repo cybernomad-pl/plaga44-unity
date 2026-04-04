@@ -73,6 +73,9 @@ namespace Plaga44.Core
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void AutoSetup()
         {
+#if LOCOMOTION_ONLY
+        return;
+#endif
             var grabbers = FindObjectsByType<OVRGrabber>(FindObjectsSortMode.None);
             foreach (var grabber in grabbers)
             {

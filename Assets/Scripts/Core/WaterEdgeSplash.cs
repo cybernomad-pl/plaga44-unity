@@ -16,11 +16,11 @@ public class WaterEdgeSplash : MonoBehaviour
     private Terrain _terrain;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void AutoCreate()
+    {
 #if LOCOMOTION_ONLY
         return;
 #endif
-    static void AutoCreate()
-    {
         var go = new GameObject("_WaterEdgeSplash");
         go.AddComponent<WaterEdgeSplash>();
         DontDestroyOnLoad(go);

@@ -10,6 +10,9 @@ public class VRPostProcessEnable : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void EnableOnAllCameras()
     {
+#if LOCOMOTION_ONLY
+        return;
+#endif
         // Delay one frame so OVRCameraRig has created its cameras
         var helper = new GameObject("_PostProcessHelper").AddComponent<PostProcessHelper>();
         helper.StartCoroutine(helper.EnableNextFrame());

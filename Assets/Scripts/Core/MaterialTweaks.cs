@@ -7,11 +7,11 @@ using UnityEngine;
 public class MaterialTweaks : MonoBehaviour
 {
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void AutoCreate()
+    {
 #if LOCOMOTION_ONLY
         return;
 #endif
-    static void AutoCreate()
-    {
         var go = new GameObject("_MaterialTweaks");
         go.AddComponent<MaterialTweaks>();
         DontDestroyOnLoad(go);

@@ -27,6 +27,9 @@ namespace Plaga44.FaceTracking
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoSpawn()
         {
+#if LOCOMOTION_ONLY
+            return;
+#endif
 #if UNITY_EDITOR
             if (!UnityEditor.EditorPrefs.GetBool(ENABLED_KEY, false)) return;
 #endif

@@ -41,6 +41,9 @@ namespace Plaga44.FaceTracking
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoSpawn()
         {
+#if LOCOMOTION_ONLY
+            return;
+#endif
             Spawn();
         }
 

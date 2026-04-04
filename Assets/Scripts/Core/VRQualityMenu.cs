@@ -61,11 +61,11 @@ public class VRQualityMenu : MonoBehaviour
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void AutoCreate()
+    {
 #if LOCOMOTION_ONLY
         return;
 #endif
-    static void AutoCreate()
-    {
         var go = new GameObject("_VRQualityMenu");
         go.AddComponent<VRQualityMenu>();
         DontDestroyOnLoad(go);

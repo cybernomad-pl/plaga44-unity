@@ -17,11 +17,11 @@ public class TerrainDeformer : MonoBehaviour
     private bool _saved = false;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void AutoCreate()
+    {
 #if LOCOMOTION_ONLY
         return;
 #endif
-    static void AutoCreate()
-    {
         var go = new GameObject("_TerrainDeformer");
         go.AddComponent<TerrainDeformer>();
         DontDestroyOnLoad(go);

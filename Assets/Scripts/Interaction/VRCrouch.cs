@@ -13,6 +13,9 @@ public class VRCrouch : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoAttach()
     {
+#if LOCOMOTION_ONLY
+        return;
+#endif
         var pc = Object.FindAnyObjectByType<OVRPlayerController>();
         if (pc == null)
         {

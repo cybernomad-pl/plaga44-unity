@@ -8,11 +8,11 @@ using UnityEngine;
 public class M249GripFix : MonoBehaviour
 {
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void AutoCreate()
+    {
 #if LOCOMOTION_ONLY
         return;
 #endif
-    static void AutoCreate()
-    {
         var go = new GameObject("_M249GripFix");
         go.AddComponent<M249GripFix>();
         DontDestroyOnLoad(go);
