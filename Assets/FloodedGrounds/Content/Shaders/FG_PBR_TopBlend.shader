@@ -31,6 +31,7 @@ Shader "Flooded_Grounds/PBR_TopBlend" {
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             #pragma multi_compile_fog
+            #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -61,6 +62,7 @@ Shader "Flooded_Grounds/PBR_TopBlend" {
                 float3 normalOS   : NORMAL;
                 float4 tangentOS  : TANGENT;
                 float2 uv         : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings {
@@ -72,11 +74,14 @@ Shader "Flooded_Grounds/PBR_TopBlend" {
                 float3 tangentWS   : TEXCOORD4;
                 float3 bitangentWS : TEXCOORD5;
                 float  fogFactor   : TEXCOORD6;
+                UNITY_VERTEX_OUTPUT_STEREO
             };
 
             Varyings vert(Attributes IN)
             {
                 Varyings OUT = (Varyings)0;
+                UNITY_SETUP_INSTANCE_ID(IN);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
                 VertexPositionInputs pi = GetVertexPositionInputs(IN.positionOS.xyz);
                 VertexNormalInputs ni = GetVertexNormalInputs(IN.normalOS, IN.tangentOS);
 
@@ -93,6 +98,7 @@ Shader "Flooded_Grounds/PBR_TopBlend" {
 
             half4 frag(Varyings IN) : SV_Target
             {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
                 // Base textures
                 half3 mainCol = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv).rgb;
                 half3 norm = UnpackNormalScale(SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, IN.uvBump), 1.0);

@@ -24,6 +24,7 @@ Shader "Flooded_Grounds/Triplanar_BumpSpec"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_fog
+            #pragma multi_compile_instancing
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
@@ -58,6 +59,8 @@ Shader "Flooded_Grounds/Triplanar_BumpSpec"
             Varyings vert (Attributes IN)
             {
                 Varyings OUT = (Varyings)0;
+                UNITY_SETUP_INSTANCE_ID(IN);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
                 VertexPositionInputs pi = GetVertexPositionInputs(IN.positionOS.xyz);
                 VertexNormalInputs ni = GetVertexNormalInputs(IN.normalOS);
 
@@ -73,6 +76,7 @@ Shader "Flooded_Grounds/Triplanar_BumpSpec"
 
             half4 frag (Varyings IN) : SV_Target
             {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
                 // Triplanar blend weights
                 half3 blend_weights = abs(IN.localNorm.xyz);
                 blend_weights = max(blend_weights - _BlendPlateau, 0);

@@ -24,6 +24,7 @@ SubShader {
         #pragma vertex vert
         #pragma fragment frag
         #pragma multi_compile_fog
+            #pragma multi_compile_instancing
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
@@ -56,6 +57,8 @@ SubShader {
 
         Varyings vert(Attributes IN) {
             Varyings OUT = (Varyings)0;
+                UNITY_SETUP_INSTANCE_ID(IN);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT);
             VertexPositionInputs pi = GetVertexPositionInputs(IN.positionOS.xyz);
             VertexNormalInputs ni = GetVertexNormalInputs(IN.normalOS, IN.tangentOS);
             OUT.positionCS = pi.positionCS;
@@ -68,6 +71,7 @@ SubShader {
         }
 
         half4 frag(Varyings IN) : SV_Target {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
             half4 c = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
             c.rgb *= IN.color.rgb * IN.color.a * _Color.rgb;
 
