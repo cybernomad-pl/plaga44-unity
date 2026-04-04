@@ -965,7 +965,9 @@ namespace Plaga44.Editor
             {
                 if (es == null) continue;
                 var standalone = es.GetComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+                #pragma warning disable CS0618
                 var touch = es.GetComponent<UnityEngine.EventSystems.TouchInputModule>();
+                #pragma warning restore CS0618
                 if (standalone != null)
                 {
                     Debug.Log($"{LOG} Removing legacy StandaloneInputModule from '{es.gameObject.name}'");
@@ -1204,7 +1206,9 @@ namespace Plaga44.Editor
         private List<string> _prefabPaths = new List<string>();
         private Vector2 _scrollCat;
         private Vector2 _scrollPrefabs;
+        #pragma warning disable CS0414
         private string _spawnOffset = "0 0 3"; // domyslnie 3m przed graczem
+        #pragma warning restore CS0414
         private float _spawnY = 0f;
 
         public static void Open()
