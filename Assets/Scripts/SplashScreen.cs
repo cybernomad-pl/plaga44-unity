@@ -1,5 +1,6 @@
 // SplashScreen.cs
 // CYBERNOMAD -- Splash screen + main menu + pause menu.
+// Lives on SplashScene (build index 0). Loads gameSceneName when player starts.
 // On game start: black screen with "PLAGA '44", waits for both triggers.
 // After triggers: shows main menu (CONTINUE / NEW GAME / SETTINGS).
 // During gameplay: Start button opens pause menu (RESUME / SAVE / SETTINGS / QUIT).
@@ -9,6 +10,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Plaga44.UI
@@ -21,6 +23,9 @@ namespace Plaga44.UI
 
         [Tooltip("Use <color=#CC3333> for red parts.")]
         public string displayName = "PLAGA <color=#CC3333>'44</color>";
+
+        [Tooltip("Scene to load when player starts the game (NEW GAME / CONTINUE).")]
+        public string gameSceneName = "PLAGA44_Demo";
 
         // ---- Singleton ----
 
@@ -75,6 +80,7 @@ namespace Plaga44.UI
 
         // Fade
         private float _fadeTimer;
+        private bool _loadSceneOnFadeComplete;
 
         // Input
         private float _stickCooldown;
@@ -226,6 +232,13 @@ namespace Plaga44.UI
                     ShowControllers();
                     SetTimeScale(1f);
                     DisablePlayerController(false);
+
+                    // If transitioning from splash/main-menu, load the game scene
+                    if (_loadSceneOnFadeComplete)
+                    {
+                        _loadSceneOnFadeComplete = false;
+                        LoadGameScene();
+                    }
                     break;
             }
         }
@@ -378,6 +391,22 @@ namespace Plaga44.UI
 #endif
         }
 
+        // ---- Scene loading ----
+
+        private void LoadGameScene()
+        {
+            string current = SceneManager.GetActiveScene().name;
+            if (current == gameSceneName)
+            {
+                // Already on the game scene (e.g. started directly in editor)
+                Debug.Log($"[PLAGA44] SplashScreen: already on {gameSceneName}, skipping load");
+                return;
+            }
+
+            Debug.Log($"[PLAGA44] SplashScreen: loading {gameSceneName}");
+            SceneManager.LoadScene(gameSceneName);
+        }
+
         // ---- Menu builders ----
 
         private void BuildMainMenuEntries()
@@ -388,6 +417,7 @@ namespace Plaga44.UI
 
             AddMenuEntry("CONTINUE", hasSave, () =>
             {
+                _loadSceneOnFadeComplete = true;
                 if (SaveManager.Instance != null)
                 {
                     SaveManager.Instance.Load();
@@ -397,6 +427,7 @@ namespace Plaga44.UI
 
             AddMenuEntry("NEW GAME", true, () =>
             {
+                _loadSceneOnFadeComplete = true;
                 EnterState(State.FadingOut);
             });
 
