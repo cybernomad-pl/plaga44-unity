@@ -5,7 +5,8 @@ using UnityEngine;
 
 public static class OpenScene
 {
-    [MenuItem("CYBERNOMAD/Scene/Open Scene_A (Terrain)", false, 1)]
+    // Disabled -- Scene_A is raw FloodedGrounds template, use Load PLAGA 44 Demo instead
+    // [MenuItem("CYBERNOMAD/Scene/Open Scene_A (Terrain)", false, 1)]
     public static void OpenSceneA()
     {
         if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
