@@ -39,11 +39,13 @@ namespace Plaga44.Editor
         private const string PREFABS_ROOT =
             "Assets/PLAGA44/Environment/Prefabs";
 
+        private const string SPLASH_SCENE_PATH =
+            "Assets/Scenes/SplashScene.unity";
+
         // Sceny do usuniecia z projektu (smieci z wczesniejszych iteracji)
         private static readonly string[] SCENES_TO_DELETE = new string[]
         {
             "Assets/Scenes/PLAGA44_Level.unity",
-            "Assets/Scenes/PLAGA44_Splash.unity",
             "Assets/Scenes/HandGrabExamples.unity",
             "Assets/Scenes/LocomotionExamples.unity",
             "Assets/Scenes/SampleScene.unity",
@@ -123,6 +125,7 @@ namespace Plaga44.Editor
 
             EditorBuildSettings.scenes = new EditorBuildSettingsScene[]
             {
+                new EditorBuildSettingsScene(SPLASH_SCENE_PATH, true),
                 new EditorBuildSettingsScene(DEMO_SCENE_PATH, true)
             };
 

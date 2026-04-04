@@ -387,6 +387,22 @@ namespace Plaga44.UI
             SceneManager.LoadScene(gameSceneName);
         }
 
+        // ---- Scene loading ----
+
+        private void LoadGameScene()
+        {
+            string current = SceneManager.GetActiveScene().name;
+            if (current == gameSceneName)
+            {
+                // Already on the game scene (e.g. started directly in editor)
+                Debug.Log($"[PLAGA44] SplashScreen: already on {gameSceneName}, skipping load");
+                return;
+            }
+
+            Debug.Log($"[PLAGA44] SplashScreen: loading {gameSceneName}");
+            SceneManager.LoadScene(gameSceneName);
+        }
+
         // ---- Menu builders ----
 
         private void BuildMainMenuEntries()
