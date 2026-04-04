@@ -61,11 +61,19 @@ SubShader {
             return o;
         }
 
+        // URP-compatible HDR decode (replaces built-in DecodeHDREnvironment)
+        half3 DecodeHDRSkybox(half4 data, half4 hdr)
+        {
+            // hdr.x = multiplier, hdr.y = power (usually 1 for cubemaps)
+            half alpha = hdr.y > 0 ? data.a : 1.0;
+            return data.rgb * hdr.x * pow(abs(alpha), hdr.y);
+        }
+
         half4 frag (Varyings i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
             half4 tex = SAMPLE_TEXTURECUBE(_Tex, sampler_Tex, i.texcoord);
-            half3 c = DecodeHDREnvironment(tex, _Tex_HDR);
+            half3 c = DecodeHDRSkybox(tex, _Tex_HDR);
             c = c * _Tint.rgb * 2.0;
             c *= _Exposure;
 
