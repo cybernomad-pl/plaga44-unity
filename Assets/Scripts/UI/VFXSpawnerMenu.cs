@@ -73,9 +73,11 @@ namespace Plaga44.UI
         private Text _categoryText;
         private Text[] _rowTexts;
         private Text _footerText;
+        #pragma warning disable CS0414
         private bool _visible = false;
-        private int _selectedRow = 0;
         private float _inputCooldown = 0f;
+        #pragma warning restore CS0414
+        private int _selectedRow = 0;
         private float _spawnDistance = 2.5f;
 
         private const int MAX_VISIBLE_ROWS = 10;

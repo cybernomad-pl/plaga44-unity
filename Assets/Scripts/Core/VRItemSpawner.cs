@@ -105,10 +105,12 @@ public class VRItemSpawner : MonoBehaviour
     private GameObject _canvas;
     private Text _titleText;
     private Text[] _rowTexts;
+    #pragma warning disable CS0414
     private bool _visible = false;
+    private float _inputCooldown = 0;
+    #pragma warning restore CS0414
     private int _selectedRow = 0;
     private int _selectedWeaponRow = 0;
-    private float _inputCooldown = 0;
     private float _spawnScale = 1f;
     private float _spawnDistance = 2f;
     private List<GameObject> _prefabs = new List<GameObject>();

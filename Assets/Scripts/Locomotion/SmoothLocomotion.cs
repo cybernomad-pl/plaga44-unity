@@ -59,7 +59,9 @@ namespace Plaga44.Locomotion
         private const float SnapCooldownDuration = 0.25f;
 
         // Smooth-turn state
+        #pragma warning disable CS0414
         private bool _turnReleased = true;
+        #pragma warning restore CS0414
 
         // -------------------------------------------------------------------------
         // Events

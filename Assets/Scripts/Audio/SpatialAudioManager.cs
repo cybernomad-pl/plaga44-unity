@@ -20,7 +20,9 @@ namespace Plaga44.Audio
         [SerializeField] private string _expectedSpatializerPlugin = "MetaXRAudioSpatializerUnity";
 
         [Tooltip("Enable audio spatializer on startup if not already active.")]
+        #pragma warning disable CS0414
         [SerializeField] private bool _autoEnableSpatializer = true;
+        #pragma warning restore CS0414
 
         [Header("Source Pool")]
         [Tooltip("Number of pooled AudioSources for one-shot impact / ambient sounds.")]

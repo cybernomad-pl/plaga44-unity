@@ -13,7 +13,7 @@ namespace Plaga44.Core
     {
         private PoseableBone _bone;
 
-        protected virtual void Start()
+        protected new void Start()
         {
             _bone = GetComponent<PoseableBone>();
 

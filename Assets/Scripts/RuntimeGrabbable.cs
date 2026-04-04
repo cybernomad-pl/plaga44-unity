@@ -31,7 +31,7 @@ public class RuntimeGrabbable : OVRGrabbable
         m_allowOffhandGrab = allow;
     }
 
-    new void Awake()
+    protected void Awake()
     {
         // m_grabPoints is protected in OVRGrabbable -- accessible here.
         if (m_grabPoints == null || m_grabPoints.Length == 0)
