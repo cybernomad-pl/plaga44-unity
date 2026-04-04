@@ -393,16 +393,10 @@ namespace Plaga44.UI
         {
             ClearMenuEntries();
 
-            bool hasSave = SaveManager.Instance != null && SaveManager.Instance.HasSave();
-
-            AddMenuEntry("CONTINUE", hasSave, () =>
+            AddMenuEntry("CONTINUE", false, () =>
             {
                 _loadSceneOnFadeComplete = true;
-                if (SaveManager.Instance != null)
-                {
-                    SaveManager.Instance.Load();
-                    EnterState(State.FadingOut);
-                }
+                EnterState(State.FadingOut);
             });
 
             AddMenuEntry("NEW GAME", true, () =>
@@ -427,19 +421,9 @@ namespace Plaga44.UI
                 EnterState(State.Hidden);
             });
 
-            AddMenuEntry("SAVE", true, () =>
+            AddMenuEntry("SAVE", false, () =>
             {
-                if (SaveManager.Instance != null)
-                {
-                    SaveManager.Instance.Save();
-                    Debug.Log("[PLAGA44] SplashScreen: game saved");
-                    // Brief feedback -- flash the button
-                    var entry = _menuEntries[_selectedIndex];
-                    if (entry.textComponent != null)
-                        entry.textComponent.text = "SAVED!";
-                    // Reset after a moment via coroutine
-                    StartCoroutine(ResetLabelAfterDelay(entry, "SAVE", 1.0f));
-                }
+                Debug.Log("[PLAGA44] SplashScreen: SaveManager not implemented yet");
             });
 
             AddMenuEntry("SETTINGS", true, () =>
