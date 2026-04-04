@@ -4,21 +4,43 @@
 // Middle, Ring, Pinky: curled (gripping)
 // Thumb: clenched inward (Force Choke / Vader grip)
 //
-// Works with OVRHand / OVRCustomSkeleton or falls back to
-// hiding controller model and showing pose via finger bone transforms.
+// Drives the OVR hand Animator parameters (Flex, Point, Pinch) which is the
+// correct way to control finger poses on Meta Quest controllers.
+// Does NOT directly manipulate bone transforms -- that fights the Animator
+// and causes flickering/glitchy finger animation.
+//
+// Guards against hand tracking mode (no controllers connected) to prevent
+// unnecessary Animator writes and log spam.
 
 using UnityEngine;
+using Plaga44.Core;
 
 public class GrabHandPose : MonoBehaviour
 {
-    // Finger curl values: 0 = extended, 1 = fully curled
-    public static float indexCurl = 0.0f;    // extended
-    public static float middleCurl = 0.9f;   // curled
-    public static float ringCurl = 0.95f;    // curled tight
-    public static float pinkyCurl = 1.0f;    // curled tightest
-    public static float thumbCurl = 0.7f;    // clenched inward
+    // Animator parameter targets for the Force Choke / Vader grip:
+    //   Flex = overall grip curl (0 = open, 1 = fist)
+    //   Point = index finger extension (0 = curled with fist, 1 = pointing)
+    //   Pinch = index+thumb pinch (0 = no pinch, 1 = full pinch)
+    [Header("Grab Pose Parameters")]
+    public float grabFlex  = 0.9f;   // grip fingers curled
+    public float grabPoint = 1.0f;   // index extended
+    public float grabPinch = 0.0f;   // no pinch
+
+    [Header("Thresholds")]
+    [Tooltip("Grip trigger value to START the grab pose")]
+    public float gripOnThreshold  = 0.7f;
+    [Tooltip("Grip trigger value to END the grab pose (hysteresis)")]
+    public float gripOffThreshold = 0.4f;
+    [Tooltip("How fast the Animator parameters blend (higher = snappier)")]
+    public float blendSpeed = 12f;
 
     private OVRCameraRig _rig;
+    private bool _leftGrabbing;
+    private bool _rightGrabbing;
+
+    // Current blended Animator values (for smooth transitions)
+    private float _leftFlex, _leftPoint, _leftPinch;
+    private float _rightFlex, _rightPoint, _rightPinch;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoCreate()
@@ -37,114 +59,63 @@ public class GrabHandPose : MonoBehaviour
     {
         if (_rig == null) return;
 
-        // Check if either hand is grabbing
-        bool leftGrab = IsGrabbing(OVRInput.Controller.LTouch);
-        bool rightGrab = IsGrabbing(OVRInput.Controller.RTouch);
+        // Skip entirely if no controllers connected (hand tracking mode)
+        if (!ControllerModeHelper.AnyControllerActive())
+            return;
 
-        if (leftGrab)
-            ApplyPose(_rig.leftHandAnchor, true);
-        if (rightGrab)
-            ApplyPose(_rig.rightHandAnchor, false);
+        // Update grab state with hysteresis to prevent flickering
+        UpdateGrabState(OVRInput.Controller.LTouch, ref _leftGrabbing);
+        UpdateGrabState(OVRInput.Controller.RTouch, ref _rightGrabbing);
 
-        // Set OVRInput overrides for hand animation layers
-        // OVRHand uses Anim Layer Blend to control finger curls
-        SetFingerOverrides(leftGrab, rightGrab);
+        // Drive Animator parameters on each hand
+        BlendAndApply(_rig.leftControllerAnchor, _leftGrabbing,
+                      ref _leftFlex, ref _leftPoint, ref _leftPinch);
+        BlendAndApply(_rig.rightControllerAnchor, _rightGrabbing,
+                      ref _rightFlex, ref _rightPoint, ref _rightPinch);
     }
 
-    bool IsGrabbing(OVRInput.Controller ctrl)
+    void UpdateGrabState(OVRInput.Controller ctrl, ref bool grabbing)
     {
-        // Grabbing = grip trigger held
-        return OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, ctrl) > 0.7f ||
-               OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger, ctrl) > 0.7f;
-    }
+        float grip = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, ctrl);
 
-    void ApplyPose(Transform handAnchor, bool isLeft)
-    {
-        if (handAnchor == null) return;
-
-        // Try to find OVRSkeleton on hand
-        var skeleton = handAnchor.GetComponentInChildren<OVRSkeleton>();
-        if (skeleton == null || skeleton.Bones == null || skeleton.Bones.Count == 0) return;
-
-        foreach (var bone in skeleton.Bones)
+        // Hysteresis: require a higher threshold to START grab,
+        // and a lower threshold to STOP. This prevents flickering
+        // when the trigger hovers near the boundary.
+        if (grabbing)
         {
-            if (bone == null || bone.Transform == null) continue;
-            string boneName = bone.Id.ToString().ToLower();
-
-            float targetCurl = 0f;
-            bool apply = false;
-
-            // Index finger -- EXTENDED
-            if (boneName.Contains("index"))
-            {
-                targetCurl = indexCurl;
-                apply = true;
-            }
-            // Middle -- CURLED
-            else if (boneName.Contains("middle"))
-            {
-                targetCurl = middleCurl;
-                apply = true;
-            }
-            // Ring -- CURLED
-            else if (boneName.Contains("ring"))
-            {
-                targetCurl = ringCurl;
-                apply = true;
-            }
-            // Pinky -- CURLED TIGHT
-            else if (boneName.Contains("pinky") || boneName.Contains("little"))
-            {
-                targetCurl = pinkyCurl;
-                apply = true;
-            }
-            // Thumb -- CLENCHED INWARD
-            else if (boneName.Contains("thumb"))
-            {
-                targetCurl = thumbCurl;
-                apply = true;
-            }
-
-            if (apply && (boneName.Contains("1") || boneName.Contains("2") || boneName.Contains("3")))
-            {
-                // Apply curl as rotation on X axis (typical for finger bones)
-                float angle = targetCurl * 90f;
-                Quaternion curled = Quaternion.Euler(angle, 0, 0);
-                bone.Transform.localRotation = Quaternion.Slerp(
-                    bone.Transform.localRotation, curled, Time.deltaTime * 15f);
-            }
+            if (grip < gripOffThreshold)
+                grabbing = false;
+        }
+        else
+        {
+            if (grip > gripOnThreshold)
+                grabbing = true;
         }
     }
 
-    void SetFingerOverrides(bool leftGrab, bool rightGrab)
-    {
-        // OVRInput custom capacitive touch overrides
-        // This affects the default hand animation in OVRControllerHelper
-        // When grabbing, we override the animator parameters
-
-        // Find OVRControllerHelper on each hand
-        if (_rig == null) return;
-
-        if (leftGrab)
-            ApplyAnimatorOverride(_rig.leftControllerAnchor);
-        if (rightGrab)
-            ApplyAnimatorOverride(_rig.rightControllerAnchor);
-    }
-
-    void ApplyAnimatorOverride(Transform anchor)
+    void BlendAndApply(Transform anchor, bool grabbing,
+                       ref float curFlex, ref float curPoint, ref float curPinch)
     {
         if (anchor == null) return;
+
         var animator = anchor.GetComponentInChildren<Animator>();
         if (animator == null) return;
 
-        // OVR hand animator uses these parameters:
-        // "Flex" (0-1) for overall grip
-        // "Pinch" (0-1) for index-thumb pinch
-        // "Point" (0-1) for index pointing
+        // Target values: grab pose or default (let controller capacitive sensing drive)
+        float targetFlex  = grabbing ? grabFlex  : 0f;
+        float targetPoint = grabbing ? grabPoint : 0f;
+        float targetPinch = grabbing ? grabPinch : 0f;
 
-        // Force Choke pose: high flex (grip), no pinch, full point (index out)
-        animator.SetFloat("Flex", 0.9f);
-        animator.SetFloat("Point", 1.0f);   // index extended
-        animator.SetFloat("Pinch", 0.0f);   // no pinch
+        float dt = Time.deltaTime * blendSpeed;
+        curFlex  = Mathf.Lerp(curFlex,  targetFlex,  dt);
+        curPoint = Mathf.Lerp(curPoint, targetPoint, dt);
+        curPinch = Mathf.Lerp(curPinch, targetPinch, dt);
+
+        // Only override Animator when we have a meaningful override.
+        // When not grabbing, values blend back to 0 and the controller's
+        // capacitive touch sensing takes over naturally.
+        animator.SetFloat("Flex",  curFlex);
+        animator.SetFloat("Point", curPoint);
+        animator.SetFloat("Pinch", curPinch);
     }
 }

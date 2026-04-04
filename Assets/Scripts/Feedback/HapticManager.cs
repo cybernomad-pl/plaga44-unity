@@ -9,6 +9,7 @@
 
 using System.Collections;
 using UnityEngine;
+using Plaga44.Core;
 
 namespace Plaga44.Feedback
 {
@@ -170,6 +171,10 @@ namespace Plaga44.Feedback
         private void PlayOnce(OVRInput.Controller controller, HapticEvent evt)
         {
 #if HAS_META_XR
+            // Guard: skip when controller disconnected or SampleRateHz == 0 (hand tracking mode)
+            if (!ControllerModeHelper.IsControllerActive(controller))
+                return;
+
             StartCoroutine(VibrationCoroutine(controller, evt.amplitude, evt.frequency, evt.duration));
 #else
             Debug.Log($"[HapticManager] PlayOnce | ctrl={controller} amp={evt.amplitude:F2} freq={evt.frequency:F2} dur={evt.duration:F2}s");
@@ -179,6 +184,10 @@ namespace Plaga44.Feedback
 #if HAS_META_XR
         private IEnumerator VibrationCoroutine(OVRInput.Controller controller, float amplitude, float frequency, float duration)
         {
+            // Re-check at coroutine start in case controller disconnected between call and execution
+            if (!ControllerModeHelper.IsControllerActive(controller))
+                yield break;
+
             OVRInput.SetControllerVibration(frequency, amplitude, controller);
             yield return new WaitForSeconds(duration);
             OVRInput.SetControllerVibration(0f, 0f, controller);

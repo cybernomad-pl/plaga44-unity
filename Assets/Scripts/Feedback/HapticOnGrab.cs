@@ -12,6 +12,7 @@
 // Guard: #if HAS_META_XR. Without the SDK the methods log to console.
 
 using UnityEngine;
+using Plaga44.Core;
 
 namespace Plaga44.Feedback
 {
@@ -97,6 +98,9 @@ namespace Plaga44.Feedback
         private System.Collections.IEnumerator OneShot(
             OVRInput.Controller controller, float amplitude, float frequency, float duration)
         {
+            if (!ControllerModeHelper.IsControllerActive(controller))
+                yield break;
+
             OVRInput.SetControllerVibration(frequency, amplitude, controller);
             yield return new WaitForSeconds(duration);
             OVRInput.SetControllerVibration(0f, 0f, controller);
