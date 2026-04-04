@@ -32,9 +32,10 @@ namespace Plaga44.Core
             isTouching = true;
 
             // Wibracja -- stala, mocna, zawsze
+            // Guard: skip when controller not connected (hand tracking mode)
             float amplitude = baseAmplitude;
 
-            OVRInput.SetControllerVibration(baseFrequency, amplitude, controller);
+            ControllerModeHelper.SafeVibration(baseFrequency, amplitude, controller);
             _hapticCooldown = 0.05f; // trzymaj wibracje jeszcze 50ms po utracie kontaktu
         }
 
@@ -53,14 +54,14 @@ namespace Plaga44.Core
                 _hapticCooldown -= Time.deltaTime;
                 if (_hapticCooldown <= 0f)
                 {
-                    OVRInput.SetControllerVibration(0, 0, controller);
+                    ControllerModeHelper.SafeVibration(0, 0, controller);
                 }
             }
         }
 
         void OnDisable()
         {
-            OVRInput.SetControllerVibration(0, 0, controller);
+            ControllerModeHelper.SafeVibration(0, 0, controller);
         }
     }
 

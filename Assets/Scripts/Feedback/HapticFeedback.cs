@@ -19,6 +19,7 @@
 
 using UnityEngine;
 using System.Collections;
+using Plaga44.Core;
 
 public class HapticFeedback : MonoBehaviour
 {
@@ -84,6 +85,9 @@ public class HapticFeedback : MonoBehaviour
     /// </summary>
     public static void ThrowWindup(OVRInput.Controller controller, float intensity)
     {
+        if (!ControllerModeHelper.IsControllerActive(controller))
+            return;
+
         float amp = Mathf.Lerp(0.05f, 0.5f, Mathf.Clamp01(intensity));
         OVRInput.SetControllerVibration(amp, amp, controller);
     }
@@ -93,6 +97,11 @@ public class HapticFeedback : MonoBehaviour
     /// </summary>
     public static void StopVibration(OVRInput.Controller controller)
     {
+        // StopVibration is safe to call even without guard -- setting 0,0 is a no-op.
+        // But skip if controller not connected to avoid unnecessary SDK calls.
+        if (!ControllerModeHelper.IsControllerActive(controller))
+            return;
+
         OVRInput.SetControllerVibration(0f, 0f, controller);
     }
 
@@ -104,6 +113,11 @@ public class HapticFeedback : MonoBehaviour
     /// </summary>
     private static void Vibrate(OVRInput.Controller controller, float frequency, float amplitude, float duration)
     {
+        // Guard: skip vibration when controller is not connected or in hand tracking mode
+        // (SampleRateHz == 0). Prevents log spam from OVRHaptics.
+        if (!ControllerModeHelper.IsControllerActive(controller))
+            return;
+
         if (Instance != null)
         {
             Instance.StartCoroutine(Instance.VibrateCoroutine(controller, frequency, amplitude, duration));
@@ -119,6 +133,10 @@ public class HapticFeedback : MonoBehaviour
 
     private IEnumerator VibrateCoroutine(OVRInput.Controller controller, float frequency, float amplitude, float duration)
     {
+        // Re-check at coroutine start in case controller disconnected between call and execution
+        if (!ControllerModeHelper.IsControllerActive(controller))
+            yield break;
+
         OVRInput.SetControllerVibration(frequency, amplitude, controller);
         yield return new WaitForSeconds(duration);
         OVRInput.SetControllerVibration(0f, 0f, controller);
