@@ -44,6 +44,13 @@ crashlytics-build.properties
 # Source template packs (not part of project -- assets extracted to Assets/PLAGA44/)
 Assets/FloodedGrounds/
 Assets/FloodedGrounds.meta
+# BUT track shaders and key materials (URP fixes must persist!)
+!Assets/FloodedGrounds/Content/Shaders/
+!Assets/FloodedGrounds/Content/Shaders/**
+!Assets/FloodedGrounds/Content/Materials/
+!Assets/FloodedGrounds/Content/Materials/**
+!Assets/FloodedGrounds/Resources/
+!Assets/FloodedGrounds/Resources/**
 Assets/SwordAndPistol/
 Assets/SwordAndPistol.meta
 
