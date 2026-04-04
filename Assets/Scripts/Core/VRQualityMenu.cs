@@ -1018,8 +1018,10 @@ public class VRQualityMenu : MonoBehaviour
         {
             Vector3 target = cam.transform.position + cam.transform.forward * 1.2f;
             _canvas.transform.position = Vector3.Lerp(_canvas.transform.position, target, Time.deltaTime * 2f);
+            // Canvas text renders on +Z face. To face the player, canvas forward must
+            // point TOWARD the player (= cam.position - canvas.position = negative of old direction).
             _canvas.transform.rotation = Quaternion.Slerp(_canvas.transform.rotation,
-                Quaternion.LookRotation(_canvas.transform.position - cam.transform.position), Time.deltaTime * 2f);
+                Quaternion.LookRotation(cam.transform.position - _canvas.transform.position), Time.deltaTime * 2f);
         }
 
         // Input cooldown

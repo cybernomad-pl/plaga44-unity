@@ -93,7 +93,8 @@ namespace Plaga44.Platform
             }
 
             // Toggle visibility with B button (right controller).
-            if (IsBButtonPressed())
+            // Don't toggle while menu/quality panels are active.
+            if (!Plaga44.UI.VRMenuManager.MenuOpen && !VRQualityMenu.MenuOpen && IsBButtonPressed())
             {
                 ToggleVisible();
             }
