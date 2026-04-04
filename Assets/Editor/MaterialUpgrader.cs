@@ -14,6 +14,7 @@ namespace Plaga44.Editor
     {
         private const string LOG = "[PLAGA44]";
 
+        [MenuItem("CYBERNOMAD/Upgrade Materials to URP")]
         public static void UpgradeMaterials()
         {
             Shader urpLit = Shader.Find("Universal Render Pipeline/Lit");
@@ -67,7 +68,7 @@ namespace Plaga44.Editor
 
             // Also scan asset folders for any material not in scene
             var assetGuids = AssetDatabase.FindAssets("t:Material",
-                new[] { "Assets/PLAGA44" });
+                new[] { "Assets/PLAGA44", "Assets/FloodedGrounds" });
             foreach (var guid in assetGuids)
             {
                 var mat = AssetDatabase.LoadAssetAtPath<Material>(

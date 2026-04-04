@@ -10,17 +10,20 @@ Properties {
 }
 
 SubShader {
-    Tags { "Queue"="Background" "RenderType"="Background" "PreviewType"="Skybox" }
+    Tags { "RenderPipeline"="UniversalPipeline" "Queue"="Background" "RenderType"="Background" "PreviewType"="Skybox" }
     Cull Off ZWrite Off
 
     Pass {
-        CGPROGRAM
+        Name "Skybox"
+        HLSLPROGRAM
         #pragma vertex vert
         #pragma fragment frag
         #pragma multi_compile_instancing
-        #include "UnityCG.cginc"
 
-        samplerCUBE _Tex;
+        #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+        TEXTURECUBE(_Tex);
+        SAMPLER(sampler_Tex);
         half4 _Tex_HDR;
         half4 _Tint;
         half _Exposure;
@@ -30,40 +33,48 @@ SubShader {
 
         float4 RotateAroundYInDegrees (float4 vertex, float degrees)
         {
-            float alpha = degrees * UNITY_PI / 180.0;
+            float alpha = degrees * PI / 180.0;
             float sina, cosa;
             sincos(alpha, sina, cosa);
             float2x2 m = float2x2(cosa, -sina, sina, cosa);
             return float4(mul(m, vertex.xz), vertex.yw).xzyw;
         }
 
-        struct appdata_t {
-            float4 vertex : POSITION;
+        struct Attributes {
+            float4 positionOS : POSITION;
             UNITY_VERTEX_INPUT_INSTANCE_ID
         };
 
-        struct v2f {
-            float4 vertex : SV_POSITION;
+        struct Varyings {
+            float4 positionCS : SV_POSITION;
             float3 texcoord : TEXCOORD0;
             UNITY_VERTEX_OUTPUT_STEREO
         };
 
-        v2f vert (appdata_t v)
+        Varyings vert (Attributes v)
         {
-            v2f o;
+            Varyings o;
             UNITY_SETUP_INSTANCE_ID(v);
             UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-            o.vertex = UnityObjectToClipPos(RotateAroundYInDegrees(v.vertex, _Rotation + (_Time * _RotSpeed)));
-            o.texcoord = v.vertex.xyz;
+            o.positionCS = TransformObjectToHClip(RotateAroundYInDegrees(v.positionOS, _Rotation + (_Time.y * _RotSpeed)).xyz);
+            o.texcoord = v.positionOS.xyz;
             return o;
         }
 
-        fixed4 frag (v2f i) : SV_Target
+        // URP-compatible HDR decode (replaces built-in DecodeHDREnvironment)
+        half3 DecodeHDRSkybox(half4 data, half4 hdr)
+        {
+            // hdr.x = multiplier, hdr.y = power (usually 1 for cubemaps)
+            half alpha = hdr.y > 0 ? data.a : 1.0;
+            return data.rgb * hdr.x * pow(abs(alpha), hdr.y);
+        }
+
+        half4 frag (Varyings i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-            half4 tex = texCUBE (_Tex, i.texcoord);
-            half3 c = DecodeHDR (tex, _Tex_HDR);
-            c = c * _Tint.rgb * unity_ColorSpaceDouble.rgb;
+            half4 tex = SAMPLE_TEXTURECUBE(_Tex, sampler_Tex, i.texcoord);
+            half3 c = DecodeHDRSkybox(tex, _Tex_HDR);
+            c = c * _Tint.rgb * 2.0;
             c *= _Exposure;
 
             half lum = dot(c, half3(0.299, 0.587, 0.114));
@@ -72,7 +83,7 @@ SubShader {
 
             return half4(c, 1);
         }
-        ENDCG
+        ENDHLSL
     }
 }
 
