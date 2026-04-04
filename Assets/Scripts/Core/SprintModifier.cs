@@ -47,7 +47,7 @@ public class SprintModifier : MonoBehaviour
         if (_pc == null) return;
 
         // Don't sprint/jump when menus are open
-        if (VRQualityMenu.MenuOpen || VRItemSpawner.MenuOpen) return;
+        if (Plaga44.UI.VRMenuManager.MenuOpen || VRQualityMenu.MenuOpen) return;
 
         HandleSprint();
         HandleJump();

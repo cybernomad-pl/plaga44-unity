@@ -73,7 +73,7 @@ public class VRQualityMenu : MonoBehaviour
         _urpAsset = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
         _postProcessVolume = FindAnyObjectByType<Volume>();
         _ovrPlayer = FindAnyObjectByType<OVRPlayerController>();
-        if (_ovrPlayer != null) _ovrPlayer.enabled = false; // blocked until menu closed
+        // NOTE: locomotion blocking is now handled by VRMenuManager.MenuOpen
         _skyboxMat = RenderSettings.skybox;
 
         // Find water material by name or shader name
@@ -978,6 +978,24 @@ public class VRQualityMenu : MonoBehaviour
         return go;
     }
 
+    // ---- Public API for VRMenuManager ----
+
+    /// <summary>Show the quality settings panel. Called by VRMenuManager (Debug > Quality).</summary>
+    public void ShowPanel()
+    {
+        _visible = true;
+        _canvas.SetActive(true);
+        MenuOpen = true;
+    }
+
+    /// <summary>Hide the quality settings panel. Called by VRMenuManager on back/close.</summary>
+    public void HidePanel()
+    {
+        _visible = false;
+        _canvas.SetActive(false);
+        MenuOpen = false;
+    }
+
     void Update()
     {
         _frameCount++;
@@ -989,21 +1007,8 @@ public class VRQualityMenu : MonoBehaviour
             _fpsTimer = 0;
         }
 
-        // Toggle -- only handle Start directly when SplashScreen is NOT managing menus.
-        // When SplashScreen exists, it owns the Start button and opens VRQualityMenu
-        // via reflection when the user selects SETTINGS.
-        // Don't toggle if LaserInspector is active
-        if (Plaga44.UI.LaserInspector.IsOpen) return;
-
-        bool splashOwnsStart = Plaga44.UI.SplashScreen.Instance != null;
-        if (!splashOwnsStart && OVRInput.GetDown(OVRInput.Button.Start))
-        {
-            _visible = !_visible;
-            _canvas.SetActive(_visible);
-            MenuOpen = _visible;
-            // Disable/enable OVRPlayerController to block its built-in turn
-            if (_ovrPlayer != null) _ovrPlayer.enabled = !_visible;
-        }
+        // Input toggle REMOVED -- VRMenuManager owns Button.Start now.
+        // VRQualityMenu is opened/closed via ShowPanel()/HidePanel() from VRMenuManager.
 
         if (!_visible) return;
 

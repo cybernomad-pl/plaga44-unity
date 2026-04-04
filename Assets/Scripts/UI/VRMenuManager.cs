@@ -1,13 +1,21 @@
 // VRMenuManager.cs
-// CYBERNOMAD -- World-space VR pause menu.
-// Opens 2m in front of player when Menu button is pressed.
-// Stays static (does not follow gaze) while open.
-// Buttons: Resume, Settings, Quit.
-// Settings panel: Volume slider, Comfort vignette toggle, Snap turn toggle.
+// CYBERNOMAD -- Unified hamburger menu (Button.Start).
+// Single entry point for all in-game menus.
+// Structure:
+//   RESUME
+//   SPAWNER >  (Items | VFX | Weapons sub-tabs)
+//   SETTINGS > (Volume | Comfort Vignette | Snap Turn)
+//   DEBUG >    (opens VRQualityMenu panel | Inspect Skybox)
+//   QUIT
+//
+// Opens 2m in front of player. Disables locomotion while open.
+// UIRayPointer (laser) + IndexTrigger = select/confirm.
+// Button.Start = toggle open/close.
 //
 // Requires: com.meta.xr.sdk.core (HAS_META_XR define)
 
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +26,9 @@ namespace Plaga44.UI
         // ---- Public API ----
 
         public static VRMenuManager Instance { get; private set; }
+
+        /// <summary>True when ANY menu panel is visible. Check this to block gameplay input.</summary>
+        public static bool MenuOpen { get; private set; } = false;
 
         public bool IsOpen => _canvas != null && _canvas.gameObject.activeSelf;
 
@@ -31,10 +42,10 @@ namespace Plaga44.UI
 
         // ---- Private ----
 
-        private const float MENU_DISTANCE = 2.0f;   // metres in front of player
-        private const float CANVAS_SCALE  = 0.001f; // 1px = 1mm in world space
+        private const float MENU_DISTANCE = 2.0f;
+        private const float CANVAS_SCALE  = 0.001f;
         private const int   CANVAS_W      = 600;
-        private const int   CANVAS_H      = 660;
+        private const int   CANVAS_H      = 750;
 
         // Colours -- dark theme
         private static readonly Color BG_COLOR      = new Color(0.10f, 0.10f, 0.10f, 0.88f);
@@ -44,19 +55,38 @@ namespace Plaga44.UI
         private static readonly Color ACCENT         = new Color(1.00f, 0.42f, 0.21f, 1.00f);  // #FF6B35
         private static readonly Color TEXT_WHITE     = Color.white;
         private static readonly Color TEXT_GREY      = new Color(0.65f, 0.65f, 0.65f, 1.00f);
+        private static readonly Color TAB_ACTIVE     = new Color(0.30f, 0.55f, 1.00f, 1.00f);  // blue
+        private static readonly Color TAB_INACTIVE   = new Color(0.25f, 0.25f, 0.25f, 1.00f);
 
 #if HAS_META_XR
         private OVRCameraRig _rig;
+        private OVRPlayerController _playerController;
 #endif
 
         private Canvas _canvas;
-        private GameObject _mainPanel;
-        private GameObject _settingsPanel;
 
-        private Button _continueBtn;
+        // Panels
+        private GameObject _mainPanel;
+        private GameObject _spawnerPanel;
+        private GameObject _settingsPanel;
+        private GameObject _debugPanel;
+
+        // Active sub-panel tracking
+        private GameObject _activePanel;
+
+        // Settings controls
         private Slider _volumeSlider;
         private Toggle _vignetteToggle;
         private Toggle _snapTurnToggle;
+
+        // Spawner state
+        private enum SpawnerTab { Items, VFX, Weapons }
+        private SpawnerTab _spawnerTab = SpawnerTab.Items;
+        private Text _spawnerTabLabel;
+        private Text _spawnerListText;
+
+        // Debug: reference to VRQualityMenu for delegation
+        private bool _debugQualityOpen = false;
 
         // ---- Lifecycle ----
 
@@ -70,27 +100,51 @@ namespace Plaga44.UI
         {
             BuildCanvas();
             BuildMainPanel();
+            BuildSpawnerPanel();
             BuildSettingsPanel();
+            BuildDebugPanel();
+
+            // Hide all sub-panels, start closed
+            _spawnerPanel.SetActive(false);
             _settingsPanel.SetActive(false);
-            _canvas.gameObject.SetActive(false);  // closed at start
+            _debugPanel.SetActive(false);
+            _mainPanel.SetActive(true);
+            _activePanel = _mainPanel;
+            _canvas.gameObject.SetActive(false);
         }
 
         private void Update()
         {
 #if HAS_META_XR
             if (_rig == null) _rig = FindFirstObjectByType<OVRCameraRig>();
+            if (_playerController == null) _playerController = FindFirstObjectByType<OVRPlayerController>();
 
-            // DISABLED: Start button now exclusively handled by VRQualityMenu.
-            // VRMenuManager can still be opened/closed via Open()/Close()/Toggle()
-            // from other scripts (e.g. VRQualityMenu could call it).
-            // if (OVRInput.GetDown(OVRInput.Button.Start))
-            //     Toggle();
+            // Don't steal Start if SplashScreen is managing menus
+            bool splashOwnsInput = SplashScreen.Instance != null && SplashScreen.IsMenuOpen;
+            // Don't steal Start if LaserInspector is active
+            bool laserActive = LaserInspector.IsOpen;
+
+            if (!splashOwnsInput && !laserActive && OVRInput.GetDown(OVRInput.Button.Start))
+            {
+                // If debug quality menu is open, close it and return to debug panel
+                if (_debugQualityOpen)
+                {
+                    CloseQualitySubMenu();
+                    return;
+                }
+
+                Toggle();
+            }
 #endif
         }
 
         private void OnDestroy()
         {
-            if (Instance == this) Instance = null;
+            if (Instance == this)
+            {
+                MenuOpen = false;
+                Instance = null;
+            }
         }
 
         // ---- Public methods ----
@@ -99,23 +153,53 @@ namespace Plaga44.UI
         {
             if (IsOpen) return;
             PlaceInFrontOfPlayer();
-            _mainPanel.SetActive(true);
-            _settingsPanel.SetActive(false);
+            ShowPanel(_mainPanel);
             _canvas.gameObject.SetActive(true);
-            UpdateContinueButton();
+            _debugQualityOpen = false;
+
+            MenuOpen = true;
+            SetLocomotion(false);
             OnMenuToggled?.Invoke(true);
         }
 
         public void Close()
         {
-            if (!IsOpen) return;
+            if (!IsOpen && !_debugQualityOpen) return;
+
+            // Close quality sub-menu if open
+            if (_debugQualityOpen) CloseQualitySubMenu();
+
             _canvas.gameObject.SetActive(false);
+            MenuOpen = false;
+            SetLocomotion(true);
             OnMenuToggled?.Invoke(false);
         }
 
         public void Toggle()
         {
-            if (IsOpen) Close(); else Open();
+            if (IsOpen || _debugQualityOpen) Close(); else Open();
+        }
+
+        // ---- Panel navigation ----
+
+        private void ShowPanel(GameObject panel)
+        {
+            _mainPanel.SetActive(false);
+            _spawnerPanel.SetActive(false);
+            _settingsPanel.SetActive(false);
+            _debugPanel.SetActive(false);
+            panel.SetActive(true);
+            _activePanel = panel;
+        }
+
+        // ---- Locomotion control ----
+
+        private void SetLocomotion(bool enabled)
+        {
+#if HAS_META_XR
+            if (_playerController != null)
+                _playerController.enabled = enabled;
+#endif
         }
 
         // ---- Placement ----
@@ -131,14 +215,16 @@ namespace Plaga44.UI
             forward.Normalize();
 
             _canvas.transform.position = head.position + forward * MENU_DISTANCE;
-            _canvas.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+            // Canvas text renders on the +Z (forward) face.
+            // To face the player, canvas forward must point TOWARD the player (= -forward).
+            _canvas.transform.rotation = Quaternion.LookRotation(-forward, Vector3.up);
 #else
             _canvas.transform.position = new Vector3(0f, 1.5f, MENU_DISTANCE);
             _canvas.transform.rotation = Quaternion.identity;
 #endif
         }
 
-        // ---- Canvas & panels ----
+        // ---- Canvas ----
 
         private void BuildCanvas()
         {
@@ -150,9 +236,9 @@ namespace Plaga44.UI
 
             var rt = go.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(CANVAS_W, CANVAS_H);
-            rt.localScale  = Vector3.one * CANVAS_SCALE;
+            rt.localScale = Vector3.one * CANVAS_SCALE;
 
-            // GraphicRaycaster so UIRayPointer can interact with buttons
+            // GraphicRaycaster so UIRayPointer can interact
             go.AddComponent<GraphicRaycaster>();
 
             // Semi-transparent background
@@ -161,6 +247,10 @@ namespace Plaga44.UI
             bg.raycastTarget = true;
         }
 
+        // ================================================================
+        //  MAIN PANEL -- hamburger root
+        // ================================================================
+
         private void BuildMainPanel()
         {
             _mainPanel = new GameObject("MainPanel");
@@ -168,58 +258,192 @@ namespace Plaga44.UI
             var rt = _mainPanel.AddComponent<RectTransform>();
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(340, 600);
+            rt.sizeDelta = new Vector2(400, 700);
             rt.anchoredPosition = Vector2.zero;
 
-            // Dark panel
             CreateImage(_mainPanel.transform, "Panel",
-                Vector2.zero, new Vector2(340, 600), PANEL_COLOR);
+                Vector2.zero, new Vector2(400, 700), PANEL_COLOR);
+
+            // Hamburger icon (3 lines)
+            var icon = CreateText(_mainPanel.transform, "HamburgerIcon",
+                new Vector2(0, 310), new Vector2(60, 40), TextAnchor.MiddleCenter, 28);
+            icon.text = "\u2261"; // triple bar
+            icon.color = ACCENT;
 
             // Title
             var title = CreateText(_mainPanel.transform, "Title",
-                new Vector2(0, 255), new Vector2(300, 50), TextAnchor.MiddleCenter, 36);
+                new Vector2(0, 275), new Vector2(340, 44), TextAnchor.MiddleCenter, 34);
             title.text = "MENU";
             title.color = ACCENT;
 
             // Divider
             var div = CreateImage(_mainPanel.transform, "Divider",
-                new Vector2(0, 228), new Vector2(280, 2), new Color(1, 1, 1, 0.12f));
+                new Vector2(0, 250), new Vector2(340, 2), new Color(1, 1, 1, 0.12f));
             div.raycastTarget = false;
 
-            // Buttons -- top to bottom: Continue, Resume, Save, Load, Settings, Quit
-            _continueBtn = CreateButton(_mainPanel.transform, "ContinueBtn",
-                new Vector2(0, 180), new Vector2(260, 56),
-                "CONTINUE", OnContinueClicked);
+            // Buttons -- top to bottom
+            float y = 200f;
+            float step = -70f;
 
             CreateButton(_mainPanel.transform, "ResumeBtn",
-                new Vector2(0, 115), new Vector2(260, 56),
+                new Vector2(0, y), new Vector2(300, 56),
                 "RESUME", OnResumeClicked);
+            y += step;
 
-            CreateButton(_mainPanel.transform, "SaveBtn",
-                new Vector2(0, 50), new Vector2(260, 56),
-                "SAVE", OnSaveClicked);
-
-            CreateButton(_mainPanel.transform, "LoadBtn",
-                new Vector2(0, -15), new Vector2(260, 56),
-                "LOAD", OnLoadClicked);
+            CreateButton(_mainPanel.transform, "SpawnerBtn",
+                new Vector2(0, y), new Vector2(300, 56),
+                "SPAWNER  >", OnSpawnerClicked);
+            y += step;
 
             CreateButton(_mainPanel.transform, "SettingsBtn",
-                new Vector2(0, -80), new Vector2(260, 56),
-                "SETTINGS", OnSettingsClicked);
+                new Vector2(0, y), new Vector2(300, 56),
+                "SETTINGS  >", OnSettingsClicked);
+            y += step;
+
+            CreateButton(_mainPanel.transform, "DebugBtn",
+                new Vector2(0, y), new Vector2(300, 56),
+                "DEBUG  >", OnDebugClicked);
+            y += step;
 
             CreateButton(_mainPanel.transform, "QuitBtn",
-                new Vector2(0, -145), new Vector2(260, 56),
+                new Vector2(0, y), new Vector2(300, 56),
                 "QUIT", OnQuitClicked, new Color(0.55f, 0.15f, 0.10f, 1f));
-
-            // Grey out CONTINUE if no save exists
-            UpdateContinueButton();
 
             // Version label
             var ver = CreateText(_mainPanel.transform, "VersionLabel",
-                new Vector2(0, -265), new Vector2(300, 28), TextAnchor.MiddleCenter, 18);
-            ver.text = "PLAGA '44  |  v0.1";
+                new Vector2(0, -310), new Vector2(340, 28), TextAnchor.MiddleCenter, 16);
+            ver.text = "PLAGA '44  |  TECH DEMO";
             ver.color = TEXT_GREY;
         }
+
+        // ================================================================
+        //  SPAWNER PANEL -- Items / VFX / Weapons tabs
+        // ================================================================
+
+        private void BuildSpawnerPanel()
+        {
+            _spawnerPanel = new GameObject("SpawnerPanel");
+            _spawnerPanel.transform.SetParent(_canvas.transform, false);
+            var rt = _spawnerPanel.AddComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(500, 700);
+            rt.anchoredPosition = Vector2.zero;
+
+            CreateImage(_spawnerPanel.transform, "Panel",
+                Vector2.zero, new Vector2(500, 700), PANEL_COLOR);
+
+            // Title
+            var title = CreateText(_spawnerPanel.transform, "Title",
+                new Vector2(0, 310), new Vector2(460, 44), TextAnchor.MiddleCenter, 30);
+            title.text = "SPAWNER";
+            title.color = ACCENT;
+
+            // Divider
+            var div = CreateImage(_spawnerPanel.transform, "Divider",
+                new Vector2(0, 285), new Vector2(460, 2), new Color(1, 1, 1, 0.12f));
+            div.raycastTarget = false;
+
+            // Tab buttons
+            float tabY = 255f;
+            float tabW = 140f;
+
+            CreateButton(_spawnerPanel.transform, "TabItems",
+                new Vector2(-155, tabY), new Vector2(tabW, 44),
+                "ITEMS", () => SwitchSpawnerTab(SpawnerTab.Items));
+
+            CreateButton(_spawnerPanel.transform, "TabVFX",
+                new Vector2(0, tabY), new Vector2(tabW, 44),
+                "VFX", () => SwitchSpawnerTab(SpawnerTab.VFX));
+
+            CreateButton(_spawnerPanel.transform, "TabWeapons",
+                new Vector2(155, tabY), new Vector2(tabW, 44),
+                "WEAPONS", () => SwitchSpawnerTab(SpawnerTab.Weapons));
+
+            // Tab indicator label
+            _spawnerTabLabel = CreateText(_spawnerPanel.transform, "TabLabel",
+                new Vector2(0, 218), new Vector2(460, 30), TextAnchor.MiddleCenter, 18);
+            _spawnerTabLabel.color = TAB_ACTIVE;
+
+            // Spawner content area (text list of what is available)
+            _spawnerListText = CreateText(_spawnerPanel.transform, "SpawnerList",
+                new Vector2(0, 50), new Vector2(440, 300), TextAnchor.UpperCenter, 18);
+            _spawnerListText.color = TEXT_WHITE;
+
+            // Action buttons
+            CreateButton(_spawnerPanel.transform, "SpawnBtn",
+                new Vector2(0, -140), new Vector2(300, 50),
+                "SPAWN SELECTED", OnSpawnClicked);
+
+            CreateButton(_spawnerPanel.transform, "DeleteLastBtn",
+                new Vector2(-120, -200), new Vector2(210, 44),
+                "DELETE LAST", OnDeleteLastClicked);
+
+            CreateButton(_spawnerPanel.transform, "DeleteAllBtn",
+                new Vector2(120, -200), new Vector2(210, 44),
+                "DELETE ALL", OnDeleteAllClicked, new Color(0.55f, 0.15f, 0.10f, 1f));
+
+            // Hint
+            var hint = CreateText(_spawnerPanel.transform, "Hint",
+                new Vector2(0, -260), new Vector2(440, 24), TextAnchor.MiddleCenter, 14);
+            hint.text = "Use laser pointer to select. Trigger to confirm.";
+            hint.color = TEXT_GREY;
+
+            // Back
+            CreateButton(_spawnerPanel.transform, "BackBtn",
+                new Vector2(0, -310), new Vector2(260, 48),
+                "< BACK", OnBackToMainClicked);
+
+            SwitchSpawnerTab(SpawnerTab.Items);
+        }
+
+        private void SwitchSpawnerTab(SpawnerTab tab)
+        {
+            _spawnerTab = tab;
+
+            string label = tab switch
+            {
+                SpawnerTab.Items => "[ ITEMS ]   VFX   WEAPONS",
+                SpawnerTab.VFX => "ITEMS   [ VFX ]   WEAPONS",
+                SpawnerTab.Weapons => "ITEMS   VFX   [ WEAPONS ]",
+                _ => ""
+            };
+            if (_spawnerTabLabel != null) _spawnerTabLabel.text = label;
+
+            // Populate list from the appropriate spawner system
+            if (_spawnerListText != null)
+            {
+                string content = GetSpawnerListContent(tab);
+                _spawnerListText.text = content;
+            }
+        }
+
+        private string GetSpawnerListContent(SpawnerTab tab)
+        {
+            switch (tab)
+            {
+                case SpawnerTab.Items:
+                    if (VRItemSpawner.Instance != null)
+                        return VRItemSpawner.Instance.GetItemList();
+                    return "<color=#666666>No items loaded.\nPlace prefabs in Resources/SpawnItems/</color>";
+
+                case SpawnerTab.VFX:
+                    if (VFXSpawnerMenu.Instance != null)
+                        return VFXSpawnerMenu.Instance.GetVFXList();
+                    return "<color=#666666>No VFX loaded.\nPlace prefabs in Resources/VFXPrefabs/</color>";
+
+                case SpawnerTab.Weapons:
+                    // Weapons are a subset of items -- filter by name
+                    if (VRItemSpawner.Instance != null)
+                        return VRItemSpawner.Instance.GetWeaponList();
+                    return "<color=#666666>No weapons loaded.</color>";
+            }
+            return "";
+        }
+
+        // ================================================================
+        //  SETTINGS PANEL
+        // ================================================================
 
         private void BuildSettingsPanel()
         {
@@ -228,35 +452,35 @@ namespace Plaga44.UI
             var rt = _settingsPanel.AddComponent<RectTransform>();
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(380, 440);
+            rt.sizeDelta = new Vector2(420, 500);
             rt.anchoredPosition = Vector2.zero;
 
             CreateImage(_settingsPanel.transform, "Panel",
-                Vector2.zero, new Vector2(380, 440), PANEL_COLOR);
+                Vector2.zero, new Vector2(420, 500), PANEL_COLOR);
 
             // Title
             var title = CreateText(_settingsPanel.transform, "Title",
-                new Vector2(0, 175), new Vector2(340, 50), TextAnchor.MiddleCenter, 36);
+                new Vector2(0, 210), new Vector2(380, 44), TextAnchor.MiddleCenter, 30);
             title.text = "SETTINGS";
             title.color = ACCENT;
 
             var div = CreateImage(_settingsPanel.transform, "Divider",
-                new Vector2(0, 148), new Vector2(340, 2), new Color(1, 1, 1, 0.12f));
+                new Vector2(0, 185), new Vector2(380, 2), new Color(1, 1, 1, 0.12f));
             div.raycastTarget = false;
 
             // ---- Volume slider ----
             var volLabel = CreateText(_settingsPanel.transform, "VolLabel",
-                new Vector2(-80, 90), new Vector2(120, 32), TextAnchor.MiddleLeft, 24);
+                new Vector2(-90, 130), new Vector2(140, 32), TextAnchor.MiddleLeft, 22);
             volLabel.text = "VOLUME";
             volLabel.color = TEXT_WHITE;
 
             var volValText = CreateText(_settingsPanel.transform, "VolValue",
-                new Vector2(140, 90), new Vector2(70, 32), TextAnchor.MiddleRight, 24);
+                new Vector2(145, 130), new Vector2(80, 32), TextAnchor.MiddleRight, 22);
             volValText.text = "100%";
             volValText.color = ACCENT;
 
             _volumeSlider = CreateSlider(_settingsPanel.transform, "VolSlider",
-                new Vector2(20, 55), new Vector2(300, 30), 0f, 1f, Volume);
+                new Vector2(20, 95), new Vector2(300, 30), 0f, 1f, Volume);
             _volumeSlider.onValueChanged.AddListener(val =>
             {
                 Volume = val;
@@ -266,12 +490,12 @@ namespace Plaga44.UI
 
             // ---- Comfort vignette toggle ----
             var vigLabel = CreateText(_settingsPanel.transform, "VigLabel",
-                new Vector2(-80, -10), new Vector2(220, 32), TextAnchor.MiddleLeft, 24);
+                new Vector2(-90, 30), new Vector2(240, 32), TextAnchor.MiddleLeft, 22);
             vigLabel.text = "COMFORT VIGNETTE";
             vigLabel.color = TEXT_WHITE;
 
             _vignetteToggle = CreateToggle(_settingsPanel.transform, "VigToggle",
-                new Vector2(140, -10), ComfortVignette);
+                new Vector2(145, 30), ComfortVignette);
             _vignetteToggle.onValueChanged.AddListener(val =>
             {
                 ComfortVignette = val;
@@ -280,12 +504,12 @@ namespace Plaga44.UI
 
             // ---- Snap turn toggle ----
             var snapLabel = CreateText(_settingsPanel.transform, "SnapLabel",
-                new Vector2(-80, -60), new Vector2(220, 32), TextAnchor.MiddleLeft, 24);
+                new Vector2(-90, -30), new Vector2(240, 32), TextAnchor.MiddleLeft, 22);
             snapLabel.text = "SNAP TURN";
             snapLabel.color = TEXT_WHITE;
 
             _snapTurnToggle = CreateToggle(_settingsPanel.transform, "SnapToggle",
-                new Vector2(140, -60), SnapTurn);
+                new Vector2(145, -30), SnapTurn);
             _snapTurnToggle.onValueChanged.AddListener(val =>
             {
                 SnapTurn = val;
@@ -293,46 +517,70 @@ namespace Plaga44.UI
 
             // ---- Back button ----
             CreateButton(_settingsPanel.transform, "BackBtn",
-                new Vector2(0, -160), new Vector2(260, 52),
-                "< BACK", OnBackClicked);
+                new Vector2(0, -200), new Vector2(260, 48),
+                "< BACK", OnBackToMainClicked);
         }
 
-        // ---- Button callbacks ----
+        // ================================================================
+        //  DEBUG PANEL
+        // ================================================================
+
+        private void BuildDebugPanel()
+        {
+            _debugPanel = new GameObject("DebugPanel");
+            _debugPanel.transform.SetParent(_canvas.transform, false);
+            var rt = _debugPanel.AddComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(420, 500);
+            rt.anchoredPosition = Vector2.zero;
+
+            CreateImage(_debugPanel.transform, "Panel",
+                Vector2.zero, new Vector2(420, 500), PANEL_COLOR);
+
+            // Title
+            var title = CreateText(_debugPanel.transform, "Title",
+                new Vector2(0, 210), new Vector2(380, 44), TextAnchor.MiddleCenter, 30);
+            title.text = "DEBUG";
+            title.color = ACCENT;
+
+            var div = CreateImage(_debugPanel.transform, "Divider",
+                new Vector2(0, 185), new Vector2(380, 2), new Color(1, 1, 1, 0.12f));
+            div.raycastTarget = false;
+
+            // Quality Menu button
+            CreateButton(_debugPanel.transform, "QualityBtn",
+                new Vector2(0, 120), new Vector2(300, 56),
+                "QUALITY SETTINGS", OnOpenQualityClicked);
+
+            // Inspect Skybox button
+            CreateButton(_debugPanel.transform, "InspectSkyboxBtn",
+                new Vector2(0, 50), new Vector2(300, 56),
+                "INSPECT SKYBOX", OnInspectSkyboxClicked);
+
+            // Hint
+            var hint = CreateText(_debugPanel.transform, "DebugHint",
+                new Vector2(0, -50), new Vector2(380, 60), TextAnchor.UpperCenter, 16);
+            hint.text = "Quality Settings opens the full debug\npanel with thumbstick navigation.\nPress Start to return.";
+            hint.color = TEXT_GREY;
+
+            // Back
+            CreateButton(_debugPanel.transform, "BackBtn",
+                new Vector2(0, -200), new Vector2(260, 48),
+                "< BACK", OnBackToMainClicked);
+        }
+
+        // ================================================================
+        //  BUTTON CALLBACKS
+        // ================================================================
 
         private void OnResumeClicked() => Close();
 
-        private void OnContinueClicked()
-        {
-            if (SaveManager.Instance != null && SaveManager.Instance.HasSave())
-            {
-                SaveManager.Instance.Load();
-                Close();
-            }
-        }
+        private void OnSpawnerClicked() => ShowPanel(_spawnerPanel);
 
-        private void OnSaveClicked()
-        {
-            if (SaveManager.Instance != null)
-            {
-                SaveManager.Instance.Save();
-                UpdateContinueButton();
-            }
-        }
+        private void OnSettingsClicked() => ShowPanel(_settingsPanel);
 
-        private void OnLoadClicked()
-        {
-            if (SaveManager.Instance != null && SaveManager.Instance.HasSave())
-            {
-                SaveManager.Instance.Load();
-                Close();
-            }
-        }
-
-        private void OnSettingsClicked()
-        {
-            _mainPanel.SetActive(false);
-            _settingsPanel.SetActive(true);
-        }
+        private void OnDebugClicked() => ShowPanel(_debugPanel);
 
         private void OnQuitClicked()
         {
@@ -343,24 +591,106 @@ namespace Plaga44.UI
 #endif
         }
 
-        private void OnBackClicked()
+        private void OnBackToMainClicked() => ShowPanel(_mainPanel);
+
+        // ---- Spawner callbacks ----
+
+        private void OnSpawnClicked()
         {
-            _settingsPanel.SetActive(false);
-            _mainPanel.SetActive(true);
+            switch (_spawnerTab)
+            {
+                case SpawnerTab.Items:
+                    if (VRItemSpawner.Instance != null)
+                        VRItemSpawner.Instance.SpawnCurrent();
+                    break;
+                case SpawnerTab.VFX:
+                    if (VFXSpawnerMenu.Instance != null)
+                        VFXSpawnerMenu.Instance.SpawnCurrent();
+                    break;
+                case SpawnerTab.Weapons:
+                    if (VRItemSpawner.Instance != null)
+                        VRItemSpawner.Instance.SpawnCurrentWeapon();
+                    break;
+            }
+            // Refresh the list after spawning
+            SwitchSpawnerTab(_spawnerTab);
         }
 
-        // ---- Save/Load helpers ----
-
-        private void UpdateContinueButton()
+        private void OnDeleteLastClicked()
         {
-            if (_continueBtn == null) return;
-            bool hasSave = SaveManager.Instance != null && SaveManager.Instance.HasSave();
-            _continueBtn.interactable = hasSave;
+            switch (_spawnerTab)
+            {
+                case SpawnerTab.Items:
+                case SpawnerTab.Weapons:
+                    if (VRItemSpawner.Instance != null)
+                        VRItemSpawner.Instance.DeleteLast();
+                    break;
+                case SpawnerTab.VFX:
+                    if (VFXSpawnerMenu.Instance != null)
+                        VFXSpawnerMenu.Instance.DeleteLast();
+                    break;
+            }
+            SwitchSpawnerTab(_spawnerTab);
+        }
 
-            // Dim the label when no save exists
-            var label = _continueBtn.GetComponentInChildren<Text>();
-            if (label != null)
-                label.color = hasSave ? TEXT_WHITE : TEXT_GREY;
+        private void OnDeleteAllClicked()
+        {
+            switch (_spawnerTab)
+            {
+                case SpawnerTab.Items:
+                case SpawnerTab.Weapons:
+                    if (VRItemSpawner.Instance != null)
+                        VRItemSpawner.Instance.DeleteAll();
+                    break;
+                case SpawnerTab.VFX:
+                    if (VFXSpawnerMenu.Instance != null)
+                        VFXSpawnerMenu.Instance.DeleteAll();
+                    break;
+            }
+            SwitchSpawnerTab(_spawnerTab);
+        }
+
+        // ---- Debug callbacks ----
+
+        private void OnOpenQualityClicked()
+        {
+            // Hide our canvas and open VRQualityMenu directly
+            _canvas.gameObject.SetActive(false);
+            _debugQualityOpen = true;
+
+            var menu = FindFirstObjectByType<VRQualityMenu>();
+            if (menu != null)
+            {
+                menu.ShowPanel();
+            }
+            else
+            {
+                Debug.LogWarning("[PLAGA44] VRMenuManager: VRQualityMenu not found");
+                _canvas.gameObject.SetActive(true);
+                _debugQualityOpen = false;
+            }
+        }
+
+        private void CloseQualitySubMenu()
+        {
+            var menu = FindFirstObjectByType<VRQualityMenu>();
+            if (menu != null)
+                menu.HidePanel();
+            _debugQualityOpen = false;
+            _canvas.gameObject.SetActive(true);
+            ShowPanel(_debugPanel);
+        }
+
+        private void OnInspectSkyboxClicked()
+        {
+            // Close menu, activate LaserInspector
+            Close();
+            var inspector = FindFirstObjectByType<LaserInspector>();
+            if (inspector != null)
+            {
+                // LaserInspector has its own toggle mechanism
+                inspector.SendMessage("ToggleInspector", SendMessageOptions.DontRequireReceiver);
+            }
         }
 
         // ---- Platform integration ----
@@ -368,16 +698,15 @@ namespace Plaga44.UI
         private void ApplyVignette(bool enabled)
         {
 #if HAS_META_XR
-            // OVRManager exposes comfort vignette in newer SDK versions.
-            // Keep a soft fallback -- no-op if property absent.
             var mgr = FindFirstObjectByType<OVRManager>();
             if (mgr == null) return;
-            // OVRManager.instance.isInsightPassthroughEnabled has no direct vignette API
-            // in v81 -- leave as settings state for future integration.
+            // OVRManager v81 -- no direct vignette API. State stored for future integration.
 #endif
         }
 
-        // ---- UI helpers ----
+        // ================================================================
+        //  UI HELPERS -- shared builder methods
+        // ================================================================
 
         private Image CreateImage(Transform parent, string name,
             Vector2 pos, Vector2 size, Color color)
@@ -454,8 +783,8 @@ namespace Plaga44.UI
             txtRt.offsetMin = txtRt.offsetMax = Vector2.zero;
 
             var txt = txtGo.AddComponent<Text>();
-            txt.font = Font.CreateDynamicFontFromOSFont("Arial", 26);
-            txt.fontSize = 26;
+            txt.font = Font.CreateDynamicFontFromOSFont("Arial", 24);
+            txt.fontSize = 24;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.color = TEXT_WHITE;
             txt.raycastTarget = false;

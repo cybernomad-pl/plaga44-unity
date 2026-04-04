@@ -86,7 +86,7 @@ namespace Plaga44.Locomotion
 
         private void Update()
         {
-            if (VRQualityMenu.MenuOpen) return;
+            if (Plaga44.UI.VRMenuManager.MenuOpen || VRQualityMenu.MenuOpen) return;
             Vector2 thumbstick = GetRightThumbstick();
             bool wantsAim = thumbstick.y > inputDeadzone;
 

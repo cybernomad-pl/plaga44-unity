@@ -41,7 +41,7 @@ namespace Plaga44.UI
             Splash,      // black screen + title, waiting for both triggers
             MainMenu,    // post-splash menu: CONTINUE / NEW GAME / SETTINGS
             Paused,      // in-game pause: RESUME / SAVE / SETTINGS / QUIT
-            Settings,    // settings sub-panel (delegates to VRQualityMenu)
+            Settings,    // settings sub-panel (delegates to VRMenuManager)
             FadingOut,   // fading canvas to transparent, then -> Hidden
             Hidden       // not visible, gameplay active
         }
@@ -218,9 +218,9 @@ namespace Plaga44.UI
                     break;
 
                 case State.Settings:
-                    // Hide our canvas, show VRQualityMenu
+                    // Hide our canvas, show VRMenuManager (unified hamburger menu)
                     _canvas.gameObject.SetActive(false);
-                    OpenVRQualityMenu();
+                    OpenHamburgerMenu();
                     break;
 
                 case State.FadingOut:
@@ -338,19 +338,9 @@ namespace Plaga44.UI
 
         private void UpdateSettings()
         {
-#if HAS_META_XR
-            // Start button closes VRQualityMenu and returns to our menu
-            if (OVRInput.GetDown(OVRInput.Button.Start))
-            {
-                CloseVRQualityMenu();
-                _canvas.gameObject.SetActive(true);
-                EnterState(_returnToPause ? State.Paused : State.MainMenu);
-                return;
-            }
-#endif
-
-            // Also check if VRQualityMenu closed itself somehow
-            if (!IsVRQualityMenuOpen())
+            // VRMenuManager handles its own Start button toggle.
+            // When it closes, we detect that and return to our menu.
+            if (!VRMenuManager.MenuOpen)
             {
                 _canvas.gameObject.SetActive(true);
                 EnterState(_returnToPause ? State.Paused : State.MainMenu);
@@ -377,18 +367,8 @@ namespace Plaga44.UI
 
         private void UpdateHidden()
         {
-#if HAS_META_XR
-            // Start button in gameplay = toggle VRQualityMenu (debug context menu)
-            // Splash/pause menu is ONLY at game start. In-game always opens debug settings.
-            if (OVRInput.GetDown(OVRInput.Button.Start))
-            {
-                // Toggle VRQualityMenu directly -- do NOT open splash/pause
-                if (!IsVRQualityMenuOpen())
-                {
-                    OpenVRQualityMenu();
-                }
-            }
-#endif
+            // Start button in gameplay is now handled by VRMenuManager (unified hamburger menu).
+            // SplashScreen no longer intercepts Start in Hidden state.
         }
 
         // ---- Scene loading ----
@@ -758,59 +738,20 @@ namespace Plaga44.UI
 #endif
         }
 
-        // ---- VRQualityMenu integration ----
+        // ---- VRMenuManager integration ----
 
-        private void OpenVRQualityMenu()
+        private void OpenHamburgerMenu()
         {
-            var menu = FindFirstObjectByType<VRQualityMenu>();
-            if (menu != null)
+            if (VRMenuManager.Instance != null)
             {
-                // Force it open via its static field
-                VRQualityMenu.MenuOpen = true;
-                var canvasField = menu.GetType().GetField("_canvas",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (canvasField != null)
-                {
-                    var canvas = canvasField.GetValue(menu) as GameObject;
-                    if (canvas != null) canvas.SetActive(true);
-                }
-
-                var visField = menu.GetType().GetField("_visible",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (visField != null) visField.SetValue(menu, true);
+                VRMenuManager.Instance.Open();
             }
             else
             {
-                // No VRQualityMenu found -- go back to menu
-                Debug.LogWarning("[PLAGA44] SplashScreen: VRQualityMenu not found, returning to menu");
+                Debug.LogWarning("[PLAGA44] SplashScreen: VRMenuManager not found, returning to menu");
                 _canvas.gameObject.SetActive(true);
                 EnterState(_returnToPause ? State.Paused : State.MainMenu);
             }
-        }
-
-        private void CloseVRQualityMenu()
-        {
-            var menu = FindFirstObjectByType<VRQualityMenu>();
-            if (menu != null)
-            {
-                VRQualityMenu.MenuOpen = false;
-                var canvasField = menu.GetType().GetField("_canvas",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (canvasField != null)
-                {
-                    var canvas = canvasField.GetValue(menu) as GameObject;
-                    if (canvas != null) canvas.SetActive(false);
-                }
-
-                var visField = menu.GetType().GetField("_visible",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (visField != null) visField.SetValue(menu, false);
-            }
-        }
-
-        private bool IsVRQualityMenuOpen()
-        {
-            return VRQualityMenu.MenuOpen;
         }
 
         // ---- Time & player controller ----

@@ -96,7 +96,7 @@ public class ModelSpawner : MonoBehaviour
     void Update()
     {
         if (_modelPaths.Count == 0) return;
-        if (VRQualityMenu.MenuOpen) return;
+        if (Plaga44.UI.VRMenuManager.MenuOpen || VRQualityMenu.MenuOpen) return;
 
         _scrollCooldown -= Time.deltaTime;
 

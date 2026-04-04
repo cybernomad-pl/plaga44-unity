@@ -102,8 +102,8 @@ namespace Plaga44.UI
                 if (_controllerAnchor == null) return;
             }
 
-            // Don't run while VRQualityMenu is open
-            if (VRQualityMenu.MenuOpen)
+            // Don't run while any menu is open
+            if (VRMenuManager.MenuOpen || VRQualityMenu.MenuOpen)
             {
                 HideLaser();
                 return;

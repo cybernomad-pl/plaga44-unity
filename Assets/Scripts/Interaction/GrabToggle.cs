@@ -41,7 +41,7 @@ public class GrabToggle : MonoBehaviour
 
     void Update()
     {
-        if (VRQualityMenu.MenuOpen) return;
+        if (Plaga44.UI.VRMenuManager.MenuOpen || VRQualityMenu.MenuOpen) return;
         bool gripPressed = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, _controller) > 0.55f;
 
         // Toggle on press edge

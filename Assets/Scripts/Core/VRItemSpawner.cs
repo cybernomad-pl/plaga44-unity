@@ -16,6 +16,75 @@ public class VRItemSpawner : MonoBehaviour
     public static bool MenuOpen { get; private set; } = false;
     public static VRItemSpawner Instance { get; private set; }
 
+    // ---- Public API for VRMenuManager ----
+
+    /// <summary>Get formatted list of all spawnable items.</summary>
+    public string GetItemList()
+    {
+        if (_prefabs.Count == 0) return "<color=#666666>No items in Resources/SpawnItems/</color>";
+        var sb = new System.Text.StringBuilder();
+        foreach (var p in _prefabs)
+        {
+            if (p != null)
+                sb.AppendLine(p.name);
+        }
+        sb.AppendLine($"\n<color=#888888>Scale: x{_spawnScale:F2} | {_spawnedObjects.Count} spawned</color>");
+        return sb.ToString();
+    }
+
+    /// <summary>Get formatted list of weapon items (filtered by name).</summary>
+    public string GetWeaponList()
+    {
+        if (_prefabs.Count == 0) return "<color=#666666>No weapons loaded.</color>";
+        var sb = new System.Text.StringBuilder();
+        bool any = false;
+        foreach (var p in _prefabs)
+        {
+            if (p == null) continue;
+            string lower = p.name.ToLower();
+            if (lower.Contains("m249") || lower.Contains("gun") || lower.Contains("rifle") ||
+                lower.Contains("pistol") || lower.Contains("sword") || lower.Contains("katana") ||
+                lower.Contains("weapon") || lower.Contains("scifi"))
+            {
+                sb.AppendLine(p.name);
+                any = true;
+            }
+        }
+        if (!any) sb.AppendLine("<color=#666666>No weapon prefabs found.</color>");
+        sb.AppendLine($"\n<color=#888888>{_spawnedObjects.Count} spawned</color>");
+        return sb.ToString();
+    }
+
+    /// <summary>Spawn the first available item.</summary>
+    public void SpawnCurrent()
+    {
+        if (_prefabs.Count == 0) return;
+        SpawnItem(_prefabs[0]);
+    }
+
+    /// <summary>Spawn the first weapon-category item.</summary>
+    public void SpawnCurrentWeapon()
+    {
+        foreach (var p in _prefabs)
+        {
+            if (p == null) continue;
+            string lower = p.name.ToLower();
+            if (lower.Contains("m249") || lower.Contains("gun") || lower.Contains("rifle") ||
+                lower.Contains("pistol") || lower.Contains("sword") || lower.Contains("katana") ||
+                lower.Contains("weapon") || lower.Contains("scifi"))
+            {
+                SpawnItem(p);
+                return;
+            }
+        }
+    }
+
+    /// <summary>Delete last spawned item.</summary>
+    public void DeleteLast() => DeleteLastSpawned();
+
+    /// <summary>Delete all spawned items.</summary>
+    public void DeleteAll() => DeleteAllSpawned();
+
     private GameObject _canvas;
     private Text _titleText;
     private Text[] _rowTexts;
@@ -124,57 +193,13 @@ public class VRItemSpawner : MonoBehaviour
 
     void Update()
     {
-        // X = toggle menu
-        if (OVRInput.GetDown(OVRInput.Button.Three))
-        {
-            _visible = !_visible;
-            _canvas.SetActive(_visible);
-            MenuOpen = _visible;
-            BlockPlayerMovement(_visible);
-        }
+        // Input handling REMOVED -- VRMenuManager owns all menu input now.
+        // VRItemSpawner is controlled via public API (GetItemList, SpawnCurrent, etc.)
+        // from VRMenuManager's Spawner sub-panel.
 
-        // Y = quick delete last (always available)
+        // Y = quick delete last (kept -- this is a dedicated shortcut, not a menu toggle)
         if (OVRInput.GetDown(OVRInput.Button.Four))
             DeleteLastSpawned();
-
-        if (!_visible) return;
-
-        PositionCanvas();
-
-        _inputCooldown -= Time.unscaledDeltaTime;
-        if (_inputCooldown > 0) return;
-
-        Vector2 stick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
-
-        if (stick.y > 0.5f)
-        {
-            _selectedRow = (_selectedRow - 1 + TotalRows) % TotalRows;
-            _inputCooldown = 0.18f;
-        }
-        else if (stick.y < -0.5f)
-        {
-            _selectedRow = (_selectedRow + 1) % TotalRows;
-            _inputCooldown = 0.18f;
-        }
-
-        if (stick.x > 0.5f)
-        {
-            _spawnScale = Mathf.Min(_spawnScale * 1.2f, 100f);
-            _inputCooldown = 0.15f;
-        }
-        else if (stick.x < -0.5f)
-        {
-            _spawnScale = Mathf.Max(_spawnScale / 1.2f, 0.01f);
-            _inputCooldown = 0.15f;
-        }
-
-        if (OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0.5f)
-        {
-            Execute(_selectedRow);
-            _inputCooldown = 0.3f;
-        }
-
-        UpdateDisplay();
     }
 
     void BlockPlayerMovement(bool block)
