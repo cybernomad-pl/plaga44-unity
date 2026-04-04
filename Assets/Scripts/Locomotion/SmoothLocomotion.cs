@@ -83,7 +83,7 @@ namespace Plaga44.Locomotion
         private void Update()
         {
             if (_headTransform == null) return;
-            if (Plaga44.UI.VRMenuManager.MenuOpen || VRQualityMenu.MenuOpen) return;
+            if (!Plaga44.GameState.CanMove) return;
 
             Vector2 moveInput = GetMoveInput();
             Vector2 turnInput = GetTurnInput();

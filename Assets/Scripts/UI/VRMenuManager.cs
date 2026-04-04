@@ -158,6 +158,7 @@ namespace Plaga44.UI
             _debugQualityOpen = false;
 
             MenuOpen = true;
+            Plaga44.GameState.Pause();
             SetLocomotion(false);
             OnMenuToggled?.Invoke(true);
         }
@@ -171,6 +172,7 @@ namespace Plaga44.UI
 
             _canvas.gameObject.SetActive(false);
             MenuOpen = false;
+            Plaga44.GameState.Resume();
             SetLocomotion(true);
             OnMenuToggled?.Invoke(false);
         }

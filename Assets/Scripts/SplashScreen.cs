@@ -178,6 +178,16 @@ namespace Plaga44.UI
         {
             _state = newState;
 
+            // Sync global GameState
+            switch (newState)
+            {
+                case State.Splash:   Plaga44.GameState.SetState(Plaga44.GamePhase.Splash); break;
+                case State.MainMenu: Plaga44.GameState.SetState(Plaga44.GamePhase.MainMenu); break;
+                case State.Paused:   Plaga44.GameState.SetState(Plaga44.GamePhase.Paused); break;
+                case State.Hidden:   Plaga44.GameState.SetState(Plaga44.GamePhase.Playing); break;
+                case State.FadingOut: Plaga44.GameState.SetState(Plaga44.GamePhase.Loading); break;
+            }
+
             switch (newState)
             {
                 case State.Splash:
