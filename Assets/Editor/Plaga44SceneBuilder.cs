@@ -110,8 +110,9 @@ namespace Plaga44.Editor
             MaterialUpgrader.UpgradeMaterials();
             FixWaterMaterials();
 
-            SpawnItems();
-            SetupWeaponManagers();
+            // Weapons are spawned via hamburger menu (VRItemSpawner), not baked in scene
+            // SpawnItems();
+            // SetupWeaponManagers();
             AddPostProcessing();
             FixParticleMaterials();
             FixLeavesAndGrass();
