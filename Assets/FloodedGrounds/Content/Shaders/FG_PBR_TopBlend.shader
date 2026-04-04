@@ -74,14 +74,6 @@ Shader "Flooded_Grounds/PBR_TopBlend" {
                 float  fogFactor   : TEXCOORD6;
             };
 
-            half3 UnpackNormalScale(half4 packednormal, half scale)
-            {
-                half3 normal;
-                normal.xy = (packednormal.wy * 2.0 - 1.0) * scale;
-                normal.z = sqrt(1.0 - saturate(dot(normal.xy, normal.xy)));
-                return normal;
-            }
-
             Varyings vert(Attributes IN)
             {
                 Varyings OUT = (Varyings)0;
