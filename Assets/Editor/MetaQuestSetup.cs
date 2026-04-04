@@ -125,7 +125,7 @@ namespace Plaga44.Editor
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             PlayerSettings.SetApplicationIdentifier(
-                NamedBuildTarget.Android, "com.cybernomad.plaga44");
+                NamedBuildTarget.Android, "games.cybernomad.plaga44");
 
             PlayerSettings.SetGraphicsAPIs(
                 BuildTarget.Android, new[] { GraphicsDeviceType.Vulkan });
