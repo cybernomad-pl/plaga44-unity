@@ -35,6 +35,9 @@ public class ModelSpawner : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoCreate()
     {
+#if LOCOMOTION_ONLY
+        return;
+#endif
         var go = new GameObject("_ModelSpawner");
         go.AddComponent<ModelSpawner>();
         DontDestroyOnLoad(go);

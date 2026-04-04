@@ -16,6 +16,9 @@ public class BodyTrackingBootstrap : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoCreate()
     {
+#if LOCOMOTION_ONLY
+        return;
+#endif
         var go = new GameObject("_BodyTrackingBootstrap");
         go.AddComponent<BodyTrackingBootstrap>();
         DontDestroyOnLoad(go);

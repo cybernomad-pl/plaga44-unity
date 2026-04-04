@@ -17,6 +17,9 @@ public class TerrainDeformer : MonoBehaviour
     private bool _saved = false;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+#if LOCOMOTION_ONLY
+        return;
+#endif
     static void AutoCreate()
     {
         var go = new GameObject("_TerrainDeformer");

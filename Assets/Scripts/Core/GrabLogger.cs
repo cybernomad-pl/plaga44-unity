@@ -11,6 +11,9 @@ public class GrabLogger : MonoBehaviour
     private float _timer;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+#if LOCOMOTION_ONLY
+        return;
+#endif
     static void AutoCreate()
     {
         var go = new GameObject("_GrabLogger");

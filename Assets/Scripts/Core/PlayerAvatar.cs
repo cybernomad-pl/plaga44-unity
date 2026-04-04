@@ -18,6 +18,9 @@ public class PlayerAvatar : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoCreate()
     {
+#if LOCOMOTION_ONLY
+        return;
+#endif
         var go = new GameObject("_PlayerAvatar");
         go.AddComponent<PlayerAvatar>();
         DontDestroyOnLoad(go);

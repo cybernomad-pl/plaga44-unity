@@ -32,6 +32,9 @@ public class UnderwaterEffect : MonoBehaviour
     private bool _savedFogState;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+#if LOCOMOTION_ONLY
+        return;
+#endif
     static void AutoCreate()
     {
         var go = new GameObject("_UnderwaterEffect");

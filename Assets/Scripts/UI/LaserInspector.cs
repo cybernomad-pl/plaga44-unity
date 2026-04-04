@@ -79,6 +79,9 @@ namespace Plaga44.UI
         // ── Auto-create ──
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+#if LOCOMOTION_ONLY
+        return;
+#endif
         static void AutoCreate()
         {
             var go = new GameObject("_LaserInspector");

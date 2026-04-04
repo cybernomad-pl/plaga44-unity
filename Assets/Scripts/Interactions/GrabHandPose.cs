@@ -43,6 +43,9 @@ public class GrabHandPose : MonoBehaviour
     private float _rightFlex, _rightPoint, _rightPinch;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+#if LOCOMOTION_ONLY
+        return;
+#endif
     static void AutoCreate()
     {
         var go = new GameObject("_GrabHandPose");

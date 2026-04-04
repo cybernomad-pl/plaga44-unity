@@ -38,6 +38,9 @@ public class M249Disassembly : MonoBehaviour
     private Transform _lastHighlighted;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+#if LOCOMOTION_ONLY
+        return;
+#endif
     static void AutoCreate()
     {
         // Szukaj M249 w scenie

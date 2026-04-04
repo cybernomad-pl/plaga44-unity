@@ -97,6 +97,9 @@ namespace Plaga44.UI
         // ---- Lifecycle ----
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+#if LOCOMOTION_ONLY
+        return;
+#endif
         static void AutoCreate()
         {
             var go = new GameObject("_VFXSpawnerMenu");

@@ -22,6 +22,9 @@ public class WaterScoop : MonoBehaviour
     private int _rightDroplets;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+#if LOCOMOTION_ONLY
+        return;
+#endif
     static void AutoCreate()
     {
         var go = new GameObject("_WaterScoop");

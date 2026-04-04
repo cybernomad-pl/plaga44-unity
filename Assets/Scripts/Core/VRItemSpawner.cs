@@ -119,6 +119,9 @@ public class VRItemSpawner : MonoBehaviour
     private int TotalRows => _prefabs.Count + 3;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+#if LOCOMOTION_ONLY
+        return;
+#endif
     static void AutoCreate()
     {
         var go = new GameObject("_VRItemSpawner");

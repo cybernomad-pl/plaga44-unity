@@ -27,6 +27,9 @@ public class PerformanceBenchmark : MonoBehaviour
     private GUIStyle _style;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+#if LOCOMOTION_ONLY
+        return;
+#endif
     static void AutoCreate()
     {
         var go = new GameObject("_Benchmark");

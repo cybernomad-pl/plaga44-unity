@@ -21,6 +21,9 @@ public class ModelExhibition : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     static void AutoCreate()
     {
+#if LOCOMOTION_ONLY
+        return;
+#endif
         var go = new GameObject("_ModelExhibition");
         var ex = go.AddComponent<ModelExhibition>();
         DontDestroyOnLoad(go);
