@@ -6,19 +6,17 @@
 // What it does:
 //   1. Adds Meta XR scoped registry to manifest.json
 //   2. Adds required packages (OpenXR, Meta XR Core, Interaction, Audio)
-//   3. Configures Player Settings for Quest (Vulkan, IL2CPP, ARM64)
-//   4. Enables OpenXR Loader in XR Plugin Management
-//   5. Switches build target to Android
+//   3. Enables OpenXR Loader in XR Plugin Management
+//   4. Switches build target to Android
 //
+// Player/Quality settings are baked into ProjectSettings/*.asset in the repo.
 // Version: META_SDK_VERSION constant below. Change it to upgrade all packages at once.
 
 using System.IO;
 using UnityEditor;
-using UnityEditor.Build;
 using UnityEditor.XR.Management;
 using UnityEditor.XR.Management.Metadata;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.XR.Management;
 
 namespace Plaga44.Editor
@@ -97,7 +95,6 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} === Setup Meta SDK ===");
             AddScopedRegistry();
             AddPackagesToManifest();
-            SetPlayerSettings();
             EnableOpenXRLoader();
             Debug.Log($"{LOG} === DONE -- Unity will now resolve packages ===");
         }
@@ -200,48 +197,7 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 3. Player Settings (Quest-ready)
-        // =====================================================================
-
-        static void SetPlayerSettings()
-        {
-            // Identity
-            PlayerSettings.companyName = "Cybernomad";
-            PlayerSettings.productName = "PLAGA 44";
-            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "games.cybernomad.plaga44");
-
-            // Rendering
-            PlayerSettings.colorSpace = ColorSpace.Linear;
-            PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.Vulkan });
-            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
-
-            // Scripting
-            PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
-            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
-
-            // Android SDK
-            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
-            PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)32;
-
-            // Orientation (VR = landscape locked)
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
-            PlayerSettings.allowedAutorotateToPortrait = false;
-            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
-            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
-            PlayerSettings.allowedAutorotateToLandscapeRight = false;
-
-            // Quality
-            QualitySettings.antiAliasing = 4;       // MSAA x4
-            QualitySettings.vSyncCount = 0;          // VR handles vsync
-            QualitySettings.shadowDistance = 20f;
-            QualitySettings.lodBias = 1.0f;
-            QualitySettings.pixelLightCount = 2;
-
-            Debug.Log($"{LOG} Player/Quality settings configured.");
-        }
-
-        // =====================================================================
-        // 4. OpenXR Loader (XR Plugin Management)
+        // 3. OpenXR Loader (XR Plugin Management)
         // =====================================================================
 
         static void EnableOpenXRLoader()
