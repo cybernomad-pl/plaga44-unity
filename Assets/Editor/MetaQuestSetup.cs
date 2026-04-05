@@ -1,28 +1,84 @@
 #if UNITY_EDITOR
-using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEditor.PackageManager;
+using UnityEditor.XR.Management;
+using UnityEditor.XR.Management.Metadata;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.XR.Management;
 
 namespace Plaga44.Editor
 {
+    // Auto-runs on editor load -- if Meta XR SDK missing, offers to install it.
+    [InitializeOnLoad]
     public static class MetaQuestSetup
     {
         private const string LOG = "[PLAGA44]";
         private const string META_SDK_VERSION = "81.0.0";
+        private const string SESSION_KEY = "PLAGA44_SDK_CHECK_DONE";
 
         private static readonly string[][] PackagesToInstall = new[]
         {
-            new[] { "com.unity.xr.openxr",       "1.14.0" },
-            new[] { "com.unity.xr.meta-openxr",   "2.4.0"  },
-            new[] { "com.meta.xr.sdk.core",        META_SDK_VERSION },
-            new[] { "com.meta.xr.sdk.interaction",      META_SDK_VERSION },
-            new[] { "com.meta.xr.sdk.interaction.ovr", META_SDK_VERSION },
-            new[] { "com.meta.xr.sdk.audio",            META_SDK_VERSION },
+            new[] { "com.unity.xr.openxr",                "1.14.0" },
+            new[] { "com.unity.xr.meta-openxr",            "2.4.0"  },
+            new[] { "com.meta.xr.sdk.core",                META_SDK_VERSION },
+            new[] { "com.meta.xr.sdk.interaction",         META_SDK_VERSION },
+            new[] { "com.meta.xr.sdk.interaction.ovr",     META_SDK_VERSION },
+            new[] { "com.meta.xr.sdk.audio",               META_SDK_VERSION },
         };
+
+        // Static constructor -- runs on editor load / domain reload
+        static MetaQuestSetup()
+        {
+            // Run once per editor session, not on every domain reload
+            if (SessionState.GetBool(SESSION_KEY, false)) return;
+            SessionState.SetBool(SESSION_KEY, true);
+
+            // Delay to let editor finish loading
+            EditorApplication.delayCall += AutoCheck;
+        }
+
+        static void AutoCheck()
+        {
+            if (IsMetaXRInstalled())
+            {
+                Debug.Log($"{LOG} Meta XR SDK detected -- OK.");
+
+                // Auto switch to Android if not already
+                if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
+                {
+                    bool doSwitch = EditorUtility.DisplayDialog(
+                        "PLAGA '44 -- Switch to Android?",
+                        "Meta XR SDK is installed but build target is not Android.\n\nSwitch now?",
+                        "Switch to Android", "Not now");
+                    if (doSwitch) SwitchToAndroid();
+                }
+                return;
+            }
+
+            bool doSetup = EditorUtility.DisplayDialog(
+                "PLAGA '44 -- Meta XR SDK not found",
+                "This project requires Meta XR SDK for Quest development.\n\n" +
+                "Install Meta XR SDK + configure project settings automatically?",
+                "Setup Everything", "Skip");
+
+            if (doSetup)
+            {
+                SetupMetaSDK();
+                SwitchToAndroid();
+            }
+        }
+
+        static bool IsMetaXRInstalled()
+        {
+            string manifest = ReadManifest();
+            return manifest != null && manifest.Contains("com.meta.xr.sdk.core");
+        }
+
+        // =================================================================
+        // MENU: Manual triggers (still available)
+        // =================================================================
 
         [MenuItem("CYBERNOMAD/Meta SDK Setup/1. Setup Meta SDK", false, 1)]
         public static void SetupMetaSDK()
@@ -32,9 +88,28 @@ namespace Plaga44.Editor
             AddScopedRegistry();
             AddPackagesToManifest();
             SetPlayerSettings();
+            EnableOpenXRLoader();
 
             Debug.Log($"{LOG} === DONE -- Unity will now resolve packages ===");
         }
+
+        [MenuItem("CYBERNOMAD/Meta SDK Setup/2. Switch to Android", false, 2)]
+        public static void SwitchToAndroid()
+        {
+            if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
+            {
+                Debug.Log($"{LOG} Already on Android.");
+                return;
+            }
+
+            Debug.Log($"{LOG} Switching to Android...");
+            EditorUserBuildSettings.SwitchActiveBuildTarget(
+                BuildTargetGroup.Android, BuildTarget.Android);
+        }
+
+        // =================================================================
+        // SDK Installation
+        // =================================================================
 
         static void AddScopedRegistry()
         {
@@ -153,20 +228,68 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} Player/Quality settings configured.");
         }
 
-        [MenuItem("CYBERNOMAD/Meta SDK Setup/2. Switch to Android", false, 2)]
-        public static void SwitchToAndroid()
+        // =================================================================
+        // XR Loader
+        // =================================================================
+
+        static void EnableOpenXRLoader()
         {
-            if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android)
+            // Find or create the per-build-target settings asset
+            string[] guids = AssetDatabase.FindAssets("t:XRGeneralSettingsPerBuildTarget");
+            XRGeneralSettingsPerBuildTarget perBuildTarget = null;
+
+            if (guids.Length > 0)
             {
-                Debug.Log($"{LOG} Already on Android.");
-                return;
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                perBuildTarget = AssetDatabase.LoadAssetAtPath<XRGeneralSettingsPerBuildTarget>(path);
             }
 
-            Debug.Log($"{LOG} Switching to Android...");
-            EditorUserBuildSettings.SwitchActiveBuildTarget(
-                BuildTargetGroup.Android, BuildTarget.Android);
+            if (perBuildTarget == null)
+            {
+                // Create from scratch
+                var settingsDir = "Assets/XR/Settings";
+                if (!Directory.Exists(Path.Combine(Application.dataPath, "XR", "Settings")))
+                    Directory.CreateDirectory(Path.Combine(Application.dataPath, "XR", "Settings"));
+
+                perBuildTarget = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
+                AssetDatabase.CreateAsset(perBuildTarget, $"{settingsDir}/XRGeneralSettingsPerBuildTarget.asset");
+            }
+
+            var generalSettings = perBuildTarget.SettingsForBuildTarget(BuildTargetGroup.Android);
+            if (generalSettings == null)
+            {
+                generalSettings = ScriptableObject.CreateInstance<XRGeneralSettings>();
+                var manager = ScriptableObject.CreateInstance<XRManagerSettings>();
+                generalSettings.Manager = manager;
+
+                var settingsDir = "Assets/XR/Settings";
+                AssetDatabase.CreateAsset(generalSettings, $"{settingsDir}/XRGeneralSettings_Android.asset");
+                AssetDatabase.CreateAsset(manager, $"{settingsDir}/XRManager_Android.asset");
+
+                perBuildTarget.SetSettingsForBuildTarget(BuildTargetGroup.Android, generalSettings);
+                EditorUtility.SetDirty(perBuildTarget);
+                Debug.Log($"{LOG} Created XR General Settings for Android.");
+            }
+
+            // Assign OpenXR loader
+            var loaderName = "Unity.XR.OpenXR.OpenXRLoader";
+            bool assigned = XRPackageMetadataStore.AssignLoader(
+                generalSettings.Manager, loaderName, BuildTargetGroup.Android);
+
+            if (assigned)
+                Debug.Log($"{LOG} OpenXR Loader added to Android XR settings.");
+            else
+                Debug.LogWarning($"{LOG} Could not add OpenXR Loader automatically. " +
+                    "Go to Project Settings > XR Plug-in Management > Android tab > enable OpenXR.");
+
+            AssetDatabase.SaveAssets();
         }
 
+        // =================================================================
+        // VR Scene Setup (requires Meta XR SDK installed)
+        // =================================================================
+
+#if HAS_META_XR
         public static void SetupVRSceneControllers()
         {
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
@@ -286,19 +409,10 @@ namespace Plaga44.Editor
             if (mgr != null)
             {
                 var so = new SerializedObject(mgr);
-
-                // Tracking origin -- FloorLevel
                 SetProperty(so, "_trackingOriginType", 1, "FloorLevel");
-
-                // Controller-driven hand poses type -- ConformingToController
                 SetProperty(so, "controllerDrivenHandPosesType", 1, "ConformingToController");
-
-                // Enable simultaneous hands+controllers at startup
                 SetProperty(so, "launchSimultaneousHandsControllersOnStartup", true, "SimultaneousHandsControllers");
-
-                // Runtime flag for simultaneous hands+controllers
                 SetProperty(so, "SimultaneousHandsAndControllersEnabled", true, "SimultaneousEnabled");
-
                 so.ApplyModifiedProperties();
                 Debug.Log($"{LOG} OVRManager configured (FloorLevel + controller-driven hand poses + simultaneous hands&controllers).");
             }
@@ -349,14 +463,14 @@ namespace Plaga44.Editor
             leftHand.name = "OVRHandPrefab";
             leftHand.transform.localPosition = Vector3.zero;
             leftHand.transform.localRotation = Quaternion.Euler(0f, 0f, 60f);
-            ConfigureOVRHand(leftHand, 0); // 0 = HandLeft
+            ConfigureOVRHand(leftHand, 0);
             Undo.RegisterCreatedObjectUndo(leftHand, "Add Left OVRHandPrefab");
 
             var rightHand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, rightAnchor);
             rightHand.name = "OVRHandPrefab";
             rightHand.transform.localPosition = Vector3.zero;
             rightHand.transform.localRotation = Quaternion.Euler(0f, 0f, -60f);
-            ConfigureOVRHand(rightHand, 1); // 1 = HandRight
+            ConfigureOVRHand(rightHand, 1);
             Undo.RegisterCreatedObjectUndo(rightHand, "Add Right OVRHandPrefab");
 
             Debug.Log($"{LOG} OVRHandPrefab added under LeftHandAnchor + RightHandAnchor.");
@@ -369,7 +483,6 @@ namespace Plaga44.Editor
             {
                 var so = new SerializedObject(hand);
                 SetProperty(so, "HandType", handIndex, $"OVRHand.HandType ({handGO.name})");
-                // m_showState: Always=0 so hands are always visible
                 SetProperty(so, "m_showState", 0, $"OVRHand.m_showState=Always ({handGO.name})");
                 so.ApplyModifiedProperties();
             }
@@ -380,11 +493,7 @@ namespace Plaga44.Editor
             {
                 var so = new SerializedObject(skeleton);
                 var prop = so.FindProperty("_skeletonType");
-                if (prop != null)
-                {
-                    prop.intValue = handIndex;
-                    so.ApplyModifiedProperties();
-                }
+                if (prop != null) { prop.intValue = handIndex; so.ApplyModifiedProperties(); }
                 else Debug.LogError($"{LOG} OVRSkeleton._skeletonType property NOT FOUND!");
             }
             else Debug.LogError($"{LOG} OVRSkeleton NOT FOUND on {handGO.name}!");
@@ -394,15 +503,16 @@ namespace Plaga44.Editor
             {
                 var so = new SerializedObject(mesh);
                 var prop = so.FindProperty("_meshType");
-                if (prop != null)
-                {
-                    prop.intValue = handIndex;
-                    so.ApplyModifiedProperties();
-                }
+                if (prop != null) { prop.intValue = handIndex; so.ApplyModifiedProperties(); }
                 else Debug.LogError($"{LOG} OVRMesh._meshType property NOT FOUND!");
             }
             else Debug.LogError($"{LOG} OVRMesh NOT FOUND on {handGO.name}!");
         }
+#endif
+
+        // =================================================================
+        // Helpers
+        // =================================================================
 
         public static Transform FindChildRecursive(Transform parent, string name)
         {
@@ -437,6 +547,12 @@ namespace Plaga44.Editor
             }
             else
                 Debug.LogError($"{LOG} Property NOT FOUND: {name} -- SDK field name may have changed!");
+        }
+
+        static string ReadManifest()
+        {
+            string path = GetManifestPath();
+            return path != null ? File.ReadAllText(path) : null;
         }
 
         static string GetManifestPath()
