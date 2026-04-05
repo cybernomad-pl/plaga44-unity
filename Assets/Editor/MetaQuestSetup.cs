@@ -1,7 +1,19 @@
-#if UNITY_EDITOR
+// MetaQuestSetup.cs -- CYBERNOMAD Editor Tool
+//
+// Auto-detects missing Meta XR SDK on editor open and offers to install it.
+// Manual triggers: CYBERNOMAD > Meta SDK Setup > 1. Setup Meta SDK / 2. Switch to Android
+//
+// What it does:
+//   1. Adds Meta XR scoped registry to manifest.json
+//   2. Adds required packages (OpenXR, Meta XR Core, Interaction, Audio)
+//   3. Configures Player Settings for Quest (Vulkan, IL2CPP, ARM64)
+//   4. Enables OpenXR Loader in XR Plugin Management
+//   5. Switches build target to Android
+//
+// Version: META_SDK_VERSION constant below. Change it to upgrade all packages at once.
+
 using System.IO;
 using UnityEditor;
-using UnityEditor.Build;
 using UnityEditor.XR.Management;
 using UnityEditor.XR.Management.Metadata;
 using UnityEngine;
@@ -10,7 +22,6 @@ using UnityEngine.XR.Management;
 
 namespace Plaga44.Editor
 {
-    // Auto-runs on editor load -- if Meta XR SDK missing, offers to install it.
     [InitializeOnLoad]
     public static class MetaQuestSetup
     {
@@ -28,14 +39,14 @@ namespace Plaga44.Editor
             new[] { "com.meta.xr.sdk.audio",               META_SDK_VERSION },
         };
 
-        // Static constructor -- runs on editor load / domain reload
+        // =====================================================================
+        // Auto-check on editor load
+        // =====================================================================
+
         static MetaQuestSetup()
         {
-            // Run once per editor session, not on every domain reload
             if (SessionState.GetBool(SESSION_KEY, false)) return;
             SessionState.SetBool(SESSION_KEY, true);
-
-            // Delay to let editor finish loading
             EditorApplication.delayCall += AutoCheck;
         }
 
@@ -45,7 +56,6 @@ namespace Plaga44.Editor
             {
                 Debug.Log($"{LOG} Meta XR SDK detected -- OK.");
 
-                // Auto switch to Android if not already
                 if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
                 {
                     bool doSwitch = EditorUtility.DisplayDialog(
@@ -76,20 +86,18 @@ namespace Plaga44.Editor
             return manifest != null && manifest.Contains("com.meta.xr.sdk.core");
         }
 
-        // =================================================================
-        // MENU: Manual triggers (still available)
-        // =================================================================
+        // =====================================================================
+        // Menu items
+        // =====================================================================
 
         [MenuItem("CYBERNOMAD/Meta SDK Setup/1. Setup Meta SDK", false, 1)]
         public static void SetupMetaSDK()
         {
             Debug.Log($"{LOG} === Setup Meta SDK ===");
-
             AddScopedRegistry();
             AddPackagesToManifest();
             SetPlayerSettings();
             EnableOpenXRLoader();
-
             Debug.Log($"{LOG} === DONE -- Unity will now resolve packages ===");
         }
 
@@ -101,15 +109,14 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} Already on Android.");
                 return;
             }
-
             Debug.Log($"{LOG} Switching to Android...");
             EditorUserBuildSettings.SwitchActiveBuildTarget(
                 BuildTargetGroup.Android, BuildTarget.Android);
         }
 
-        // =================================================================
-        // SDK Installation
-        // =================================================================
+        // =====================================================================
+        // 1. Scoped Registry (npm.developer.oculus.com)
+        // =====================================================================
 
         static void AddScopedRegistry()
         {
@@ -117,7 +124,6 @@ namespace Plaga44.Editor
             if (path == null) return;
 
             string manifest = File.ReadAllText(path);
-
             if (manifest.Contains("npm.developer.oculus.com"))
             {
                 Debug.Log($"{LOG} Registry already present.");
@@ -145,13 +151,14 @@ namespace Plaga44.Editor
     }
   ],
 ";
-            manifest = manifest.Substring(0, lineStart)
-                     + registry
-                     + manifest.Substring(lineStart);
-
+            manifest = manifest.Substring(0, lineStart) + registry + manifest.Substring(lineStart);
             File.WriteAllText(path, manifest);
             Debug.Log($"{LOG} Added Meta XR scoped registry.");
         }
+
+        // =====================================================================
+        // 2. Packages (manifest.json)
+        // =====================================================================
 
         static void AddPackagesToManifest()
         {
@@ -174,9 +181,7 @@ namespace Plaga44.Editor
                 if (braceIdx < 0) continue;
 
                 string entry = $"\n    \"{pkg[0]}\": \"{pkg[1]}\",";
-                manifest = manifest.Substring(0, braceIdx + 1)
-                         + entry
-                         + manifest.Substring(braceIdx + 1);
+                manifest = manifest.Substring(0, braceIdx + 1) + entry + manifest.Substring(braceIdx + 1);
                 changed = true;
                 Debug.Log($"{LOG} Added {pkg[0]}@{pkg[1]}");
             }
@@ -193,34 +198,40 @@ namespace Plaga44.Editor
             }
         }
 
+        // =====================================================================
+        // 3. Player Settings (Quest-ready)
+        // =====================================================================
+
         static void SetPlayerSettings()
         {
+            // Identity
             PlayerSettings.companyName = "Cybernomad";
             PlayerSettings.productName = "PLAGA 44";
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "games.cybernomad.plaga44");
+
+            // Rendering
             PlayerSettings.colorSpace = ColorSpace.Linear;
-
-            PlayerSettings.SetApplicationIdentifier(
-                NamedBuildTarget.Android, "games.cybernomad.plaga44");
-
-            PlayerSettings.SetGraphicsAPIs(
-                BuildTarget.Android, new[] { GraphicsDeviceType.Vulkan });
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.Vulkan });
             PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
 
-            PlayerSettings.SetScriptingBackend(
-                NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
+            // Scripting
+            PlayerSettings.SetScriptingBackend(NamedBuildTarget.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
 
+            // Android SDK
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel29;
             PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)32;
 
+            // Orientation (VR = landscape locked)
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
             PlayerSettings.allowedAutorotateToPortrait = false;
             PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
             PlayerSettings.allowedAutorotateToLandscapeLeft = true;
             PlayerSettings.allowedAutorotateToLandscapeRight = false;
 
-            QualitySettings.antiAliasing = 4;
-            QualitySettings.vSyncCount = 0;
+            // Quality
+            QualitySettings.antiAliasing = 4;       // MSAA x4
+            QualitySettings.vSyncCount = 0;          // VR handles vsync
             QualitySettings.shadowDistance = 20f;
             QualitySettings.lodBias = 1.0f;
             QualitySettings.pixelLightCount = 2;
@@ -228,326 +239,62 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} Player/Quality settings configured.");
         }
 
-        // =================================================================
-        // XR Loader
-        // =================================================================
+        // =====================================================================
+        // 4. OpenXR Loader (XR Plugin Management)
+        // =====================================================================
 
         static void EnableOpenXRLoader()
         {
-            // Find or create the per-build-target settings asset
+            // Find existing settings asset or create one
             string[] guids = AssetDatabase.FindAssets("t:XRGeneralSettingsPerBuildTarget");
             XRGeneralSettingsPerBuildTarget perBuildTarget = null;
 
             if (guids.Length > 0)
             {
-                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
-                perBuildTarget = AssetDatabase.LoadAssetAtPath<XRGeneralSettingsPerBuildTarget>(path);
+                string assetPath = AssetDatabase.GUIDToAssetPath(guids[0]);
+                perBuildTarget = AssetDatabase.LoadAssetAtPath<XRGeneralSettingsPerBuildTarget>(assetPath);
             }
 
             if (perBuildTarget == null)
             {
-                // Create from scratch
-                var settingsDir = "Assets/XR/Settings";
-                if (!Directory.Exists(Path.Combine(Application.dataPath, "XR", "Settings")))
-                    Directory.CreateDirectory(Path.Combine(Application.dataPath, "XR", "Settings"));
-
+                EnsureDirectory("Assets/XR/Settings");
                 perBuildTarget = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
-                AssetDatabase.CreateAsset(perBuildTarget, $"{settingsDir}/XRGeneralSettingsPerBuildTarget.asset");
+                AssetDatabase.CreateAsset(perBuildTarget, "Assets/XR/Settings/XRGeneralSettingsPerBuildTarget.asset");
             }
 
+            // Ensure Android general settings exist
             var generalSettings = perBuildTarget.SettingsForBuildTarget(BuildTargetGroup.Android);
             if (generalSettings == null)
             {
+                EnsureDirectory("Assets/XR/Settings");
                 generalSettings = ScriptableObject.CreateInstance<XRGeneralSettings>();
                 var manager = ScriptableObject.CreateInstance<XRManagerSettings>();
                 generalSettings.Manager = manager;
 
-                var settingsDir = "Assets/XR/Settings";
-                AssetDatabase.CreateAsset(generalSettings, $"{settingsDir}/XRGeneralSettings_Android.asset");
-                AssetDatabase.CreateAsset(manager, $"{settingsDir}/XRManager_Android.asset");
+                AssetDatabase.CreateAsset(generalSettings, "Assets/XR/Settings/XRGeneralSettings_Android.asset");
+                AssetDatabase.CreateAsset(manager, "Assets/XR/Settings/XRManager_Android.asset");
 
                 perBuildTarget.SetSettingsForBuildTarget(BuildTargetGroup.Android, generalSettings);
                 EditorUtility.SetDirty(perBuildTarget);
                 Debug.Log($"{LOG} Created XR General Settings for Android.");
             }
 
-            // Assign OpenXR loader
-            var loaderName = "Unity.XR.OpenXR.OpenXRLoader";
+            // Assign the loader
             bool assigned = XRPackageMetadataStore.AssignLoader(
-                generalSettings.Manager, loaderName, BuildTargetGroup.Android);
+                generalSettings.Manager, "Unity.XR.OpenXR.OpenXRLoader", BuildTargetGroup.Android);
 
             if (assigned)
-                Debug.Log($"{LOG} OpenXR Loader added to Android XR settings.");
+                Debug.Log($"{LOG} OpenXR Loader enabled for Android.");
             else
-                Debug.LogWarning($"{LOG} Could not add OpenXR Loader automatically. " +
-                    "Go to Project Settings > XR Plug-in Management > Android tab > enable OpenXR.");
+                Debug.LogWarning($"{LOG} Could not enable OpenXR Loader automatically. " +
+                    "Do it manually: Project Settings > XR Plug-in Management > Android > OpenXR.");
 
             AssetDatabase.SaveAssets();
         }
 
-        // =================================================================
-        // VR Scene Setup (requires Meta XR SDK installed)
-        // =================================================================
-
-#if HAS_META_XR
-        public static void SetupVRSceneControllers()
-        {
-            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
-            {
-                Debug.LogError($"{LOG} Build target is not Android. Run Step 2 first.");
-                return;
-            }
-
-            string[] guids = AssetDatabase.FindAssets("OVRCameraRig t:prefab");
-            if (guids.Length == 0)
-            {
-                Debug.LogError($"{LOG} OVRCameraRig prefab not found. Run Step 1 first.");
-                return;
-            }
-
-            string prefabPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            if (prefab == null)
-            {
-                Debug.LogError($"{LOG} Could not load OVRCameraRig at: {prefabPath}");
-                return;
-            }
-
-            var existing = GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None);
-            foreach (var t in existing)
-            {
-                if (t.name == "OVRCameraRig" || t.name == "XROrigin")
-                {
-                    Debug.LogWarning($"{LOG} {t.name} already in scene. Skipping.");
-                    return;
-                }
-            }
-
-            var cameras = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None);
-            foreach (var cam in cameras)
-            {
-                if (cam.gameObject.name == "Main Camera")
-                {
-                    Undo.DestroyObjectImmediate(cam.gameObject);
-                    Debug.Log($"{LOG} Deleted Main Camera.");
-                    break;
-                }
-            }
-
-            var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            rig.transform.position = Vector3.zero;
-            rig.transform.rotation = Quaternion.identity;
-            Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
-
-            var mgr = rig.GetComponent<OVRManager>();
-            if (mgr != null)
-            {
-                var so = new SerializedObject(mgr);
-                var pTrackingOrigin = so.FindProperty("_trackingOriginType");
-                if (pTrackingOrigin != null) pTrackingOrigin.intValue = 1; // FloorLevel
-                so.ApplyModifiedProperties();
-                Debug.Log($"{LOG} OVRManager configured (FloorLevel, controllers only).");
-            }
-
-            Selection.activeGameObject = rig;
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
-                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
-
-            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig (controllers).");
-        }
-
-        public static void SetupVRSceneHands()
-        {
-            if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
-            {
-                Debug.LogError($"{LOG} Build target is not Android. Run Step 2 first.");
-                return;
-            }
-
-            string[] guids = AssetDatabase.FindAssets("OVRCameraRig t:prefab");
-            if (guids.Length == 0)
-            {
-                Debug.LogError($"{LOG} OVRCameraRig prefab not found. Run Step 1 first.");
-                return;
-            }
-
-            string prefabPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            if (prefab == null)
-            {
-                Debug.LogError($"{LOG} Could not load OVRCameraRig at: {prefabPath}");
-                return;
-            }
-
-            var existing = GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None);
-            foreach (var t in existing)
-            {
-                if (t.name == "OVRCameraRig" || t.name == "XROrigin")
-                {
-                    Debug.LogWarning($"{LOG} {t.name} already in scene. Skipping.");
-                    return;
-                }
-            }
-
-            var cameras = GameObject.FindObjectsByType<Camera>(FindObjectsSortMode.None);
-            foreach (var cam in cameras)
-            {
-                if (cam.gameObject.name == "Main Camera")
-                {
-                    Undo.DestroyObjectImmediate(cam.gameObject);
-                    Debug.Log($"{LOG} Deleted Main Camera.");
-                    break;
-                }
-            }
-
-            var rig = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            rig.transform.position = Vector3.zero;
-            rig.transform.rotation = Quaternion.identity;
-            Undo.RegisterCreatedObjectUndo(rig, "Add OVRCameraRig");
-
-            var mgr = rig.GetComponent<OVRManager>();
-            if (mgr != null)
-            {
-                var so = new SerializedObject(mgr);
-                SetProperty(so, "_trackingOriginType", 1, "FloorLevel");
-                SetProperty(so, "controllerDrivenHandPosesType", 1, "ConformingToController");
-                SetProperty(so, "launchSimultaneousHandsControllersOnStartup", true, "SimultaneousHandsControllers");
-                SetProperty(so, "SimultaneousHandsAndControllersEnabled", true, "SimultaneousEnabled");
-                so.ApplyModifiedProperties();
-                Debug.Log($"{LOG} OVRManager configured (FloorLevel + controller-driven hand poses + simultaneous hands&controllers).");
-            }
-
-            AddOVRHandPrefabs(rig);
-
-            Selection.activeGameObject = rig;
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
-                UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
-
-            Debug.Log($"{LOG} VR Scene ready: OVRCameraRig + OVRHandPrefab (controller-driven hands).");
-        }
-
-        public static void AddOVRHandPrefabs(GameObject rig)
-        {
-            string[] guids = AssetDatabase.FindAssets("OVRHandPrefab t:prefab");
-            GameObject handPrefab = null;
-            foreach (var guid in guids)
-            {
-                string p = AssetDatabase.GUIDToAssetPath(guid);
-                if (p.Contains("Prefabs/OVRHandPrefab.prefab"))
-                {
-                    handPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(p);
-                    if (handPrefab != null)
-                    {
-                        Debug.Log($"{LOG} Found OVRHandPrefab: {p}");
-                        break;
-                    }
-                }
-            }
-
-            if (handPrefab == null)
-            {
-                Debug.LogError($"{LOG} OVRHandPrefab.prefab not found. Is com.meta.xr.sdk.core installed?");
-                return;
-            }
-
-            Transform leftAnchor = FindChildRecursive(rig.transform, "LeftHandAnchor");
-            Transform rightAnchor = FindChildRecursive(rig.transform, "RightHandAnchor");
-
-            if (leftAnchor == null || rightAnchor == null)
-            {
-                Debug.LogError($"{LOG} LeftHandAnchor or RightHandAnchor not found in OVRCameraRig!");
-                return;
-            }
-
-            var leftHand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, leftAnchor);
-            leftHand.name = "OVRHandPrefab";
-            leftHand.transform.localPosition = Vector3.zero;
-            leftHand.transform.localRotation = Quaternion.Euler(0f, 0f, 60f);
-            ConfigureOVRHand(leftHand, 0);
-            Undo.RegisterCreatedObjectUndo(leftHand, "Add Left OVRHandPrefab");
-
-            var rightHand = (GameObject)PrefabUtility.InstantiatePrefab(handPrefab, rightAnchor);
-            rightHand.name = "OVRHandPrefab";
-            rightHand.transform.localPosition = Vector3.zero;
-            rightHand.transform.localRotation = Quaternion.Euler(0f, 0f, -60f);
-            ConfigureOVRHand(rightHand, 1);
-            Undo.RegisterCreatedObjectUndo(rightHand, "Add Right OVRHandPrefab");
-
-            Debug.Log($"{LOG} OVRHandPrefab added under LeftHandAnchor + RightHandAnchor.");
-        }
-
-        public static void ConfigureOVRHand(GameObject handGO, int handIndex)
-        {
-            var hand = handGO.GetComponent<OVRHand>();
-            if (hand != null)
-            {
-                var so = new SerializedObject(hand);
-                SetProperty(so, "HandType", handIndex, $"OVRHand.HandType ({handGO.name})");
-                SetProperty(so, "m_showState", 0, $"OVRHand.m_showState=Always ({handGO.name})");
-                so.ApplyModifiedProperties();
-            }
-            else Debug.LogError($"{LOG} OVRHand component NOT FOUND on {handGO.name}!");
-
-            var skeleton = handGO.GetComponent<OVRSkeleton>();
-            if (skeleton != null)
-            {
-                var so = new SerializedObject(skeleton);
-                var prop = so.FindProperty("_skeletonType");
-                if (prop != null) { prop.intValue = handIndex; so.ApplyModifiedProperties(); }
-                else Debug.LogError($"{LOG} OVRSkeleton._skeletonType property NOT FOUND!");
-            }
-            else Debug.LogError($"{LOG} OVRSkeleton NOT FOUND on {handGO.name}!");
-
-            var mesh = handGO.GetComponent<OVRMesh>();
-            if (mesh != null)
-            {
-                var so = new SerializedObject(mesh);
-                var prop = so.FindProperty("_meshType");
-                if (prop != null) { prop.intValue = handIndex; so.ApplyModifiedProperties(); }
-                else Debug.LogError($"{LOG} OVRMesh._meshType property NOT FOUND!");
-            }
-            else Debug.LogError($"{LOG} OVRMesh NOT FOUND on {handGO.name}!");
-        }
-#endif
-
-        // =================================================================
-        // Helpers
-        // =================================================================
-
-        public static Transform FindChildRecursive(Transform parent, string name)
-        {
-            foreach (Transform child in parent)
-            {
-                if (child.name == name) return child;
-                var found = FindChildRecursive(child, name);
-                if (found != null) return found;
-            }
-            return null;
-        }
-
-        static void SetProperty(SerializedObject so, string name, int value, string label)
-        {
-            var prop = so.FindProperty(name);
-            if (prop != null)
-            {
-                prop.intValue = value;
-                Debug.Log($"{LOG} {label}: {name} = {value}");
-            }
-            else
-                Debug.LogError($"{LOG} Property NOT FOUND: {name} -- SDK field name may have changed!");
-        }
-
-        static void SetProperty(SerializedObject so, string name, bool value, string label)
-        {
-            var prop = so.FindProperty(name);
-            if (prop != null)
-            {
-                prop.boolValue = value;
-                Debug.Log($"{LOG} {label}: {name} = {value}");
-            }
-            else
-                Debug.LogError($"{LOG} Property NOT FOUND: {name} -- SDK field name may have changed!");
-        }
+        // =====================================================================
+        // Utilities
+        // =====================================================================
 
         static string ReadManifest()
         {
@@ -565,6 +312,12 @@ namespace Plaga44.Editor
             }
             return p;
         }
+
+        static void EnsureDirectory(string assetPath)
+        {
+            string fullPath = Path.Combine(Application.dataPath, "..", assetPath);
+            if (!Directory.Exists(fullPath))
+                Directory.CreateDirectory(fullPath);
+        }
     }
 }
-#endif
