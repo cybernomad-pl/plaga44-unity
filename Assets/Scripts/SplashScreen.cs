@@ -268,7 +268,9 @@ namespace Plaga44.UI
 
             if (BothTriggersPressed())
             {
-                EnterState(State.MainMenu);
+                // PREALPHA: skip main menu, go straight to game
+                _loadSceneOnFadeComplete = true;
+                EnterState(State.FadingOut);
             }
         }
 

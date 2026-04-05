@@ -19,7 +19,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
-  m_LockedProperties:
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -38,14 +38,14 @@ Material:
     m_Ints: []
     m_Floats:
     - _BumpLerp: 0.5
-    - _BumpScale: 1.0
-    - _Emis: 0.02
-    - _Metallic: 0.85
-    - _ScrollSpeed: 0.15
-    - _Smth: 0.95
-    - _WaveFreq: 20
-    - _WaveHeight: 0.15
+    - _BumpScale: 3
+    - _Emis: 0.312
+    - _Metallic: 0.21
+    - _ScrollSpeed: 0.007
+    - _Smth: 0.423
+    - _WaveFreq: 0.8
+    - _WaveHeight: 0.05
     m_Colors:
-    - _Color: {r: 0.25, g: 0.35, b: 0.3, a: 1}
+    - _Color: {r: 0.318, g: 0.381, b: 0.404, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

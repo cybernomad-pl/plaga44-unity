@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-2274915263086423946
+--- !u!114 &-1870624905057233712
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,4 +41,4 @@ MonoBehaviour:
   m_Name: PLAGA44_PostProcess
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.VolumeProfile
   components:
-  - {fileID: -2274915263086423946}
+  - {fileID: -1870624905057233712}
