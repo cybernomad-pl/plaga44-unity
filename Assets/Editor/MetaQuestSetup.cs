@@ -14,6 +14,7 @@
 
 using System.IO;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.XR.Management;
 using UnityEditor.XR.Management.Metadata;
 using UnityEngine;
