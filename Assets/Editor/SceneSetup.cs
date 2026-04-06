@@ -175,12 +175,6 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} Dodano SprintModifier (sprint=3x, jump=5)");
             }
 
-            // ComfortVignette -- winieta komfortu
-            if (rig.GetComponent<Locomotion.ComfortVignette>() == null)
-            {
-                Undo.AddComponent<Locomotion.ComfortVignette>(rig);
-                Debug.Log($"{LOG} Dodano ComfortVignette");
-            }
 
             // LocomotionManager -- orkiestracja
             if (rig.GetComponent<Locomotion.LocomotionManager>() == null)
