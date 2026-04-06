@@ -1,140 +1,186 @@
 // PipelinePresets.cs -- CYBERNOMAD Editor Tool
 //
-// Public API: PipelinePresets.ApplyPreset("PIPELINE_INITIAL")
-// Menu: CYBERNOMAD > Pipeline Preset > Apply... (dialog)
+// Jeden pipeline asset (Mobile_RPAsset) -- zmienia mu wartosci on-the-fly.
+// Presety to zestawy ustawien w kodzie, nie osobne pliki.
 //
-// Switches the URP Render Pipeline Asset on the "Mobile" quality level.
-// Presets are .asset files in Assets/Settings/ (any UniversalRenderPipelineAsset).
+// Public API:
+//   PipelinePresets.Apply(PipelinePresets.INITIAL);
+//   PipelinePresets.Apply(new PipelineSettings { hdr = false, msaa = 4, ... });
+//   PipelinePresets.LogCurrent();
 //
-// To add a new preset: duplicate a pipeline asset, tweak in Inspector, done.
-// Call ApplyPreset("YourAssetName") from code or pick it from the menu dialog.
+// Menu: CYBERNOMAD > Pipeline > Apply INITIAL / Apply DEFAULT / Show Current
 
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 namespace Plaga44.Editor
 {
+    // =========================================================================
+    // Settings struct -- przekazujesz caly zestaw naraz
+    // =========================================================================
+
+    public struct PipelineSettings
+    {
+        public bool hdr;
+        public int msaa;                    // 1, 2, 4
+        public float renderScale;           // 0.5 - 1.5
+        public float shadowDistance;
+        public int mainShadowResolution;    // 256, 512, 1024, 2048, 4096
+        public int addShadowResolution;
+        public int addLightsPerObject;      // max additional lights per object
+        public bool reflectionProbeBlending;
+        public bool reflectionProbeBoxProjection;
+        public bool lightLayers;
+        public bool lensFlareData;
+        public bool lensFlareScreenSpace;
+        public int colorGradingLutSize;     // 16, 32
+        public bool softShadows;
+    }
+
+    // =========================================================================
+    // Presets + applicator
+    // =========================================================================
+
     public static class PipelinePresets
     {
         private const string LOG = "[PLAGA44]";
-        private const string SETTINGS_DIR = "Assets/Settings/";
+        private const string ASSET_PATH = "Assets/Settings/Mobile_RPAsset.asset";
 
-        // =====================================================================
-        // Public API -- call from anywhere
-        // =====================================================================
+        // ---------------------------------------------------------------------
+        // Predefiniowane zestawy -- dodawaj kolejne tutaj
+        // ---------------------------------------------------------------------
+
+        public static readonly PipelineSettings INITIAL = new PipelineSettings
+        {
+            hdr                         = false,
+            msaa                        = 4,
+            renderScale                 = 1.0f,
+            shadowDistance               = 20f,
+            mainShadowResolution        = 1024,
+            addShadowResolution         = 512,
+            addLightsPerObject          = 2,
+            reflectionProbeBlending     = false,
+            reflectionProbeBoxProjection = false,
+            lightLayers                 = false,
+            lensFlareData               = false,
+            lensFlareScreenSpace        = false,
+            colorGradingLutSize         = 16,
+            softShadows                 = false,
+        };
+
+        public static readonly PipelineSettings DEFAULT = new PipelineSettings
+        {
+            hdr                         = true,
+            msaa                        = 1,
+            renderScale                 = 0.8f,
+            shadowDistance               = 50f,
+            mainShadowResolution        = 1024,
+            addShadowResolution         = 2048,
+            addLightsPerObject          = 4,
+            reflectionProbeBlending     = true,
+            reflectionProbeBoxProjection = true,
+            lightLayers                 = true,
+            lensFlareData               = true,
+            lensFlareScreenSpace        = true,
+            colorGradingLutSize         = 32,
+            softShadows                 = false,
+        };
+
+        // ---------------------------------------------------------------------
+        // Public API
+        // ---------------------------------------------------------------------
 
         /// <summary>
-        /// Apply a URP pipeline preset by asset name (without .asset extension).
-        /// Asset must exist in Assets/Settings/.
-        /// Example: PipelinePresets.ApplyPreset("PIPELINE_INITIAL");
+        /// Aplikuje zestaw ustawien do Mobile_RPAsset. Przekazujesz gotowy struct.
+        /// Przyklad: PipelinePresets.Apply(PipelinePresets.INITIAL);
+        /// Przyklad: PipelinePresets.Apply(new PipelineSettings { hdr = false, msaa = 8 });
         /// </summary>
-        public static bool ApplyPreset(string assetName)
+        public static bool Apply(PipelineSettings s)
         {
-            string path = SETTINGS_DIR + assetName + ".asset";
-            var asset = AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(path);
-
+            var asset = AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(ASSET_PATH);
             if (asset == null)
             {
-                Debug.LogError($"{LOG} Pipeline asset not found: {path}");
+                Debug.LogError($"{LOG} Pipeline asset not found: {ASSET_PATH}");
                 return false;
             }
 
-            int mobileIndex = FindMobileQualityIndex();
-            if (mobileIndex < 0)
-            {
-                Debug.LogError($"{LOG} 'Mobile' quality level not found in QualitySettings.");
-                return false;
-            }
+            var so = new SerializedObject(asset);
 
-            QualitySettings.SetQualityLevel(mobileIndex, applyExpensiveChanges: true);
-            QualitySettings.renderPipeline = asset;
+            Set(so, "m_SupportsHDR",                      s.hdr);
+            Set(so, "m_MSAA",                              s.msaa);
+            Set(so, "m_RenderScale",                       s.renderScale);
+            Set(so, "m_ShadowDistance",                    s.shadowDistance);
+            Set(so, "m_MainLightShadowmapResolution",     s.mainShadowResolution);
+            Set(so, "m_AdditionalLightsShadowmapResolution", s.addShadowResolution);
+            Set(so, "m_AdditionalLightsPerObjectLimit",    s.addLightsPerObject);
+            Set(so, "m_ReflectionProbeBlending",           s.reflectionProbeBlending);
+            Set(so, "m_ReflectionProbeBoxProjection",      s.reflectionProbeBoxProjection);
+            Set(so, "m_SupportsLightLayers",               s.lightLayers);
+            Set(so, "m_SupportDataDrivenLensFlare",        s.lensFlareData);
+            Set(so, "m_SupportScreenSpaceLensFlare",       s.lensFlareScreenSpace);
+            Set(so, "m_ColorGradingLutSize",               s.colorGradingLutSize);
+            Set(so, "m_SoftShadowsSupported",              s.softShadows);
 
-            var urp = asset as UniversalRenderPipelineAsset;
-            Debug.Log($"{LOG} Pipeline preset applied: {assetName}");
-            if (urp != null)
-            {
-                Debug.Log($"{LOG}   HDR={urp.supportsHDR} MSAA={urp.msaaSampleCount}x " +
-                          $"RenderScale={urp.renderScale} ShadowDist={urp.shadowDistance}m");
-            }
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(asset);
+            AssetDatabase.SaveAssets();
+
+            Debug.Log($"{LOG} Pipeline settings applied to {asset.name}:");
+            Debug.Log($"{LOG}   HDR={s.hdr} MSAA={s.msaa}x Scale={s.renderScale} " +
+                      $"Shadow={s.shadowDistance}m MainShadRes={s.mainShadowResolution} " +
+                      $"AddShadRes={s.addShadowResolution} AddLights={s.addLightsPerObject}");
             return true;
         }
 
-        /// <summary>
-        /// Returns the name of the currently active pipeline asset on the Mobile quality level.
-        /// </summary>
-        public static string GetActivePresetName()
+        /// <summary>Loguje aktualne wartosci Mobile_RPAsset.</summary>
+        public static void LogCurrent()
         {
-            int mobileIndex = FindMobileQualityIndex();
-            if (mobileIndex < 0) return null;
-
-            var current = QualitySettings.GetRenderPipelineAssetAt(mobileIndex);
-            return current != null ? current.name : null;
-        }
-
-        /// <summary>
-        /// Returns all URP pipeline assets found in Assets/Settings/.
-        /// </summary>
-        public static List<string> ListAvailablePresets()
-        {
-            var result = new List<string>();
-            string[] guids = AssetDatabase.FindAssets("t:UniversalRenderPipelineAsset", new[] { "Assets/Settings" });
-            foreach (var guid in guids)
+            var asset = AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(ASSET_PATH);
+            if (asset == null)
             {
-                string path = AssetDatabase.GUIDToAssetPath(guid);
-                var asset = AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(path);
-                if (asset != null) result.Add(asset.name);
-            }
-            return result;
-        }
-
-        // =====================================================================
-        // Menu
-        // =====================================================================
-
-        [MenuItem("CYBERNOMAD/Pipeline Preset/Apply...", false, 1)]
-        static void MenuApply()
-        {
-            var presets = ListAvailablePresets();
-            if (presets.Count == 0)
-            {
-                Debug.LogError($"{LOG} No pipeline assets found in {SETTINGS_DIR}");
+                Debug.LogError($"{LOG} Pipeline asset not found: {ASSET_PATH}");
                 return;
             }
 
-            string active = GetActivePresetName() ?? "(none)";
-            var menu = new GenericMenu();
-            foreach (var name in presets)
-            {
-                bool isCurrent = (name == active);
-                menu.AddItem(new GUIContent(name + (isCurrent ? "  [active]" : "")),
-                    isCurrent, () => ApplyPreset(name));
-            }
-            menu.ShowAsContext();
+            Debug.Log($"{LOG} Current pipeline ({asset.name}):");
+            Debug.Log($"{LOG}   HDR={asset.supportsHDR} MSAA={asset.msaaSampleCount}x " +
+                      $"Scale={asset.renderScale} Shadow={asset.shadowDistance}m");
         }
 
-        [MenuItem("CYBERNOMAD/Pipeline Preset/Show Active", false, 2)]
-        static void MenuShowActive()
+        // ---------------------------------------------------------------------
+        // Menu
+        // ---------------------------------------------------------------------
+
+        [MenuItem("CYBERNOMAD/Pipeline/Apply INITIAL", false, 1)]
+        static void MenuInitial() => Apply(INITIAL);
+
+        [MenuItem("CYBERNOMAD/Pipeline/Apply DEFAULT", false, 2)]
+        static void MenuDefault() => Apply(DEFAULT);
+
+        [MenuItem("CYBERNOMAD/Pipeline/Show Current", false, 100)]
+        static void MenuShow() => LogCurrent();
+
+        // ---------------------------------------------------------------------
+        // SerializedObject helpers
+        // ---------------------------------------------------------------------
+
+        static void Set(SerializedObject so, string field, bool value)
         {
-            string name = GetActivePresetName();
-            if (name != null)
-                Debug.Log($"{LOG} Active pipeline preset: {name}");
-            else
-                Debug.LogWarning($"{LOG} No pipeline asset assigned to Mobile quality level.");
+            var p = so.FindProperty(field);
+            if (p != null) p.boolValue = value;
         }
 
-        // =====================================================================
-        // Internal
-        // =====================================================================
-
-        static int FindMobileQualityIndex()
+        static void Set(SerializedObject so, string field, int value)
         {
-            string[] names = QualitySettings.names;
-            for (int i = 0; i < names.Length; i++)
-                if (names[i] == "Mobile") return i;
-            return -1;
+            var p = so.FindProperty(field);
+            if (p != null) p.intValue = value;
+        }
+
+        static void Set(SerializedObject so, string field, float value)
+        {
+            var p = so.FindProperty(field);
+            if (p != null) p.floatValue = value;
         }
     }
 }
