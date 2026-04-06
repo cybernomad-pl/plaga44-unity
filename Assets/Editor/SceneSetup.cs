@@ -1,20 +1,21 @@
 // SceneSetup.cs -- CYBERNOMAD Editor Tool
 //
-// Jednym klikiem stawia testowa scene VR z lokomocja.
-// Menu: CYBERNOMAD > Scene Setup > Locomotion Testbed
+// Otwiera TESTBED_V2 scene i stawia na niej wszystko co trzeba do testowania.
+// Menu: CYBERNOMAD > Scene Setup > Load Testbed
 //
 // Co robi:
-//   1. Usuwa Main Camera (jesli jest)
-//   2. Wstawia OVRCameraRig z prefaba Meta SDK (lub fallback Camera)
-//   3. Dodaje CharacterController na rig root
-//   4. Dodaje LocomotionController + SprintModifier + ComfortVignette
+//   1. Otwiera TESTBED_V2.unity
+//   2. Usuwa Main Camera (jesli jest)
+//   3. Wstawia OVRCameraRig z prefaba Meta SDK (lub fallback Camera)
+//   4. Dodaje CharacterController na rig root
+//   5. Dodaje LocomotionController + SprintModifier + ComfortVignette
 //   5. Dodaje LocomotionManager
 //   6. Tworzy podloge (Plane 50x50m) z szachownica
 //   7. Dodaje swiatlo kierunkowe
 //   8. Ustawia GameState na Playing
 //
 // Public API:
-//   SceneSetup.BuildLocomotionTestbed();
+//   SceneSetup.LoadTestbed();
 
 using UnityEditor;
 using UnityEngine;
@@ -30,7 +31,7 @@ namespace Plaga44.Editor
         // =====================================================================
 
         [MenuItem("CYBERNOMAD/Scene Setup/Load Testbed", false, 10)]
-        public static void BuildLocomotionTestbed()
+        public static void LoadTestbed()
         {
             Debug.Log($"{LOG} === Loading Testbed ===");
 
