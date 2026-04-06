@@ -38,9 +38,11 @@ namespace Plaga44.Editor
             UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/TESTBED_V2.unity");
 
             CleanCamera();
+            CleanTestObjects();
             var rig = PlaceVRRig();
             AddLocomotion(rig);
             LoadDemoLevelTerrain();
+            SpawnPlayerAboveTerrain(rig);
             EnsureLight();
             AddAutoPlay();
 
@@ -66,6 +68,47 @@ namespace Plaga44.Editor
             {
                 Undo.DestroyObjectImmediate(mainCam);
                 Debug.Log($"{LOG} Usunieto Main Camera.");
+            }
+        }
+
+        /// <summary>Usuwa smieci z poprzednich setupow (TestFloor, TestWall, FallbackFloor).</summary>
+        static void CleanTestObjects()
+        {
+            string[] trash = { "TestFloor", "TestWall_N", "TestWall_E", "FallbackFloor" };
+            foreach (var name in trash)
+            {
+                var obj = GameObject.Find(name);
+                if (obj != null)
+                {
+                    Undo.DestroyObjectImmediate(obj);
+                    Debug.Log($"{LOG} Usunieto {name}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Umieszcza gracza wysoko nad srodkiem terenu -- spadnie na teren.
+        /// Jesli brak terenu, stawia na y=50.
+        /// </summary>
+        static void SpawnPlayerAboveTerrain(GameObject rig)
+        {
+            var terrain = Object.FindFirstObjectByType<Terrain>();
+            if (terrain != null)
+            {
+                var data = terrain.terrainData;
+                var terrainPos = terrain.transform.position;
+                // Srodek terenu
+                float cx = terrainPos.x + data.size.x * 0.5f;
+                float cz = terrainPos.z + data.size.z * 0.5f;
+                // Najwyzszy punkt terenu + 50m
+                float maxHeight = terrainPos.y + data.size.y + 50f;
+                rig.transform.position = new Vector3(cx, maxHeight, cz);
+                Debug.Log($"{LOG} Gracz nad terenem: ({cx:F0}, {maxHeight:F0}, {cz:F0})");
+            }
+            else
+            {
+                rig.transform.position = new Vector3(0f, 50f, 0f);
+                Debug.Log($"{LOG} Gracz na y=50 (brak terenu)");
             }
         }
 
