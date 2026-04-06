@@ -29,7 +29,7 @@ namespace Plaga44.Editor
         // Menu
         // =====================================================================
 
-        [MenuItem("CYBERNOMAD/Scene Setup/Locomotion Testbed", false, 10)]
+        [MenuItem("CYBERNOMAD/Scene Setup/Load Testbed", false, 10)]
         public static void BuildLocomotionTestbed()
         {
             Debug.Log($"{LOG} === Building Locomotion Testbed ===");

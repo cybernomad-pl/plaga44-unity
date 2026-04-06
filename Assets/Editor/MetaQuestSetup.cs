@@ -51,6 +51,9 @@ namespace Plaga44.Editor
 
         static void AutoCheck()
         {
+            // Otwórz TESTBED_V2 jesli edytor otworzyl pusta scene
+            OpenTestbedIfNeeded();
+
             if (IsMetaXRInstalled())
             {
                 Debug.Log($"{LOG} Meta XR SDK detected -- OK.");
@@ -76,6 +79,21 @@ namespace Plaga44.Editor
             {
                 SetupMetaSDK();
                 SwitchToAndroid();
+            }
+        }
+
+        static void OpenTestbedIfNeeded()
+        {
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
+            if (string.IsNullOrEmpty(scene.path) || scene.path.Contains("Untitled"))
+            {
+                string testbed = "Assets/TESTBED_V2.unity";
+                if (System.IO.File.Exists(
+                    System.IO.Path.Combine(Application.dataPath, "..", testbed)))
+                {
+                    UnityEditor.SceneManagement.EditorSceneManager.OpenScene(testbed);
+                    Debug.Log($"{LOG} Auto-opened {testbed}");
+                }
             }
         }
 
