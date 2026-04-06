@@ -96,9 +96,9 @@ namespace Plaga44.Editor
         public static void SetValue(string field, float v) => PipelineCore.Tweak(ASSET_PATH, field, v, LOG);
         public static void SetValue(string field, bool v) => PipelineCore.Tweak(ASSET_PATH, field, v, LOG);
 
-        [MenuItem("CYBERNOMAD/VR Pipeline/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Presets/Quest/VR Pipeline INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
-        [MenuItem("CYBERNOMAD/VR Pipeline/Apply DEFAULT", false, 2)]
+        [MenuItem("CYBERNOMAD/Presets/Quest/VR Pipeline DEFAULT", false, 2)]
         static void MenuDefault() => Apply(DEFAULT);
         [MenuItem("CYBERNOMAD/VR Pipeline/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
@@ -163,9 +163,9 @@ namespace Plaga44.Editor
         public static void SetValue(string field, float v) => PipelineCore.Tweak(ASSET_PATH, field, v, LOG);
         public static void SetValue(string field, bool v) => PipelineCore.Tweak(ASSET_PATH, field, v, LOG);
 
-        [MenuItem("CYBERNOMAD/PC Pipeline/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Presets/PC/Pipeline INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
-        [MenuItem("CYBERNOMAD/PC Pipeline/Apply DEFAULT", false, 2)]
+        [MenuItem("CYBERNOMAD/Presets/PC/Pipeline DEFAULT", false, 2)]
         static void MenuDefault() => Apply(DEFAULT);
         [MenuItem("CYBERNOMAD/PC Pipeline/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();

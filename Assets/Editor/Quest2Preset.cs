@@ -19,7 +19,7 @@ namespace Plaga44.Editor
     {
         private const string LOG = "[PLAGA44/QUEST2]";
 
-        [MenuItem("CYBERNOMAD/Presets/Apply QUEST 2", false, 0)]
+        [MenuItem("CYBERNOMAD/Presets/Quest/--- Apply All ---", false, 0)]
         public static void Apply()
         {
             Debug.Log($"{LOG} ========== APPLYING QUEST 2 PRESET ==========");
@@ -41,7 +41,7 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} ========== QUEST 2 PRESET COMPLETE ==========");
         }
 
-        [MenuItem("CYBERNOMAD/Presets/Log All Settings", false, 100)]
+        [MenuItem("CYBERNOMAD/Presets/Quest/--- Log All ---", false, 100)]
         public static void LogAll()
         {
             Debug.Log($"{LOG} ========== FULL PROJECT STATUS ==========");

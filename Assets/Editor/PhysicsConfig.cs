@@ -121,10 +121,10 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Physics/Apply INITIAL (72Hz)", false, 1)]
+        [MenuItem("CYBERNOMAD/Presets/Quest/Physics INITIAL (72Hz)", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/Physics/Apply QUEST3 (90Hz)", false, 2)]
+        [MenuItem("CYBERNOMAD/Presets/Quest/Physics QUEST3 (90Hz)", false, 2)]
         static void MenuQuest3() => Apply(QUEST3);
 
         [MenuItem("CYBERNOMAD/Physics/Show Current", false, 100)]

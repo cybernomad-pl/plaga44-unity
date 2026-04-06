@@ -111,10 +111,10 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Oculus/Apply INITIAL (controllers only)", false, 1)]
+        [MenuItem("CYBERNOMAD/Presets/Quest/Oculus INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/Oculus/Apply FULL (all tracking)", false, 2)]
+        [MenuItem("CYBERNOMAD/Presets/Quest/Oculus FULL", false, 2)]
         static void MenuFull() => Apply(FULL);
 
         [MenuItem("CYBERNOMAD/Oculus/Show Current", false, 100)]
