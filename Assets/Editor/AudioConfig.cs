@@ -96,7 +96,7 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Presets/Quest/Audio INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/Audio/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/Audio", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

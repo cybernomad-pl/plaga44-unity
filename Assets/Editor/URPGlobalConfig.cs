@@ -202,7 +202,7 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Presets/Quest/URP Global DEBUG", false, 2)]
         static void MenuDebug() => Apply(DEBUG);
 
-        [MenuItem("CYBERNOMAD/URP Global/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/URP Global", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

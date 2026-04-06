@@ -163,7 +163,7 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Presets/Quest/Quality INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/Quality/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/Quality", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

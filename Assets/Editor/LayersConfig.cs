@@ -155,7 +155,7 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Presets/Quest/Layers INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/Layers & Tags/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/Layers "CYBERNOMAD/Layers & Tags/Show Current" Tags", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

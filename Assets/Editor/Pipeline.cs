@@ -100,7 +100,7 @@ namespace Plaga44.Editor
         static void MenuInitial() => Apply(INITIAL);
         [MenuItem("CYBERNOMAD/Presets/Quest/VR Pipeline DEFAULT", false, 2)]
         static void MenuDefault() => Apply(DEFAULT);
-        [MenuItem("CYBERNOMAD/VR Pipeline/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/VR Pipeline", false, 100)]
         static void MenuShow() => LogCurrent();
     }
 
@@ -167,7 +167,7 @@ namespace Plaga44.Editor
         static void MenuInitial() => Apply(INITIAL);
         [MenuItem("CYBERNOMAD/Presets/PC/Pipeline DEFAULT", false, 2)]
         static void MenuDefault() => Apply(DEFAULT);
-        [MenuItem("CYBERNOMAD/PC Pipeline/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/PC Pipeline", false, 100)]
         static void MenuShow() => LogCurrent();
     }
 

@@ -220,7 +220,7 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Presets/Quest/Volume CINEMATIC", false, 2)]
         static void MenuCinematic() => Apply(CINEMATIC);
 
-        [MenuItem("CYBERNOMAD/Volume/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/Volume", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

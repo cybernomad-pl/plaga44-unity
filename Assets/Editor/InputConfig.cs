@@ -40,7 +40,7 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG}   Legacy axes count: {axes.arraySize}");
         }
 
-        [MenuItem("CYBERNOMAD/Input/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/Input", false, 100)]
         static void MenuShow() => LogCurrent();
 
         static SerializedObject LoadAsset()

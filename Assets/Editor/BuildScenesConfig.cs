@@ -101,7 +101,7 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Build Scenes/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/Build Scenes", false, 100)]
         static void MenuShow() => LogCurrent();
     }
 }
