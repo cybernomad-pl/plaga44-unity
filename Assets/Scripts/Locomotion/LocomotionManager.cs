@@ -83,10 +83,10 @@ namespace Plaga44.Locomotion
         [Tooltip("Predkosc chodzenia w metrach na sekunde (SmoothLocomotion).")]
         [SerializeField] public float moveSpeed = 2.5f;
 
-        [Tooltip("Kat snap turna lub predkosc smooth turna (stopnie/sek). Faza 2.")]
+        [Tooltip("NIEAKTYWNE W FAZIE 1. Kat snap turna lub predkosc smooth turna (stopnie/sek).")]
         [SerializeField] public float turnSpeed = 45f;
 
-        [Tooltip("Tryb obrotu (snap vs smooth). Faza 2.")]
+        [Tooltip("NIEAKTYWNE W FAZIE 1. Tryb obrotu (snap vs smooth).")]
         [SerializeField] public TurnMode turnMode = TurnMode.Snap;
 
         [Header("Winieta komfortu")]

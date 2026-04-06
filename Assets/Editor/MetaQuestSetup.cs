@@ -87,13 +87,8 @@ namespace Plaga44.Editor
             var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
             if (string.IsNullOrEmpty(scene.path) || scene.path.Contains("Untitled"))
             {
-                string testbed = "Assets/TESTBED_V2.unity";
-                if (System.IO.File.Exists(
-                    System.IO.Path.Combine(Application.dataPath, "..", testbed)))
-                {
-                    UnityEditor.SceneManagement.EditorSceneManager.OpenScene(testbed);
-                    Debug.Log($"{LOG} Auto-opened {testbed}");
-                }
+                UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/TESTBED_V2.unity");
+                Debug.Log($"{LOG} Auto-opened TESTBED_V2.unity");
             }
         }
 
