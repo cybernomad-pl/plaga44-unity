@@ -37,10 +37,13 @@ namespace Plaga44.Editor
 
             UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/TESTBED_V2.unity");
 
+            LinkFloodedGrounds();
+            AssetDatabase.Refresh();
+
             CleanCamera();
             var rig = PlaceVRRig();
             AddLocomotion(rig);
-            CreateFloor();
+            LoadFloodedGroundsTerrain();
             EnsureLight();
             AddAutoPlay();
 
@@ -186,65 +189,103 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 4. Podloga
+        // 4. FloodedGrounds -- link + teren
         // =====================================================================
 
-        static void CreateFloor()
+        // Sciezka do FloodedGrounds w starym testbedzie
+        private const string FG_SOURCE = "C:/Users/boris/NordLocker_8592730/PLAGA44/testbed/plaga44-unity/Assets/FloodedGrounds";
+        private const string FG_TARGET = "Assets/FloodedGrounds";
+
+        /// <summary>
+        /// Tworzy junction (symlink katalogu na Windows) z FloodedGrounds
+        /// w starym testbedzie do naszego projektu.
+        /// Dzieki temu assety nie sa duplikowane na dysku.
+        /// </summary>
+        static void LinkFloodedGrounds()
         {
-            // Sprawdz czy podloga juz jest
-            if (GameObject.Find("TestFloor") != null)
+            string targetFull = System.IO.Path.Combine(Application.dataPath, "..", FG_TARGET);
+
+            // Juz istnieje (junction lub katalog)
+            if (System.IO.Directory.Exists(targetFull))
             {
-                Debug.Log($"{LOG} TestFloor juz istnieje.");
+                Debug.Log($"{LOG} FloodedGrounds juz podlinkowane.");
                 return;
             }
 
-            // Plane 50x50m z szachownica
-            var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            floor.name = "TestFloor";
-            floor.transform.position = Vector3.zero;
-            floor.transform.localScale = new Vector3(5f, 1f, 5f); // Plane = 10m default, 5x = 50m
+            if (!System.IO.Directory.Exists(FG_SOURCE))
+            {
+                Debug.LogError($"{LOG} FloodedGrounds zrodlo nie znalezione: {FG_SOURCE}");
+                Debug.LogError($"{LOG} Fallback: tworzenie prostej podlogi.");
+                CreateFallbackFloor();
+                return;
+            }
 
-            // Proba nadania szachownicy (Built-in checkered shader)
+            // Tworzymy junction (Windows directory symlink)
+            // mklink /J nie wymaga uprawnien admina
+            var process = new System.Diagnostics.Process();
+            process.StartInfo.FileName = "cmd.exe";
+            process.StartInfo.Arguments = $"/C mklink /J \"{targetFull}\" \"{FG_SOURCE}\"";
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+            process.Start();
+            process.WaitForExit();
+
+            if (process.ExitCode == 0)
+                Debug.Log($"{LOG} FloodedGrounds podlinkowane: {FG_SOURCE} -> {FG_TARGET}");
+            else
+                Debug.LogError($"{LOG} Nie udalo sie stworzyc junction. Kod: {process.ExitCode}");
+        }
+
+        /// <summary>
+        /// Laduje teren FloodedGrounds Scene_A na aktywna scene.
+        /// Szuka prefabow terenu lub otwiera scene addytywnie.
+        /// </summary>
+        static void LoadFloodedGroundsTerrain()
+        {
+            // Sprawdz czy teren juz jest
+            var existingTerrain = Object.FindFirstObjectByType<Terrain>();
+            if (existingTerrain != null)
+            {
+                Debug.Log($"{LOG} Teren juz na scenie: {existingTerrain.name}");
+                return;
+            }
+
+            // Laduj Scene_A addytywnie -- zawiera teren, wode, drzewa, skybox
+            string scenePath = FG_TARGET + "/Scenes/Scene_A.unity";
+            if (!System.IO.File.Exists(
+                System.IO.Path.Combine(Application.dataPath, "..", scenePath)))
+            {
+                Debug.LogWarning($"{LOG} Scene_A nie znaleziona: {scenePath}. Tworzenie fallback podlogi.");
+                CreateFallbackFloor();
+                return;
+            }
+
+            UnityEditor.SceneManagement.EditorSceneManager.OpenScene(
+                scenePath, UnityEditor.SceneManagement.OpenSceneMode.Additive);
+
+            Debug.Log($"{LOG} Zaladowano FloodedGrounds Scene_A (teren + woda + drzewa)");
+        }
+
+        /// <summary>Prosta podloga fallback gdy FloodedGrounds niedostepne.</summary>
+        static void CreateFallbackFloor()
+        {
+            if (GameObject.Find("FallbackFloor") != null) return;
+
+            var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            floor.name = "FallbackFloor";
+            floor.transform.position = Vector3.zero;
+            floor.transform.localScale = new Vector3(5f, 1f, 5f);
+
             var renderer = floor.GetComponent<Renderer>();
             if (renderer != null)
             {
                 var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-                mat.name = "TestFloorMat";
                 mat.color = new Color(0.3f, 0.3f, 0.3f);
-
-                // Tiling daje efekt siatki -- latwiej zauwazyc ruch
-                mat.mainTextureScale = new Vector2(50f, 50f);
                 renderer.material = mat;
             }
 
-            Undo.RegisterCreatedObjectUndo(floor, "Create TestFloor");
-            Debug.Log($"{LOG} Stworzono TestFloor 50x50m");
-
-            // Dodaj kilka scian do testowania kolizji
-            CreateWall("TestWall_N", new Vector3(0f, 1.5f, 20f), new Vector3(10f, 3f, 0.3f));
-            CreateWall("TestWall_E", new Vector3(20f, 1.5f, 0f), new Vector3(0.3f, 3f, 10f));
-        }
-
-        static void CreateWall(string name, Vector3 position, Vector3 scale)
-        {
-            if (GameObject.Find(name) != null) return;
-
-            var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            wall.name = name;
-            wall.transform.position = position;
-            wall.transform.localScale = scale;
-
-            var renderer = wall.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-                mat.name = name + "Mat";
-                mat.color = new Color(0.6f, 0.2f, 0.2f);
-                renderer.material = mat;
-            }
-
-            Undo.RegisterCreatedObjectUndo(wall, $"Create {name}");
-            Debug.Log($"{LOG} Stworzono {name} do testow kolizji");
+            Undo.RegisterCreatedObjectUndo(floor, "Create FallbackFloor");
+            Debug.Log($"{LOG} Stworzono FallbackFloor (FloodedGrounds niedostepne)");
         }
 
         // =====================================================================
