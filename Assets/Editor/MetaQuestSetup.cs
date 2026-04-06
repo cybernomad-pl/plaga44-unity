@@ -84,12 +84,8 @@ namespace Plaga44.Editor
 
         static void OpenTestbedIfNeeded()
         {
-            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
-            if (string.IsNullOrEmpty(scene.path) || scene.path.Contains("Untitled"))
-            {
-                UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/TESTBED_V2.unity");
-                Debug.Log($"{LOG} Auto-opened TESTBED_V2.unity");
-            }
+            UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/TESTBED_V2.unity");
+            Debug.Log($"{LOG} Opened TESTBED_V2.unity");
         }
 
         static bool IsMetaXRInstalled()
