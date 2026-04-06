@@ -149,6 +149,36 @@ namespace Plaga44.Editor
         }
 
         // ---------------------------------------------------------------------
+        // Single value tweaks -- zmiana jednej wartosci on-demand
+        // ---------------------------------------------------------------------
+
+        /// <summary>Zmien dowolne pole pipeline. Nazwa pola jak w YAML (np. "m_MSAA").</summary>
+        public static void SetValue(string field, int value) => Tweak(field, so => Set(so, field, value));
+        public static void SetValue(string field, float value) => Tweak(field, so => Set(so, field, value));
+        public static void SetValue(string field, bool value) => Tweak(field, so => Set(so, field, value));
+
+        // Wygodne aliasy -- najczesciej uzywane
+        public static void SetMSAA(int value) => Tweak("MSAA", so => Set(so, "m_MSAA", value));
+        public static void SetHDR(bool value) => Tweak("HDR", so => Set(so, "m_SupportsHDR", value));
+        public static void SetRenderScale(float value) => Tweak("RenderScale", so => Set(so, "m_RenderScale", value));
+        public static void SetShadowDistance(float value) => Tweak("ShadowDistance", so => Set(so, "m_ShadowDistance", value));
+        public static void SetShadowResolution(int value) => Tweak("MainShadowRes", so => Set(so, "m_MainLightShadowmapResolution", value));
+        public static void SetSoftShadows(bool value) => Tweak("SoftShadows", so => Set(so, "m_SoftShadowsSupported", value));
+        public static void SetAdditionalLights(int value) => Tweak("AddLights", so => Set(so, "m_AdditionalLightsPerObjectLimit", value));
+
+        static void Tweak(string label, System.Action<SerializedObject> action)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>(ASSET_PATH);
+            if (asset == null) { Debug.LogError($"{LOG} Asset not found: {ASSET_PATH}"); return; }
+
+            var so = new SerializedObject(asset);
+            action(so);
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(asset);
+            Debug.Log($"{LOG} Pipeline tweak: {label}");
+        }
+
+        // ---------------------------------------------------------------------
         // Menu
         // ---------------------------------------------------------------------
 
