@@ -1,19 +1,15 @@
 // PipelinePresets.cs -- CYBERNOMAD Editor Tool
 //
-// Menu: CYBERNOMAD > Pipeline Preset > [preset name]
+// Public API: PipelinePresets.ApplyPreset("PIPELINE_INITIAL")
+// Menu: CYBERNOMAD > Pipeline Preset > Apply... (dialog)
 //
-// Switches the active URP Render Pipeline Asset on the "Mobile" quality level.
-// Each preset is a separate .asset file in Assets/Settings/.
+// Switches the URP Render Pipeline Asset on the "Mobile" quality level.
+// Presets are .asset files in Assets/Settings/ (any UniversalRenderPipelineAsset).
 //
-// To add a new preset:
-//   1. Duplicate an existing pipeline asset in Assets/Settings/
-//   2. Rename it (e.g. PIPELINE_HIEND.asset)
-//   3. Tweak values in Inspector
-//   4. Add a MenuItem below pointing to it
-//
-// Active preset applies to Android builds (Quest).
-// PC quality level keeps PC_RPAsset unchanged.
+// To add a new preset: duplicate a pipeline asset, tweak in Inspector, done.
+// Call ApplyPreset("YourAssetName") from code or pick it from the menu dialog.
 
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -27,59 +23,15 @@ namespace Plaga44.Editor
         private const string SETTINGS_DIR = "Assets/Settings/";
 
         // =====================================================================
-        // Presets
+        // Public API -- call from anywhere
         // =====================================================================
 
-        [MenuItem("CYBERNOMAD/Pipeline Preset/INITIAL (Quest optimized)", false, 1)]
-        public static void ApplyInitial()
-        {
-            ApplyPreset("PIPELINE_INITIAL");
-        }
-
-        [MenuItem("CYBERNOMAD/Pipeline Preset/DEFAULT (URP template)", false, 2)]
-        public static void ApplyDefault()
-        {
-            ApplyPreset("Mobile_RPAsset");
-        }
-
-        // Add more presets here:
-        // [MenuItem("CYBERNOMAD/Pipeline Preset/HIEND (max quality)", false, 3)]
-        // public static void ApplyHiEnd() => ApplyPreset("PIPELINE_HIEND");
-
-        // [MenuItem("CYBERNOMAD/Pipeline Preset/SAFE (min spec)", false, 4)]
-        // public static void ApplySafe() => ApplyPreset("PIPELINE_SAFE");
-
-        // =====================================================================
-        // Show current preset
-        // =====================================================================
-
-        [MenuItem("CYBERNOMAD/Pipeline Preset/-- Show Active --", false, 100)]
-        public static void ShowActive()
-        {
-            int mobileIndex = FindMobileQualityIndex();
-            if (mobileIndex < 0)
-            {
-                Debug.LogError($"{LOG} Mobile quality level not found.");
-                return;
-            }
-
-            var current = QualitySettings.GetRenderPipelineAssetAt(mobileIndex);
-            if (current != null)
-            {
-                string path = AssetDatabase.GetAssetPath(current);
-                Debug.Log($"{LOG} Active pipeline preset: {current.name} ({path})");
-            }
-            else
-            {
-                Debug.LogWarning($"{LOG} No pipeline asset assigned to Mobile quality level.");
-            }
-        }
-
-        // =====================================================================
-        // Core
-        // =====================================================================
-
-        static void ApplyPreset(string assetName)
+        /// <summary>
+        /// Apply a URP pipeline preset by asset name (without .asset extension).
+        /// Asset must exist in Assets/Settings/.
+        /// Example: PipelinePresets.ApplyPreset("PIPELINE_INITIAL");
+        /// </summary>
+        public static bool ApplyPreset(string assetName)
         {
             string path = SETTINGS_DIR + assetName + ".asset";
             var asset = AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(path);
@@ -87,33 +39,101 @@ namespace Plaga44.Editor
             if (asset == null)
             {
                 Debug.LogError($"{LOG} Pipeline asset not found: {path}");
-                return;
+                return false;
             }
 
             int mobileIndex = FindMobileQualityIndex();
             if (mobileIndex < 0)
             {
-                Debug.LogError($"{LOG} Mobile quality level not found in QualitySettings.");
-                return;
+                Debug.LogError($"{LOG} 'Mobile' quality level not found in QualitySettings.");
+                return false;
             }
 
             QualitySettings.SetQualityLevel(mobileIndex, applyExpensiveChanges: true);
             QualitySettings.renderPipeline = asset;
 
+            var urp = asset as UniversalRenderPipelineAsset;
             Debug.Log($"{LOG} Pipeline preset applied: {assetName}");
-            Debug.Log($"{LOG}   HDR: {(asset as UniversalRenderPipelineAsset)?.supportsHDR}");
-            Debug.Log($"{LOG}   MSAA: {(asset as UniversalRenderPipelineAsset)?.msaaSampleCount}x");
-            Debug.Log($"{LOG}   Render Scale: {(asset as UniversalRenderPipelineAsset)?.renderScale}");
-            Debug.Log($"{LOG}   Shadow Distance: {(asset as UniversalRenderPipelineAsset)?.shadowDistance}");
+            if (urp != null)
+            {
+                Debug.Log($"{LOG}   HDR={urp.supportsHDR} MSAA={urp.msaaSampleCount}x " +
+                          $"RenderScale={urp.renderScale} ShadowDist={urp.shadowDistance}m");
+            }
+            return true;
         }
+
+        /// <summary>
+        /// Returns the name of the currently active pipeline asset on the Mobile quality level.
+        /// </summary>
+        public static string GetActivePresetName()
+        {
+            int mobileIndex = FindMobileQualityIndex();
+            if (mobileIndex < 0) return null;
+
+            var current = QualitySettings.GetRenderPipelineAssetAt(mobileIndex);
+            return current != null ? current.name : null;
+        }
+
+        /// <summary>
+        /// Returns all URP pipeline assets found in Assets/Settings/.
+        /// </summary>
+        public static List<string> ListAvailablePresets()
+        {
+            var result = new List<string>();
+            string[] guids = AssetDatabase.FindAssets("t:UniversalRenderPipelineAsset", new[] { "Assets/Settings" });
+            foreach (var guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var asset = AssetDatabase.LoadAssetAtPath<RenderPipelineAsset>(path);
+                if (asset != null) result.Add(asset.name);
+            }
+            return result;
+        }
+
+        // =====================================================================
+        // Menu
+        // =====================================================================
+
+        [MenuItem("CYBERNOMAD/Pipeline Preset/Apply...", false, 1)]
+        static void MenuApply()
+        {
+            var presets = ListAvailablePresets();
+            if (presets.Count == 0)
+            {
+                Debug.LogError($"{LOG} No pipeline assets found in {SETTINGS_DIR}");
+                return;
+            }
+
+            string active = GetActivePresetName() ?? "(none)";
+            var menu = new GenericMenu();
+            foreach (var name in presets)
+            {
+                bool isCurrent = (name == active);
+                menu.AddItem(new GUIContent(name + (isCurrent ? "  [active]" : "")),
+                    isCurrent, () => ApplyPreset(name));
+            }
+            menu.ShowAsContext();
+        }
+
+        [MenuItem("CYBERNOMAD/Pipeline Preset/Show Active", false, 2)]
+        static void MenuShowActive()
+        {
+            string name = GetActivePresetName();
+            if (name != null)
+                Debug.Log($"{LOG} Active pipeline preset: {name}");
+            else
+                Debug.LogWarning($"{LOG} No pipeline asset assigned to Mobile quality level.");
+        }
+
+        // =====================================================================
+        // Internal
+        // =====================================================================
 
         static int FindMobileQualityIndex()
         {
             string[] names = QualitySettings.names;
             for (int i = 0; i < names.Length; i++)
-            {
                 if (names[i] == "Mobile") return i;
-            }
             return -1;
         }
     }
