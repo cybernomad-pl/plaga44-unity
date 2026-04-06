@@ -32,7 +32,19 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Scene Setup/Load Testbed", false, 10)]
         public static void BuildLocomotionTestbed()
         {
-            Debug.Log($"{LOG} === Building Locomotion Testbed ===");
+            Debug.Log($"{LOG} === Loading Testbed ===");
+
+            // Otwórz TESTBED_V2 jesli nie jest aktywna
+            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
+            if (scene.path != "Assets/TESTBED_V2.unity")
+            {
+                if (System.IO.File.Exists(
+                    System.IO.Path.Combine(Application.dataPath, "..", "Assets/TESTBED_V2.unity")))
+                {
+                    UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/TESTBED_V2.unity");
+                    Debug.Log($"{LOG} Otwarto TESTBED_V2.unity");
+                }
+            }
 
             CleanCamera();
             var rig = PlaceVRRig();
