@@ -37,13 +37,10 @@ namespace Plaga44.Editor
 
             UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/TESTBED_V2.unity");
 
-            LinkFloodedGrounds();
-            AssetDatabase.Refresh();
-
             CleanCamera();
             var rig = PlaceVRRig();
             AddLocomotion(rig);
-            LoadFloodedGroundsTerrain();
+            LoadDemoLevelTerrain();
             EnsureLight();
             AddAutoPlay();
 
@@ -189,58 +186,19 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 4. FloodedGrounds -- link + teren
+        // 4. DemoLevel -- teren + woda + skybox
         // =====================================================================
 
-        // Sciezka do FloodedGrounds w starym testbedzie
-        private const string FG_SOURCE = "C:/Users/boris/NordLocker_8592730/PLAGA44/testbed/plaga44-unity/Assets/FloodedGrounds";
-        private const string FG_TARGET = "Assets/FloodedGrounds";
+        private const string DEMO_LEVEL = "Assets/DemoLevel";
+        private const string TERRAIN_ASSET = "Assets/DemoLevel/Terrain/Scene_A_Terrain.asset";
+        private const string SKYBOX_MAT = "Assets/DemoLevel/Skybox/BGR_Sky1.mat";
+        private const string WATER_MESH = "Assets/DemoLevel/Water/WaterPlane.fbx";
 
         /// <summary>
-        /// Tworzy junction (symlink katalogu na Windows) z FloodedGrounds
-        /// w starym testbedzie do naszego projektu.
-        /// Dzieki temu assety nie sa duplikowane na dysku.
+        /// Stawia teren, wode i skybox z DemoLevel asset packa.
+        /// Teren z heightmap, woda jako mesh pod terenem, skybox z materialu.
         /// </summary>
-        static void LinkFloodedGrounds()
-        {
-            string targetFull = System.IO.Path.Combine(Application.dataPath, "..", FG_TARGET);
-
-            // Juz istnieje (junction lub katalog)
-            if (System.IO.Directory.Exists(targetFull))
-            {
-                Debug.Log($"{LOG} FloodedGrounds juz podlinkowane.");
-                return;
-            }
-
-            if (!System.IO.Directory.Exists(FG_SOURCE))
-            {
-                Debug.LogError($"{LOG} FloodedGrounds zrodlo nie znalezione: {FG_SOURCE}");
-                Debug.LogError($"{LOG} Fallback: tworzenie prostej podlogi.");
-                CreateFallbackFloor();
-                return;
-            }
-
-            // Tworzymy junction (Windows directory symlink)
-            // mklink /J nie wymaga uprawnien admina
-            var process = new System.Diagnostics.Process();
-            process.StartInfo.FileName = "cmd.exe";
-            process.StartInfo.Arguments = $"/C mklink /J \"{targetFull}\" \"{FG_SOURCE}\"";
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.CreateNoWindow = true;
-            process.Start();
-            process.WaitForExit();
-
-            if (process.ExitCode == 0)
-                Debug.Log($"{LOG} FloodedGrounds podlinkowane: {FG_SOURCE} -> {FG_TARGET}");
-            else
-                Debug.LogError($"{LOG} Nie udalo sie stworzyc junction. Kod: {process.ExitCode}");
-        }
-
-        /// <summary>
-        /// Laduje teren FloodedGrounds Scene_A na aktywna scene.
-        /// Szuka prefabow terenu lub otwiera scene addytywnie.
-        /// </summary>
-        static void LoadFloodedGroundsTerrain()
+        static void LoadDemoLevelTerrain()
         {
             // Sprawdz czy teren juz jest
             var existingTerrain = Object.FindFirstObjectByType<Terrain>();
@@ -250,23 +208,46 @@ namespace Plaga44.Editor
                 return;
             }
 
-            // Laduj Scene_A addytywnie -- zawiera teren, wode, drzewa, skybox
-            string scenePath = FG_TARGET + "/Scenes/Scene_A.unity";
-            if (!System.IO.File.Exists(
-                System.IO.Path.Combine(Application.dataPath, "..", scenePath)))
+            // --- TEREN ---
+            var terrainData = AssetDatabase.LoadAssetAtPath<TerrainData>(TERRAIN_ASSET);
+            if (terrainData != null)
             {
-                Debug.LogWarning($"{LOG} Scene_A nie znaleziona: {scenePath}. Tworzenie fallback podlogi.");
+                var terrainGO = Terrain.CreateTerrainGameObject(terrainData);
+                terrainGO.name = "DemoTerrain";
+                // Pozycja terenu -- centrujemy (terrain size / 2)
+                var size = terrainData.size;
+                terrainGO.transform.position = new Vector3(-size.x * 0.5f, 0f, -size.z * 0.5f);
+                Undo.RegisterCreatedObjectUndo(terrainGO, "Create DemoTerrain");
+                Debug.Log($"{LOG} Teren zaladowany: {size.x}x{size.z}m");
+            }
+            else
+            {
+                Debug.LogWarning($"{LOG} Terrain asset nie znaleziony: {TERRAIN_ASSET}. Tworzenie fallback.");
                 CreateFallbackFloor();
-                return;
             }
 
-            UnityEditor.SceneManagement.EditorSceneManager.OpenScene(
-                scenePath, UnityEditor.SceneManagement.OpenSceneMode.Additive);
+            // --- WODA ---
+            var waterMesh = AssetDatabase.LoadAssetAtPath<GameObject>(WATER_MESH);
+            if (waterMesh != null)
+            {
+                var water = (GameObject)PrefabUtility.InstantiatePrefab(waterMesh);
+                water.name = "DemoWater";
+                water.transform.position = new Vector3(0f, 0.5f, 0f); // lekko nad poziomem 0
+                water.transform.localScale = new Vector3(100f, 1f, 100f);
+                Undo.RegisterCreatedObjectUndo(water, "Create DemoWater");
+                Debug.Log($"{LOG} Woda zaladowana");
+            }
 
-            Debug.Log($"{LOG} Zaladowano FloodedGrounds Scene_A (teren + woda + drzewa)");
+            // --- SKYBOX ---
+            var skyboxMat = AssetDatabase.LoadAssetAtPath<Material>(SKYBOX_MAT);
+            if (skyboxMat != null)
+            {
+                RenderSettings.skybox = skyboxMat;
+                Debug.Log($"{LOG} Skybox ustawiony");
+            }
         }
 
-        /// <summary>Prosta podloga fallback gdy FloodedGrounds niedostepne.</summary>
+        /// <summary>Prosta podloga fallback gdy DemoLevel assety niedostepne.</summary>
         static void CreateFallbackFloor()
         {
             if (GameObject.Find("FallbackFloor") != null) return;
@@ -285,7 +266,7 @@ namespace Plaga44.Editor
             }
 
             Undo.RegisterCreatedObjectUndo(floor, "Create FallbackFloor");
-            Debug.Log($"{LOG} Stworzono FallbackFloor (FloodedGrounds niedostepne)");
+            Debug.Log($"{LOG} Stworzono FallbackFloor (DemoLevel niedostepne)");
         }
 
         // =====================================================================

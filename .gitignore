@@ -40,3 +40,7 @@ crashlytics-build.properties
 *.aab
 *.unitypackage
 *.app
+
+# DemoLevel assets (copied from testbed v1, heavy textures)
+/Assets/DemoLevel/
+/Assets/FloodedGrounds/
