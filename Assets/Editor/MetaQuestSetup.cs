@@ -51,8 +51,8 @@ namespace Plaga44.Editor
 
         static void AutoCheck()
         {
-            // Otwórz TESTBED_V2 jesli edytor otworzyl pusta scene
-            OpenTestbedIfNeeded();
+            // Otwórz TESTBED_V2 i postaw scene
+            SceneSetup.LoadTestbed();
 
             if (IsMetaXRInstalled())
             {
@@ -80,12 +80,6 @@ namespace Plaga44.Editor
                 SetupMetaSDK();
                 SwitchToAndroid();
             }
-        }
-
-        static void OpenTestbedIfNeeded()
-        {
-            UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/TESTBED_V2.unity");
-            Debug.Log($"{LOG} Opened TESTBED_V2.unity");
         }
 
         static bool IsMetaXRInstalled()
