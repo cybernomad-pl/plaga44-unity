@@ -255,9 +255,11 @@ namespace Plaga44.Editor
             var terrainData = AssetDatabase.LoadAssetAtPath<TerrainData>(TERRAIN_ASSET);
             if (terrainData != null)
             {
+                // Czysc brakujace referencje drzew -- prefaby nie sa w DemoLevel
+                CleanMissingTrees(terrainData);
+
                 var terrainGO = Terrain.CreateTerrainGameObject(terrainData);
                 terrainGO.name = "DemoTerrain";
-                // Pozycja terenu -- centrujemy (terrain size / 2)
                 var size = terrainData.size;
                 terrainGO.transform.position = new Vector3(-size.x * 0.5f, 0f, -size.z * 0.5f);
                 Undo.RegisterCreatedObjectUndo(terrainGO, "Create DemoTerrain");
@@ -291,6 +293,19 @@ namespace Plaga44.Editor
         }
 
         /// <summary>Prosta podloga fallback gdy DemoLevel assety niedostepne.</summary>
+        /// <summary>Usuwa brakujace drzewa i detale z terrain data.</summary>
+        static void CleanMissingTrees(TerrainData data)
+        {
+            // Usun instancje drzew
+            data.treeInstances = new TreeInstance[0];
+            // Usun prototypy drzew (referencje do brakujacych prefabow)
+            data.treePrototypes = new TreePrototype[0];
+            // Usun detail prototypes (trawa itp.)
+            data.detailPrototypes = new DetailPrototype[0];
+            EditorUtility.SetDirty(data);
+            Debug.Log($"{LOG} Wyczyszczono brakujace drzewa i detale z terenu.");
+        }
+
         static void CreateFallbackFloor()
         {
             if (GameObject.Find("FallbackFloor") != null) return;
