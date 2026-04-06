@@ -1,12 +1,12 @@
-// PipelinePresets.cs -- CYBERNOMAD Editor Tool
+// Pipeline.cs -- CYBERNOMAD Editor Tool
 //
 // Jeden pipeline asset (Mobile_RPAsset) -- zmienia mu wartosci on-the-fly.
 // Presety to zestawy ustawien w kodzie, nie osobne pliki.
 //
 // Public API:
-//   PipelinePresets.Apply(PipelinePresets.INITIAL);
-//   PipelinePresets.Apply(new PipelineSettings { hdr = false, msaa = 4, ... });
-//   PipelinePresets.LogCurrent();
+//   Pipeline.Apply(Pipeline.INITIAL);
+//   Pipeline.Apply(new PipelineSettings { hdr = false, msaa = 4, ... });
+//   Pipeline.LogCurrent();
 //
 // Menu: CYBERNOMAD > Pipeline > Apply INITIAL / Apply DEFAULT / Show Current
 
@@ -42,7 +42,7 @@ namespace Plaga44.Editor
     // Presets + applicator
     // =========================================================================
 
-    public static class PipelinePresets
+    public static class Pipeline
     {
         private const string LOG = "[PLAGA44]";
         private const string ASSET_PATH = "Assets/Settings/Mobile_RPAsset.asset";
@@ -93,8 +93,8 @@ namespace Plaga44.Editor
 
         /// <summary>
         /// Aplikuje zestaw ustawien do Mobile_RPAsset. Przekazujesz gotowy struct.
-        /// Przyklad: PipelinePresets.Apply(PipelinePresets.INITIAL);
-        /// Przyklad: PipelinePresets.Apply(new PipelineSettings { hdr = false, msaa = 8 });
+        /// Przyklad: Pipeline.Apply(Pipeline.INITIAL);
+        /// Przyklad: Pipeline.Apply(new PipelineSettings { hdr = false, msaa = 8 });
         /// </summary>
         public static bool Apply(PipelineSettings s)
         {
