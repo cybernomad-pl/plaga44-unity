@@ -273,6 +273,38 @@ namespace Plaga44.Editor
             return p;
         }
 
+        /// <summary>
+        /// Czyści brakujace tree/detail prototypy z terrain data assetow na dysku
+        /// ZANIM scena sie zaladuje (zeby uniknac warningow "Tree prefab at index X is missing").
+        /// </summary>
+        static void CleanTerrainDataAssets()
+        {
+            string[] tilePaths = new string[10];
+            for (int i = 0; i < 9; i++)
+                tilePaths[i] = $"Assets/DemoLevel/Terrain/Tile_{i}.asset";
+            tilePaths[9] = "Assets/DemoLevel/Terrain/Scene_A_Terrain.asset";
+
+            int cleaned = 0;
+            foreach (var path in tilePaths)
+            {
+                var data = AssetDatabase.LoadAssetAtPath<TerrainData>(path);
+                if (data == null) continue;
+                if (data.treePrototypes.Length == 0 && data.detailPrototypes.Length == 0) continue;
+
+                data.treeInstances = new TreeInstance[0];
+                data.treePrototypes = new TreePrototype[0];
+                data.detailPrototypes = new DetailPrototype[0];
+                EditorUtility.SetDirty(data);
+                cleaned++;
+            }
+
+            if (cleaned > 0)
+            {
+                AssetDatabase.SaveAssets();
+                Debug.Log($"{LOG} Wyczyszczono drzewa/detale z {cleaned} terrain data assetow.");
+            }
+        }
+
         static void EnsureDirectory(string assetPath)
         {
             string fullPath = Path.Combine(Application.dataPath, "..", assetPath);

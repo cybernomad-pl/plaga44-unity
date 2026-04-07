@@ -100,8 +100,8 @@ namespace Plaga44.Editor
                 // Srodek terenu
                 float cx = terrainPos.x + data.size.x * 0.5f;
                 float cz = terrainPos.z + data.size.z * 0.5f;
-                // Najwyzszy punkt terenu + 50m
-                float maxHeight = terrainPos.y + data.size.y + 50f;
+                // Najwyzszy punkt terenu + 200m
+                float maxHeight = terrainPos.y + data.size.y + 200f;
                 rig.transform.position = new Vector3(cx, maxHeight, cz);
                 Debug.Log($"{LOG} Gracz nad terenem: ({cx:F0}, {maxHeight:F0}, {cz:F0})");
             }
@@ -263,6 +263,22 @@ namespace Plaga44.Editor
                 mgr.moveSpeed = 2.5f;
                 Debug.Log($"{LOG} Dodano LocomotionManager");
             }
+
+            // EditorCameraHeight -- wymusza wysokosc kamery w edytorze bez headsetu
+            if (rig.GetComponent<Locomotion.EditorCameraHeight>() == null)
+            {
+                var camHeight = Undo.AddComponent<Locomotion.EditorCameraHeight>(rig);
+                camHeight.eyeHeight = 1.65f;
+                Debug.Log($"{LOG} Dodano EditorCameraHeight (1.65m)");
+            }
+
+            // EditorMouseLook -- obrot kamery myszka w edytorze (PPM + ruch)
+            if (rig.GetComponent<Locomotion.EditorMouseLook>() == null)
+            {
+                var mouseLook = Undo.AddComponent<Locomotion.EditorMouseLook>(rig);
+                mouseLook.sensitivity = 2f;
+                Debug.Log($"{LOG} Dodano EditorMouseLook (PPM + ruch myszy)");
+            }
         }
 
         // =====================================================================
@@ -273,13 +289,12 @@ namespace Plaga44.Editor
         private const string TILE_PATH = "Assets/DemoLevel/Terrain/Tile_{0}.asset";
         private const string SKYBOX_MAT = "Assets/DemoLevel/Skybox/BGR_Sky1.mat";
         private const string WATER_MESH = "Assets/DemoLevel/Water/WaterPlane.fbx";
-        private const int GRID_SIZE = 3; // 3x3 = 9 tiles
+        private const int GRID_SIZE = 5; // 5x5 = 25 tiles
 
         /// <summary>
-        /// Stawia 3x3 grid terenow, wode i skybox z DemoLevel asset packa.
-        /// Kazdy tile to osobna kopia TerrainData (Tile_0..8.asset).
-        /// Grid jest wycentrowany -- gracz spawnuje na srodkowym tile.
-        /// Co drugi tile obrocony o 180 stopni zeby krawedzie sie laczily.
+        /// Stawia 5x5 grid terenow, wode i skybox z DemoLevel asset packa.
+        /// 9 tile assetow (Tile_0..8) uzywa cyklicznie na 25 pozycjach.
+        /// Grid jest wycentrowany -- gracz spawnuje nad srodkowym tile.
         /// </summary>
         static void LoadDemoLevelTerrain()
         {
@@ -287,6 +302,13 @@ namespace Plaga44.Editor
             var existingTerrain = Object.FindFirstObjectByType<Terrain>();
             if (existingTerrain != null)
             {
+                // Wyczysc brakujace drzewa ze WSZYSTKICH istniejacych terenow
+                var allTerrains = Object.FindObjectsByType<Terrain>(FindObjectsSortMode.None);
+                foreach (var t in allTerrains)
+                {
+                    if (t.terrainData != null && t.terrainData.treePrototypes.Length > 0)
+                        CleanMissingTrees(t.terrainData);
+                }
                 Debug.Log($"{LOG} Teren juz na scenie: {existingTerrain.name}");
                 return;
             }
@@ -308,17 +330,20 @@ namespace Plaga44.Editor
             var terrainRoot = new GameObject("DemoTerrainGrid");
             Undo.RegisterCreatedObjectUndo(terrainRoot, "Create DemoTerrainGrid");
 
+            // 9 tile assetow (Tile_0..8), uzycie cykliczne na wiekszym gridzie
+            const int TILE_ASSET_COUNT = 9;
             int tileIndex = 0;
             for (int z = 0; z < GRID_SIZE; z++)
             {
                 for (int x = 0; x < GRID_SIZE; x++)
                 {
+                    int assetIdx = tileIndex % TILE_ASSET_COUNT;
                     var tileData = AssetDatabase.LoadAssetAtPath<TerrainData>(
-                        string.Format(TILE_PATH, tileIndex));
+                        string.Format(TILE_PATH, assetIdx));
 
                     if (tileData == null)
                     {
-                        Debug.LogWarning($"{LOG} Tile_{tileIndex}.asset nie znaleziony -- pomijam.");
+                        Debug.LogWarning($"{LOG} Tile_{assetIdx}.asset nie znaleziony -- pomijam.");
                         tileIndex++;
                         continue;
                     }
