@@ -1,0 +1,89 @@
+// =============================================================================
+// EditorCameraHeight.cs
+// CYBERNOMAD -- Wymusza wysokosc kamery w edytorze bez headsetu VR.
+//
+// PROBLEM:
+// OVRCameraRig co klatke ustawia CenterEyeAnchor na podstawie trackingu.
+// W edytorze bez headsetu tracking zwraca (0,0,0) wiec kamera laduje
+// na pozycji riga = poziom ziemi = kamera wtapia sie w teren.
+//
+// ROZWIAZANIE:
+// LateUpdate (po OVRCameraRig.Update) wymusza CenterEyeAnchor.localPosition.y
+// na wysokosc oczu (1.65m). Dziala TYLKO w edytorze bez XR -- na Questcie
+// tracking nadpisuje pozycje wiec ten komponent nic nie robi.
+//
+// SETUP:
+// Dodawany automatycznie przez SceneSetup.LoadTestbed().
+// Attach na OVRCameraRig root (ten sam GO co LocomotionController).
+// =============================================================================
+
+using UnityEngine;
+
+namespace Plaga44.Locomotion
+{
+    /// <summary>
+    /// Wymusza wysokosc kamery na 1.65m w edytorze bez headsetu.
+    /// Na urzadzeniu VR (Quest) nie robi nic -- tracking nadpisuje pozycje.
+    /// Uzywa LateUpdate zeby dzialac PO OVRCameraRig.Update().
+    /// </summary>
+    [DisallowMultipleComponent]
+    public class EditorCameraHeight : MonoBehaviour
+    {
+        [Tooltip("Wysokosc oczu gracza w metrach.")]
+        public float eyeHeight = 1.65f;
+
+        private Transform _cameraTransform;
+        private bool _isVRActive;
+
+        private void Start()
+        {
+            // Sprawdz czy XR jest aktywne (Quest podlaczony)
+            _isVRActive = UnityEngine.XR.XRSettings.isDeviceActive;
+
+            if (_isVRActive)
+            {
+                // Na Questcie tracking dziala -- nie ingerujemy
+                enabled = false;
+                return;
+            }
+
+            // Znajdz kamere -- CenterEyeAnchor lub Camera.main
+            _cameraTransform = FindCameraTransform();
+
+            if (_cameraTransform == null)
+            {
+                Debug.LogWarning("[EditorCameraHeight] Nie znaleziono kamery.");
+                enabled = false;
+            }
+        }
+
+        private void LateUpdate()
+        {
+            // LateUpdate bo OVRCameraRig ustawia pozycje w Update.
+            // My nadpisujemy PO nim.
+            if (_cameraTransform == null) return;
+
+            var pos = _cameraTransform.localPosition;
+            // Zawsze ustawiaj -- eyeHeight moze sie zmieniac dynamicznie (crouch)
+            if (Mathf.Abs(pos.y - eyeHeight) > 0.001f)
+            {
+                _cameraTransform.localPosition = new Vector3(pos.x, eyeHeight, pos.z);
+            }
+        }
+
+        private Transform FindCameraTransform()
+        {
+            // Szukaj CenterEyeAnchor (OVRCameraRig hierarchy)
+            var tracking = transform.Find("TrackingSpace");
+            if (tracking != null)
+            {
+                var eye = tracking.Find("CenterEyeAnchor");
+                if (eye != null) return eye;
+            }
+
+            // Fallback
+            var cam = GetComponentInChildren<Camera>();
+            return cam != null ? cam.transform : null;
+        }
+    }
+}

@@ -117,7 +117,7 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Presets/Quest/Oculus FULL", false, 2)]
         static void MenuFull() => Apply(FULL);
 
-        [MenuItem("CYBERNOMAD/Oculus/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/Oculus", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

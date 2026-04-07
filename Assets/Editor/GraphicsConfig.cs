@@ -108,7 +108,7 @@ namespace Plaga44.Editor
 
         [MenuItem("CYBERNOMAD/Presets/Quest/Graphics INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
-        [MenuItem("CYBERNOMAD/Graphics/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/Graphics", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

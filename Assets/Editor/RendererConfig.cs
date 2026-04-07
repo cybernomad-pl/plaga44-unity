@@ -54,7 +54,7 @@ namespace Plaga44.Editor
 
         [MenuItem("CYBERNOMAD/Presets/Quest/VR Renderer INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
-        [MenuItem("CYBERNOMAD/VR Renderer/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/VR Renderer", false, 100)]
         static void MenuShow() => LogCurrent();
     }
 
@@ -99,7 +99,7 @@ namespace Plaga44.Editor
         static void MenuInitial() => Apply(INITIAL);
         [MenuItem("CYBERNOMAD/Presets/PC/Renderer HIEND", false, 2)]
         static void MenuHiEnd() => Apply(HIEND);
-        [MenuItem("CYBERNOMAD/PC Renderer/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/PC Renderer", false, 100)]
         static void MenuShow() => LogCurrent();
     }
 

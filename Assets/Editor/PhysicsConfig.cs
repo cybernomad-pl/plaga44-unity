@@ -127,7 +127,7 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Presets/Quest/Physics QUEST3 (90Hz)", false, 2)]
         static void MenuQuest3() => Apply(QUEST3);
 
-        [MenuItem("CYBERNOMAD/Physics/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Status/Physics", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------
