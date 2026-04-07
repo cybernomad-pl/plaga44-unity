@@ -112,6 +112,35 @@ namespace Plaga44.Editor
             }
         }
 
+        /// <summary>
+        /// W edytorze bez headsetu OVRCameraRig ma CenterEyeAnchor na y=0.
+        /// Szukamy CenterEyeAnchor i podnosimy na 1.65m (wysokosc oczu).
+        /// Na Quescie head tracking to nadpisze -- nie szkodzi.
+        /// </summary>
+        static void EnsureCameraHeight(GameObject rig)
+        {
+            // Szukaj CenterEyeAnchor (OVRCameraRig hierarchy)
+            var tracking = rig.transform.Find("TrackingSpace");
+            if (tracking != null)
+            {
+                var eye = tracking.Find("CenterEyeAnchor");
+                if (eye != null)
+                {
+                    eye.localPosition = new Vector3(0f, 1.65f, 0f);
+                    Debug.Log($"{LOG} CenterEyeAnchor podniesiony na 1.65m");
+                    return;
+                }
+            }
+
+            // Fallback camera
+            var cam = rig.GetComponentInChildren<Camera>();
+            if (cam != null && cam.transform.localPosition.y < 0.1f)
+            {
+                cam.transform.localPosition = new Vector3(0f, 1.65f, 0f);
+                Debug.Log($"{LOG} Fallback camera podniesiona na 1.65m");
+            }
+        }
+
         // =====================================================================
         // 2. Wstaw VR rig
         // =====================================================================
@@ -188,6 +217,11 @@ namespace Plaga44.Editor
         static void AddLocomotion(GameObject rig)
         {
             // CharacterController -- fizyka kolizji i grawitacja
+            // W VR kamera jest na pozycji glowy gracza (tracking).
+            // CC musi obejmowac cialo OD PODLOGI do czubka glowy.
+            // height=1.8m, center y=0.9m = collider od y=0 do y=1.8m.
+            // Na Quescie CenterEyeAnchor jest ~1.65m (oczy).
+            // W edytorze bez headsetu fallback camera jest na 1.65m.
             if (rig.GetComponent<CharacterController>() == null)
             {
                 var cc = Undo.AddComponent<CharacterController>(rig);
@@ -198,6 +232,9 @@ namespace Plaga44.Editor
                 cc.stepOffset = 0.3f;
                 Debug.Log($"{LOG} Dodano CharacterController (h=1.8, r=0.3)");
             }
+
+            // W edytorze bez headsetu -- podnieś kamerę na wysokość oczu
+            EnsureCameraHeight(rig);
 
             // LocomotionController -- ruch thumbstickiem
             if (rig.GetComponent<Locomotion.LocomotionController>() == null)
