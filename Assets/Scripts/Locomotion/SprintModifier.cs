@@ -26,9 +26,9 @@
 //   - Guard na GameState.CanMove
 //   - #if HAS_META_XR z fallbackiem na klawiature
 //
-// INPUT MAPPING (Quest kontrolery):
-//   L3 (lewy thumbstick click) = sprint
-//   B  (prawy kontroler)       = skok
+// INPUT MAPPING:
+//   Quest:    L3 = sprint, B = skok, R3 = crouch
+//   Edytor:   Shift = sprint, Space = skok, LCtrl = crouch
 // =============================================================================
 
 using UnityEngine;
@@ -36,7 +36,7 @@ using UnityEngine;
 namespace Plaga44.Locomotion
 {
     /// <summary>
-    /// Modyfikator lokomocji: sprint (L3) i skok (B).
+    /// Modyfikator lokomocji: sprint, skok, crouch.
     /// Attach do tego samego GameObject co LocomotionController.
     /// </summary>
     [DisallowMultipleComponent]
@@ -57,6 +57,13 @@ namespace Plaga44.Locomotion
         [Tooltip("Cooldown miedzy skokami w sekundach. Zapobiega spammowaniu skoku.")]
         public float jumpCooldown = 0.5f;
 
+        [Header("Crouch")]
+        [Tooltip("Wysokosc CharacterControllera podczas croucha.")]
+        public float crouchHeight = 1.0f;
+
+        [Tooltip("Predkosc przejscia miedzy staniem a crouchem.")]
+        public float crouchSpeed = 8f;
+
         // =====================================================================
         // Stan runtime
         // =====================================================================
@@ -75,6 +82,15 @@ namespace Plaga44.Locomotion
 
         /// <summary>Timer cooldownu skoku.</summary>
         private float _jumpTimer;
+
+        /// <summary>Bazowa wysokosc CC (przed crouchem).</summary>
+        private float _standHeight;
+
+        /// <summary>Bazowy center CC (przed crouchem).</summary>
+        private float _standCenterY;
+
+        /// <summary>Czy gracz jest w crouchu.</summary>
+        private bool _crouching;
 
         // =====================================================================
         // Unity lifecycle
@@ -96,6 +112,8 @@ namespace Plaga44.Locomotion
             }
 
             _baseSpeed = _loco.moveSpeed;
+            _standHeight = _loco.CharController.height;
+            _standCenterY = _loco.CharController.center.y;
         }
 
         private void Update()
@@ -104,16 +122,31 @@ namespace Plaga44.Locomotion
 
             HandleSprint();
             HandleJump();
+            HandleCrouch();
         }
 
         private void OnDisable()
         {
-            // Przywroc bazowa predkosc gdy komponent jest wylaczany
-            // (np. przez LocomotionManager przy zmianie trybu).
-            if (_sprinting && _loco != null)
+            if (_loco == null) return;
+
+            // Przywroc bazowa predkosc
+            if (_sprinting)
             {
                 _loco.moveSpeed = _baseSpeed;
                 _sprinting = false;
+            }
+
+            // Przywroc pelna wysokosc
+            if (_crouching)
+            {
+                var cc = _loco.CharController;
+                cc.height = _standHeight;
+                cc.center = new Vector3(0f, _standCenterY, 0f);
+                _crouching = false;
+
+                var camHeight = _loco.GetComponent<EditorCameraHeight>();
+                if (camHeight != null)
+                    camHeight.eyeHeight = 1.65f;
             }
         }
 
@@ -165,6 +198,35 @@ namespace Plaga44.Locomotion
         }
 
         // =====================================================================
+        // Crouch
+        // =====================================================================
+
+        /// <summary>
+        /// LCtrl (klawiatura) / R3 (Quest) = crouch toggle.
+        /// Zmniejsza wysokosc CharacterControllera i obniza kamerę proporcjonalnie.
+        /// </summary>
+        private void HandleCrouch()
+        {
+            if (GetCrouchInput())
+                _crouching = !_crouching;
+
+            float targetHeight = _crouching ? crouchHeight : _standHeight;
+            float targetCenterY = targetHeight * 0.5f;
+
+            var cc = _loco.CharController;
+            cc.height = Mathf.Lerp(cc.height, targetHeight, crouchSpeed * Time.deltaTime);
+            cc.center = new Vector3(0f, Mathf.Lerp(cc.center.y, targetCenterY, crouchSpeed * Time.deltaTime), 0f);
+
+            // Obniz kamerę proporcjonalnie
+            var camHeight = _loco.GetComponent<EditorCameraHeight>();
+            if (camHeight != null)
+            {
+                float eyeRatio = 1.65f / _standHeight; // proporcja oczy/wysokosc
+                camHeight.eyeHeight = Mathf.Lerp(camHeight.eyeHeight, targetHeight * eyeRatio, crouchSpeed * Time.deltaTime);
+            }
+        }
+
+        // =====================================================================
         // Input
         // =====================================================================
 
@@ -183,6 +245,15 @@ namespace Plaga44.Locomotion
             return OVRInput.GetDown(OVRInput.Button.Two);
 #else
             return UnityEngine.Input.GetKeyDown(KeyCode.Space);
+#endif
+        }
+
+        private bool GetCrouchInput()
+        {
+#if HAS_META_XR
+            return OVRInput.GetDown(OVRInput.Button.SecondaryThumbstick);
+#else
+            return UnityEngine.Input.GetKeyDown(KeyCode.LeftControl);
 #endif
         }
     }

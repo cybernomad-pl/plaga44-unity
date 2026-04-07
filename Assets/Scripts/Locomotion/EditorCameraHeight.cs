@@ -64,7 +64,8 @@ namespace Plaga44.Locomotion
             if (_cameraTransform == null) return;
 
             var pos = _cameraTransform.localPosition;
-            if (pos.y < eyeHeight - 0.01f)
+            // Zawsze ustawiaj -- eyeHeight moze sie zmieniac dynamicznie (crouch)
+            if (Mathf.Abs(pos.y - eyeHeight) > 0.001f)
             {
                 _cameraTransform.localPosition = new Vector3(pos.x, eyeHeight, pos.z);
             }

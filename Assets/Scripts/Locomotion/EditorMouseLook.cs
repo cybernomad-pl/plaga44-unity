@@ -3,7 +3,7 @@
 // CYBERNOMAD -- Mouse look w edytorze bez headsetu VR.
 //
 // W edytorze bez Questa nie ma head trackingu, wiec obrot kamery musi
-// byc na myszce. Prawy przycisk myszy + ruch = obrot kamery (FPS style).
+// byc na myszce. Ruch myszy = obrot kamery (FPS style, kursor zablokowany).
 //
 // OBROT:
 // - Yaw (lewo/prawo): obraca CALY RIG (zeby LocomotionController
