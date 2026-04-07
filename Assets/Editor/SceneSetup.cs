@@ -270,13 +270,16 @@ namespace Plaga44.Editor
         // =====================================================================
 
         private const string DEMO_LEVEL = "Assets/DemoLevel";
-        private const string TERRAIN_ASSET = "Assets/DemoLevel/Terrain/Scene_A_Terrain.asset";
+        private const string TILE_PATH = "Assets/DemoLevel/Terrain/Tile_{0}.asset";
         private const string SKYBOX_MAT = "Assets/DemoLevel/Skybox/BGR_Sky1.mat";
         private const string WATER_MESH = "Assets/DemoLevel/Water/WaterPlane.fbx";
+        private const int GRID_SIZE = 3; // 3x3 = 9 tiles
 
         /// <summary>
-        /// Stawia teren, wode i skybox z DemoLevel asset packa.
-        /// Teren z heightmap, woda jako mesh pod terenem, skybox z materialu.
+        /// Stawia 3x3 grid terenow, wode i skybox z DemoLevel asset packa.
+        /// Kazdy tile to osobna kopia TerrainData (Tile_0..8.asset).
+        /// Grid jest wycentrowany -- gracz spawnuje na srodkowym tile.
+        /// Co drugi tile obrocony o 180 stopni zeby krawedzie sie laczily.
         /// </summary>
         static void LoadDemoLevelTerrain()
         {
@@ -288,36 +291,67 @@ namespace Plaga44.Editor
                 return;
             }
 
-            // --- TEREN ---
-            var terrainData = AssetDatabase.LoadAssetAtPath<TerrainData>(TERRAIN_ASSET);
-            if (terrainData != null)
+            // Zaladuj pierwszy tile zeby poznac rozmiar
+            var firstTile = AssetDatabase.LoadAssetAtPath<TerrainData>(string.Format(TILE_PATH, 0));
+            if (firstTile == null)
             {
-                // Czysc brakujace referencje drzew -- prefaby nie sa w DemoLevel
-                CleanMissingTrees(terrainData);
-
-                var terrainGO = Terrain.CreateTerrainGameObject(terrainData);
-                terrainGO.name = "DemoTerrain";
-                var size = terrainData.size;
-                terrainGO.transform.position = new Vector3(-size.x * 0.5f, 0f, -size.z * 0.5f);
-                Undo.RegisterCreatedObjectUndo(terrainGO, "Create DemoTerrain");
-                Debug.Log($"{LOG} Teren zaladowany: {size.x}x{size.z}m");
-            }
-            else
-            {
-                Debug.LogWarning($"{LOG} Terrain asset nie znaleziony: {TERRAIN_ASSET}. Tworzenie fallback.");
+                Debug.LogWarning($"{LOG} Tile_0.asset nie znaleziony. Tworzenie fallback.");
                 CreateFallbackFloor();
+                return;
             }
 
-            // --- WODA ---
+            Vector3 tileSize = firstTile.size;
+            float totalX = tileSize.x * GRID_SIZE;
+            float totalZ = tileSize.z * GRID_SIZE;
+
+            // Parent dla wszystkich terenow
+            var terrainRoot = new GameObject("DemoTerrainGrid");
+            Undo.RegisterCreatedObjectUndo(terrainRoot, "Create DemoTerrainGrid");
+
+            int tileIndex = 0;
+            for (int z = 0; z < GRID_SIZE; z++)
+            {
+                for (int x = 0; x < GRID_SIZE; x++)
+                {
+                    var tileData = AssetDatabase.LoadAssetAtPath<TerrainData>(
+                        string.Format(TILE_PATH, tileIndex));
+
+                    if (tileData == null)
+                    {
+                        Debug.LogWarning($"{LOG} Tile_{tileIndex}.asset nie znaleziony -- pomijam.");
+                        tileIndex++;
+                        continue;
+                    }
+
+                    CleanMissingTrees(tileData);
+
+                    var terrainGO = Terrain.CreateTerrainGameObject(tileData);
+                    terrainGO.name = $"Tile_{x}_{z}";
+                    terrainGO.transform.SetParent(terrainRoot.transform);
+
+                    // Pozycja: centrujemy grid tak zeby srodkowy tile byl na (0,0,0)
+                    float posX = (x - GRID_SIZE / 2) * tileSize.x;
+                    float posZ = (z - GRID_SIZE / 2) * tileSize.z;
+                    terrainGO.transform.position = new Vector3(posX, 0f, posZ);
+
+                    tileIndex++;
+                }
+            }
+
+            Debug.Log($"{LOG} Teren 3x3: {GRID_SIZE * GRID_SIZE} tiles, {totalX}x{totalZ}m");
+
+            // --- WODA (skalowana do calego gridu) ---
             var waterMesh = AssetDatabase.LoadAssetAtPath<GameObject>(WATER_MESH);
             if (waterMesh != null)
             {
                 var water = (GameObject)PrefabUtility.InstantiatePrefab(waterMesh);
                 water.name = "DemoWater";
-                water.transform.position = new Vector3(0f, 0.5f, 0f); // lekko nad poziomem 0
-                water.transform.localScale = new Vector3(100f, 1f, 100f);
+                water.transform.position = new Vector3(0f, 0.5f, 0f);
+                // Skalujemy wode do rozmiaru calego gridu
+                float waterScale = Mathf.Max(totalX, totalZ) * 0.15f;
+                water.transform.localScale = new Vector3(waterScale, 1f, waterScale);
                 Undo.RegisterCreatedObjectUndo(water, "Create DemoWater");
-                Debug.Log($"{LOG} Woda zaladowana");
+                Debug.Log($"{LOG} Woda zaladowana (skala {waterScale})");
             }
 
             // --- SKYBOX ---
