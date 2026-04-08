@@ -67,6 +67,8 @@ namespace Plaga44
         // Aktualny stan
         // =====================================================================
 
+        private const string LOG = "[PLAGA44][GameState]";
+
         /// <summary>Aktualny stan gry.</summary>
         public static GamePhase Current { get; private set; } = GamePhase.Splash;
 
@@ -100,7 +102,7 @@ namespace Plaga44
             Previous = Current;
             Current = newState;
 
-            Debug.Log($"[PLAGA44] GameState: {Previous} -> {Current}");
+            Debug.Log($"{LOG} {Previous} -> {Current} (timeScale={Time.timeScale})");
 
             // Zarzadzanie Time.timeScale:
             // W stanach "zamrozonych" (pauza, menu, smierc) ustawiamy timeScale na 0,
@@ -173,6 +175,7 @@ namespace Plaga44
         /// </summary>
         public static void TogglePause()
         {
+            Debug.Log($"{LOG} TogglePause: current={Current}");
             if (Current == GamePhase.Playing) Pause();
             else if (Current == GamePhase.Paused) Resume();
         }

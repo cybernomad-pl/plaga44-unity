@@ -35,25 +35,30 @@ namespace Plaga44.Locomotion
         private Transform _cameraTransform;
         private bool _isVRActive;
 
+        private const string LOG = "[PLAGA44][CamHeight]";
+
         private void Start()
         {
-            // Sprawdz czy XR jest aktywne (Quest podlaczony)
             _isVRActive = UnityEngine.XR.XRSettings.isDeviceActive;
+            Debug.Log($"{LOG} Start: XR active={_isVRActive}, eyeHeight={eyeHeight}");
 
             if (_isVRActive)
             {
-                // Na Questcie tracking dziala -- nie ingerujemy
+                Debug.Log($"{LOG} VR tracking active -- wylaczam komponent");
                 enabled = false;
                 return;
             }
 
-            // Znajdz kamere -- CenterEyeAnchor lub Camera.main
             _cameraTransform = FindCameraTransform();
 
             if (_cameraTransform == null)
             {
-                Debug.LogWarning("[EditorCameraHeight] Nie znaleziono kamery.");
+                Debug.LogError($"{LOG} BRAK KAMERY -- wylaczam komponent");
                 enabled = false;
+            }
+            else
+            {
+                Debug.Log($"{LOG} Kamera: {_cameraTransform.name}, localPos={_cameraTransform.localPosition}");
             }
         }
 

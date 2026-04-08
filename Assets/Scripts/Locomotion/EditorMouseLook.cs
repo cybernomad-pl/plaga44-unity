@@ -40,11 +40,16 @@ namespace Plaga44.Locomotion
         private float _pitch;
         private float _yaw;
 
+        private const string LOG = "[PLAGA44][MouseLook]";
+
         private void Start()
         {
-            // Na urzadzeniu VR -- wylacz, tracking obraca kamere
-            if (UnityEngine.XR.XRSettings.isDeviceActive)
+            bool vrActive = UnityEngine.XR.XRSettings.isDeviceActive;
+            Debug.Log($"{LOG} Start: XR active={vrActive}, sensitivity={sensitivity}");
+
+            if (vrActive)
             {
+                Debug.Log($"{LOG} VR tracking active -- wylaczam mouse look");
                 enabled = false;
                 return;
             }
@@ -53,19 +58,18 @@ namespace Plaga44.Locomotion
 
             if (_cameraTransform == null)
             {
-                Debug.LogWarning("[EditorMouseLook] Nie znaleziono kamery.");
+                Debug.LogError($"{LOG} BRAK KAMERY -- wylaczam komponent");
                 enabled = false;
                 return;
             }
 
-            // Startowe katy z aktualnej rotacji
             _yaw = transform.eulerAngles.y;
             _pitch = _cameraTransform.localEulerAngles.x;
             if (_pitch > 180f) _pitch -= 360f;
 
-            // Schowaj i zablokuj kursor w oknie gry
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+            Debug.Log($"{LOG} Ready: cam={_cameraTransform.name}, yaw={_yaw:F1}, pitch={_pitch:F1}, cursor locked");
         }
 
         private void Update()

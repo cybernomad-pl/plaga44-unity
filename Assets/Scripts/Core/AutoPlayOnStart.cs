@@ -8,10 +8,16 @@ namespace Plaga44
 {
     public class AutoPlayOnStart : MonoBehaviour
     {
+        private void Awake()
+        {
+            Debug.Log($"[PLAGA44][AutoPlay] Awake: scene={gameObject.scene.name}, GO={gameObject.name}");
+        }
+
         private void Start()
         {
+            Debug.Log($"[PLAGA44][AutoPlay] Start: setting GameState -> Playing");
             GameState.Play();
-            Debug.Log("[PLAGA44] AutoPlay: GameState -> Playing");
+            Debug.Log($"[PLAGA44][AutoPlay] GameState.Current={GameState.Current}, CanMove={GameState.CanMove}");
         }
     }
 }

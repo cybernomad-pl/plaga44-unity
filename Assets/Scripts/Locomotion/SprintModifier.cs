@@ -96,17 +96,17 @@ namespace Plaga44.Locomotion
         // Unity lifecycle
         // =====================================================================
 
+        private const string LOG = "[PLAGA44][Sprint]";
+
         private void Awake()
         {
-            // Szukamy LocomotionController na tym obiekcie lub w rodzicach/dzieciach.
             _loco = GetComponentInParent<LocomotionController>();
             if (_loco == null)
                 _loco = GetComponentInChildren<LocomotionController>();
 
             if (_loco == null)
             {
-                Debug.LogError("[SprintModifier] Brak LocomotionController w hierarchii! " +
-                               "Dodaj SprintModifier na ten sam GameObject co LocomotionController.");
+                Debug.LogError($"{LOG} Awake: BRAK LocomotionController w hierarchii!");
                 enabled = false;
                 return;
             }
@@ -114,7 +114,10 @@ namespace Plaga44.Locomotion
             _baseSpeed = _loco.moveSpeed;
             _standHeight = _loco.CharController.height;
             _standCenterY = _loco.CharController.center.y;
+            Debug.Log($"{LOG} Awake: baseSpeed={_baseSpeed}, standHeight={_standHeight}, sprintMult={sprintMultiplier}, jumpForce={jumpForce}");
         }
+
+        private void OnEnable() => Debug.Log($"{LOG} OnEnable");
 
         private void Update()
         {
@@ -127,16 +130,16 @@ namespace Plaga44.Locomotion
 
         private void OnDisable()
         {
+            Debug.Log($"{LOG} OnDisable: sprinting={_sprinting}, crouching={_crouching}");
             if (_loco == null) return;
 
-            // Przywroc bazowa predkosc
             if (_sprinting)
             {
                 _loco.moveSpeed = _baseSpeed;
                 _sprinting = false;
+                Debug.Log($"{LOG} Reset sprint -> speed={_baseSpeed}");
             }
 
-            // Przywroc pelna wysokosc
             if (_crouching)
             {
                 var cc = _loco.CharController;
@@ -164,16 +167,16 @@ namespace Plaga44.Locomotion
 
             if (pressed && !_sprinting)
             {
-                // Zapamietujemy aktualna predkosc jako baze
-                // (moze byc inna niz poczatkowa jesli LocomotionManager ja zmienil).
                 _baseSpeed = _loco.moveSpeed;
                 _loco.moveSpeed = _baseSpeed * sprintMultiplier;
                 _sprinting = true;
+                Debug.Log($"{LOG} SPRINT ON: {_baseSpeed} -> {_loco.moveSpeed}");
             }
             else if (!pressed && _sprinting)
             {
                 _loco.moveSpeed = _baseSpeed;
                 _sprinting = false;
+                Debug.Log($"{LOG} SPRINT OFF: -> {_baseSpeed}");
             }
         }
 
@@ -194,6 +197,7 @@ namespace Plaga44.Locomotion
             {
                 _loco.VerticalVelocity = jumpForce;
                 _jumpTimer = jumpCooldown;
+                Debug.Log($"{LOG} JUMP: force={jumpForce}, pos={transform.position}");
             }
         }
 
@@ -208,7 +212,10 @@ namespace Plaga44.Locomotion
         private void HandleCrouch()
         {
             if (GetCrouchInput())
+            {
                 _crouching = !_crouching;
+                Debug.Log($"{LOG} CROUCH: {(_crouching ? "ON" : "OFF")}, targetHeight={(_crouching ? crouchHeight : _standHeight)}");
+            }
 
             float targetHeight = _crouching ? crouchHeight : _standHeight;
             float targetCenterY = targetHeight * 0.5f;

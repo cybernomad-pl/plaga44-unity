@@ -109,8 +109,11 @@ namespace Plaga44.Locomotion
         // Unity lifecycle
         // =====================================================================
 
+        private const string LOG = "[PLAGA44][LocoManager]";
+
         private void Awake()
         {
+            Debug.Log($"{LOG} Awake: startMode={_startMode}, moveSpeed={moveSpeed}");
             GatherComponents();
             ApplyMode(_startMode, force: true);
         }
@@ -118,7 +121,11 @@ namespace Plaga44.Locomotion
         private void Start()
         {
             PushConfigToSubSystems();
+            Debug.Log($"{LOG} Start: pushed moveSpeed={moveSpeed} to LocomotionController");
         }
+
+        private void OnEnable() => Debug.Log($"{LOG} OnEnable");
+        private void OnDisable() => Debug.Log($"{LOG} OnDisable");
 
         // =====================================================================
         // Publiczne API
@@ -154,6 +161,7 @@ namespace Plaga44.Locomotion
         {
             if (_locomotionController == null)
                 _locomotionController = GetComponentInChildren<LocomotionController>(includeInactive: true);
+            Debug.Log($"{LOG} GatherComponents: LocoCtrl={(_locomotionController != null ? _locomotionController.gameObject.name : "NULL")}");
         }
 
         private void ApplyMode(LocomotionMode mode, bool force)

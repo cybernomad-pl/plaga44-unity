@@ -129,25 +129,34 @@ namespace Plaga44.Locomotion
         // Unity lifecycle
         // =====================================================================
 
+        private const string LOG = "[PLAGA44][Locomotion]";
+
         private void Awake()
         {
-            // Pobieramy CharacterController -- RequireComponent gwarantuje ze istnieje.
             _cc = GetComponent<CharacterController>();
+            Debug.Log($"{LOG} Awake: CC found={_cc != null}, height={_cc?.height}, radius={_cc?.radius}");
 
-            // Jesli headTransform nie zostal ustawiony w inspektorze,
-            // probujemy znalezc go automatycznie (Meta XR CenterEyeAnchor lub Camera.main).
             if (_headTransform == null)
                 _headTransform = ResolveHeadTransform();
+
+            Debug.Log($"{LOG} Awake: headTransform={_headTransform?.name ?? "NULL"}, pos={transform.position}");
         }
+
+        private void OnEnable()
+        {
+            Debug.Log($"{LOG} OnEnable: speed={moveSpeed}, strafe={strafeFactor}");
+        }
+
+        private void OnDisable()
+        {
+            Debug.Log($"{LOG} OnDisable");
+        }
+
+        private bool _wasGrounded = true;
 
         private void Update()
         {
-            // --- GUARD: nie ruszaj sie jesli gra nie jest w stanie Playing ---
-            // To jest KLUCZOWY guard -- bez niego gracz moglby sie poruszac
-            // w menu, podczas ladowania, po smierci itp.
             if (!GameState.CanMove) return;
-
-            // Jesli nie mamy referencji do glowy, nie mozemy obliczyc kierunku ruchu.
             if (_headTransform == null) return;
 
             // 1. Odczytaj input z lewego thumbsticka (lub klawiatury)
@@ -164,9 +173,14 @@ namespace Plaga44.Locomotion
             Vector3 finalMove = horizontalMove + (Vector3.up * _verticalVelocity * Time.deltaTime);
             _cc.Move(finalMove);
 
-            // 5. Zaktualizuj NormalisedSpeed dla ComfortVignette
-            // Clamp01 bo input.magnitude moze byc > 1 na diagonalach.
             NormalisedSpeed = Mathf.Clamp01(moveInput.magnitude);
+
+            // Log zmian grounded
+            if (_cc.isGrounded != _wasGrounded)
+            {
+                Debug.Log($"{LOG} Grounded: {_wasGrounded} -> {_cc.isGrounded}, pos={transform.position}, vVel={_verticalVelocity:F2}");
+                _wasGrounded = _cc.isGrounded;
+            }
         }
 
         // =====================================================================
@@ -292,10 +306,12 @@ namespace Plaga44.Locomotion
 #endif
             // Fallback -- Camera.main dziala zarowno w edytorze jak i na urzadzeniu.
             if (Camera.main != null)
+            {
+                Debug.Log($"{LOG} ResolveHead: fallback Camera.main ({Camera.main.name})");
                 return Camera.main.transform;
+            }
 
-            Debug.LogWarning("[LocomotionController] Nie znaleziono head transform! " +
-                             "Ustaw _headTransform recznie w inspektorze.");
+            Debug.LogError($"{LOG} ResolveHead: BRAK KAMERY! Ustaw _headTransform w inspektorze.");
             return null;
         }
     }
