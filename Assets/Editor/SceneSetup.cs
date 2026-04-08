@@ -41,7 +41,7 @@ namespace Plaga44.Editor
             CleanTestObjects();
             var rig = PlaceVRRig();
             AddLocomotion(rig);
-            LoadDemoLevelTerrain();
+            LoadTerrain();
             SpawnPlayerAboveTerrain(rig);
             EnsureLight();
             AddAutoPlay();
@@ -282,21 +282,21 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 4. DemoLevel -- teren + woda + skybox
+        // 4. Level -- teren + woda + skybox
         // =====================================================================
 
-        private const string DEMO_LEVEL = "Assets/DemoLevel";
-        private const string TILE_PATH = "Assets/DemoLevel/Terrain/Tile_{0}.asset";
-        private const string SKYBOX_MAT = "Assets/DemoLevel/Skybox/BGR_Sky1.mat";
-        private const string WATER_MESH = "Assets/DemoLevel/Water/WaterPlane.fbx";
+        private const string LEVEL_ROOT = "Assets/Level";
+        private const string TILE_PATH = "Assets/Level/Terrain/Tile_{0}.asset";
+        private const string SKYBOX_MAT = "Assets/Level/Skybox/BGR_Sky1.mat";
+        private const string WATER_MESH = "Assets/Level/Water/WaterPlane.fbx";
         private const int GRID_SIZE = 5; // 5x5 = 25 tiles
 
         /// <summary>
-        /// Stawia 5x5 grid terenow, wode i skybox z DemoLevel asset packa.
+        /// Stawia 5x5 grid terenow, wode i skybox z Level asset packa.
         /// 9 tile assetow (Tile_0..8) uzywa cyklicznie na 25 pozycjach.
         /// Grid jest wycentrowany -- gracz spawnuje nad srodkowym tile.
         /// </summary>
-        static void LoadDemoLevelTerrain()
+        static void LoadTerrain()
         {
             // Sprawdz czy teren juz jest
             var existingTerrain = Object.FindFirstObjectByType<Terrain>();
@@ -327,8 +327,8 @@ namespace Plaga44.Editor
             float totalZ = tileSize.z * GRID_SIZE;
 
             // Parent dla wszystkich terenow
-            var terrainRoot = new GameObject("DemoTerrainGrid");
-            Undo.RegisterCreatedObjectUndo(terrainRoot, "Create DemoTerrainGrid");
+            var terrainRoot = new GameObject("TerrainGrid");
+            Undo.RegisterCreatedObjectUndo(terrainRoot, "Create TerrainGrid");
 
             // 9 tile assetow (Tile_0..8), uzycie cykliczne na wiekszym gridzie
             const int TILE_ASSET_COUNT = 9;
@@ -370,12 +370,12 @@ namespace Plaga44.Editor
             if (waterMesh != null)
             {
                 var water = (GameObject)PrefabUtility.InstantiatePrefab(waterMesh);
-                water.name = "DemoWater";
+                water.name = "Water";
                 water.transform.position = new Vector3(0f, 0.5f, 0f);
                 // Skalujemy wode do rozmiaru calego gridu
                 float waterScale = Mathf.Max(totalX, totalZ) * 0.15f;
                 water.transform.localScale = new Vector3(waterScale, 1f, waterScale);
-                Undo.RegisterCreatedObjectUndo(water, "Create DemoWater");
+                Undo.RegisterCreatedObjectUndo(water, "Create Water");
                 Debug.Log($"{LOG} Woda zaladowana (skala {waterScale})");
             }
 
@@ -388,7 +388,7 @@ namespace Plaga44.Editor
             }
         }
 
-        /// <summary>Prosta podloga fallback gdy DemoLevel assety niedostepne.</summary>
+        /// <summary>Prosta podloga fallback gdy Level assety niedostepne.</summary>
         /// <summary>Usuwa brakujace drzewa i detale z terrain data.</summary>
         static void CleanMissingTrees(TerrainData data)
         {
@@ -420,7 +420,7 @@ namespace Plaga44.Editor
             }
 
             Undo.RegisterCreatedObjectUndo(floor, "Create FallbackFloor");
-            Debug.Log($"{LOG} Stworzono FallbackFloor (DemoLevel niedostepne)");
+            Debug.Log($"{LOG} Stworzono FallbackFloor (Level niedostepne)");
         }
 
         // =====================================================================
