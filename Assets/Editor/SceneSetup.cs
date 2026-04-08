@@ -288,7 +288,7 @@ namespace Plaga44.Editor
         private const string LEVEL_ROOT = "Assets/Potok";
         private const string TILE_PATH = "Assets/Potok/Terrain/Tile_{0}.asset";
         private const string SKYBOX_MAT = "Assets/Potok/Skybox/BGR_Sky1.mat";
-        private const string WATER_MESH = "Assets/Potok/Water/WaterPlane.fbx";
+        // WODA: wywalona ze sceny
         private const int GRID_SIZE = 5; // 5x5 = 25 tiles
 
         /// <summary>
@@ -363,21 +363,7 @@ namespace Plaga44.Editor
                 }
             }
 
-            Debug.Log($"{LOG} Teren 3x3: {GRID_SIZE * GRID_SIZE} tiles, {totalX}x{totalZ}m");
-
-            // --- WODA (skalowana do calego gridu) ---
-            var waterMesh = AssetDatabase.LoadAssetAtPath<GameObject>(WATER_MESH);
-            if (waterMesh != null)
-            {
-                var water = (GameObject)PrefabUtility.InstantiatePrefab(waterMesh);
-                water.name = "Water";
-                water.transform.position = new Vector3(0f, 0.5f, 0f);
-                // Skalujemy wode do rozmiaru calego gridu
-                float waterScale = Mathf.Max(totalX, totalZ) * 0.15f;
-                water.transform.localScale = new Vector3(waterScale, 1f, waterScale);
-                Undo.RegisterCreatedObjectUndo(water, "Create Water");
-                Debug.Log($"{LOG} Woda zaladowana (skala {waterScale})");
-            }
+            Debug.Log($"{LOG} Teren {GRID_SIZE}x{GRID_SIZE}: {GRID_SIZE * GRID_SIZE} tiles, {totalX}x{totalZ}m");
 
             // --- SKYBOX ---
             var skyboxMat = AssetDatabase.LoadAssetAtPath<Material>(SKYBOX_MAT);
