@@ -281,8 +281,8 @@ namespace Plaga44.Editor
         {
             string[] tilePaths = new string[10];
             for (int i = 0; i < 9; i++)
-                tilePaths[i] = $"Assets/Level/Terrain/Tile_{i}.asset";
-            tilePaths[9] = "Assets/Level/Terrain/Scene_A_Terrain.asset";
+                tilePaths[i] = $"Assets/Potok/Terrain/Tile_{i}.asset";
+            tilePaths[9] = "Assets/Potok/Terrain/Scene_A_Terrain.asset";
 
             int cleaned = 0;
             foreach (var path in tilePaths)

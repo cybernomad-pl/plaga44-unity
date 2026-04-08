@@ -15,7 +15,7 @@ namespace Plaga44.Editor
             int cleaned = 0;
             for (int i = 0; i < 9; i++)
             {
-                string path = $"Assets/Level/Terrain/Tile_{i}.asset";
+                string path = $"Assets/Potok/Terrain/Tile_{i}.asset";
                 var data = AssetDatabase.LoadAssetAtPath<TerrainData>(path);
                 if (data == null) continue;
 
@@ -33,7 +33,7 @@ namespace Plaga44.Editor
             }
 
             // Wyczysc tez oryginal
-            var orig = AssetDatabase.LoadAssetAtPath<TerrainData>("Assets/Level/Terrain/Scene_A_Terrain.asset");
+            var orig = AssetDatabase.LoadAssetAtPath<TerrainData>("Assets/Potok/Terrain/Scene_A_Terrain.asset");
             if (orig != null)
             {
                 orig.treeInstances = new TreeInstance[0];

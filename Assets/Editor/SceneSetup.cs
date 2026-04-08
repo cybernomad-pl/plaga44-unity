@@ -282,17 +282,17 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 4. Level -- teren + woda + skybox
+        // 4. Potok -- teren + woda + skybox
         // =====================================================================
 
-        private const string LEVEL_ROOT = "Assets/Level";
-        private const string TILE_PATH = "Assets/Level/Terrain/Tile_{0}.asset";
-        private const string SKYBOX_MAT = "Assets/Level/Skybox/BGR_Sky1.mat";
-        private const string WATER_MESH = "Assets/Level/Water/WaterPlane.fbx";
+        private const string LEVEL_ROOT = "Assets/Potok";
+        private const string TILE_PATH = "Assets/Potok/Terrain/Tile_{0}.asset";
+        private const string SKYBOX_MAT = "Assets/Potok/Skybox/BGR_Sky1.mat";
+        private const string WATER_MESH = "Assets/Potok/Water/WaterPlane.fbx";
         private const int GRID_SIZE = 5; // 5x5 = 25 tiles
 
         /// <summary>
-        /// Stawia 5x5 grid terenow, wode i skybox z Level asset packa.
+        /// Stawia 5x5 grid terenow, wode i skybox z Potok asset packa.
         /// 9 tile assetow (Tile_0..8) uzywa cyklicznie na 25 pozycjach.
         /// Grid jest wycentrowany -- gracz spawnuje nad srodkowym tile.
         /// </summary>
@@ -420,7 +420,7 @@ namespace Plaga44.Editor
             }
 
             Undo.RegisterCreatedObjectUndo(floor, "Create FallbackFloor");
-            Debug.Log($"{LOG} Stworzono FallbackFloor (Level niedostepne)");
+            Debug.Log($"{LOG} Stworzono FallbackFloor (Potok niedostepne)");
         }
 
         // =====================================================================
