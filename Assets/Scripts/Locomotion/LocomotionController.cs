@@ -90,7 +90,7 @@ namespace Plaga44.Locomotion
         /// nawet na lekko nierównym terenie. Bez tego gracz moze "drgac" miedzy
         /// isGrounded = true i false na pochylych powierzchniach.
         /// </summary>
-        private const float GroundedPullDown = -0.5f;
+        private const float GroundedPullDown = -2f; // mocniejszy pull = stabilniejszy isGrounded na nierównym terenie
 
         // =====================================================================
         // Property publiczne (read-only z zewnatrz)

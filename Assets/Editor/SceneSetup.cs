@@ -227,8 +227,8 @@ namespace Plaga44.Editor
                 cc.height = 1.8f;
                 cc.radius = 0.3f;
                 cc.center = new Vector3(0f, 0.9f, 0f);
-                cc.skinWidth = 0.02f;
-                cc.stepOffset = 0.3f;
+                cc.skinWidth = 0.08f;  // wiekszy skin = mniej drgania na terenie
+                cc.stepOffset = 0.5f;  // wiekszy step = plynniejsze wchodzenie na nierówności
                 Debug.Log($"{LOG} Dodano CharacterController (h=1.8, r=0.3)");
             }
 
@@ -284,100 +284,68 @@ namespace Plaga44.Editor
         // 4. Potok -- teren + woda + skybox
         // =====================================================================
 
-        private const string LEVEL_ROOT = "Assets/Potok";
-        private const string TILE_PATH = "Assets/Potok/Terrain/Tile_{0}.asset";
+        private const string TERRAIN_ASSET = "Assets/Potok/Terrain/Tile_0.asset";
         private const string SKYBOX_MAT = "Assets/Potok/Skybox/BGR_Sky1.mat";
-        // WODA: wywalona ze sceny
-        private const int GRID_SIZE = 15; // 15x15 = 225 tiles
+        private const string MOSS_LAYER = "Assets/Potok/TerrainLayers/layer_GR_Moss1_ASGR_Moss1_N3d1cca0d6d0e9938.terrainlayer";
+        private const float TERRAIN_SCALE = 20f;
 
         /// <summary>
-        /// Stawia 5x5 grid terenow, wode i skybox z Potok asset packa.
-        /// 9 tile assetow (Tile_0..8) uzywa cyklicznie na 25 pozycjach.
-        /// Grid jest wycentrowany -- gracz spawnuje nad srodkowym tile.
+        /// Jeden duzy teren (Tile_0 skalowany 20x), 1 warstwa (Moss), wycentrowany.
         /// </summary>
         static void LoadTerrain()
         {
-            // Sprawdz czy teren juz jest
             var existingTerrain = Object.FindFirstObjectByType<Terrain>();
             if (existingTerrain != null)
             {
-                // Wyczysc brakujace drzewa ze WSZYSTKICH istniejacych terenow
-                var allTerrains = Object.FindObjectsByType<Terrain>(FindObjectsSortMode.None);
-                foreach (var t in allTerrains)
-                {
-                    if (t.terrainData != null && t.terrainData.treePrototypes.Length > 0)
-                        CleanMissingTrees(t.terrainData);
-                }
+                if (existingTerrain.terrainData != null && existingTerrain.terrainData.treePrototypes.Length > 0)
+                    CleanMissingTrees(existingTerrain.terrainData);
                 Debug.Log($"{LOG} Teren juz na scenie: {existingTerrain.name}");
                 return;
             }
 
-            // Zaladuj pierwszy tile zeby poznac rozmiar
-            var firstTile = AssetDatabase.LoadAssetAtPath<TerrainData>(string.Format(TILE_PATH, 0));
-            if (firstTile == null)
+            var terrainData = AssetDatabase.LoadAssetAtPath<TerrainData>(TERRAIN_ASSET);
+            if (terrainData == null)
             {
-                Debug.LogWarning($"{LOG} Tile_0.asset nie znaleziony. Tworzenie fallback.");
+                Debug.LogWarning($"{LOG} Tile_0.asset nie znaleziony.");
                 CreateFallbackFloor();
                 return;
             }
 
-            Vector3 tileSize = firstTile.size;
-            float totalX = tileSize.x * GRID_SIZE;
-            float totalZ = tileSize.z * GRID_SIZE;
+            CleanMissingTrees(terrainData);
 
-            // Parent dla wszystkich terenow
-            var terrainRoot = new GameObject("TerrainGrid");
-            Undo.RegisterCreatedObjectUndo(terrainRoot, "Create TerrainGrid");
+            // Skaluj 20x
+            Vector3 orig = terrainData.size;
+            terrainData.size = new Vector3(orig.x * TERRAIN_SCALE, orig.y * TERRAIN_SCALE, orig.z * TERRAIN_SCALE);
 
-            // 9 tile assetow (Tile_0..8), uzycie cykliczne na wiekszym gridzie
-            const int TILE_ASSET_COUNT = 9;
-            int tileIndex = 0;
-            for (int z = 0; z < GRID_SIZE; z++)
+            // 1 warstwa -- Moss, duzy UV repeat
+            var mossLayer = AssetDatabase.LoadAssetAtPath<TerrainLayer>(MOSS_LAYER);
+            if (mossLayer != null)
             {
-                for (int x = 0; x < GRID_SIZE; x++)
-                {
-                    int assetIdx = tileIndex % TILE_ASSET_COUNT;
-                    var tileData = AssetDatabase.LoadAssetAtPath<TerrainData>(
-                        string.Format(TILE_PATH, assetIdx));
-
-                    if (tileData == null)
-                    {
-                        Debug.LogWarning($"{LOG} Tile_{assetIdx}.asset nie znaleziony -- pomijam.");
-                        tileIndex++;
-                        continue;
-                    }
-
-                    CleanMissingTrees(tileData);
-
-                    var terrainGO = Terrain.CreateTerrainGameObject(tileData);
-                    terrainGO.name = $"Tile_{x}_{z}";
-                    terrainGO.transform.SetParent(terrainRoot.transform);
-
-                    // Pozycja: centrujemy grid tak zeby srodkowy tile byl na (0,0,0)
-                    float posX = (x - GRID_SIZE / 2) * tileSize.x;
-                    float posZ = (z - GRID_SIZE / 2) * tileSize.z;
-                    terrainGO.transform.position = new Vector3(posX, 0f, posZ);
-
-                    tileIndex++;
-                }
+                mossLayer.tileSize = new Vector2(5f, 5f);
+                EditorUtility.SetDirty(mossLayer);
+                terrainData.terrainLayers = new TerrainLayer[] { mossLayer };
             }
 
-            Debug.Log($"{LOG} Teren {GRID_SIZE}x{GRID_SIZE}: {GRID_SIZE * GRID_SIZE} tiles, {totalX}x{totalZ}m");
+            EditorUtility.SetDirty(terrainData);
 
-            // --- SKYBOX ---
-            // Uzywamy ORYGINALNEGO cubemapu (BGR_Sky1.tif, guid 8888999060e5b7f4399b58f65d814847).
-            // Material BGR_Sky1.mat juz ma _Tex ustawiony na ten cubemap -- nie nadpisujemy.
-            // Chmury wylaczone (CloudOpacity=0) -- upraszcza rendering.
+            var terrainGO = Terrain.CreateTerrainGameObject(terrainData);
+            terrainGO.name = "Terrain";
+            float halfX = terrainData.size.x * 0.5f;
+            float halfZ = terrainData.size.z * 0.5f;
+            terrainGO.transform.position = new Vector3(-halfX, 0f, -halfZ);
+            Undo.RegisterCreatedObjectUndo(terrainGO, "Create Terrain");
+
+            Debug.Log($"{LOG} Teren: {terrainData.size.x:F0}x{terrainData.size.z:F0}m (skala {TERRAIN_SCALE}x)");
+
+            // Skybox
             var skyboxMat = AssetDatabase.LoadAssetAtPath<Material>(SKYBOX_MAT);
             if (skyboxMat != null)
             {
                 skyboxMat.SetFloat("_CloudOpacity", 0f);
                 EditorUtility.SetDirty(skyboxMat);
-
                 RenderSettings.skybox = skyboxMat;
-                Debug.Log($"{LOG} Skybox ustawiony (oryginalny cubemap, chmury wylaczone)");
+                Debug.Log($"{LOG} Skybox ustawiony");
             }
-
         }
 
         /// <summary>Prosta podloga fallback gdy Level assety niedostepne.</summary>
