@@ -521,6 +521,18 @@ namespace Plaga44.Editor
                 avatar.hideHeadInFirstPerson = true;
             }
 
+            // Retargeter -- IK body retargeting (head, arms, legs)
+            if (rig.GetComponent<Plaga44.AvatarRetargeter>() == null)
+            {
+                var retargeter = Undo.AddComponent<Plaga44.AvatarRetargeter>(rig);
+                retargeter.headToHipsRatio = 0.60f;
+                retargeter.spineFollowHead = 0.4f;
+                retargeter.stepFrequency = 2.0f;
+                retargeter.stepLength = 0.35f;
+                retargeter.stepHeight = 0.08f;
+                Debug.Log($"{LOG} Dodano AvatarRetargeter (IK body tracking)");
+            }
+
             // Model na scenie (widoczny w scene graph)
             if (GameObject.Find("PlayerAvatarModel") != null)
             {

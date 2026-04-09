@@ -63,6 +63,7 @@ namespace Plaga44
         private Transform _leftHandAnchor;
         private Transform _rightHandAnchor;
         private Animator _animator;
+        private AvatarRetargeter _retargeter;
 
         // Sub-mesh renderers indexed by OBJ group name
         private readonly Dictionary<string, Renderer> _submeshRenderers = new Dictionary<string, Renderer>();
@@ -118,11 +119,12 @@ namespace Plaga44
             ApplyMaskLensMaterial();
             FindAnchors();
             FindBones();
+            InitializeRetargeter();
 
             if (hideHeadInFirstPerson)
                 HideHeadBones();
 
-            Debug.Log($"{LOG} Avatar ready: head={_headBone?.name ?? "NULL"}, hips={_hipsBone?.name ?? "NULL"}");
+            Debug.Log($"{LOG} Avatar ready: head={_headBone?.name ?? "NULL"}, hips={_hipsBone?.name ?? "NULL"}, retargeter={_retargeter != null}");
         }
 
         private void LateUpdate()
@@ -136,23 +138,43 @@ namespace Plaga44
             float yaw = transform.eulerAngles.y;
             _avatarInstance.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
 
-            // Mapuj glowe na head anchor (kamera VR)
-            if (_headBone != null && _headAnchor != null)
+            // Retargeting: AvatarRetargeter robi pelny IK (head, spine, arms, legs).
+            // Wywolywany TUTAJ (po pozycjonowaniu avatara) zeby gwarantowac kolejnosc.
+            if (_retargeter != null && _retargeter.IsInitialized)
             {
-                _headBone.rotation = _headAnchor.rotation;
+                _retargeter.UpdateRetargeting();
             }
-
-            // Mapuj rece na hand anchors
-            if (_hipsBone != null)
+            else
             {
-                MapHand(_leftHandAnchor, "mixamorig:LeftArm", "mixamorig:LeftForeArm");
-                MapHand(_rightHandAnchor, "mixamorig:RightArm", "mixamorig:RightForeArm");
+                // Fallback: stary prosty mapping (bez retargetera)
+                if (_headBone != null && _headAnchor != null)
+                    _headBone.rotation = _headAnchor.rotation;
+
+                if (_hipsBone != null)
+                {
+                    MapHand(_leftHandAnchor, "mixamorig:LeftArm", "mixamorig:LeftForeArm");
+                    MapHand(_rightHandAnchor, "mixamorig:RightArm", "mixamorig:RightForeArm");
+                }
             }
         }
 
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+        }
+
+        // =====================================================================
+        // Retargeter
+        // =====================================================================
+
+        private void InitializeRetargeter()
+        {
+            _retargeter = GetComponent<AvatarRetargeter>();
+            if (_retargeter == null)
+                _retargeter = gameObject.AddComponent<AvatarRetargeter>();
+
+            _retargeter.Initialize(_avatarInstance, _headAnchor, _leftHandAnchor, _rightHandAnchor);
+            Debug.Log($"{LOG} AvatarRetargeter initialized on {gameObject.name}");
         }
 
         // =====================================================================
