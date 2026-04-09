@@ -6,6 +6,9 @@ Properties {
     _RotSpeed ("Rotation Speed", Range(0, 360)) = 0
     _CloudBoost ("Cloud Brightness", Range(0, 5)) = 1.5
     _CloudThreshold ("Cloud Threshold", Range(0, 1)) = 0.3
+    _GroundColor ("Ground Color", Color) = (0.18, 0.42, 0.08, 1)
+    _GroundBlend ("Ground Blend Height", Range(-0.5, 0.5)) = 0.05
+    _GroundFade ("Ground Fade Softness", Range(0.01, 1)) = 0.3
     [NoScaleOffset] _Tex ("Cubemap   (HDR)", Cube) = "grey" {}
 }
 
@@ -30,6 +33,9 @@ SubShader {
         float _Rotation, _RotSpeed;
         half _CloudBoost;
         half _CloudThreshold;
+        half4 _GroundColor;
+        half _GroundBlend;
+        half _GroundFade;
 
         float4 RotateAroundYInDegrees (float4 vertex, float degrees)
         {
@@ -80,6 +86,11 @@ SubShader {
             half lum = dot(c, half3(0.299, 0.587, 0.114));
             half cloudMask = saturate((lum - _CloudThreshold) / (1.0 - _CloudThreshold));
             c += c * cloudMask * (_CloudBoost - 1.0);
+
+            // Zielony gradient od dolu -- blend z ground color ponizej horyzontu
+            half viewY = normalize(i.texcoord).y;
+            half groundMask = saturate((_GroundBlend - viewY) / _GroundFade);
+            c = lerp(c, _GroundColor.rgb * _Exposure, groundMask);
 
             return half4(c, 1);
         }
