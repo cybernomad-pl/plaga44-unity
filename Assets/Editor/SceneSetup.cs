@@ -55,6 +55,7 @@ namespace Plaga44.Editor
             EnsureLight();
             // EnsureUplight(); -- wywalony
             SetFogAndAmbient();
+            AddHamburgerMenu();
             AddAutoPlay();
 
             // Zaznacz rig w hierarchii
@@ -438,8 +439,8 @@ namespace Plaga44.Editor
             var lightGO = new GameObject("Directional Light");
             var light = lightGO.AddComponent<Light>();
             light.type = LightType.Directional;
-            light.color = new Color(1f, 0.95f, 0.84f);
-            light.intensity = 1.2f;
+            light.color = new Color(0.4f, 0.45f, 0.6f); // zimny ksiezycowy
+            light.intensity = 0.15f; // noc
             light.shadows = LightShadows.Soft;
             lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
             Undo.RegisterCreatedObjectUndo(lightGO, "Create Light");
@@ -490,7 +491,25 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 8. Auto-Play (GameState.Play() na starcie)
+        // 8. Hamburger menu
+        // =====================================================================
+
+        static void AddHamburgerMenu()
+        {
+            if (Object.FindAnyObjectByType<Plaga44.UI.HamburgerMenu>() != null)
+            {
+                Debug.Log($"{LOG} HamburgerMenu juz istnieje.");
+                return;
+            }
+
+            var menuGO = new GameObject("_HamburgerMenu");
+            Undo.AddComponent<Plaga44.UI.HamburgerMenu>(menuGO);
+            Undo.RegisterCreatedObjectUndo(menuGO, "Create HamburgerMenu");
+            Debug.Log($"{LOG} Dodano HamburgerMenu (Escape / Menu button)");
+        }
+
+        // =====================================================================
+        // 9. Auto-Play (GameState.Play() na starcie)
         // =====================================================================
 
         static void AddAutoPlay()
