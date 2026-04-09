@@ -92,25 +92,30 @@ namespace Plaga44
                 return;
             }
             Instance = this;
-
-            // Spawn od razu w Awake -- widoczny w edytorze
-            Debug.Log($"{LOG} Awake: spawning avatar...");
-            SpawnAvatar();
-            IndexSubmeshes();
-            ApplyMaskLensMaterial();
-
-            // W edytorze (edit mode) -- pokaz caly model
-            // W play mode -- ukryj body i zastosuj FP ustawienia
-            if (!Application.isPlaying && _avatarInstance != null)
-            {
-                Debug.Log($"{LOG} Edit mode -- model widoczny w pelni");
-            }
         }
 
         private void Start()
         {
-            // Play mode -- ukryj body, setup anchors
+            Debug.Log($"{LOG} Start: szukam modelu...");
+
+            // Szukaj modelu juz na scenie (postawiony przez SceneSetup)
+            var existing = transform.Find("PlayerAvatarModel");
+            if (existing != null)
+            {
+                _avatarInstance = existing.gameObject;
+                Debug.Log($"{LOG} Model znaleziony w hierarchii: {_avatarInstance.name}");
+            }
+            else
+            {
+                // Fallback -- spawn runtime (Quest build)
+                SpawnAvatar();
+            }
+
+            if (_avatarInstance == null) return;
+
+            IndexSubmeshes();
             ApplyDefaultVisibility();
+            ApplyMaskLensMaterial();
             FindAnchors();
             FindBones();
 

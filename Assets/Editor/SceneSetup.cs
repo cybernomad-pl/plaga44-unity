@@ -498,17 +498,40 @@ namespace Plaga44.Editor
 
         static void AddPlayerAvatar(GameObject rig)
         {
-            if (rig.GetComponent<Plaga44.PlayerAvatar>() != null)
+            // Komponent
+            if (rig.GetComponent<Plaga44.PlayerAvatar>() == null)
             {
-                Debug.Log($"{LOG} PlayerAvatar juz istnieje.");
+                var avatar = Undo.AddComponent<Plaga44.PlayerAvatar>(rig);
+                avatar.modelScale = 0.01f;
+                avatar.yOffset = -1.65f;
+                avatar.hideHeadInFirstPerson = true;
+            }
+
+            // Model na scenie (widoczny w scene graph)
+            if (GameObject.Find("PlayerAvatarModel") != null)
+            {
+                Debug.Log($"{LOG} PlayerAvatarModel juz na scenie.");
                 return;
             }
 
-            var avatar = Undo.AddComponent<Plaga44.PlayerAvatar>(rig);
-            avatar.modelScale = 0.01f;    // Fuse cm -> Unity m
-            avatar.yOffset = -1.65f;      // stopy na podlodze
-            avatar.hideHeadInFirstPerson = true;
-            Debug.Log($"{LOG} Dodano PlayerAvatar (scale=0.01, yOffset=-1.65)");
+            var fbx = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Characters/Player/PLAYER_rigged.fbx");
+            if (fbx == null)
+                fbx = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/PLAYER_rigged.fbx");
+
+            if (fbx == null)
+            {
+                Debug.LogError($"{LOG} BRAK PLAYER_rigged.fbx!");
+                return;
+            }
+
+            var model = (GameObject)PrefabUtility.InstantiatePrefab(fbx);
+            model.name = "PlayerAvatarModel";
+            model.transform.SetParent(rig.transform);
+            model.transform.localPosition = new Vector3(0f, -1.65f, 0f);
+            model.transform.localRotation = UnityEngine.Quaternion.identity;
+            model.transform.localScale = Vector3.one * 0.01f;
+            Undo.RegisterCreatedObjectUndo(model, "Create PlayerAvatarModel");
+            Debug.Log($"{LOG} PlayerAvatarModel postawiony na scenie (dziecko {rig.name})");
         }
 
         static void AddHamburgerMenu()
