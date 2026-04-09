@@ -112,8 +112,17 @@ namespace Plaga44.Locomotion
             }
 
             _baseSpeed = _loco.moveSpeed;
-            _standHeight = _loco.CharController.height;
-            _standCenterY = _loco.CharController.center.y;
+            if (_loco.CharController != null)
+            {
+                _standHeight = _loco.CharController.height;
+                _standCenterY = _loco.CharController.center.y;
+            }
+            else
+            {
+                _standHeight = 1.8f;
+                _standCenterY = 0.9f;
+                Debug.LogWarning($"{LOG} CharController null w Awake -- defaults (h=1.8, cy=0.9)");
+            }
             Debug.Log($"{LOG} Awake: baseSpeed={_baseSpeed}, standHeight={_standHeight}, sprintMult={sprintMultiplier}, jumpForce={jumpForce}");
         }
 

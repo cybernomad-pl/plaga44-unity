@@ -306,6 +306,7 @@ namespace Plaga44.UI
 
             // Content area z vertical layout
             var contentGO = new GameObject("Content");
+            contentGO.AddComponent<RectTransform>();
             contentGO.transform.SetParent(_menuPanel.transform, false);
             var contentRect = contentGO.GetComponent<RectTransform>();
             contentRect.anchorMin = new Vector2(0, 0);
