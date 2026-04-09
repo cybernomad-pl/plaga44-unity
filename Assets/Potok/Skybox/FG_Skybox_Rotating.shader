@@ -4,12 +4,13 @@ Properties {
     [Gamma] _Exposure ("Exposure", Range(0, 8)) = 1.0
     _Rotation ("Rotation", Range(0, 360)) = 0
     _RotSpeed ("Rotation Speed", Range(0, 360)) = 0
-    _CloudBoost ("Cloud Brightness", Range(0, 5)) = 1.5
-    _CloudThreshold ("Cloud Threshold", Range(0, 1)) = 0.3
     _GroundColor ("Ground Color", Color) = (0.18, 0.42, 0.08, 1)
     _GroundBlend ("Ground Blend Height", Range(-0.5, 0.5)) = 0.05
     _GroundFade ("Ground Fade Softness", Range(0.01, 1)) = 0.3
-    [NoScaleOffset] _Tex ("Cubemap   (HDR)", Cube) = "grey" {}
+    _CloudOpacity ("Cloud Opacity", Range(0, 2)) = 1.0
+    _CloudTint ("Cloud Tint", Color) = (1, 1, 1, 1)
+    [NoScaleOffset] _Tex ("Sky Cubemap (HDR)", Cube) = "grey" {}
+    _CloudTex ("Cloud Layer (RGBA)", 2D) = "black" {}
 }
 
 SubShader {
@@ -28,14 +29,18 @@ SubShader {
         TEXTURECUBE(_Tex);
         SAMPLER(sampler_Tex);
         half4 _Tex_HDR;
+
+        TEXTURE2D(_CloudTex);
+        SAMPLER(sampler_CloudTex);
+
         half4 _Tint;
         half _Exposure;
         float _Rotation, _RotSpeed;
-        half _CloudBoost;
-        half _CloudThreshold;
         half4 _GroundColor;
         half _GroundBlend;
         half _GroundFade;
+        half _CloudOpacity;
+        half4 _CloudTint;
 
         float4 RotateAroundYInDegrees (float4 vertex, float degrees)
         {
@@ -67,28 +72,48 @@ SubShader {
             return o;
         }
 
-        // URP-compatible HDR decode (replaces built-in DecodeHDREnvironment)
         half3 DecodeHDRSkybox(half4 data, half4 hdr)
         {
-            // hdr.x = multiplier, hdr.y = power (usually 1 for cubemaps)
             half alpha = hdr.y > 0 ? data.a : 1.0;
             return data.rgb * hdr.x * pow(abs(alpha), hdr.y);
+        }
+
+        // Overlay blend mode (Photoshop-style)
+        half3 BlendOverlay(half3 base, half3 blend)
+        {
+            return lerp(
+                2.0 * base * blend,
+                1.0 - 2.0 * (1.0 - base) * (1.0 - blend),
+                step(0.5, base)
+            );
         }
 
         half4 frag (Varyings i) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+
+            // --- SKY LAYER (cubemap) ---
             half4 tex = SAMPLE_TEXTURECUBE(_Tex, sampler_Tex, i.texcoord);
-            half3 c = DecodeHDRSkybox(tex, _Tex_HDR);
-            c = c * _Tint.rgb * 2.0;
-            c *= _Exposure;
+            half3 sky = DecodeHDRSkybox(tex, _Tex_HDR);
+            sky = sky * _Tint.rgb * 2.0;
+            sky *= _Exposure;
 
-            half lum = dot(c, half3(0.299, 0.587, 0.114));
-            half cloudMask = saturate((lum - _CloudThreshold) / (1.0 - _CloudThreshold));
-            c += c * cloudMask * (_CloudBoost - 1.0);
+            // --- CLOUD LAYER (2D texture, overlay blend) ---
+            // Latlong UV z direction vector
+            half3 dir = normalize(i.texcoord);
+            half2 cloudUV;
+            cloudUV.x = atan2(dir.z, dir.x) / (2.0 * PI) + 0.5;
+            cloudUV.y = asin(dir.y) / PI + 0.5;
 
-            // Zielony gradient od dolu -- blend z ground color ponizej horyzontu
-            half viewY = normalize(i.texcoord).y;
+            half4 cloudSample = SAMPLE_TEXTURE2D(_CloudTex, sampler_CloudTex, cloudUV);
+            half3 cloudColor = cloudSample.rgb * _CloudTint.rgb;
+            half cloudAlpha = cloudSample.a * _CloudOpacity;
+
+            // Overlay blend -- chmury rozjaśniają jasne, przyciemniają ciemne
+            half3 c = lerp(sky, BlendOverlay(sky, cloudColor), cloudAlpha);
+
+            // --- GROUND gradient ---
+            half viewY = dir.y;
             half groundMask = saturate((_GroundBlend - viewY) / _GroundFade);
             c = lerp(c, _GroundColor.rgb * _Exposure, groundMask);
 
