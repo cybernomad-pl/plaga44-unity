@@ -47,14 +47,23 @@ public static class BuildScript
     [MenuItem("CYBERNOMAD/Build/Quest APK (Clean)", false, 3)]
     public static void BuildQuestClean()
     {
-        string libraryPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, "Library");
-        if (Directory.Exists(libraryPath))
+        // Czyscimy tylko build cache -- NIE caly Library (ArtifactDB jest zablokowany przez edytor)
+        string projectRoot = Directory.GetParent(Application.dataPath).FullName;
+        string[] cleanDirs = {
+            Path.Combine(projectRoot, "Library", "Bee"),
+            Path.Combine(projectRoot, "Library", "BuildPlayerData"),
+            Path.Combine(projectRoot, "Library", "Il2cppBuildCache"),
+            Path.Combine(projectRoot, "Temp", "StagingArea"),
+        };
+        foreach (var dir in cleanDirs)
         {
-            Debug.Log($"{LOG} Deleting Library cache...");
-            Directory.Delete(libraryPath, true);
-            Debug.Log($"{LOG} Library deleted. Build will reimport all assets.");
+            if (Directory.Exists(dir))
+            {
+                try { Directory.Delete(dir, true); Debug.Log($"{LOG} Deleted: {dir}"); }
+                catch (System.Exception e) { Debug.LogWarning($"{LOG} Skip {dir}: {e.Message}"); }
+            }
         }
-        BuildInternal(BuildOptions.None, "Clean Release");
+        BuildInternal(BuildOptions.CleanBuildCache, "Clean Release");
     }
 
     // ---- Batch mode entry points ----
