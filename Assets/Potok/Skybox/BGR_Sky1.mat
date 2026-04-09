@@ -100,8 +100,8 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _CloudBoost: 2.77
-    - _CloudThreshold: 0.379
+    - _CloudBoost: 5
+    - _CloudThreshold: 0.15
     - _Cull: 2
     - _Cutoff: 0.5
     - _DetailAlbedoMapScale: 1
@@ -110,7 +110,7 @@ Material:
     - _DstBlendAlpha: 0
     - _EmissionScaleUI: 0
     - _EnvironmentReflections: 1
-    - _Exposure: 0.2
+    - _Exposure: 0.5
     - _GlossMapScale: 0
     - _Glossiness: 0.5
     - _GlossyReflections: 0
