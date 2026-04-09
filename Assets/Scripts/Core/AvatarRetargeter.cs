@@ -188,6 +188,17 @@ namespace Plaga44
             Debug.Log($"{LOG} Initialize: model={_avatarRoot.name}, scale={_modelScale}");
 
             CacheBones();
+
+            // Graceful degrade: jesli brak krytycznych kosci (hips, spine, head),
+            // nie inicjalizuj IK -- PlayerAvatar uzyje fallback mapping
+            if (_hips == null && _head == null)
+            {
+                Debug.LogWarning($"{LOG} Initialize: 0 critical bones found (no Hips, no Head). " +
+                                 "Retargeting disabled -- check FBX bone hierarchy.");
+                _initialized = false;
+                return;
+            }
+
             CacheTPoseRotations();
             CacheLimbLengths();
 

@@ -42,11 +42,11 @@ namespace Plaga44
         // =====================================================================
 
         [Header("Config")]
-        [Tooltip("Skala modelu (Fuse OBJ = centymetry, potrzebuje 0.01)")]
-        public float modelScale = 0.01f;
+        [Tooltip("Skala modelu (2.75m mesh * 0.655 = 1.8m gracz)")]
+        public float modelScale = 0.655f;
 
-        [Tooltip("Offset Y modelu wzgledem riga (stopy na podlodze)")]
-        public float yOffset = -1.664f;
+        [Tooltip("Offset Y modelu wzgledem riga (0 = stopy na poziomie riga)")]
+        public float yOffset = 0f;
 
         [Tooltip("Ukryj glowe/szyje w first person")]
         public bool hideHeadInFirstPerson = true;
@@ -152,8 +152,9 @@ namespace Plaga44
 
                 if (_hipsBone != null)
                 {
-                    MapHand(_leftHandAnchor, "mixamorig:LeftArm", "mixamorig:LeftForeArm");
-                    MapHand(_rightHandAnchor, "mixamorig:RightArm", "mixamorig:RightForeArm");
+                    // Szukaj obu wariantow: z i bez prefixu mixamorig:
+                    MapHand(_leftHandAnchor, "LeftArm", "LeftForeArm");
+                    MapHand(_rightHandAnchor, "RightArm", "RightForeArm");
                 }
             }
         }
@@ -474,10 +475,13 @@ namespace Plaga44
 
         private void MapHand(Transform anchor, string upperBoneName, string lowerBoneName)
         {
-            if (anchor == null) return;
+            if (anchor == null || _avatarInstance == null) return;
 
-            var upper = FindBoneRecursive(_avatarInstance.transform, upperBoneName);
-            var lower = FindBoneRecursive(_avatarInstance.transform, lowerBoneName);
+            // Szukaj obu wariantow: bez i z prefixem mixamorig:
+            var upper = FindBoneRecursive(_avatarInstance.transform, upperBoneName)
+                     ?? FindBoneRecursive(_avatarInstance.transform, "mixamorig:" + upperBoneName);
+            var lower = FindBoneRecursive(_avatarInstance.transform, lowerBoneName)
+                     ?? FindBoneRecursive(_avatarInstance.transform, "mixamorig:" + lowerBoneName);
             if (upper == null || lower == null) return;
 
             Vector3 dir = anchor.position - upper.position;

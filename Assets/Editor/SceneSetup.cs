@@ -53,7 +53,6 @@ namespace Plaga44.Editor
             LoadTerrain();
             SpawnPlayerAboveTerrain(rig);
             EnsureLight();
-            // EnsureUplight(); -- wywalony
             SetFogAndAmbient();
             AddHamburgerMenu();
             AddPlayerAvatar(rig);
@@ -221,62 +220,67 @@ namespace Plaga44.Editor
             // height=1.8m, center y=0.9m = collider od y=0 do y=1.8m.
             // Na Quescie CenterEyeAnchor jest ~1.664m (oczy).
             // W edytorze bez headsetu fallback camera jest na 1.664m.
-            if (rig.GetComponent<CharacterController>() == null)
             {
-                var cc = Undo.AddComponent<CharacterController>(rig);
+                var cc = rig.GetComponent<CharacterController>();
+                if (cc == null)
+                    cc = Undo.AddComponent<CharacterController>(rig);
                 cc.height = 1.8f;
                 cc.radius = 0.3f;
                 cc.center = new Vector3(0f, 0.9f, 0f);
                 cc.skinWidth = 0.08f;  // wiekszy skin = mniej drgania na terenie
                 cc.stepOffset = 0.5f;  // wiekszy step = plynniejsze wchodzenie na nierówności
-                Debug.Log($"{LOG} Dodano CharacterController (h=1.8, r=0.3)");
+                Debug.Log($"{LOG} CharacterController: h=1.8, r=0.3, center=(0,0.9,0), skin=0.08, step=0.5");
             }
 
             // W edytorze bez headsetu -- podnieś kamerę na wysokość oczu
             EnsureCameraHeight(rig);
 
             // LocomotionController -- ruch thumbstickiem
-            if (rig.GetComponent<Locomotion.LocomotionController>() == null)
             {
-                var loco = Undo.AddComponent<Locomotion.LocomotionController>(rig);
+                var loco = rig.GetComponent<Locomotion.LocomotionController>();
+                if (loco == null)
+                    loco = Undo.AddComponent<Locomotion.LocomotionController>(rig);
                 loco.moveSpeed = 2.5f;
                 loco.strafeFactor = 0.8f;
-                Debug.Log($"{LOG} Dodano LocomotionController (speed=2.5, strafe=0.8)");
+                Debug.Log($"{LOG} LocomotionController: speed=2.5, strafe=0.8");
             }
 
             // SprintModifier -- L3 sprint, B skok
-            if (rig.GetComponent<Locomotion.SprintModifier>() == null)
             {
-                var sprint = Undo.AddComponent<Locomotion.SprintModifier>(rig);
+                var sprint = rig.GetComponent<Locomotion.SprintModifier>();
+                if (sprint == null)
+                    sprint = Undo.AddComponent<Locomotion.SprintModifier>(rig);
                 sprint.sprintMultiplier = 3f;
                 sprint.jumpForce = 5f;
                 sprint.jumpCooldown = 0.5f;
-                Debug.Log($"{LOG} Dodano SprintModifier (sprint=3x, jump=5)");
+                Debug.Log($"{LOG} SprintModifier: sprint=3x, jump=5");
             }
 
-
             // LocomotionManager -- orkiestracja
-            if (rig.GetComponent<Locomotion.LocomotionManager>() == null)
             {
-                var mgr = Undo.AddComponent<Locomotion.LocomotionManager>(rig);
+                var mgr = rig.GetComponent<Locomotion.LocomotionManager>();
+                if (mgr == null)
+                    mgr = Undo.AddComponent<Locomotion.LocomotionManager>(rig);
                 mgr.moveSpeed = 2.5f;
-                Debug.Log($"{LOG} Dodano LocomotionManager");
+                Debug.Log($"{LOG} LocomotionManager: speed=2.5");
             }
 
             // EditorCameraHeight -- wymusza wysokosc kamery w edytorze bez headsetu
-            if (rig.GetComponent<Locomotion.EditorCameraHeight>() == null)
             {
-                var camHeight = Undo.AddComponent<Locomotion.EditorCameraHeight>(rig);
+                var camHeight = rig.GetComponent<Locomotion.EditorCameraHeight>();
+                if (camHeight == null)
+                    camHeight = Undo.AddComponent<Locomotion.EditorCameraHeight>(rig);
                 camHeight.eyeHeight = 1.664f;
-                Debug.Log($"{LOG} Dodano EditorCameraHeight (1.664m)");
+                Debug.Log($"{LOG} EditorCameraHeight: 1.664m");
             }
 
             // EditorMouseLook -- obrot kamery myszka w edytorze (PPM + ruch)
-            if (rig.GetComponent<Locomotion.EditorMouseLook>() == null)
             {
-                var mouseLook = Undo.AddComponent<Locomotion.EditorMouseLook>(rig);
+                var mouseLook = rig.GetComponent<Locomotion.EditorMouseLook>();
+                if (mouseLook == null)
+                    mouseLook = Undo.AddComponent<Locomotion.EditorMouseLook>(rig);
                 mouseLook.sensitivity = 2f;
-                Debug.Log($"{LOG} Dodano EditorMouseLook (PPM + ruch myszy)");
+                Debug.Log($"{LOG} EditorMouseLook: sensitivity=2");
             }
         }
 
@@ -409,30 +413,7 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 6. Uplight -- zielone swiatlo od dolu (ZAWSZE)
-        // =====================================================================
-
-        static void EnsureUplight()
-        {
-            if (GameObject.Find("Ground Uplight") != null)
-            {
-                Debug.Log($"{LOG} Ground Uplight juz istnieje.");
-                return;
-            }
-
-            var uplightGO = new GameObject("Ground Uplight");
-            var uplight = uplightGO.AddComponent<Light>();
-            uplight.type = LightType.Directional;
-            uplight.color = new Color(0f, 0f, 0f);
-            uplight.intensity = 0.8f;
-            uplight.shadows = LightShadows.None;
-            uplightGO.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
-            Undo.RegisterCreatedObjectUndo(uplightGO, "Create Uplight");
-            Debug.Log($"{LOG} Stworzono Ground Uplight");
-        }
-
-        // =====================================================================
-        // 7. Fog + ambient (ZAWSZE)
+        // 6. Fog + ambient (ZAWSZE)
         // =====================================================================
 
         static void SetFogAndAmbient()
@@ -452,36 +433,44 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 8. Hamburger menu
+        // 7. Player avatar
         // =====================================================================
 
         static void AddPlayerAvatar(GameObject rig)
         {
-            // Komponent
-            if (rig.GetComponent<Plaga44.PlayerAvatar>() == null)
+            // Komponent -- ZAWSZE aktualizuj parametry
             {
-                var avatar = Undo.AddComponent<Plaga44.PlayerAvatar>(rig);
+                var avatar = rig.GetComponent<Plaga44.PlayerAvatar>();
+                if (avatar == null)
+                    avatar = Undo.AddComponent<Plaga44.PlayerAvatar>(rig);
                 avatar.modelScale = 0.655f;  // 2.75m mesh -> 1.8m gracz
-                avatar.yOffset = -1.664f;  // wysokosc oczu z PLAYER.obj Eyes group
+                avatar.yOffset = 0f;  // stopy na poziomie riga (CC bottom = 0 local)
                 avatar.hideHeadInFirstPerson = true;
+                Debug.Log($"{LOG} PlayerAvatar: scale=0.655, yOffset=0");
             }
 
             // Retargeter -- IK body retargeting (head, arms, legs)
-            if (rig.GetComponent<Plaga44.AvatarRetargeter>() == null)
             {
-                var retargeter = Undo.AddComponent<Plaga44.AvatarRetargeter>(rig);
+                var retargeter = rig.GetComponent<Plaga44.AvatarRetargeter>();
+                if (retargeter == null)
+                    retargeter = Undo.AddComponent<Plaga44.AvatarRetargeter>(rig);
                 retargeter.headToHipsRatio = 0.60f;
                 retargeter.spineFollowHead = 0.4f;
                 retargeter.stepFrequency = 2.0f;
                 retargeter.stepLength = 0.35f;
                 retargeter.stepHeight = 0.08f;
-                Debug.Log($"{LOG} Dodano AvatarRetargeter (IK body tracking)");
+                Debug.Log($"{LOG} AvatarRetargeter: IK body tracking");
             }
 
             // Model na scenie (widoczny w scene graph)
-            if (GameObject.Find("PlayerAvatarModel") != null)
+            var existingModel = GameObject.Find("PlayerAvatarModel");
+            if (existingModel != null)
             {
-                Debug.Log($"{LOG} PlayerAvatarModel juz na scenie.");
+                // Aktualizuj parametry istniejacego modelu
+                existingModel.transform.localPosition = Vector3.zero;
+                existingModel.transform.localRotation = Quaternion.identity;
+                existingModel.transform.localScale = Vector3.one * 0.655f;
+                Debug.Log($"{LOG} PlayerAvatarModel: zaktualizowano parametry (pos=0, scale=0.655)");
                 return;
             }
 
@@ -498,8 +487,8 @@ namespace Plaga44.Editor
             var model = (GameObject)PrefabUtility.InstantiatePrefab(fbx);
             model.name = "PlayerAvatarModel";
             model.transform.SetParent(rig.transform);
-            model.transform.localPosition = new Vector3(0f, -1.664f, 0f);
-            model.transform.localRotation = UnityEngine.Quaternion.identity;
+            model.transform.localPosition = Vector3.zero;  // stopy na poziomie riga
+            model.transform.localRotation = Quaternion.identity;
             model.transform.localScale = Vector3.one * 0.655f;  // 1.8m
             Undo.RegisterCreatedObjectUndo(model, "Create PlayerAvatarModel");
             Debug.Log($"{LOG} PlayerAvatarModel postawiony na scenie (dziecko {rig.name})");
@@ -520,7 +509,7 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 9. Inventory Screen + Menu Setup
+        // 8. Hamburger menu + Inventory Screen
         // =====================================================================
 
         static void AddInventoryScreen()
@@ -543,7 +532,7 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 10. Auto-Play (GameState.Play() na starcie)
+        // 9. Auto-Play (GameState.Play() na starcie)
         // =====================================================================
 
         static void AddAutoPlay()

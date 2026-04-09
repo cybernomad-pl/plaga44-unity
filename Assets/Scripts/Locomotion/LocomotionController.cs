@@ -153,6 +153,7 @@ namespace Plaga44.Locomotion
         }
 
         private bool _wasGrounded = true;
+        private float _lastGroundedLogTime = -1f;
 
         private void Update()
         {
@@ -175,10 +176,14 @@ namespace Plaga44.Locomotion
 
             NormalisedSpeed = Mathf.Clamp01(moveInput.magnitude);
 
-            // Log zmian grounded
+            // Log zmian grounded (throttled: max co 0.5s zeby uniknac spam przy drganiach CC)
             if (_cc.isGrounded != _wasGrounded)
             {
-                Debug.Log($"{LOG} Grounded: {_wasGrounded} -> {_cc.isGrounded}, pos={transform.position}, vVel={_verticalVelocity:F2}");
+                if (Time.time - _lastGroundedLogTime > 0.5f)
+                {
+                    Debug.Log($"{LOG} Grounded: {_wasGrounded} -> {_cc.isGrounded}, pos={transform.position}, vVel={_verticalVelocity:F2}");
+                    _lastGroundedLogTime = Time.time;
+                }
                 _wasGrounded = _cc.isGrounded;
             }
         }
