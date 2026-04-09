@@ -517,7 +517,7 @@ namespace Plaga44.Editor
             {
                 var avatar = Undo.AddComponent<Plaga44.PlayerAvatar>(rig);
                 avatar.modelScale = 0.655f;  // 2.75m mesh -> 1.8m gracz
-                avatar.yOffset = -1.65f;
+                avatar.yOffset = -1.664f;  // wysokosc oczu z PLAYER.obj Eyes group
                 avatar.hideHeadInFirstPerson = true;
             }
 

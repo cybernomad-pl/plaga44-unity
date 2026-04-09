@@ -30,7 +30,7 @@ namespace Plaga44.Locomotion
     public class EditorCameraHeight : MonoBehaviour
     {
         [Tooltip("Wysokosc oczu gracza w metrach.")]
-        public float eyeHeight = 1.65f;
+        public float eyeHeight = 1.664f;  // z PLAYER.obj Eyes group
 
         private Transform _cameraTransform;
         private bool _isVRActive;
