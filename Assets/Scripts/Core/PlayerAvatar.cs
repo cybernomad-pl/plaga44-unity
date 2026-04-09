@@ -450,9 +450,9 @@ namespace Plaga44
         {
             if (_avatarInstance == null) return;
 
-            _headBone = FindBoneRecursive(_avatarInstance.transform, "mixamorig:Head");
-            _neckBone = FindBoneRecursive(_avatarInstance.transform, "mixamorig:Neck");
-            _hipsBone = FindBoneRecursive(_avatarInstance.transform, "mixamorig:Hips");
+            _headBone = FindBoneRecursive(_avatarInstance.transform, "Head") ?? FindBoneRecursive(_avatarInstance.transform, "mixamorig:Head");
+            _neckBone = FindBoneRecursive(_avatarInstance.transform, "Neck") ?? FindBoneRecursive(_avatarInstance.transform, "mixamorig:Neck");
+            _hipsBone = FindBoneRecursive(_avatarInstance.transform, "Hips") ?? FindBoneRecursive(_avatarInstance.transform, "mixamorig:Hips");
 
             Debug.Log($"{LOG} Bones found: head={_headBone != null}, neck={_neckBone != null}, hips={_hipsBone != null}");
         }

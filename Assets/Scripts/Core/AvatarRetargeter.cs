@@ -244,31 +244,32 @@ namespace Plaga44
             // ZAWSZE szukaj po nazwie -- Animator humanoid mapping czesto zwraca null
             // na prefab instances. FindBone rekurencyjnie przeszukuje hierarchie.
             {
-                Debug.Log($"{LOG} Finding bones by name (mixamorig:*)");
-                _hips = FindBone("mixamorig:Hips");
-                _spine = FindBone("mixamorig:Spine");
-                _spine1 = FindBone("mixamorig:Spine1");
-                _spine2 = FindBone("mixamorig:Spine2");
-                _neck = FindBone("mixamorig:Neck");
-                _head = FindBone("mixamorig:Head");
+                // Szukaj obu wariantow: z i bez prefixu mixamorig:
+                Debug.Log($"{LOG} Finding bones by name...");
+                _hips = FindBone("Hips") ?? FindBone("mixamorig:Hips");
+                _spine = FindBone("Spine") ?? FindBone("mixamorig:Spine");
+                _spine1 = FindBone("Spine1") ?? FindBone("mixamorig:Spine1");
+                _spine2 = FindBone("Spine2") ?? FindBone("mixamorig:Spine2");
+                _neck = FindBone("Neck") ?? FindBone("mixamorig:Neck");
+                _head = FindBone("Head") ?? FindBone("mixamorig:Head");
 
-                _leftShoulder = FindBone("mixamorig:LeftShoulder");
-                _leftArm = FindBone("mixamorig:LeftArm");
-                _leftForeArm = FindBone("mixamorig:LeftForeArm");
-                _leftHand = FindBone("mixamorig:LeftHand");
+                _leftShoulder = FindBone("LeftShoulder") ?? FindBone("mixamorig:LeftShoulder");
+                _leftArm = FindBone("LeftArm") ?? FindBone("mixamorig:LeftArm");
+                _leftForeArm = FindBone("LeftForeArm") ?? FindBone("mixamorig:LeftForeArm");
+                _leftHand = FindBone("LeftHand") ?? FindBone("mixamorig:LeftHand");
 
-                _rightShoulder = FindBone("mixamorig:RightShoulder");
-                _rightArm = FindBone("mixamorig:RightArm");
-                _rightForeArm = FindBone("mixamorig:RightForeArm");
-                _rightHand = FindBone("mixamorig:RightHand");
+                _rightShoulder = FindBone("RightShoulder") ?? FindBone("mixamorig:RightShoulder");
+                _rightArm = FindBone("RightArm") ?? FindBone("mixamorig:RightArm");
+                _rightForeArm = FindBone("RightForeArm") ?? FindBone("mixamorig:RightForeArm");
+                _rightHand = FindBone("RightHand") ?? FindBone("mixamorig:RightHand");
 
-                _leftUpLeg = FindBone("mixamorig:LeftUpLeg");
-                _leftLeg = FindBone("mixamorig:LeftLeg");
-                _leftFoot = FindBone("mixamorig:LeftFoot");
+                _leftUpLeg = FindBone("LeftUpLeg") ?? FindBone("mixamorig:LeftUpLeg");
+                _leftLeg = FindBone("LeftLeg") ?? FindBone("mixamorig:LeftLeg");
+                _leftFoot = FindBone("LeftFoot") ?? FindBone("mixamorig:LeftFoot");
 
-                _rightUpLeg = FindBone("mixamorig:RightUpLeg");
-                _rightLeg = FindBone("mixamorig:RightLeg");
-                _rightFoot = FindBone("mixamorig:RightFoot");
+                _rightUpLeg = FindBone("RightUpLeg") ?? FindBone("mixamorig:RightUpLeg");
+                _rightLeg = FindBone("RightLeg") ?? FindBone("mixamorig:RightLeg");
+                _rightFoot = FindBone("RightFoot") ?? FindBone("mixamorig:RightFoot");
             }
 
             LogBoneStatus();
