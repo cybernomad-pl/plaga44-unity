@@ -51,6 +51,9 @@ namespace Plaga44.Editor
 
         static void AutoCheck()
         {
+            // NIE odpalaj LoadTestbed w play mode
+            if (EditorApplication.isPlaying) return;
+
             // Otwórz TESTBED_V2 i postaw scene
             SceneSetup.LoadTestbed();
 
