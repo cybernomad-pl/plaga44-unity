@@ -44,3 +44,12 @@ crashlytics-build.properties
 # DemoLevel assets (copied from testbed v1, heavy textures)
 /Assets/DemoLevel/
 /Assets/FloodedGrounds/
+
+# Unity temp/backup
+.utmp/
+Assets/_Recovery/
+Assets/New folder/
+OLD/
+*_BurstDebugInformation_DoNotShip/
+*_BackUpThisFolder_ButDontShipItWithYourGame/
+Assets/XR/Temp/
