@@ -53,6 +53,8 @@ namespace Plaga44.Editor
             LoadTerrain();
             SpawnPlayerAboveTerrain(rig);
             EnsureLight();
+            EnsureUplight();
+            SetFogAndAmbient();
             AddAutoPlay();
 
             // Zaznacz rig w hierarchii
@@ -382,20 +384,6 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} Skybox ustawiony");
             }
 
-            // --- FOG (zielony gradient od dolu) ---
-            RenderSettings.fog = true;
-            RenderSettings.fogMode = FogMode.Linear;
-            RenderSettings.fogColor = new Color(0.15f, 0.35f, 0.1f); // ciemna zielen
-            RenderSettings.fogStartDistance = 0f;
-            RenderSettings.fogEndDistance = 200f;
-
-            // Ambient -- zielonkawy od dolu
-            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-            RenderSettings.ambientGroundColor = new Color(0.12f, 0.28f, 0.08f); // zielen od ziemi
-            RenderSettings.ambientEquatorColor = new Color(0.2f, 0.3f, 0.15f);
-            RenderSettings.ambientSkyColor = new Color(0.5f, 0.55f, 0.6f);
-
-            Debug.Log($"{LOG} Fog + ambient: zielony gradient od dolu");
         }
 
         /// <summary>Prosta podloga fallback gdy Level assety niedostepne.</summary>
@@ -447,7 +435,6 @@ namespace Plaga44.Editor
                 return;
             }
 
-            // Glowne swiatlo -- slonce
             var lightGO = new GameObject("Directional Light");
             var light = lightGO.AddComponent<Light>();
             light.type = LightType.Directional;
@@ -456,22 +443,54 @@ namespace Plaga44.Editor
             light.shadows = LightShadows.Soft;
             lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
             Undo.RegisterCreatedObjectUndo(lightGO, "Create Light");
-
-            // Uplight -- zielonkawe swiatlo od dolu (odbicie od trawy)
-            var uplightGO = new GameObject("Ground Uplight");
-            var uplight = uplightGO.AddComponent<Light>();
-            uplight.type = LightType.Directional;
-            uplight.color = new Color(0.2f, 0.4f, 0.15f); // zielen
-            uplight.intensity = 0.3f;
-            uplight.shadows = LightShadows.None;
-            uplightGO.transform.rotation = Quaternion.Euler(-90f, 0f, 0f); // swiatlo DO GORY
-            Undo.RegisterCreatedObjectUndo(uplightGO, "Create Uplight");
-
-            Debug.Log($"{LOG} Stworzono Directional Light + Ground Uplight");
+            Debug.Log($"{LOG} Stworzono Directional Light");
         }
 
         // =====================================================================
-        // 6. Auto-Play (GameState.Play() na starcie)
+        // 6. Uplight -- zielone swiatlo od dolu (ZAWSZE)
+        // =====================================================================
+
+        static void EnsureUplight()
+        {
+            if (GameObject.Find("Ground Uplight") != null)
+            {
+                Debug.Log($"{LOG} Ground Uplight juz istnieje.");
+                return;
+            }
+
+            var uplightGO = new GameObject("Ground Uplight");
+            var uplight = uplightGO.AddComponent<Light>();
+            uplight.type = LightType.Directional;
+            uplight.color = new Color(0.2f, 0.4f, 0.15f);
+            uplight.intensity = 0.3f;
+            uplight.shadows = LightShadows.None;
+            uplightGO.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+            Undo.RegisterCreatedObjectUndo(uplightGO, "Create Uplight");
+            Debug.Log($"{LOG} Stworzono Ground Uplight");
+        }
+
+        // =====================================================================
+        // 7. Fog + ambient (ZAWSZE)
+        // =====================================================================
+
+        static void SetFogAndAmbient()
+        {
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.Linear;
+            RenderSettings.fogColor = new Color(0.15f, 0.35f, 0.1f);
+            RenderSettings.fogStartDistance = 0f;
+            RenderSettings.fogEndDistance = 200f;
+
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+            RenderSettings.ambientGroundColor = new Color(0.12f, 0.28f, 0.08f);
+            RenderSettings.ambientEquatorColor = new Color(0.2f, 0.3f, 0.15f);
+            RenderSettings.ambientSkyColor = new Color(0.5f, 0.55f, 0.6f);
+
+            Debug.Log($"{LOG} Fog + ambient ustawione");
+        }
+
+        // =====================================================================
+        // 8. Auto-Play (GameState.Play() na starcie)
         // =====================================================================
 
         static void AddAutoPlay()
