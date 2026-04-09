@@ -379,12 +379,26 @@ namespace Plaga44.Editor
 
             Debug.Log($"{LOG} Teren {GRID_SIZE}x{GRID_SIZE}: {GRID_SIZE * GRID_SIZE} tiles, {totalX}x{totalZ}m");
 
-            // --- SKYBOX ---
+            // --- SKYBOX + CLOUDS ---
             var skyboxMat = AssetDatabase.LoadAssetAtPath<Material>(SKYBOX_MAT);
             if (skyboxMat != null)
             {
+                // Sky cubemap (bez chmur)
+                var skyCube = AssetDatabase.LoadAssetAtPath<Cubemap>("Assets/Potok/Skybox/BGR_Sky1_sky.tif");
+                if (skyCube != null)
+                    skyboxMat.SetTexture("_Tex", skyCube);
+
+                // Cloud layer (białe chmury, overlay)
+                var cloudTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Potok/Skybox/BGR_Sky1_clouds.png");
+                if (cloudTex != null)
+                    skyboxMat.SetTexture("_CloudTex", cloudTex);
+
+                skyboxMat.SetFloat("_CloudOpacity", 1.0f);
+                skyboxMat.SetColor("_CloudTint", Color.white);
+                EditorUtility.SetDirty(skyboxMat);
+
                 RenderSettings.skybox = skyboxMat;
-                Debug.Log($"{LOG} Skybox ustawiony");
+                Debug.Log($"{LOG} Skybox + clouds ustawione");
             }
 
         }
