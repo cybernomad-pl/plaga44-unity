@@ -46,7 +46,7 @@ namespace Plaga44
         public float modelScale = 0.01f;
 
         [Tooltip("Offset Y modelu wzgledem riga (stopy na podlodze)")]
-        public float yOffset = -1.65f;
+        public float yOffset = -1.664f;
 
         [Tooltip("Ukryj glowe/szyje w first person")]
         public bool hideHeadInFirstPerson = true;

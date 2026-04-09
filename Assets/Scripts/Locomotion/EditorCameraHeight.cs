@@ -9,7 +9,8 @@
 //
 // ROZWIAZANIE:
 // LateUpdate (po OVRCameraRig.Update) wymusza CenterEyeAnchor.localPosition.y
-// na wysokosc oczu (1.65m). Dziala TYLKO w edytorze bez XR -- na Questcie
+// na wysokosc oczu (1.664m -- zmierzone z PLAYER.obj Eyes group).
+// Dziala TYLKO w edytorze bez XR -- na Questcie
 // tracking nadpisuje pozycje wiec ten komponent nic nie robi.
 //
 // SETUP:
@@ -22,7 +23,7 @@ using UnityEngine;
 namespace Plaga44.Locomotion
 {
     /// <summary>
-    /// Wymusza wysokosc kamery na 1.65m w edytorze bez headsetu.
+    /// Wymusza wysokosc kamery na 1.664m w edytorze bez headsetu.
     /// Na urzadzeniu VR (Quest) nie robi nic -- tracking nadpisuje pozycje.
     /// Uzywa LateUpdate zeby dzialac PO OVRCameraRig.Update().
     /// </summary>

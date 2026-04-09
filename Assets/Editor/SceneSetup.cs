@@ -101,34 +101,19 @@ namespace Plaga44.Editor
         }
 
         /// <summary>
-        /// Umieszcza gracza wysoko nad srodkiem terenu -- spadnie na teren.
-        /// Jesli brak terenu, stawia na y=50.
+        /// Umieszcza gracza nad srodkiem swiata (0,200,0).
+        /// Przy 15x15 grid terenow srodek gridu jest na (0,0,0).
+        /// Gracz spada z 200m na teren -- CharacterController i grawitacja zalatwia ladowanie.
         /// </summary>
         static void SpawnPlayerAboveTerrain(GameObject rig)
         {
-            var terrain = Object.FindFirstObjectByType<Terrain>();
-            if (terrain != null)
-            {
-                var data = terrain.terrainData;
-                var terrainPos = terrain.transform.position;
-                // Srodek terenu
-                float cx = terrainPos.x + data.size.x * 0.5f;
-                float cz = terrainPos.z + data.size.z * 0.5f;
-                // Najwyzszy punkt terenu + 200m
-                float maxHeight = terrainPos.y + data.size.y + 200f;
-                rig.transform.position = new Vector3(cx, maxHeight, cz);
-                Debug.Log($"{LOG} Gracz nad terenem: ({cx:F0}, {maxHeight:F0}, {cz:F0})");
-            }
-            else
-            {
-                rig.transform.position = new Vector3(0f, 50f, 0f);
-                Debug.Log($"{LOG} Gracz na y=50 (brak terenu)");
-            }
+            rig.transform.position = new Vector3(0f, 200f, 0f);
+            Debug.Log($"{LOG} Gracz nad srodkiem swiata: (0, 200, 0)");
         }
 
         /// <summary>
         /// W edytorze bez headsetu OVRCameraRig ma CenterEyeAnchor na y=0.
-        /// Szukamy CenterEyeAnchor i podnosimy na 1.65m (wysokosc oczu).
+        /// Szukamy CenterEyeAnchor i podnosimy na 1.664m (wysokosc oczu).
         /// Na Quescie head tracking to nadpisze -- nie szkodzi.
         /// </summary>
         static void EnsureCameraHeight(GameObject rig)
@@ -140,8 +125,8 @@ namespace Plaga44.Editor
                 var eye = tracking.Find("CenterEyeAnchor");
                 if (eye != null)
                 {
-                    eye.localPosition = new Vector3(0f, 1.65f, 0f);
-                    Debug.Log($"{LOG} CenterEyeAnchor podniesiony na 1.65m");
+                    eye.localPosition = new Vector3(0f, 1.664f, 0f);
+                    Debug.Log($"{LOG} CenterEyeAnchor podniesiony na 1.664m");
                     return;
                 }
             }
@@ -150,8 +135,8 @@ namespace Plaga44.Editor
             var cam = rig.GetComponentInChildren<Camera>();
             if (cam != null && cam.transform.localPosition.y < 0.1f)
             {
-                cam.transform.localPosition = new Vector3(0f, 1.65f, 0f);
-                Debug.Log($"{LOG} Fallback camera podniesiona na 1.65m");
+                cam.transform.localPosition = new Vector3(0f, 1.664f, 0f);
+                Debug.Log($"{LOG} Fallback camera podniesiona na 1.664m");
             }
         }
 
@@ -234,8 +219,8 @@ namespace Plaga44.Editor
             // W VR kamera jest na pozycji glowy gracza (tracking).
             // CC musi obejmowac cialo OD PODLOGI do czubka glowy.
             // height=1.8m, center y=0.9m = collider od y=0 do y=1.8m.
-            // Na Quescie CenterEyeAnchor jest ~1.65m (oczy).
-            // W edytorze bez headsetu fallback camera jest na 1.65m.
+            // Na Quescie CenterEyeAnchor jest ~1.664m (oczy).
+            // W edytorze bez headsetu fallback camera jest na 1.664m.
             if (rig.GetComponent<CharacterController>() == null)
             {
                 var cc = Undo.AddComponent<CharacterController>(rig);
@@ -282,8 +267,8 @@ namespace Plaga44.Editor
             if (rig.GetComponent<Locomotion.EditorCameraHeight>() == null)
             {
                 var camHeight = Undo.AddComponent<Locomotion.EditorCameraHeight>(rig);
-                camHeight.eyeHeight = 1.65f;
-                Debug.Log($"{LOG} Dodano EditorCameraHeight (1.65m)");
+                camHeight.eyeHeight = 1.664f;
+                Debug.Log($"{LOG} Dodano EditorCameraHeight (1.664m)");
             }
 
             // EditorMouseLook -- obrot kamery myszka w edytorze (PPM + ruch)
@@ -379,26 +364,18 @@ namespace Plaga44.Editor
 
             Debug.Log($"{LOG} Teren {GRID_SIZE}x{GRID_SIZE}: {GRID_SIZE * GRID_SIZE} tiles, {totalX}x{totalZ}m");
 
-            // --- SKYBOX + CLOUDS ---
+            // --- SKYBOX ---
+            // Uzywamy ORYGINALNEGO cubemapu (BGR_Sky1.tif, guid 8888999060e5b7f4399b58f65d814847).
+            // Material BGR_Sky1.mat juz ma _Tex ustawiony na ten cubemap -- nie nadpisujemy.
+            // Chmury wylaczone (CloudOpacity=0) -- upraszcza rendering.
             var skyboxMat = AssetDatabase.LoadAssetAtPath<Material>(SKYBOX_MAT);
             if (skyboxMat != null)
             {
-                // Sky cubemap (bez chmur)
-                var skyCube = AssetDatabase.LoadAssetAtPath<Cubemap>("Assets/Potok/Skybox/BGR_Sky1_sky.tif");
-                if (skyCube != null)
-                    skyboxMat.SetTexture("_Tex", skyCube);
-
-                // Cloud layer (białe chmury, overlay)
-                var cloudTex = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Potok/Skybox/BGR_Sky1_clouds.png");
-                if (cloudTex != null)
-                    skyboxMat.SetTexture("_CloudTex", cloudTex);
-
-                skyboxMat.SetFloat("_CloudOpacity", 1.0f);
-                skyboxMat.SetColor("_CloudTint", Color.white);
+                skyboxMat.SetFloat("_CloudOpacity", 0f);
                 EditorUtility.SetDirty(skyboxMat);
 
                 RenderSettings.skybox = skyboxMat;
-                Debug.Log($"{LOG} Skybox + clouds ustawione");
+                Debug.Log($"{LOG} Skybox ustawiony (oryginalny cubemap, chmury wylaczone)");
             }
 
         }
@@ -553,7 +530,7 @@ namespace Plaga44.Editor
             var model = (GameObject)PrefabUtility.InstantiatePrefab(fbx);
             model.name = "PlayerAvatarModel";
             model.transform.SetParent(rig.transform);
-            model.transform.localPosition = new Vector3(0f, -1.65f, 0f);
+            model.transform.localPosition = new Vector3(0f, -1.664f, 0f);
             model.transform.localRotation = UnityEngine.Quaternion.identity;
             model.transform.localScale = Vector3.one * 0.655f;  // 1.8m
             Undo.RegisterCreatedObjectUndo(model, "Create PlayerAvatarModel");

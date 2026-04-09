@@ -158,7 +158,7 @@ namespace Plaga44.Locomotion
 
                 var camHeight = _loco.GetComponent<EditorCameraHeight>();
                 if (camHeight != null)
-                    camHeight.eyeHeight = 1.65f;
+                    camHeight.eyeHeight = 1.664f;
             }
         }
 
@@ -237,7 +237,7 @@ namespace Plaga44.Locomotion
             var camHeight = _loco.GetComponent<EditorCameraHeight>();
             if (camHeight != null)
             {
-                float eyeRatio = 1.65f / _standHeight; // proporcja oczy/wysokosc
+                float eyeRatio = 1.664f / _standHeight; // proporcja oczy/wysokosc
                 camHeight.eyeHeight = Mathf.Lerp(camHeight.eyeHeight, targetHeight * eyeRatio, crouchSpeed * Time.deltaTime);
             }
         }
