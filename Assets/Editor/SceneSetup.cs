@@ -461,8 +461,8 @@ namespace Plaga44.Editor
             var uplightGO = new GameObject("Ground Uplight");
             var uplight = uplightGO.AddComponent<Light>();
             uplight.type = LightType.Directional;
-            uplight.color = new Color(0.2f, 0.4f, 0.15f);
-            uplight.intensity = 0.3f;
+            uplight.color = new Color(0f, 0f, 0f);
+            uplight.intensity = 0.8f;
             uplight.shadows = LightShadows.None;
             uplightGO.transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
             Undo.RegisterCreatedObjectUndo(uplightGO, "Create Uplight");
