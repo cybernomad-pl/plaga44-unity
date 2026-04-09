@@ -303,7 +303,7 @@ namespace Plaga44.Editor
         private const string TILE_PATH = "Assets/Potok/Terrain/Tile_{0}.asset";
         private const string SKYBOX_MAT = "Assets/Potok/Skybox/BGR_Sky1.mat";
         // WODA: wywalona ze sceny
-        private const int GRID_SIZE = 5; // 5x5 = 25 tiles
+        private const int GRID_SIZE = 15; // 15x15 = 225 tiles
 
         /// <summary>
         /// Stawia 5x5 grid terenow, wode i skybox z Potok asset packa.
