@@ -155,7 +155,7 @@ public static class BuildScript
 
         if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
         {
-            long sizeMB = report.summary.totalSize / (1024 * 1024);
+            long sizeMB = (long)(report.summary.totalSize / (1024 * 1024));
             Debug.Log($"{LOG} BUILD SUCCESS");
             Debug.Log($"{LOG}   APK: {outputPath} ({sizeMB} MB)");
             Debug.Log($"{LOG}   Time: {duration.TotalSeconds:F0}s");
