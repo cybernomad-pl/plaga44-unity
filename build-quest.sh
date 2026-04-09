@@ -25,7 +25,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_PATH="$SCRIPT_DIR"
 UNITY_PATH="/mnt/c/Program Files/Unity/Hub/Editor/6000.3.7f1/Editor/Unity.exe"
 BUILDS_DIR="$PROJECT_PATH/Builds"
-BACKUP_DIR="/mnt/c/Users/boris/Desktop/PLAGA44/builds"
+BACKUP_DIR="/mnt/c/Users/boris/NordLocker_8592730/PLAGA44/builds"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 BUILD_METHOD="BuildScript.Build"
 

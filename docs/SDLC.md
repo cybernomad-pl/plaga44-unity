@@ -160,7 +160,7 @@ Unity.exe -batchmode -runTests -testPlatform EditMode \
 
 - **Build**: ręczny z menu Unity (`CYBERNOMAD > Build > Build APK (Quest)`) lub batch mode
 - **Deploy**: ADB install przez USB/WiFi
-- **Backup**: builds z timestampem do `C:\Users\boris\Desktop\PLAGA44\builds\`
+- **Backup**: builds z timestampem do `C:\Users\boris\NordLocker_8592730\PLAGA44\builds\`
 
 ### Build scripts
 
