@@ -33,13 +33,16 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Scene Setup/Load Testbed", false, 10)]
         public static void LoadTestbed()
         {
+            Debug.Log($"{LOG} === Loading Testbed ===");
+
             if (EditorApplication.isPlaying)
             {
-                Debug.LogWarning($"{LOG} LoadTestbed: pominieto -- play mode aktywny");
+                // Play mode -- uzyj SceneManager (EditorSceneManager nie dziala w play mode)
+                Debug.Log($"{LOG} Play mode -- reload via SceneManager");
+                UnityEngine.SceneManagement.SceneManager.LoadScene(
+                    UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
                 return;
             }
-
-            Debug.Log($"{LOG} === Loading Testbed ===");
 
             UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/TESTBED_V2.unity");
 
