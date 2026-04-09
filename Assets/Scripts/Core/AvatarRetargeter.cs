@@ -241,40 +241,10 @@ namespace Plaga44
 
         private void CacheBones()
         {
-            // Try Animator humanoid mapping first
-            var animator = _avatarRoot.GetComponent<Animator>();
-            if (animator != null && animator.avatar != null && animator.avatar.isHuman)
+            // ZAWSZE szukaj po nazwie -- Animator humanoid mapping czesto zwraca null
+            // na prefab instances. FindBone rekurencyjnie przeszukuje hierarchie.
             {
-                Debug.Log($"{LOG} Using Animator humanoid bone mapping");
-                _hips = animator.GetBoneTransform(HumanBodyBones.Hips);
-                _spine = animator.GetBoneTransform(HumanBodyBones.Spine);
-                _spine1 = animator.GetBoneTransform(HumanBodyBones.Chest);
-                _spine2 = animator.GetBoneTransform(HumanBodyBones.UpperChest);
-                _neck = animator.GetBoneTransform(HumanBodyBones.Neck);
-                _head = animator.GetBoneTransform(HumanBodyBones.Head);
-
-                _leftShoulder = animator.GetBoneTransform(HumanBodyBones.LeftShoulder);
-                _leftArm = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
-                _leftForeArm = animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
-                _leftHand = animator.GetBoneTransform(HumanBodyBones.LeftHand);
-
-                _rightShoulder = animator.GetBoneTransform(HumanBodyBones.RightShoulder);
-                _rightArm = animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
-                _rightForeArm = animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
-                _rightHand = animator.GetBoneTransform(HumanBodyBones.RightHand);
-
-                _leftUpLeg = animator.GetBoneTransform(HumanBodyBones.LeftUpperLeg);
-                _leftLeg = animator.GetBoneTransform(HumanBodyBones.LeftLowerLeg);
-                _leftFoot = animator.GetBoneTransform(HumanBodyBones.LeftFoot);
-
-                _rightUpLeg = animator.GetBoneTransform(HumanBodyBones.RightUpperLeg);
-                _rightLeg = animator.GetBoneTransform(HumanBodyBones.RightLowerLeg);
-                _rightFoot = animator.GetBoneTransform(HumanBodyBones.RightFoot);
-            }
-            else
-            {
-                // Fallback: find by name (Mixamo naming convention)
-                Debug.Log($"{LOG} Fallback: finding bones by name (mixamorig:*)");
+                Debug.Log($"{LOG} Finding bones by name (mixamorig:*)");
                 _hips = FindBone("mixamorig:Hips");
                 _spine = FindBone("mixamorig:Spine");
                 _spine1 = FindBone("mixamorig:Spine1");
