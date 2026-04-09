@@ -100,6 +100,7 @@ public static class BuildScript
         {
             // Fallback: try known scene paths
             string[] fallbacks = {
+                "Assets/TESTBED_V2.unity",
                 "Assets/Scenes/PLAGA44_Demo.unity",
                 "Assets/Scenes/testbed.unity"
             };
