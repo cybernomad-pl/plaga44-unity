@@ -112,8 +112,8 @@ namespace Plaga44.Editor
                 // Srodek terenu
                 float cx = terrainPos.x + data.size.x * 0.5f;
                 float cz = terrainPos.z + data.size.z * 0.5f;
-                // Najwyzszy punkt terenu + 200m
-                float maxHeight = terrainPos.y + data.size.y + 200f;
+                // Najwyzszy punkt terenu + 1200m
+                float maxHeight = terrainPos.y + data.size.y + 1200f;
                 rig.transform.position = new Vector3(cx, maxHeight, cz);
                 Debug.Log($"{LOG} Gracz nad terenem: ({cx:F0}, {maxHeight:F0}, {cz:F0})");
             }
