@@ -53,7 +53,7 @@ namespace Plaga44.Editor
             LoadTerrain();
             SpawnPlayerAboveTerrain(rig);
             EnsureLight();
-            EnsureUplight();
+            // EnsureUplight(); -- wywalony
             SetFogAndAmbient();
             AddAutoPlay();
 
@@ -477,13 +477,13 @@ namespace Plaga44.Editor
         {
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.Linear;
-            RenderSettings.fogColor = new Color(0.15f, 0.35f, 0.1f);
-            RenderSettings.fogStartDistance = 0f;
-            RenderSettings.fogEndDistance = 200f;
+            RenderSettings.fogColor = new Color(0.02f, 0.02f, 0.02f);
+            RenderSettings.fogStartDistance = 50f;
+            RenderSettings.fogEndDistance = 300f;
 
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-            RenderSettings.ambientGroundColor = new Color(0.12f, 0.28f, 0.08f);
-            RenderSettings.ambientEquatorColor = new Color(0.2f, 0.3f, 0.15f);
+            RenderSettings.ambientGroundColor = new Color(0.02f, 0.02f, 0.02f);
+            RenderSettings.ambientEquatorColor = new Color(0.08f, 0.08f, 0.08f);
             RenderSettings.ambientSkyColor = new Color(0.5f, 0.55f, 0.6f);
 
             Debug.Log($"{LOG} Fog + ambient ustawione");
