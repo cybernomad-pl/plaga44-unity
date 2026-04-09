@@ -56,6 +56,7 @@ namespace Plaga44.Editor
             // EnsureUplight(); -- wywalony
             SetFogAndAmbient();
             AddHamburgerMenu();
+            AddPlayerAvatar(rig);
             AddAutoPlay();
 
             // Zaznacz rig w hierarchii
@@ -493,6 +494,21 @@ namespace Plaga44.Editor
         // =====================================================================
         // 8. Hamburger menu
         // =====================================================================
+
+        static void AddPlayerAvatar(GameObject rig)
+        {
+            if (rig.GetComponent<Plaga44.PlayerAvatar>() != null)
+            {
+                Debug.Log($"{LOG} PlayerAvatar juz istnieje.");
+                return;
+            }
+
+            var avatar = Undo.AddComponent<Plaga44.PlayerAvatar>(rig);
+            avatar.modelScale = 0.01f;    // Fuse cm -> Unity m
+            avatar.yOffset = -1.65f;      // stopy na podlodze
+            avatar.hideHeadInFirstPerson = true;
+            Debug.Log($"{LOG} Dodano PlayerAvatar (scale=0.01, yOffset=-1.65)");
+        }
 
         static void AddHamburgerMenu()
         {
