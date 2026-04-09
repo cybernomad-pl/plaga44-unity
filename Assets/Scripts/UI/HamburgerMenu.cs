@@ -94,6 +94,10 @@ namespace Plaga44.UI
 
         private void Update()
         {
+            // Don't toggle hamburger menu while inventory is open
+            if (GameState.Current == GamePhase.Inventory)
+                return;
+
             if (GetMenuToggleInput())
                 Toggle();
 

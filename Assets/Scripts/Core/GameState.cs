@@ -50,6 +50,9 @@ namespace Plaga44
         /// <summary>Rozgrywka -- wszystko aktywne (lokomocja, bron, AI, itp.).</summary>
         Playing,
 
+        /// <summary>Ekran ekwipunku -- UI aktywne, gameplay zamrozony, czas plynie (animacje modelu).</summary>
+        Inventory,
+
         /// <summary>Menu pauzy -- input UI + head tracking, gameplay zamrozony.</summary>
         Paused,
 
@@ -113,6 +116,10 @@ namespace Plaga44
                 case GamePhase.Playing:
                     Time.timeScale = 1f;
                     break;
+                case GamePhase.Inventory:
+                    // Inventory: czas plynie (animacje obracania modelu), ale gameplay zamrozony.
+                    Time.timeScale = 1f;
+                    break;
                 case GamePhase.Paused:
                 case GamePhase.MainMenu:
                 case GamePhase.Dead:
@@ -137,6 +144,7 @@ namespace Plaga44
         /// <summary>True gdy input UI powinien dzialac (menu, przyciski, laser pointer).</summary>
         public static bool IsUIActive => Current == GamePhase.MainMenu ||
                                           Current == GamePhase.Paused ||
+                                          Current == GamePhase.Inventory ||
                                           Current == GamePhase.Dead;
 
         /// <summary>True gdy lokomocja jest dozwolona -- kluczowy guard dla LocomotionController.</summary>
@@ -147,7 +155,8 @@ namespace Plaga44
 
         /// <summary>True gdy jakiekolwiek menu jest otwarte (pauza lub menu glowne).</summary>
         public static bool IsMenuOpen => Current == GamePhase.Paused ||
-                                          Current == GamePhase.MainMenu;
+                                          Current == GamePhase.MainMenu ||
+                                          Current == GamePhase.Inventory;
 
         // =====================================================================
         // Skroty (shortcuts)
@@ -168,6 +177,9 @@ namespace Plaga44
 
         /// <summary>Gracz zginol.</summary>
         public static void Die() => SetState(GamePhase.Dead);
+
+        /// <summary>Otworz ekran ekwipunku.</summary>
+        public static void Inventory() => SetState(GamePhase.Inventory);
 
         /// <summary>
         /// Toggle pauzy: jesli gramy -- pauzuj, jesli pauza -- wznow.
