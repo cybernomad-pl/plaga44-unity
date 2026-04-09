@@ -29,7 +29,6 @@ namespace Plaga44
     public class PlayerAvatar : MonoBehaviour
     {
         private const string LOG = "[PLAGA44][Avatar]";
-        private const string AVATAR_PATH = "Characters/Player/PLAYER_rigged";
 
         // =====================================================================
         // Singleton

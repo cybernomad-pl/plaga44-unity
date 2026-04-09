@@ -44,7 +44,20 @@ namespace Plaga44.Editor
                 return;
             }
 
-            UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/TESTBED_V2.unity");
+            // Otworz scene -- jesli nie istnieje, stworz nowa
+            string scenePath = "Assets/TESTBED_V2.unity";
+            if (!System.IO.File.Exists(scenePath))
+            {
+                var newScene = UnityEditor.SceneManagement.EditorSceneManager.NewScene(
+                    UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,
+                    UnityEditor.SceneManagement.NewSceneMode.Single);
+                UnityEditor.SceneManagement.EditorSceneManager.SaveScene(newScene, scenePath);
+                Debug.Log($"{LOG} Stworzono nowa scene: {scenePath}");
+            }
+            else
+            {
+                UnityEditor.SceneManagement.EditorSceneManager.OpenScene(scenePath);
+            }
 
             CleanCamera();
             CleanTestObjects();

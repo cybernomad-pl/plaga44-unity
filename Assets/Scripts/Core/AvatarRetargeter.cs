@@ -252,36 +252,31 @@ namespace Plaga44
 
         private void CacheBones()
         {
-            // ZAWSZE szukaj po nazwie -- Animator humanoid mapping czesto zwraca null
-            // na prefab instances. FindBone rekurencyjnie przeszukuje hierarchie.
-            {
-                // Szukaj obu wariantow: z i bez prefixu mixamorig:
-                Debug.Log($"{LOG} Finding bones by name...");
-                _hips = FindBone("Hips") ?? FindBone("mixamorig:Hips");
-                _spine = FindBone("Spine") ?? FindBone("mixamorig:Spine");
-                _spine1 = FindBone("Spine1") ?? FindBone("mixamorig:Spine1");
-                _spine2 = FindBone("Spine2") ?? FindBone("mixamorig:Spine2");
-                _neck = FindBone("Neck") ?? FindBone("mixamorig:Neck");
-                _head = FindBone("Head") ?? FindBone("mixamorig:Head");
+            Debug.Log($"{LOG} Finding bones by name...");
+            _hips = FindBone("Hips") ?? FindBone("mixamorig:Hips");
+            _spine = FindBone("Spine") ?? FindBone("mixamorig:Spine");
+            _spine1 = FindBone("Spine1") ?? FindBone("mixamorig:Spine1");
+            _spine2 = FindBone("Spine2") ?? FindBone("mixamorig:Spine2");
+            _neck = FindBone("Neck") ?? FindBone("mixamorig:Neck");
+            _head = FindBone("Head") ?? FindBone("mixamorig:Head");
 
-                _leftShoulder = FindBone("LeftShoulder") ?? FindBone("mixamorig:LeftShoulder");
-                _leftArm = FindBone("LeftArm") ?? FindBone("mixamorig:LeftArm");
-                _leftForeArm = FindBone("LeftForeArm") ?? FindBone("mixamorig:LeftForeArm");
-                _leftHand = FindBone("LeftHand") ?? FindBone("mixamorig:LeftHand");
+            _leftShoulder = FindBone("LeftShoulder") ?? FindBone("mixamorig:LeftShoulder");
+            _leftArm = FindBone("LeftArm") ?? FindBone("mixamorig:LeftArm");
+            _leftForeArm = FindBone("LeftForeArm") ?? FindBone("mixamorig:LeftForeArm");
+            _leftHand = FindBone("LeftHand") ?? FindBone("mixamorig:LeftHand");
 
-                _rightShoulder = FindBone("RightShoulder") ?? FindBone("mixamorig:RightShoulder");
-                _rightArm = FindBone("RightArm") ?? FindBone("mixamorig:RightArm");
-                _rightForeArm = FindBone("RightForeArm") ?? FindBone("mixamorig:RightForeArm");
-                _rightHand = FindBone("RightHand") ?? FindBone("mixamorig:RightHand");
+            _rightShoulder = FindBone("RightShoulder") ?? FindBone("mixamorig:RightShoulder");
+            _rightArm = FindBone("RightArm") ?? FindBone("mixamorig:RightArm");
+            _rightForeArm = FindBone("RightForeArm") ?? FindBone("mixamorig:RightForeArm");
+            _rightHand = FindBone("RightHand") ?? FindBone("mixamorig:RightHand");
 
-                _leftUpLeg = FindBone("LeftUpLeg") ?? FindBone("mixamorig:LeftUpLeg");
-                _leftLeg = FindBone("LeftLeg") ?? FindBone("mixamorig:LeftLeg");
-                _leftFoot = FindBone("LeftFoot") ?? FindBone("mixamorig:LeftFoot");
+            _leftUpLeg = FindBone("LeftUpLeg") ?? FindBone("mixamorig:LeftUpLeg");
+            _leftLeg = FindBone("LeftLeg") ?? FindBone("mixamorig:LeftLeg");
+            _leftFoot = FindBone("LeftFoot") ?? FindBone("mixamorig:LeftFoot");
 
-                _rightUpLeg = FindBone("RightUpLeg") ?? FindBone("mixamorig:RightUpLeg");
-                _rightLeg = FindBone("RightLeg") ?? FindBone("mixamorig:RightLeg");
-                _rightFoot = FindBone("RightFoot") ?? FindBone("mixamorig:RightFoot");
-            }
+            _rightUpLeg = FindBone("RightUpLeg") ?? FindBone("mixamorig:RightUpLeg");
+            _rightLeg = FindBone("RightLeg") ?? FindBone("mixamorig:RightLeg");
+            _rightFoot = FindBone("RightFoot") ?? FindBone("mixamorig:RightFoot");
 
             LogBoneStatus();
         }
@@ -636,7 +631,7 @@ namespace Plaga44
         private void LogBoneStatus()
         {
             int found = 0;
-            int total = 20;
+            int total = 22; // 20 main + 2 shoulders
 
             if (_hips != null) found++; else Debug.LogWarning($"{LOG} Missing: Hips");
             if (_spine != null) found++; else Debug.LogWarning($"{LOG} Missing: Spine");
