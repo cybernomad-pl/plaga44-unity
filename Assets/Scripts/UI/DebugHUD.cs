@@ -230,9 +230,7 @@ namespace Plaga44.UI
             string gpuStr = _gpuLevel >= 0 ? $"{_gpuLevel:F1}" : "N/A";
             string cpuStr = _cpuLevel >= 0 ? $"{_cpuLevel:F0}" : "N/A";
 
-            // Draw calls and triangles (from Unity profiler)
-            // Note: these are approximations from the rendering stats
-            int drawCalls = UnityEngine.Rendering.FrameTimingManager.GetLatestTimings(0, null) > 0 ? -1 : -1;
+            // Draw calls placeholder -- FrameTimingManager niedostepny na tej platformie
 
             _hudText.text =
                 $"<b><color=#FF6B35>DEBUG HUD</color></b>\n" +
