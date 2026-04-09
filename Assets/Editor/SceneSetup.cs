@@ -516,7 +516,7 @@ namespace Plaga44.Editor
             if (rig.GetComponent<Plaga44.PlayerAvatar>() == null)
             {
                 var avatar = Undo.AddComponent<Plaga44.PlayerAvatar>(rig);
-                avatar.modelScale = 1f;
+                avatar.modelScale = 0.655f;  // 2.75m mesh -> 1.8m gracz
                 avatar.yOffset = -1.65f;
                 avatar.hideHeadInFirstPerson = true;
             }
@@ -543,7 +543,7 @@ namespace Plaga44.Editor
             model.transform.SetParent(rig.transform);
             model.transform.localPosition = new Vector3(0f, -1.65f, 0f);
             model.transform.localRotation = UnityEngine.Quaternion.identity;
-            model.transform.localScale = Vector3.one;
+            model.transform.localScale = Vector3.one * 0.655f;  // 1.8m
             Undo.RegisterCreatedObjectUndo(model, "Create PlayerAvatarModel");
             Debug.Log($"{LOG} PlayerAvatarModel postawiony na scenie (dziecko {rig.name})");
         }
