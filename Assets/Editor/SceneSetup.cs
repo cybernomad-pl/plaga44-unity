@@ -57,6 +57,7 @@ namespace Plaga44.Editor
             SetFogAndAmbient();
             AddHamburgerMenu();
             AddPlayerAvatar(rig);
+            // AddInventoryScreen(); // TODO: inventory agent jeszcze pracuje
             AddAutoPlay();
 
             // Zaznacz rig w hierarchii
@@ -525,7 +526,30 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // 9. Auto-Play (GameState.Play() na starcie)
+        // 9. Inventory Screen + Menu Setup
+        // =====================================================================
+
+        static void AddInventoryScreen()
+        {
+            if (Object.FindAnyObjectByType<Plaga44.UI.InventoryScreen>() != null)
+            {
+                Debug.Log($"{LOG} InventoryScreen juz istnieje.");
+                return;
+            }
+
+            // InventoryScreen -- world-space canvas z podgladem modelu i slotami
+            var invGO = new GameObject("_InventoryScreen");
+            Undo.AddComponent<Plaga44.UI.InventoryScreen>(invGO);
+            Undo.RegisterCreatedObjectUndo(invGO, "Create InventoryScreen");
+
+            // InventoryMenuSetup -- dodaje przycisk INVENTORY do HamburgerMenu
+            Undo.AddComponent<Plaga44.UI.InventoryMenuSetup>(invGO);
+
+            Debug.Log($"{LOG} Dodano InventoryScreen + InventoryMenuSetup (I / Menu button)");
+        }
+
+        // =====================================================================
+        // 10. Auto-Play (GameState.Play() na starcie)
         // =====================================================================
 
         static void AddAutoPlay()
