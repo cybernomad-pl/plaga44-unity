@@ -57,7 +57,7 @@ namespace Plaga44.Editor
             SetFogAndAmbient();
             AddHamburgerMenu();
             AddPlayerAvatar(rig);
-            // AddInventoryScreen(); // TODO: inventory agent jeszcze pracuje
+            AddInventoryScreen();
             AddAutoPlay();
 
             // Zaznacz rig w hierarchii
