@@ -330,9 +330,9 @@ namespace Plaga44.Editor
 
             CleanMissingTrees(terrainData);
 
-            // Skaluj 20x
-            Vector3 orig = terrainData.size;
-            terrainData.size = new Vector3(orig.x * TERRAIN_SCALE, orig.y * TERRAIN_SCALE, orig.z * TERRAIN_SCALE);
+            // Rozmiar terenu -- absolutny (nie kumulujacy!)
+            // Oryginalny tile Flooded Grounds: 512x600x512
+            terrainData.size = new Vector3(512f * TERRAIN_SCALE, 600f * TERRAIN_SCALE, 512f * TERRAIN_SCALE);
 
             // 1 warstwa -- Moss, duzy UV repeat
             var mossLayer = AssetDatabase.LoadAssetAtPath<TerrainLayer>(MOSS_LAYER);
@@ -491,9 +491,42 @@ namespace Plaga44.Editor
             model.transform.SetParent(rig.transform);
             model.transform.localPosition = Vector3.zero;  // stopy na poziomie riga
             model.transform.localRotation = Quaternion.identity;
-            model.transform.localScale = Vector3.one * 0.655f;  // 1.8m
+            model.transform.localScale = Vector3.one;  // Mixamo FBX already in meters
             Undo.RegisterCreatedObjectUndo(model, "Create PlayerAvatarModel");
-            Debug.Log($"{LOG} PlayerAvatarModel postawiony na scenie (dziecko {rig.name})");
+
+            // Assign material with PLAYER textures
+            AssignPlayerMaterial(model);
+
+            Debug.Log($"{LOG} PlayerAvatarModel placed (child of {rig.name})");
+        }
+
+        static void AssignPlayerMaterial(GameObject model)
+        {
+            var diffuse = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Characters/Player/PLAYER_packed0_diffuse.png");
+            var normal = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Characters/Player/PLAYER_packed0_normal.png");
+
+            if (diffuse == null) { Debug.LogWarning($"{LOG} No diffuse texture"); return; }
+
+            var shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Standard");
+
+            var mat = new Material(shader);
+            mat.name = "PlayerMaterial";
+            mat.SetTexture("_BaseMap", diffuse);
+            mat.SetTexture("_MainTex", diffuse);
+            if (normal != null)
+            {
+                mat.SetTexture("_BumpMap", normal);
+                mat.EnableKeyword("_NORMALMAP");
+            }
+
+            foreach (var r in model.GetComponentsInChildren<Renderer>(true))
+            {
+                var mats = new Material[r.sharedMaterials.Length];
+                for (int i = 0; i < mats.Length; i++) mats[i] = mat;
+                r.sharedMaterials = mats;
+            }
+            Debug.Log($"{LOG} Player material assigned (diffuse + normal)");
         }
 
         static void AddHamburgerMenu()
