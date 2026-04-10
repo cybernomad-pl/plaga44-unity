@@ -462,18 +462,7 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} PlayerAvatar: scale=0.655, yOffset=0");
             }
 
-            // Retargeter -- IK body retargeting (head, arms, legs)
-            {
-                var retargeter = rig.GetComponent<Plaga44.AvatarRetargeter>();
-                if (retargeter == null)
-                    retargeter = Undo.AddComponent<Plaga44.AvatarRetargeter>(rig);
-                retargeter.headToHipsRatio = 0.60f;
-                retargeter.spineFollowHead = 0.4f;
-                retargeter.stepFrequency = 2.0f;
-                retargeter.stepLength = 0.35f;
-                retargeter.stepHeight = 0.08f;
-                Debug.Log($"{LOG} AvatarRetargeter: IK body tracking");
-            }
+            // TODO: retargeting -- dodac po Mixamo FBX
 
             // Model na scenie (widoczny w scene graph)
             var existingModel = GameObject.Find("PlayerAvatarModel");
