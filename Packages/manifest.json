@@ -9,10 +9,10 @@
     }
   ],
   "dependencies": {
-    "com.meta.xr.sdk.audio": "81.0.0",
-    "com.meta.xr.sdk.interaction.ovr": "81.0.0",
-    "com.meta.xr.sdk.interaction": "81.0.0",
-    "com.meta.xr.sdk.core": "81.0.0",
+    "com.meta.xr.sdk.interaction.ovr": "83.0.0",
+    "com.meta.xr.sdk.interaction": "83.0.0",
+    "com.meta.xr.sdk.core": "83.0.0",
+    "com.meta.xr.sdk.movement": "https://github.com/oculus-samples/Unity-Movement.git#v83.0.0",
     "com.unity.xr.meta-openxr": "2.4.0",
     "com.unity.xr.openxr": "1.14.0",
     "com.unity.ai.navigation": "2.0.9",

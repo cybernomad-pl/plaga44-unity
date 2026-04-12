@@ -1,21 +1,14 @@
 {
   "dependencies": {
-    "com.meta.xr.sdk.audio": {
-      "version": "81.0.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://npm.developer.oculus.com"
-    },
     "com.meta.xr.sdk.core": {
-      "version": "81.0.0",
+      "version": "83.0.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://npm.developer.oculus.com"
     },
     "com.meta.xr.sdk.interaction": {
-      "version": "81.0.0",
+      "version": "83.0.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -25,14 +18,25 @@
       "url": "https://npm.developer.oculus.com"
     },
     "com.meta.xr.sdk.interaction.ovr": {
-      "version": "81.0.0",
+      "version": "83.0.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.meta.xr.sdk.interaction": "81.0.0",
-        "com.meta.xr.sdk.core": "81.0.0"
+        "com.meta.xr.sdk.interaction": "83.0.0",
+        "com.meta.xr.sdk.core": "83.0.0"
       },
       "url": "https://npm.developer.oculus.com"
+    },
+    "com.meta.xr.sdk.movement": {
+      "version": "https://github.com/oculus-samples/Unity-Movement.git#v83.0.0",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.burst": "1.8.18",
+        "com.unity.textmeshpro": "3.0.6",
+        "com.unity.ugui": "1.0.0"
+      },
+      "hash": "cc87d601514ac9e7000f592bc5ce27ed82ef669f"
     },
     "com.unity.ai.navigation": {
       "version": "2.0.9",
@@ -45,7 +49,7 @@
     },
     "com.unity.burst": {
       "version": "1.8.27",
-      "depth": 2,
+      "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.mathematics": "1.2.1",
