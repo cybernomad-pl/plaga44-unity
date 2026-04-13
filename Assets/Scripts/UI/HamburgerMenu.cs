@@ -231,11 +231,7 @@ namespace Plaga44.UI
         private void EnterSubmenu(string moduleName)
         {
             _currentSettings = SettingsRegistry.GetSettings(moduleName);
-            // Sprawdz czy sa jakiekolwiek NIE-headerowe ustawienia
-            bool hasSettings = false;
-            foreach (var s in _currentSettings)
-                if (!s.isHeader) { hasSettings = true; break; }
-            if (!hasSettings)
+            if (_currentSettings.Count == 0)
             {
                 Debug.Log($"{LOG} {moduleName}: brak ustawien runtime");
                 return;
@@ -243,9 +239,6 @@ namespace Plaga44.UI
 
             _inSubmenu = true;
             _settingIndex = 0;
-            // Przeskocz header na poczatku
-            while (_settingIndex < _currentSettings.Count && _currentSettings[_settingIndex].isHeader)
-                _settingIndex++;
             // Ukryj grid
             if (_gridRoot != null) _gridRoot.SetActive(false);
 
@@ -277,17 +270,12 @@ namespace Plaga44.UI
             if (stick.y > 0.5f && _settingIndex > 0)
             {
                 _settingIndex--;
-                // Przeskocz headery
-                while (_settingIndex > 0 && _currentSettings[_settingIndex].isHeader)
-                    _settingIndex--;
                 _lastStickTime = Time.unscaledTime;
                 UpdateSubmenuDisplay();
             }
             else if (stick.y < -0.5f && _settingIndex < _currentSettings.Count - 1)
             {
                 _settingIndex++;
-                while (_settingIndex < _currentSettings.Count - 1 && _currentSettings[_settingIndex].isHeader)
-                    _settingIndex++;
                 _lastStickTime = Time.unscaledTime;
                 UpdateSubmenuDisplay();
             }
@@ -324,8 +312,6 @@ namespace Plaga44.UI
         {
             if (_settingIndex < 0 || _settingIndex >= _currentSettings.Count) return;
             var s = _currentSettings[_settingIndex];
-            if (s.isHeader) return;
-
             float val = s.get();
             val += s.step * direction;
             val = Mathf.Clamp(val, s.min, s.max);
@@ -389,31 +375,17 @@ namespace Plaga44.UI
 
                 var s = _currentSettings[idx];
                 bool selected = (idx == _settingIndex);
-
-                if (s.isHeader)
-                {
-                    _settingTexts[i].text = s.name;
-                    _settingTexts[i].color = ACCENT;
-                }
-                else
-                {
-                    float val = s.get();
-                    string prefix = selected ? "> " : "  ";
-                    _settingTexts[i].text = $"{prefix}{s.name}: {val.ToString(s.format)}";
-                    _settingTexts[i].color = selected ? TEXT_WHITE : TEXT_GREY;
-                }
+                float val = s.get();
+                string prefix = selected ? "> " : "  ";
+                _settingTexts[i].text = $"{prefix}{s.name}: {val.ToString(s.format)}";
+                _settingTexts[i].color = selected ? TEXT_WHITE : TEXT_GREY;
             }
 
             // Footer
-            if (!_currentSettings[_settingIndex].isHeader)
             {
                 var s = _currentSettings[_settingIndex];
                 float val = s.get();
                 _valueText.text = $"<  {val.ToString(s.format)}  >    [{s.min} .. {s.max}]  step {s.step}";
-            }
-            else
-            {
-                _valueText.text = "";
             }
         }
 
