@@ -2,11 +2,8 @@
 // SettingsRegistry.cs
 // CYBERNOMAD -- Runtime odpowiednik Config API.
 //
-// Kazdy modul Config API (AudioConfig, PhysicsConfig, itd.) ma tu swoj
-// odpowiednik runtime -- lista tweakowalnych ustawien z get/set/min/max/step.
-// Grupowane per nazwa modulu (ta sama co kafelek w HamburgerMenu).
-//
-// Wzorzec z VRQualityMenu (bleeding-edge) ale pogrupowany.
+// Kazdy modul Config API ma tu swoj odpowiednik runtime -- lista tweakowalnych
+// ustawien z get/set/min/max/step. Grupowane per kafelek w HamburgerMenu.
 // =============================================================================
 
 using System;
@@ -18,7 +15,6 @@ using UnityEngine.XR;
 
 namespace Plaga44.UI
 {
-    /// <summary>Pojedyncze ustawienie -- nazwa, getter, setter, zakres.</summary>
     public class SettingDef
     {
         public string name;
@@ -26,7 +22,7 @@ namespace Plaga44.UI
         public Action<float> set;
         public float min, max, step;
         public string format;
-        public bool isHeader; // true = separator/naglowek sekcji
+        public bool isHeader;
 
         public SettingDef(string n, Func<float> g, Action<float> s,
             float mn, float mx, float st, string fmt = "F1")
@@ -40,15 +36,12 @@ namespace Plaga44.UI
         }
     }
 
-    /// <summary>Rejestr ustawien runtime -- per modul.</summary>
     public static class SettingsRegistry
     {
         private const string LOG = "[PLAGA44][Settings]";
-
         private static Dictionary<string, List<SettingDef>> _modules;
         private static bool _built;
 
-        /// <summary>Zwraca ustawienia dla danego modulu (kafelka menu).</summary>
         public static List<SettingDef> GetSettings(string moduleName)
         {
             if (!_built) Build();
@@ -56,30 +49,24 @@ namespace Plaga44.UI
             return new List<SettingDef>();
         }
 
-        /// <summary>Zwraca wszystkie nazwy modulow ktore maja ustawienia.</summary>
-        public static string[] GetModuleNames()
-        {
-            if (!_built) Build();
-            var names = new string[_modules.Count];
-            _modules.Keys.CopyTo(names, 0);
-            return names;
-        }
+        public static void Rebuild() { _built = false; _modules = null; }
 
         // =====================================================================
-        // Budowanie -- odpala sie raz, lazy
-        // =====================================================================
-
         private static void Build()
         {
             _modules = new Dictionary<string, List<SettingDef>>();
 
             var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
             var volume = UnityEngine.Object.FindAnyObjectByType<Volume>();
+            var terrain = UnityEngine.Object.FindAnyObjectByType<Terrain>();
+            var skyboxMat = RenderSettings.skybox;
+
             ColorAdjustments colorAdj = null;
             Tonemapping tonemapping = null;
             Vignette vignette = null;
             WhiteBalance whiteBalance = null;
             LiftGammaGain lgg = null;
+            Bloom bloom = null;
 
             if (volume != null && volume.profile != null)
             {
@@ -88,22 +75,33 @@ namespace Plaga44.UI
                 volume.profile.TryGet(out vignette);
                 volume.profile.TryGet(out whiteBalance);
                 volume.profile.TryGet(out lgg);
+                volume.profile.TryGet(out bloom);
             }
 
-            var skyboxMat = RenderSettings.skybox;
-
             // =============================================================
-            // MISC. -- ogolne rzeczy
+            // MISC.
             // =============================================================
             var misc = new List<SettingDef>();
+            misc.Add(new SettingDef("Target Framerate",
+                () => Application.targetFrameRate,
+                v => Application.targetFrameRate = (int)v,
+                -1, 120, 1, "F0"));
             misc.Add(new SettingDef("Time Scale",
                 () => Time.timeScale,
                 v => Time.timeScale = v,
-                0f, 2f, 0.1f));
+                0f, 3f, 0.1f));
             misc.Add(new SettingDef("Fixed Timestep",
                 () => Time.fixedDeltaTime,
                 v => Time.fixedDeltaTime = v,
                 0.005f, 0.05f, 0.005f, "F3"));
+            misc.Add(new SettingDef("Max Delta Time",
+                () => Time.maximumDeltaTime,
+                v => Time.maximumDeltaTime = v,
+                0.01f, 0.5f, 0.01f, "F2"));
+            misc.Add(new SettingDef("Shader Max LOD",
+                () => Shader.globalMaximumLOD,
+                v => Shader.globalMaximumLOD = (int)v,
+                100, 600, 100, "F0"));
             _modules["MISC."] = misc;
 
             // =============================================================
@@ -114,20 +112,48 @@ namespace Plaga44.UI
                 () => AudioListener.volume,
                 v => AudioListener.volume = v,
                 0f, 1f, 0.05f, "F2"));
+            audio.Add(new SettingDef("Doppler Factor",
+                () => AudioSettings.GetConfiguration().dopplerFactor,
+                v => { var c = AudioSettings.GetConfiguration(); c.dopplerFactor = v; AudioSettings.Reset(c); },
+                0f, 5f, 0.1f));
+            audio.Add(new SettingDef("Speed of Sound",
+                () => AudioSettings.GetConfiguration().speakerMode == AudioSpeakerMode.Stereo ? 343f : 343f,
+                v => {}, // read-only info
+                343, 343, 0, "F0"));
             _modules["Audio"] = audio;
 
             // =============================================================
             // Physics
             // =============================================================
             var physics = new List<SettingDef>();
+            physics.Add(new SettingDef("Gravity X",
+                () => UnityEngine.Physics.gravity.x,
+                v => { var g = UnityEngine.Physics.gravity; g.x = v; UnityEngine.Physics.gravity = g; },
+                -20f, 20f, 0.5f, "F1"));
             physics.Add(new SettingDef("Gravity Y",
                 () => UnityEngine.Physics.gravity.y,
-                v => UnityEngine.Physics.gravity = new Vector3(0, v, 0),
+                v => { var g = UnityEngine.Physics.gravity; g.y = v; UnityEngine.Physics.gravity = g; },
                 -20f, 0f, 0.5f, "F1"));
+            physics.Add(new SettingDef("Gravity Z",
+                () => UnityEngine.Physics.gravity.z,
+                v => { var g = UnityEngine.Physics.gravity; g.z = v; UnityEngine.Physics.gravity = g; },
+                -20f, 20f, 0.5f, "F1"));
             physics.Add(new SettingDef("Bounce Threshold",
                 () => UnityEngine.Physics.bounceThreshold,
                 v => UnityEngine.Physics.bounceThreshold = v,
                 0f, 5f, 0.1f));
+            physics.Add(new SettingDef("Solver Iterations",
+                () => UnityEngine.Physics.defaultSolverIterations,
+                v => UnityEngine.Physics.defaultSolverIterations = (int)v,
+                1, 25, 1, "F0"));
+            physics.Add(new SettingDef("Contact Offset",
+                () => UnityEngine.Physics.defaultContactOffset,
+                v => UnityEngine.Physics.defaultContactOffset = v,
+                0.001f, 0.1f, 0.005f, "F3"));
+            physics.Add(new SettingDef("Sleep Threshold",
+                () => UnityEngine.Physics.sleepThreshold,
+                v => UnityEngine.Physics.sleepThreshold = v,
+                0f, 0.5f, 0.01f, "F2"));
             _modules["Physics"] = physics;
 
             // =============================================================
@@ -136,6 +162,7 @@ namespace Plaga44.UI
             var quality = new List<SettingDef>();
             if (urp != null)
             {
+                quality.Add(SettingDef.Header("--- URP ---"));
                 quality.Add(new SettingDef("MSAA",
                     () => urp.msaaSampleCount,
                     v => urp.msaaSampleCount = (int)v,
@@ -157,6 +184,7 @@ namespace Plaga44.UI
                     v => urp.shadowNormalBias = v,
                     0, 10, 0.5f));
             }
+            quality.Add(SettingDef.Header("--- GLOBAL ---"));
             quality.Add(new SettingDef("LOD Bias",
                 () => QualitySettings.lodBias,
                 v => QualitySettings.lodBias = v,
@@ -165,14 +193,26 @@ namespace Plaga44.UI
                 () => QualitySettings.globalTextureMipmapLimit,
                 v => QualitySettings.globalTextureMipmapLimit = (int)v,
                 0, 3, 1, "F0"));
+            quality.Add(new SettingDef("Skin Weights",
+                () => (float)QualitySettings.skinWeights,
+                v => QualitySettings.skinWeights = (SkinWeights)(int)v,
+                1, 4, 1, "F0"));
+            quality.Add(new SettingDef("VSync Count",
+                () => QualitySettings.vSyncCount,
+                v => QualitySettings.vSyncCount = (int)v,
+                0, 2, 1, "F0"));
+            quality.Add(new SettingDef("Aniso Filtering",
+                () => (float)QualitySettings.anisotropicFiltering,
+                v => QualitySettings.anisotropicFiltering = (AnisotropicFiltering)(int)v,
+                0, 2, 1, "F0"));
             _modules["Quality"] = quality;
 
             // =============================================================
-            // Graphics (Lighting + Fog + Ambient)
+            // Graphics (Light + Fog + Ambient)
             // =============================================================
             var gfx = new List<SettingDef>();
-            gfx.Add(SettingDef.Header("--- LIGHT ---"));
-            gfx.Add(new SettingDef("Sun Intensity",
+            gfx.Add(SettingDef.Header("--- SUN ---"));
+            gfx.Add(new SettingDef("Intensity",
                 () => { var l = FindSun(); return l != null ? l.intensity : 1; },
                 v => { var l = FindSun(); if (l) l.intensity = v; },
                 0, 5, 0.1f));
@@ -192,6 +232,10 @@ namespace Plaga44.UI
                 () => { var l = FindSun(); return l != null ? l.shadowStrength : 1; },
                 v => { var l = FindSun(); if (l) l.shadowStrength = v; },
                 0, 1, 0.01f, "F2"));
+            gfx.Add(new SettingDef("Indirect Multiplier",
+                () => { var l = FindSun(); return l != null ? l.bounceIntensity : 1; },
+                v => { var l = FindSun(); if (l) l.bounceIntensity = v; },
+                0, 5, 0.1f));
 
             gfx.Add(SettingDef.Header("--- FOG ---"));
             gfx.Add(new SettingDef("Fog On/Off",
@@ -210,6 +254,18 @@ namespace Plaga44.UI
                 () => RenderSettings.fogEndDistance,
                 v => RenderSettings.fogEndDistance = v,
                 10, 500, 10, "F0"));
+            gfx.Add(new SettingDef("Fog R",
+                () => RenderSettings.fogColor.r,
+                v => { var c = RenderSettings.fogColor; c.r = v; RenderSettings.fogColor = c; },
+                0, 1, 0.02f, "F2"));
+            gfx.Add(new SettingDef("Fog G",
+                () => RenderSettings.fogColor.g,
+                v => { var c = RenderSettings.fogColor; c.g = v; RenderSettings.fogColor = c; },
+                0, 1, 0.02f, "F2"));
+            gfx.Add(new SettingDef("Fog B",
+                () => RenderSettings.fogColor.b,
+                v => { var c = RenderSettings.fogColor; c.b = v; RenderSettings.fogColor = c; },
+                0, 1, 0.02f, "F2"));
 
             gfx.Add(SettingDef.Header("--- AMBIENT ---"));
             gfx.Add(new SettingDef("Ambient Intensity",
@@ -228,10 +284,14 @@ namespace Plaga44.UI
                 () => RenderSettings.ambientLight.b,
                 v => { var c = RenderSettings.ambientLight; c.b = v; RenderSettings.ambientLight = c; },
                 0, 1, 0.05f, "F2"));
+            gfx.Add(new SettingDef("Reflection Intensity",
+                () => RenderSettings.reflectionIntensity,
+                v => RenderSettings.reflectionIntensity = v,
+                0, 2, 0.1f));
             _modules["Graphics"] = gfx;
 
             // =============================================================
-            // Oculus (OVR runtime)
+            // Oculus
             // =============================================================
             var oculus = new List<SettingDef>();
             oculus.Add(new SettingDef("Foveated Render Lvl",
@@ -245,7 +305,7 @@ namespace Plaga44.UI
             _modules["Oculus"] = oculus;
 
             // =============================================================
-            // Pipeline (URP asset tweaks)
+            // Pipeline
             // =============================================================
             var pipeline = new List<SettingDef>();
             if (urp != null)
@@ -262,7 +322,7 @@ namespace Plaga44.UI
             _modules["Pipeline"] = pipeline;
 
             // =============================================================
-            // Renderer (camera)
+            // Renderer (Camera)
             // =============================================================
             var renderer = new List<SettingDef>();
             renderer.Add(new SettingDef("Near Clip",
@@ -272,15 +332,22 @@ namespace Plaga44.UI
             renderer.Add(new SettingDef("Far Clip",
                 () => Camera.main != null ? Camera.main.farClipPlane : 1000,
                 v => { if (Camera.main) Camera.main.farClipPlane = v; },
-                50, 2000, 50, "F0"));
+                50, 5000, 50, "F0"));
+            renderer.Add(new SettingDef("FOV",
+                () => Camera.main != null ? Camera.main.fieldOfView : 60,
+                v => { if (Camera.main) Camera.main.fieldOfView = v; },
+                30, 120, 1, "F0"));
+            renderer.Add(new SettingDef("Depth",
+                () => Camera.main != null ? Camera.main.depth : 0,
+                v => { if (Camera.main) Camera.main.depth = v; },
+                -10, 10, 1, "F0"));
             _modules["Renderer"] = renderer;
 
             // =============================================================
-            // URP (global)
+            // URP -- placeholder
             // =============================================================
-            // Wiekszosci URP global ustawien nie da sie zmienic runtime -- placeholder
             var urpg = new List<SettingDef>();
-            urpg.Add(new SettingDef("(editor-only)", () => 0, v => {}, 0, 0, 0));
+            urpg.Add(new SettingDef("(editor-only settings)", () => 0, v => {}, 0, 0, 0) { isHeader = true });
             _modules["URP"] = urpg;
 
             // =============================================================
@@ -291,6 +358,23 @@ namespace Plaga44.UI
                 () => (volume != null && volume.enabled) ? 1 : 0,
                 v => { if (volume) volume.enabled = v > 0.5f; },
                 0, 1, 1, "F0"));
+
+            if (bloom != null)
+            {
+                vol.Add(SettingDef.Header("--- BLOOM ---"));
+                vol.Add(new SettingDef("Bloom Intensity",
+                    () => bloom.intensity.value,
+                    v => bloom.intensity.Override(v),
+                    0, 5, 0.1f));
+                vol.Add(new SettingDef("Bloom Threshold",
+                    () => bloom.threshold.value,
+                    v => bloom.threshold.Override(v),
+                    0, 3, 0.1f));
+                vol.Add(new SettingDef("Bloom Scatter",
+                    () => bloom.scatter.value,
+                    v => bloom.scatter.Override(v),
+                    0, 1, 0.05f, "F2"));
+            }
 
             if (colorAdj != null)
             {
@@ -311,16 +395,28 @@ namespace Plaga44.UI
                     () => colorAdj.hueShift.value,
                     v => colorAdj.hueShift.Override(v),
                     -180, 180, 5, "F0"));
+                vol.Add(new SettingDef("Color R",
+                    () => colorAdj.colorFilter.value.r,
+                    v => { var c = colorAdj.colorFilter.value; c.r = v; colorAdj.colorFilter.Override(c); },
+                    0, 1, 0.02f, "F2"));
+                vol.Add(new SettingDef("Color G",
+                    () => colorAdj.colorFilter.value.g,
+                    v => { var c = colorAdj.colorFilter.value; c.g = v; colorAdj.colorFilter.Override(c); },
+                    0, 1, 0.02f, "F2"));
+                vol.Add(new SettingDef("Color B",
+                    () => colorAdj.colorFilter.value.b,
+                    v => { var c = colorAdj.colorFilter.value; c.b = v; colorAdj.colorFilter.Override(c); },
+                    0, 1, 0.02f, "F2"));
             }
 
             if (vignette != null)
             {
                 vol.Add(SettingDef.Header("--- VIGNETTE ---"));
-                vol.Add(new SettingDef("Vignette Intensity",
+                vol.Add(new SettingDef("Intensity",
                     () => vignette.intensity.value,
                     v => vignette.intensity.Override(v),
                     0, 1, 0.05f, "F2"));
-                vol.Add(new SettingDef("Vignette Smoothness",
+                vol.Add(new SettingDef("Smoothness",
                     () => vignette.smoothness.value,
                     v => vignette.smoothness.Override(v),
                     0, 1, 0.05f, "F2"));
@@ -357,27 +453,95 @@ namespace Plaga44.UI
             _modules["Volume"] = vol;
 
             // =============================================================
-            // Skybox (pod Layers -- bo nie ma runtime layers)
+            // Layers -> Skybox (runtime)
             // =============================================================
             var sky = new List<SettingDef>();
             if (skyboxMat != null)
             {
-                sky.Add(new SettingDef("Sky Exposure",
-                    () => skyboxMat.HasFloat("_Exposure") ? skyboxMat.GetFloat("_Exposure") : 1f,
-                    v => { if (skyboxMat.HasFloat("_Exposure")) skyboxMat.SetFloat("_Exposure", v); },
-                    0, 5, 0.1f));
-                sky.Add(new SettingDef("Sky Rotation",
-                    () => skyboxMat.HasFloat("_Rotation") ? skyboxMat.GetFloat("_Rotation") : 0f,
-                    v => { if (skyboxMat.HasFloat("_Rotation")) skyboxMat.SetFloat("_Rotation", v); },
-                    0, 360, 10, "F0"));
+                if (skyboxMat.HasColor("_Tint"))
+                {
+                    sky.Add(new SettingDef("Sky Tint R",
+                        () => skyboxMat.GetColor("_Tint").r,
+                        v => { var c = skyboxMat.GetColor("_Tint"); c.r = v; skyboxMat.SetColor("_Tint", c); },
+                        0, 2, 0.05f, "F2"));
+                    sky.Add(new SettingDef("Sky Tint G",
+                        () => skyboxMat.GetColor("_Tint").g,
+                        v => { var c = skyboxMat.GetColor("_Tint"); c.g = v; skyboxMat.SetColor("_Tint", c); },
+                        0, 2, 0.05f, "F2"));
+                    sky.Add(new SettingDef("Sky Tint B",
+                        () => skyboxMat.GetColor("_Tint").b,
+                        v => { var c = skyboxMat.GetColor("_Tint"); c.b = v; skyboxMat.SetColor("_Tint", c); },
+                        0, 2, 0.05f, "F2"));
+                }
+                if (skyboxMat.HasFloat("_Exposure"))
+                    sky.Add(new SettingDef("Sky Exposure",
+                        () => skyboxMat.GetFloat("_Exposure"),
+                        v => skyboxMat.SetFloat("_Exposure", v),
+                        0, 5, 0.1f));
+                if (skyboxMat.HasFloat("_Rotation"))
+                    sky.Add(new SettingDef("Sky Rotation",
+                        () => skyboxMat.GetFloat("_Rotation"),
+                        v => skyboxMat.SetFloat("_Rotation", v),
+                        0, 360, 10, "F0"));
+                if (skyboxMat.HasFloat("_CloudBoost"))
+                    sky.Add(new SettingDef("Cloud Brightness",
+                        () => skyboxMat.GetFloat("_CloudBoost"),
+                        v => skyboxMat.SetFloat("_CloudBoost", v),
+                        0, 5, 0.01f, "F2"));
+                if (skyboxMat.HasFloat("_CloudThreshold"))
+                    sky.Add(new SettingDef("Cloud Threshold",
+                        () => skyboxMat.GetFloat("_CloudThreshold"),
+                        v => skyboxMat.SetFloat("_CloudThreshold", v),
+                        0, 1, 0.001f, "F3"));
             }
-            _modules["Layers"] = sky; // reuse kafelek Layers dla skybox runtime
+            _modules["Layers"] = sky;
 
             // =============================================================
-            // Moduly editor-only -- puste w runtime
+            // Manifest -> Terrain (runtime)
             // =============================================================
-            foreach (var name in new[] { "Manifest", "Packages", "Input",
-                "Memory", "NavMesh", "Project", "Editor", "Build" })
+            var terr = new List<SettingDef>();
+            if (terrain != null)
+            {
+                terr.Add(new SettingDef("Draw Distance",
+                    () => terrain.detailObjectDistance,
+                    v => terrain.detailObjectDistance = v,
+                    0, 500, 10, "F0"));
+                terr.Add(new SettingDef("Tree Distance",
+                    () => terrain.treeDistance,
+                    v => terrain.treeDistance = v,
+                    0, 5000, 100, "F0"));
+                terr.Add(new SettingDef("Tree Billboard Dist",
+                    () => terrain.treeBillboardDistance,
+                    v => terrain.treeBillboardDistance = v,
+                    0, 5000, 100, "F0"));
+                terr.Add(new SettingDef("Max Mesh Trees",
+                    () => terrain.treeMaximumFullLODCount,
+                    v => terrain.treeMaximumFullLODCount = (int)v,
+                    0, 500, 10, "F0"));
+                terr.Add(new SettingDef("Pixel Error",
+                    () => terrain.heightmapPixelError,
+                    v => terrain.heightmapPixelError = v,
+                    1, 200, 5, "F0"));
+                terr.Add(new SettingDef("Base Map Dist",
+                    () => terrain.basemapDistance,
+                    v => terrain.basemapDistance = v,
+                    0, 2000, 50, "F0"));
+                terr.Add(new SettingDef("Draw Instanced",
+                    () => terrain.drawInstanced ? 1 : 0,
+                    v => terrain.drawInstanced = v > 0.5f,
+                    0, 1, 1, "F0"));
+            }
+            else
+            {
+                terr.Add(new SettingDef("(no terrain)", () => 0, v => {}, 0, 0, 0) { isHeader = true });
+            }
+            _modules["Manifest"] = terr; // reuse Manifest kafelek dla Terrain
+
+            // =============================================================
+            // Editor-only placeholders
+            // =============================================================
+            foreach (var name in new[] { "Packages", "Input", "Memory",
+                "NavMesh", "Project", "Editor", "Build" })
             {
                 _modules[name] = new List<SettingDef>
                 {
@@ -386,12 +550,10 @@ namespace Plaga44.UI
             }
 
             _built = true;
-            Debug.Log($"{LOG} Built: {_modules.Count} modules");
+            int total = 0;
+            foreach (var kv in _modules) total += kv.Value.Count;
+            Debug.Log($"{LOG} Built: {_modules.Count} modules, {total} settings total");
         }
-
-        // =====================================================================
-        // Helpers
-        // =====================================================================
 
         private static Light FindSun()
         {
@@ -399,13 +561,6 @@ namespace Plaga44.UI
             foreach (var l in lights)
                 if (l.type == LightType.Directional) return l;
             return null;
-        }
-
-        /// <summary>Wymus przebudowanie rejestru (np. po zmianie sceny).</summary>
-        public static void Rebuild()
-        {
-            _built = false;
-            _modules = null;
         }
     }
 }
