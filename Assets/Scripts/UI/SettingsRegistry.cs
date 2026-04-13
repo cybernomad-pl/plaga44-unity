@@ -212,23 +212,23 @@ namespace Plaga44.UI
                 v => { if (sun) sun.intensity = v; },
                 0, 5, 0.1f));
             gfx.Add(new SettingDef("Sun R",
-                () => sun != null ? sun.color.r : 1; },
+                () => sun != null ? sun.color.r : 1,
                 v => { if (sun) { var c = sun.color; c.r = v; sun.color = c; } },
                 0, 1, 0.02f, "F2"));
             gfx.Add(new SettingDef("Sun G",
-                () => sun != null ? sun.color.g : 1; },
+                () => sun != null ? sun.color.g : 1,
                 v => { if (sun) { var c = sun.color; c.g = v; sun.color = c; } },
                 0, 1, 0.02f, "F2"));
             gfx.Add(new SettingDef("Sun B",
-                () => sun != null ? sun.color.b : 1; },
+                () => sun != null ? sun.color.b : 1,
                 v => { if (sun) { var c = sun.color; c.b = v; sun.color = c; } },
                 0, 1, 0.02f, "F2"));
             gfx.Add(new SettingDef("Shadow Strength",
-                () => sun != null ? sun.shadowStrength : 1; },
+                () => sun != null ? sun.shadowStrength : 1,
                 v => { if (sun) sun.shadowStrength = v; },
                 0, 1, 0.01f, "F2"));
             gfx.Add(new SettingDef("Indirect Multiplier",
-                () => sun != null ? sun.bounceIntensity : 1; },
+                () => sun != null ? sun.bounceIntensity : 1,
                 v => { if (sun) sun.bounceIntensity = v; },
                 0, 5, 0.1f));
 
