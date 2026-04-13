@@ -53,11 +53,16 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Scene/Load PLAGA44 Demo", false, 1)]
         public static void LoadFromMenu()
         {
-            // Reset flagi zeby walidacja przeszla nawet jesli juz sie odpalila
             SessionState.SetBool(BootstrapKey, true);
-
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             LoadAndValidate();
+        }
+
+        [MenuItem("CYBERNOMAD/Bootstrap", false, 2)]
+        public static void RunBootstrap()
+        {
+            Debug.Log($"{LOG} Reczny Bootstrap...");
+            ValidateScene();
         }
 
         // =====================================================================
@@ -91,6 +96,7 @@ namespace Plaga44.Editor
             changed |= ValidateSkybox();
             changed |= ValidateDirectionalLight();
             changed |= ValidatePlayerRig();
+            changed |= ValidateHamburgerMenu();
 
             if (changed)
             {
@@ -314,6 +320,23 @@ namespace Plaga44.Editor
             }
 
             return changed;
+        }
+
+        /// <summary>
+        /// Sprawdza czy HamburgerMenu jest na scenie. Jesli nie -- tworzy GO z komponentem.
+        /// </summary>
+        private static bool ValidateHamburgerMenu()
+        {
+            if (Object.FindAnyObjectByType<Plaga44.UI.HamburgerMenu>() != null)
+            {
+                Debug.Log($"{LOG} [OK] HamburgerMenu");
+                return false;
+            }
+
+            var menuGO = new GameObject("_HamburgerMenu");
+            menuGO.AddComponent<Plaga44.UI.HamburgerMenu>();
+            Debug.Log($"{LOG} [DODANO] HamburgerMenu");
+            return true;
         }
     }
 }
