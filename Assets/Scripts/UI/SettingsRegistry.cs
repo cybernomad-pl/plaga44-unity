@@ -289,7 +289,7 @@ namespace Plaga44.UI
                 }
                 if (sky.HasFloat("_Exposure")) s.Add(S("Exposure", "Sky brightness", () => sky.GetFloat("_Exposure"), v => sky.SetFloat("_Exposure",v), 0, 8, 0.1f));
                 if (sky.HasFloat("_Rotation")) s.Add(S("Rotation", "Skybox rotation (deg)", () => sky.GetFloat("_Rotation"), v => sky.SetFloat("_Rotation",v), 0, 360, 5, "F0"));
-                if (sky.HasFloat("_RotSpeed")) s.Add(S("Rot Speed", "Sky auto-rotation (deg/s, 0=stop)", () => sky.GetFloat("_RotSpeed"), v => sky.SetFloat("_RotSpeed",v), 0, 30, 0.5f));
+                // _RotSpeed shader property pominieta -- SkyRotator skrypt ogarnia rotacje
                 if (sky.HasColor("_GroundColor")) {
                     s.Add(S("Ground R", "Ground/horizon color R", () => sky.GetColor("_GroundColor").r, v => { var c=sky.GetColor("_GroundColor"); c.r=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
                     s.Add(S("Ground G", "Ground/horizon color G", () => sky.GetColor("_GroundColor").g, v => { var c=sky.GetColor("_GroundColor"); c.g=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));

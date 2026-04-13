@@ -14,7 +14,7 @@
 //   Triggers   = adjust value +/- (in settings)
 //
 // Canvas renders in world space, faces the player.
-// Time.timeScale = 0 when open.
+// GameState.Pause() when open, GameState.Resume() on close.
 // =============================================================================
 
 using System;
@@ -169,7 +169,7 @@ namespace Plaga44.UI
             PlaceInFrontOfPlayer();
             _canvas.gameObject.SetActive(true);
             MenuOpen = true;
-            Time.timeScale = 0f;
+            GameState.Pause();
             _level = MenuLevel.Top;
             _topIndex = 0;
             ShowLevel();
@@ -181,7 +181,8 @@ namespace Plaga44.UI
             if (!MenuOpen) return;
             _canvas.gameObject.SetActive(false);
             MenuOpen = false;
-            Time.timeScale = 1f;
+            if (GameState.Current == GamePhase.Paused)
+                GameState.Resume();
             Debug.Log($"{LOG} CLOSE");
         }
 
