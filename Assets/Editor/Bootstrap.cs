@@ -72,7 +72,7 @@ namespace Plaga44.Editor
         private static void LoadAndValidate()
         {
             var active = SceneManager.GetActiveScene();
-            if (!active.IsValid() || !active.path.Contains("TESTBED"))
+            if (!active.IsValid() || active.path != ScenePath)
             {
                 if (!System.IO.File.Exists(ScenePath))
                 {
