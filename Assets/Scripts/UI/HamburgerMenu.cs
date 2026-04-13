@@ -51,22 +51,22 @@ namespace Plaga44.UI
 
         private static readonly string[] CATEGORIES = new string[]
         {
-            "SPAWN",
-            "WEAPONS",
-            "TERRAIN",
-            "LIGHTING",
-            "SETTINGS",
-            "DEBUG"
+            "MISC.",
+            "SUBMENU 2",
+            "SUBMENU 3",
+            "SUBMENU 4",
+            "SUBMENU 5",
+            "SUBMENU 6"
         };
 
         private static readonly string[] CATEGORY_ICONS = new string[]
         {
-            "\u25A0",  // filled square
-            "\u2694",  // crossed swords
-            "\u2261",  // terrain/hamburger
-            "\u2600",  // sun
-            "\u2699",  // gear
-            "\u2622",  // radioactive / debug
+            "*",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
         };
 
         // =====================================================================
