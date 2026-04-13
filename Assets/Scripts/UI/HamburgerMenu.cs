@@ -33,8 +33,8 @@ namespace Plaga44.UI
 
         private const float MENU_DISTANCE = 1.4f;
         private const float CANVAS_SCALE = 0.001f;
-        private const int CANVAS_W = 700;
-        private const int CANVAS_H = 500;
+        private const int CANVAS_W = 900;
+        private const int CANVAS_H = 700;
 
         // Kolory -- dark theme
         private static readonly Color BG_COLOR = new Color(0.08f, 0.08f, 0.08f, 0.92f);
@@ -52,21 +52,24 @@ namespace Plaga44.UI
         private static readonly string[] CATEGORIES = new string[]
         {
             "MISC.",
-            "SUBMENU 2",
-            "SUBMENU 3",
-            "SUBMENU 4",
-            "SUBMENU 5",
-            "SUBMENU 6"
-        };
-
-        private static readonly string[] CATEGORY_ICONS = new string[]
-        {
-            "*",
-            "2",
-            "3",
-            "4",
-            "5",
-            "6",
+            "Audio",
+            "Physics",
+            "Quality",
+            "Graphics",
+            "Oculus",
+            "Pipeline",
+            "Renderer",
+            "URP",
+            "Volume",
+            "Layers",
+            "Manifest",
+            "Packages",
+            "Input",
+            "Memory",
+            "NavMesh",
+            "Project",
+            "Editor",
+            "Build",
         };
 
         // =====================================================================
@@ -179,10 +182,11 @@ namespace Plaga44.UI
 
             if (Time.unscaledTime - _lastStickTime < STICK_COOLDOWN) return;
 
+            int cols = 5;
             if (stick.x > 0.5f) { MoveSelection(1); _lastStickTime = Time.unscaledTime; }
             else if (stick.x < -0.5f) { MoveSelection(-1); _lastStickTime = Time.unscaledTime; }
-            else if (stick.y > 0.5f) { MoveSelection(-3); _lastStickTime = Time.unscaledTime; }
-            else if (stick.y < -0.5f) { MoveSelection(3); _lastStickTime = Time.unscaledTime; }
+            else if (stick.y > 0.5f) { MoveSelection(-cols); _lastStickTime = Time.unscaledTime; }
+            else if (stick.y < -0.5f) { MoveSelection(cols); _lastStickTime = Time.unscaledTime; }
         }
 
         private void MoveSelection(int delta)
@@ -295,18 +299,20 @@ namespace Plaga44.UI
 
         private void BuildGrid()
         {
-            float iconSize = 120f;
-            float spacing = 16f;
-            float gridW = 3 * iconSize + 2 * spacing;
+            // Dynamiczny grid -- 5 kolumn, tyle wierszy ile trzeba
+            int cols = 5;
+            float iconSize = 100f;
+            float spacing = 10f;
+            float gridW = cols * iconSize + (cols - 1) * spacing;
             float startX = -gridW / 2f + iconSize / 2f;
-            float startY = 80f;
+            float startY = 220f; // od gory canvasa
 
             _categoryBGs = new Image[CATEGORIES.Length];
 
             for (int i = 0; i < CATEGORIES.Length; i++)
             {
-                int col = i % 3;
-                int row = i / 3;
+                int col = i % cols;
+                int row = i / cols;
                 float x = startX + col * (iconSize + spacing);
                 float y = startY - row * (iconSize + spacing);
 
@@ -321,35 +327,19 @@ namespace Plaga44.UI
                 cellImg.color = BTN_COLOR;
                 _categoryBGs[i] = cellImg;
 
-                // Ikona
-                var iconGO = new GameObject("Icon");
-                iconGO.transform.SetParent(cellGO.transform, false);
-                var iconRT = iconGO.AddComponent<RectTransform>();
-                iconRT.anchorMin = Vector2.zero;
-                iconRT.anchorMax = Vector2.one;
-                iconRT.offsetMin = new Vector2(0, 25);
-                iconRT.offsetMax = Vector2.zero;
-                var iconText = iconGO.AddComponent<Text>();
-                iconText.text = CATEGORY_ICONS[i];
-                iconText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                iconText.fontSize = 40;
-                iconText.color = TEXT_WHITE;
-                iconText.alignment = TextAnchor.MiddleCenter;
-
-                // Label pod ikona
+                // Nazwa kafelka -- centrowana
                 var labelGO = new GameObject("Label");
                 labelGO.transform.SetParent(cellGO.transform, false);
                 var labelRT = labelGO.AddComponent<RectTransform>();
-                labelRT.anchorMin = new Vector2(0, 0);
-                labelRT.anchorMax = new Vector2(1, 0);
-                labelRT.pivot = new Vector2(0.5f, 0);
-                labelRT.sizeDelta = new Vector2(0, 28);
-                labelRT.anchoredPosition = new Vector2(0, 4);
+                labelRT.anchorMin = Vector2.zero;
+                labelRT.anchorMax = Vector2.one;
+                labelRT.offsetMin = Vector2.zero;
+                labelRT.offsetMax = Vector2.zero;
                 var labelText = labelGO.AddComponent<Text>();
                 labelText.text = CATEGORIES[i];
                 labelText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                labelText.fontSize = 14;
-                labelText.color = TEXT_GREY;
+                labelText.fontSize = 16;
+                labelText.color = TEXT_WHITE;
                 labelText.alignment = TextAnchor.MiddleCenter;
             }
         }
