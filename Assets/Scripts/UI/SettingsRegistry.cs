@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.XR;
+using UnityEngine.AI;
 
 namespace Plaga44.UI
 {
@@ -28,6 +29,7 @@ namespace Plaga44.UI
         private static string[] _names;
         private static bool _built;
         private static List<SettingDef> _allSettings; // flat list for save/load
+        private static float _activeProfile = 0;
 
         public static List<SettingDef> GetSettings(string s) { if (!_built) Build(); return _sec.TryGetValue(s, out var l) ? l : new List<SettingDef>(); }
         public static string[] GetSectionNames() { if (!_built) Build(); return _names; }
@@ -381,6 +383,35 @@ namespace Plaga44.UI
             });
 
             // =============================================================
+            // PROFILE -- runtime preset switcher
+            // =============================================================
+            Sec("PROFILE", s => {
+                // 0=Quest, 1=PCVR -- applies a batch of settings
+                s.Add(S("Target", "0=Quest 1=PCVR -- applies preset", () => _activeProfile, v => { ApplyProfile((int)v); }, 0, 1, 1, "F0"));
+            });
+
+            // =============================================================
+            // URP -- additional pipeline info
+            // =============================================================
+            if (urp != null) Sec("URP", s => {
+                s.Add(S("HDR", "High dynamic range (1=on)", () => urp.supportsHDR?1:0, v => {}, 0, 1, 0, "F0")); // read-only at runtime
+                s.Add(S("Depth Tex", "Camera depth texture (1=on)", () => urp.supportsCameraDepthTexture?1:0, v => {}, 0, 1, 0, "F0")); // RO
+                s.Add(S("Opaque Tex", "Camera opaque texture (1=on)", () => urp.supportsCameraOpaqueTexture?1:0, v => {}, 0, 1, 0, "F0")); // RO
+                s.Add(S("SH Mode", "Spherical harmonics eval mode", () => (float)urp.shEvalMode, v => {}, 0, 2, 0, "F0")); // RO
+            });
+
+            // =============================================================
+            // NAVMESH -- agent settings if present
+            // =============================================================
+            var agent = UnityEngine.Object.FindAnyObjectByType<NavMeshAgent>();
+            if (agent != null) Sec("NAVMESH", s => {
+                s.Add(S("Agent Speed", "NavMesh agent speed", () => agent.speed, v => agent.speed=v, 0, 20, 0.5f));
+                s.Add(S("Agent Accel", "NavMesh agent acceleration", () => agent.acceleration, v => agent.acceleration=v, 0, 50, 1, "F0"));
+                s.Add(S("Agent Radius", "NavMesh agent radius", () => agent.radius, v => agent.radius=v, 0.1f, 2, 0.05f, "F2"));
+                s.Add(S("Stop Dist", "NavMesh stopping distance", () => agent.stoppingDistance, v => agent.stoppingDistance=v, 0, 10, 0.1f));
+            });
+
+            // =============================================================
             // PRESETS (save/load as "settings")
             // =============================================================
             Sec("PRESETS", s => {
@@ -406,6 +437,38 @@ namespace Plaga44.UI
 
             _built = true;
             Debug.Log($"[PLAGA44][Settings] Built: {_sec.Count} sections, {_allSettings.Count} saveable settings");
+        }
+
+        static void ApplyProfile(int profile)
+        {
+            var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+            var ter = UnityEngine.Object.FindAnyObjectByType<Terrain>();
+            string label = profile == 0 ? "Quest" : "PCVR";
+
+            if (profile == 0)
+            {
+                // Quest profile -- low settings for mobile VR
+                if (urp != null) { urp.renderScale = 0.8f; urp.shadowDistance = 20f; urp.msaaSampleCount = 4; }
+                QualitySettings.lodBias = 0.7f;
+                if (ter != null) { ter.detailObjectDistance = 80f; ter.treeDistance = 500f; }
+                XRSettings.eyeTextureResolutionScale = 0.8f;
+                try { OVRManager.foveatedRenderingLevel = (OVRManager.FoveatedRenderingLevel)3; } catch {}
+                Application.targetFrameRate = 72;
+            }
+            else
+            {
+                // PCVR profile -- high quality for desktop VR
+                if (urp != null) { urp.renderScale = 1.2f; urp.shadowDistance = 80f; urp.msaaSampleCount = 4; }
+                QualitySettings.lodBias = 1.5f;
+                if (ter != null) { ter.detailObjectDistance = 250f; ter.treeDistance = 2000f; }
+                XRSettings.eyeTextureResolutionScale = 1.2f;
+                try { OVRManager.foveatedRenderingLevel = (OVRManager.FoveatedRenderingLevel)0; } catch {}
+                Application.targetFrameRate = -1;
+            }
+
+            _activeProfile = profile;
+            Rebuild();
+            Debug.Log($"[PLAGA44][Settings] Applied profile: {label}");
         }
 
         static Light FindSun()
