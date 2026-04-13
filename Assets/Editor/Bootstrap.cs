@@ -15,7 +15,7 @@ namespace Plaga44.Editor
     [InitializeOnLoad]
     public static class Bootstrap
     {
-        private const string ScenePath = "Assets/PLAGA44/TESTBED_V6.unity";
+        private const string ScenePath = "Assets/PLAGA44/TESTBED.unity";
         private const string TerrainAsset = "Assets/Potok/Terrain/Scene_A_Terrain.asset";
         private const string TerrainMatPath = "Assets/PLAGA44/Materials/TerrainLit.mat";
         private const string SkyboxMat = "Assets/Potok/Skybox/BGR_Sky1.mat";
@@ -72,7 +72,7 @@ namespace Plaga44.Editor
         private static void LoadAndValidate()
         {
             var active = SceneManager.GetActiveScene();
-            if (!active.IsValid() || !active.path.Contains("TESTBED_V6"))
+            if (!active.IsValid() || !active.path.Contains("TESTBED"))
             {
                 if (!System.IO.File.Exists(ScenePath))
                 {
