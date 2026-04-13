@@ -47,7 +47,7 @@ namespace Plaga44.UI
         private static readonly Color TEXT_GREY = new Color(0.55f, 0.55f, 0.55f);
 
         // =====================================================================
-        // Kategorie menu (6 ikon)
+        // Kategorie menu
         // =====================================================================
 
         private static readonly string[] CATEGORIES = new string[]
@@ -118,7 +118,7 @@ namespace Plaga44.UI
             BuildFooter();
             _canvas.gameObject.SetActive(false);
             UpdateSelection();
-            Debug.Log($"{LOG} Start: gotowe, 6 kategorii, rig={(_rig != null ? _rig.name : "NULL")}");
+            Debug.Log($"{LOG} Start: {CATEGORIES.Length} kategorii, rig={(_rig != null ? _rig.name : "NULL")}");
         }
 
         private void Update()
@@ -251,7 +251,11 @@ namespace Plaga44.UI
         private void EnterSubmenu(string moduleName)
         {
             _currentSettings = SettingsRegistry.GetSettings(moduleName);
-            if (_currentSettings.Count == 0)
+            // Sprawdz czy sa jakiekolwiek NIE-headerowe ustawienia
+            bool hasSettings = false;
+            foreach (var s in _currentSettings)
+                if (!s.isHeader) { hasSettings = true; break; }
+            if (!hasSettings)
             {
                 Debug.Log($"{LOG} {moduleName}: brak ustawien runtime");
                 return;
@@ -259,6 +263,9 @@ namespace Plaga44.UI
 
             _inSubmenu = true;
             _settingIndex = 0;
+            // Przeskocz header na poczatku
+            while (_settingIndex < _currentSettings.Count && _currentSettings[_settingIndex].isHeader)
+                _settingIndex++;
             // Ukryj grid
             if (_gridRoot != null) _gridRoot.SetActive(false);
 

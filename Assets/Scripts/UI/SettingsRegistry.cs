@@ -62,7 +62,6 @@ namespace Plaga44.UI
             var skyboxMat = RenderSettings.skybox;
 
             ColorAdjustments colorAdj = null;
-            Tonemapping tonemapping = null;
             Vignette vignette = null;
             WhiteBalance whiteBalance = null;
             LiftGammaGain lgg = null;
@@ -71,7 +70,6 @@ namespace Plaga44.UI
             if (volume != null && volume.profile != null)
             {
                 volume.profile.TryGet(out colorAdj);
-                volume.profile.TryGet(out tonemapping);
                 volume.profile.TryGet(out vignette);
                 volume.profile.TryGet(out whiteBalance);
                 volume.profile.TryGet(out lgg);
@@ -206,31 +204,32 @@ namespace Plaga44.UI
             // =============================================================
             // Graphics (Light + Fog + Ambient)
             // =============================================================
+            var sun = FindSun(); // cache -- nie szukaj co frame
             var gfx = new List<SettingDef>();
             gfx.Add(SettingDef.Header("--- SUN ---"));
             gfx.Add(new SettingDef("Intensity",
-                () => { var l = FindSun(); return l != null ? l.intensity : 1; },
-                v => { var l = FindSun(); if (l) l.intensity = v; },
+                () => sun != null ? sun.intensity : 1,
+                v => { if (sun) sun.intensity = v; },
                 0, 5, 0.1f));
             gfx.Add(new SettingDef("Sun R",
-                () => { var l = FindSun(); return l != null ? l.color.r : 1; },
-                v => { var l = FindSun(); if (l) { var c = l.color; c.r = v; l.color = c; } },
+                () => sun != null ? sun.color.r : 1; },
+                v => { if (sun) { var c = sun.color; c.r = v; sun.color = c; } },
                 0, 1, 0.02f, "F2"));
             gfx.Add(new SettingDef("Sun G",
-                () => { var l = FindSun(); return l != null ? l.color.g : 1; },
-                v => { var l = FindSun(); if (l) { var c = l.color; c.g = v; l.color = c; } },
+                () => sun != null ? sun.color.g : 1; },
+                v => { if (sun) { var c = sun.color; c.g = v; sun.color = c; } },
                 0, 1, 0.02f, "F2"));
             gfx.Add(new SettingDef("Sun B",
-                () => { var l = FindSun(); return l != null ? l.color.b : 1; },
-                v => { var l = FindSun(); if (l) { var c = l.color; c.b = v; l.color = c; } },
+                () => sun != null ? sun.color.b : 1; },
+                v => { if (sun) { var c = sun.color; c.b = v; sun.color = c; } },
                 0, 1, 0.02f, "F2"));
             gfx.Add(new SettingDef("Shadow Strength",
-                () => { var l = FindSun(); return l != null ? l.shadowStrength : 1; },
-                v => { var l = FindSun(); if (l) l.shadowStrength = v; },
+                () => sun != null ? sun.shadowStrength : 1; },
+                v => { if (sun) sun.shadowStrength = v; },
                 0, 1, 0.01f, "F2"));
             gfx.Add(new SettingDef("Indirect Multiplier",
-                () => { var l = FindSun(); return l != null ? l.bounceIntensity : 1; },
-                v => { var l = FindSun(); if (l) l.bounceIntensity = v; },
+                () => sun != null ? sun.bounceIntensity : 1; },
+                v => { if (sun) sun.bounceIntensity = v; },
                 0, 5, 0.1f));
 
             gfx.Add(SettingDef.Header("--- FOG ---"));
