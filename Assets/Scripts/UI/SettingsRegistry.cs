@@ -112,14 +112,10 @@ namespace Plaga44.UI
                 () => AudioListener.volume,
                 v => AudioListener.volume = v,
                 0f, 1f, 0.05f, "F2"));
-            audio.Add(new SettingDef("Doppler Factor",
-                () => AudioSettings.GetConfiguration().dopplerFactor,
-                v => { var c = AudioSettings.GetConfiguration(); c.dopplerFactor = v; AudioSettings.Reset(c); },
-                0f, 5f, 0.1f));
-            audio.Add(new SettingDef("Speed of Sound",
-                () => AudioSettings.GetConfiguration().speakerMode == AudioSpeakerMode.Stereo ? 343f : 343f,
-                v => {}, // read-only info
-                343, 343, 0, "F0"));
+            audio.Add(new SettingDef("DSP Buffer Size",
+                () => AudioSettings.GetConfiguration().dspBufferSize,
+                v => { var c = AudioSettings.GetConfiguration(); c.dspBufferSize = (int)v; AudioSettings.Reset(c); },
+                256, 4096, 256, "F0"));
             _modules["Audio"] = audio;
 
             // =============================================================
