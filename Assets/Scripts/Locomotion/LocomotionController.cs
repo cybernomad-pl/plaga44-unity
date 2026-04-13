@@ -63,6 +63,20 @@ namespace Plaga44.Locomotion
         [Range(0.1f, 1f)]
         public float strafeFactor = 0.8f;
 
+        [Header("Obrot")]
+        [Tooltip("Snap turn zamiast smooth turn.")]
+        public bool snapTurns = true;
+
+        [Tooltip("Stopnie na jeden snap turn.")]
+        public float snapAngle = 45f;
+
+        [Tooltip("Smooth turn predkosc (stopnie/sek).")]
+        public float turnSpeed = 90f;
+
+        [Tooltip("Deadzone thumbsticka do obrotu.")]
+        [Range(0.1f, 0.9f)]
+        public float turnDeadzone = 0.5f;
+
         [Header("Referencja glowy")]
         [Tooltip("Transform kamery VR (CenterEyeAnchor). Jesli puste -- szuka automatycznie.")]
         [SerializeField] private Transform _headTransform;
@@ -90,7 +104,8 @@ namespace Plaga44.Locomotion
         /// nawet na lekko nierównym terenie. Bez tego gracz moze "drgac" miedzy
         /// isGrounded = true i false na pochylych powierzchniach.
         /// </summary>
-        private const float GroundedPullDown = -2f; // mocniejszy pull = stabilniejszy isGrounded na nierównym terenie
+        private const float GroundedPullDown = -2f;
+        private float _snapCooldown;
 
         // =====================================================================
         // Property publiczne (read-only z zewnatrz)
@@ -158,6 +173,7 @@ namespace Plaga44.Locomotion
         private void Update()
         {
             if (!GameState.CanMove) return;
+            if (Plaga44.UI.HamburgerMenu.MenuOpen) return;
             if (_headTransform == null) return;
 
             // 1. Odczytaj input z lewego thumbsticka (lub klawiatury)
@@ -175,6 +191,9 @@ namespace Plaga44.Locomotion
             _cc.Move(finalMove);
 
             NormalisedSpeed = Mathf.Clamp01(moveInput.magnitude);
+
+            // 5. Obrot -- prawy thumbstick
+            HandleTurn();
 
             // Log zmian grounded (throttled: max co 0.5s zeby uniknac spam przy drganiach CC)
             if (_cc.isGrounded != _wasGrounded)
@@ -274,6 +293,34 @@ namespace Plaga44.Locomotion
         }
 
         // =====================================================================
+        // Obrot (snap / smooth turn) -- prawy thumbstick
+        // =====================================================================
+
+        private void HandleTurn()
+        {
+            Vector2 turnInput = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch);
+
+            if (snapTurns)
+            {
+                _snapCooldown -= Time.deltaTime;
+                if (Mathf.Abs(turnInput.x) > turnDeadzone && _snapCooldown <= 0f)
+                {
+                    float dir = Mathf.Sign(turnInput.x);
+                    transform.Rotate(0f, dir * snapAngle, 0f, Space.World);
+                    _snapCooldown = 0.25f;
+                }
+            }
+            else
+            {
+                if (Mathf.Abs(turnInput.x) > turnDeadzone)
+                {
+                    float rotation = turnInput.x * turnSpeed * Time.deltaTime;
+                    transform.Rotate(0f, rotation, 0f, Space.World);
+                }
+            }
+        }
+
+        // =====================================================================
         // Automatyczne znajdowanie kamery
         // =====================================================================
 
@@ -285,20 +332,14 @@ namespace Plaga44.Locomotion
         /// </summary>
         private Transform ResolveHeadTransform()
         {
-#if HAS_META_XR
-            // OVRCameraRig tworzy hierarchie:
-            //   [OVRCameraRig]
-            //     TrackingSpace
-            //       CenterEyeAnchor  <-- to jest kamera VR
-            //       LeftHandAnchor
-            //       RightHandAnchor
+            // OVRCameraRig: TrackingSpace/CenterEyeAnchor
             var tracking = transform.Find("TrackingSpace");
             if (tracking != null)
             {
                 var eye = tracking.Find("CenterEyeAnchor");
                 if (eye != null) return eye;
             }
-#endif
+
             // Fallback -- Camera.main dziala zarowno w edytorze jak i na urzadzeniu.
             if (Camera.main != null)
             {
