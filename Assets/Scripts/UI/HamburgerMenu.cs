@@ -381,11 +381,12 @@ namespace Plaga44.UI
                 _settingTexts[i].color = selected ? TEXT_WHITE : TEXT_GREY;
             }
 
-            // Footer
+            // Footer -- wartosc + opis
             {
                 var s = _currentSettings[_settingIndex];
                 float val = s.get();
-                _valueText.text = $"<  {val.ToString(s.format)}  >    [{s.min} .. {s.max}]  step {s.step}";
+                _selectedLabel.text = s.desc ?? "";
+                _valueText.text = $"<  {val.ToString(s.format)}  >    [{s.min}..{s.max}]";
             }
         }
 
