@@ -101,7 +101,7 @@ namespace Plaga44.UI
         private float _lastStickTime;
         private const float STICK_COOLDOWN = 0.18f;
         private float _lastTriggerTime;
-        private const float TRIGGER_COOLDOWN = 0.2f;
+        private float _triggerHoldStart;
 
         // =====================================================================
         // Unity lifecycle
@@ -300,13 +300,26 @@ namespace Plaga44.UI
             if (stick.x > 0.5f) { AdjustSetting(1); _lastStickTime = Time.unscaledTime; }
             else if (stick.x < -0.5f) { AdjustSetting(-1); _lastStickTime = Time.unscaledTime; }
 
-            // Triggers also adjust
-            if (Time.unscaledTime - _lastTriggerTime > TRIGGER_COOLDOWN)
+            // Triggers: hold to repeat, accelerates over time
+            bool trigL = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch);
+            bool trigR = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
+
+            if (trigL || trigR)
             {
-                if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
-                { AdjustSetting(-1); _lastTriggerTime = Time.unscaledTime; }
-                if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
-                { AdjustSetting(1); _lastTriggerTime = Time.unscaledTime; }
+                // Accelerate: start at 0.2s delay, speed up to 0.05s after 1s of holding
+                float holdTime = Time.unscaledTime - _triggerHoldStart;
+                float repeatRate = Mathf.Lerp(0.2f, 0.05f, Mathf.Clamp01(holdTime / 1f));
+
+                if (Time.unscaledTime - _lastTriggerTime > repeatRate)
+                {
+                    if (trigL) AdjustSetting(-1);
+                    if (trigR) AdjustSetting(1);
+                    _lastTriggerTime = Time.unscaledTime;
+                }
+            }
+            else
+            {
+                _triggerHoldStart = Time.unscaledTime;
             }
         }
 
