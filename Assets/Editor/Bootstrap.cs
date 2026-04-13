@@ -318,14 +318,11 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} [OK] SmoothTurnController on OVRCameraRig");
             }
 
-            // Spawn player above terrain if something changed
-            if (changed)
-            {
-                var terrain = Object.FindFirstObjectByType<Terrain>();
-                float spawnY = terrain != null ? terrain.terrainData.size.y + 1000f : 1200f;
-                rig.transform.position = new Vector3(0f, spawnY, 0f);
-                Debug.Log($"{LOG} Player placed at (0, {spawnY}, 0)");
-            }
+            // Always spawn player 1km above terrain
+            var terrain = Object.FindFirstObjectByType<Terrain>();
+            float spawnY = terrain != null ? terrain.terrainData.size.y + 1000f : 1200f;
+            rig.transform.position = new Vector3(0f, spawnY, 0f);
+            Debug.Log($"{LOG} Player placed at (0, {spawnY}, 0)");
 
             return changed;
         }
