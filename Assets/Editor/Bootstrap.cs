@@ -8,9 +8,9 @@ using UnityEngine.Rendering;
 namespace Plaga44.Editor
 {
     /// <summary>
-    /// Laduje scene PLAGA44 Demo, waliduje i naprawia brakujace elementy.
-    /// Odpala sie automatycznie po otwarciu projektu w edytorze
-    /// oraz dostepne z menu CYBERNOMAD > Scene > Load PLAGA44 Demo.
+    /// Loads PLAGA44 Demo scene, validates and fixes missing elements.
+    /// Runs automatically on editor open (InitializeOnLoad).
+    /// Also available from menu: CYBERNOMAD > Scene > Load PLAGA44 Demo.
     /// </summary>
     [InitializeOnLoad]
     public static class Bootstrap
@@ -20,10 +20,10 @@ namespace Plaga44.Editor
         private const string TerrainMatPath = "Assets/PLAGA44/Materials/TerrainLit.mat";
         private const string SkyboxMat = "Assets/Potok/Skybox/BGR_Sky1.mat";
         private const string BootstrapKey = "Plaga44.OpenScene.Done";
-        private const string LOG = "[PLAGA44][OpenScene]";
+        private const string LOG = "[PLAGA44][Bootstrap]";
 
         // =====================================================================
-        // Auto-run po starcie edytora
+        // Auto-run on editor start
         // =====================================================================
 
         static Bootstrap()
@@ -42,12 +42,12 @@ namespace Plaga44.Editor
                 return;
             }
 
-            Debug.Log($"{LOG} Auto-run: ladowanie sceny i walidacja...");
+            Debug.Log($"{LOG} Auto-run: loading scene and validating...");
             LoadAndValidate();
         }
 
         // =====================================================================
-        // Menu item
+        // Menu items
         // =====================================================================
 
         [MenuItem("CYBERNOMAD/Scene/Load PLAGA44 Demo", false, 1)]
@@ -61,30 +61,29 @@ namespace Plaga44.Editor
         [MenuItem("CYBERNOMAD/Bootstrap", false, 2)]
         public static void RunBootstrap()
         {
-            Debug.Log($"{LOG} Reczny Bootstrap...");
+            Debug.Log($"{LOG} Manual bootstrap...");
             ValidateScene();
         }
 
         // =====================================================================
-        // Glowna metoda: wczytaj + waliduj + napraw
+        // Main: load + validate + fix
         // =====================================================================
 
         private static void LoadAndValidate()
         {
-            // --- 1. Otworz scene jesli nie jest otwarta ---
             var active = SceneManager.GetActiveScene();
             if (!active.IsValid() || !active.path.Contains("TESTBED_V6"))
             {
                 if (!System.IO.File.Exists(ScenePath))
                 {
-                    Debug.LogError($"{LOG} Scena nie istnieje: {ScenePath}");
+                    Debug.LogError($"{LOG} Scene not found: {ScenePath}");
                     return;
                 }
                 EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
-                Debug.Log($"{LOG} Scena otwarta: {ScenePath}");
+                Debug.Log($"{LOG} Scene opened: {ScenePath}");
             }
 
-            // Daj edytorowi chwile na zaladowanie sceny
+            // Give editor a frame to finish loading
             EditorApplication.delayCall += ValidateScene;
         }
 
@@ -97,19 +96,20 @@ namespace Plaga44.Editor
             changed |= ValidateDirectionalLight();
             changed |= ValidatePlayerRig();
             changed |= ValidateHamburgerMenu();
+            changed |= ValidateSkyRotator();
 
             if (changed)
             {
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
                 EditorSceneManager.SaveOpenScenes();
-                Debug.Log($"{LOG} === Walidacja zakonczona, scena zapisana ===");
+                Debug.Log($"{LOG} === Validation done, scene saved ===");
             }
             else
             {
-                Debug.Log($"{LOG} === Walidacja OK, nic nie brakuje ===");
+                Debug.Log($"{LOG} === Validation OK, nothing missing ===");
             }
 
-            // Fokus na teren w SceneView
+            // Focus on terrain in SceneView
             var terrain = Object.FindFirstObjectByType<Terrain>();
             if (terrain != null)
             {
@@ -119,12 +119,12 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // Walidatory -- kazdy sprawdza jeden element sceny
+        // Validators -- each checks one scene element
         // =====================================================================
 
         /// <summary>
-        /// Sprawdza czy teren istnieje. Jesli nie -- tworzy z Scene_A_Terrain.asset.
-        /// Sprawdza tez material -- jesli brakuje lub rozowy, ustawia URP Terrain/Lit.
+        /// Checks if terrain exists. If not -- creates from Scene_A_Terrain.asset.
+        /// Also checks material -- if missing or pink, assigns URP Terrain/Lit.
         /// </summary>
         private static bool ValidateTerrain()
         {
@@ -136,7 +136,7 @@ namespace Plaga44.Editor
                 var terrainData = AssetDatabase.LoadAssetAtPath<TerrainData>(TerrainAsset);
                 if (terrainData == null)
                 {
-                    Debug.LogError($"{LOG} [BRAK] Scene_A_Terrain.asset nie znaleziony: {TerrainAsset}");
+                    Debug.LogError($"{LOG} [MISSING] Scene_A_Terrain.asset not found: {TerrainAsset}");
                     return false;
                 }
 
@@ -149,21 +149,21 @@ namespace Plaga44.Editor
 
                 existing = terrainGO.GetComponent<Terrain>();
                 changed = true;
-                Debug.Log($"{LOG} [DODANO] Teren: {terrainData.size.x:F0}x{terrainData.size.z:F0}m, wycentrowany");
+                Debug.Log($"{LOG} [ADDED] Terrain: {terrainData.size.x:F0}x{terrainData.size.z:F0}m, centered");
             }
             else
             {
-                Debug.Log($"{LOG} [OK] Teren: {existing.name} ({existing.terrainData.size})");
+                Debug.Log($"{LOG} [OK] Terrain: {existing.name} ({existing.terrainData.size})");
             }
 
-            // Walidacja materialu -- rozowy = brakujacy shader/material
+            // Validate material -- pink = missing shader/material
             changed |= ValidateTerrainMaterial(existing);
             return changed;
         }
 
         /// <summary>
-        /// Sprawdza material terenu. Jesli null lub uzywa brakujacego shadera
-        /// (rozowy = "Hidden/InternalErrorShader") -- tworzy URP Terrain/Lit.
+        /// Checks terrain material. If null or using missing shader
+        /// (pink = "Hidden/InternalErrorShader") -- creates URP Terrain/Lit.
         /// </summary>
         private static bool ValidateTerrainMaterial(Terrain terrain)
         {
@@ -174,51 +174,46 @@ namespace Plaga44.Editor
                 return false;
             }
 
-            Debug.LogWarning($"{LOG} [NAPRAWIAM] Terrain material brakujacy lub rozowy");
+            Debug.LogWarning($"{LOG} [FIX] Terrain material missing or pink");
 
-            // Sprobuj zaladowac istniejacy material
             var existingMat = AssetDatabase.LoadAssetAtPath<Material>(TerrainMatPath);
             if (existingMat != null)
             {
                 terrain.materialTemplate = existingMat;
-                Debug.Log($"{LOG} [OK] Przypisano istniejacy TerrainLit.mat");
+                Debug.Log($"{LOG} [OK] Assigned existing TerrainLit.mat");
                 return true;
             }
 
-            // Stworz nowy URP Terrain/Lit material
             var shader = Shader.Find("Universal Render Pipeline/Terrain/Lit");
             if (shader == null)
             {
-                Debug.LogError($"{LOG} [BLAD] Shader 'Universal Render Pipeline/Terrain/Lit' nie znaleziony!");
+                Debug.LogError($"{LOG} [ERROR] Shader 'Universal Render Pipeline/Terrain/Lit' not found!");
                 return false;
             }
 
             var newMat = new Material(shader);
             newMat.name = "TerrainLit";
 
-            // Upewnij sie ze folder istnieje
             if (!AssetDatabase.IsValidFolder("Assets/PLAGA44/Materials"))
-            {
                 AssetDatabase.CreateFolder("Assets/PLAGA44", "Materials");
-            }
 
             AssetDatabase.CreateAsset(newMat, TerrainMatPath);
             AssetDatabase.SaveAssets();
 
             terrain.materialTemplate = newMat;
-            Debug.Log($"{LOG} [DODANO] Stworzono i przypisano TerrainLit.mat (URP Terrain/Lit)");
+            Debug.Log($"{LOG} [ADDED] Created and assigned TerrainLit.mat (URP Terrain/Lit)");
             return true;
         }
 
         /// <summary>
-        /// Sprawdza czy skybox jest ustawiony. Jesli nie -- ustawia BGR_Sky1.
+        /// Checks if skybox is set. If not -- assigns BGR_Sky1.
         /// </summary>
         private static bool ValidateSkybox()
         {
             var skyboxMat = AssetDatabase.LoadAssetAtPath<Material>(SkyboxMat);
             if (skyboxMat == null)
             {
-                Debug.LogWarning($"{LOG} [BRAK] Skybox material nie znaleziony: {SkyboxMat}");
+                Debug.LogWarning($"{LOG} [MISSING] Skybox material not found: {SkyboxMat}");
                 return false;
             }
 
@@ -229,12 +224,12 @@ namespace Plaga44.Editor
             }
 
             RenderSettings.skybox = skyboxMat;
-            Debug.Log($"{LOG} [DODANO] Skybox: {skyboxMat.name}");
+            Debug.Log($"{LOG} [ADDED] Skybox: {skyboxMat.name}");
             return true;
         }
 
         /// <summary>
-        /// Sprawdza czy jest Directional Light. Jesli nie -- tworzy.
+        /// Checks for Directional Light. If missing -- creates one.
         /// </summary>
         private static bool ValidateDirectionalLight()
         {
@@ -251,27 +246,25 @@ namespace Plaga44.Editor
             var lightGO = new GameObject("Directional Light");
             var lightComp = lightGO.AddComponent<Light>();
             lightComp.type = LightType.Directional;
-            lightComp.color = new Color(1f, 0.95f, 0.84f); // ciepla barwa slonca
+            lightComp.color = new Color(1f, 0.95f, 0.84f); // warm sunlight
             lightComp.intensity = 1f;
             lightComp.shadows = LightShadows.Soft;
-
-            // Slonce pod katem -- typowe oswietlenie terenu
             lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
-            Debug.Log($"{LOG} [DODANO] Directional Light");
+            Debug.Log($"{LOG} [ADDED] Directional Light");
             return true;
         }
 
         /// <summary>
-        /// Sprawdza OVRCameraRig: CharacterController + LocomotionController.
-        /// Jesli brakuje komponentow -- dodaje.
+        /// Validates OVRCameraRig: CharacterController + LocomotionController + SmoothTurnController.
+        /// Adds missing components.
         /// </summary>
         private static bool ValidatePlayerRig()
         {
             var rig = GameObject.Find("OVRCameraRig");
             if (rig == null)
             {
-                Debug.LogWarning($"{LOG} [BRAK] OVRCameraRig nie znaleziony w scenie");
+                Debug.LogWarning($"{LOG} [MISSING] OVRCameraRig not found in scene");
                 return false;
             }
 
@@ -288,11 +281,11 @@ namespace Plaga44.Editor
                 cc.skinWidth = 0.08f;
                 cc.stepOffset = 0.5f;
                 changed = true;
-                Debug.Log($"{LOG} [DODANO] CharacterController na OVRCameraRig");
+                Debug.Log($"{LOG} [ADDED] CharacterController on OVRCameraRig");
             }
             else
             {
-                Debug.Log($"{LOG} [OK] CharacterController na OVRCameraRig");
+                Debug.Log($"{LOG} [OK] CharacterController on OVRCameraRig");
             }
 
             // LocomotionController
@@ -303,27 +296,42 @@ namespace Plaga44.Editor
                 loco.moveSpeed = 2.5f;
                 loco.strafeFactor = 0.8f;
                 changed = true;
-                Debug.Log($"{LOG} [DODANO] LocomotionController na OVRCameraRig");
+                Debug.Log($"{LOG} [ADDED] LocomotionController on OVRCameraRig");
             }
             else
             {
-                Debug.Log($"{LOG} [OK] LocomotionController na OVRCameraRig");
+                Debug.Log($"{LOG} [OK] LocomotionController on OVRCameraRig");
             }
 
-            // Spawn gracza nad terenem jesli cos sie zmienilo
+            // SmoothTurnController
+            var turn = rig.GetComponent<Plaga44.Locomotion.SmoothTurnController>();
+            if (turn == null)
+            {
+                turn = rig.AddComponent<Plaga44.Locomotion.SmoothTurnController>();
+                turn.turnSpeed = 120f;
+                turn.deadZone = 0.15f;
+                changed = true;
+                Debug.Log($"{LOG} [ADDED] SmoothTurnController on OVRCameraRig (120 deg/s)");
+            }
+            else
+            {
+                Debug.Log($"{LOG} [OK] SmoothTurnController on OVRCameraRig");
+            }
+
+            // Spawn player above terrain if something changed
             if (changed)
             {
                 var terrain = Object.FindFirstObjectByType<Terrain>();
-                float spawnY = terrain != null ? terrain.terrainData.size.y + 10f : 200f;
+                float spawnY = terrain != null ? terrain.terrainData.size.y + 1000f : 1200f;
                 rig.transform.position = new Vector3(0f, spawnY, 0f);
-                Debug.Log($"{LOG} Gracz ustawiony na (0, {spawnY}, 0)");
+                Debug.Log($"{LOG} Player placed at (0, {spawnY}, 0)");
             }
 
             return changed;
         }
 
         /// <summary>
-        /// Sprawdza czy HamburgerMenu jest na scenie. Jesli nie -- tworzy GO z komponentem.
+        /// Checks if HamburgerMenu exists in scene. If not -- creates GO with component.
         /// </summary>
         private static bool ValidateHamburgerMenu()
         {
@@ -335,7 +343,22 @@ namespace Plaga44.Editor
 
             var menuGO = new GameObject("_HamburgerMenu");
             menuGO.AddComponent<Plaga44.UI.HamburgerMenu>();
-            Debug.Log($"{LOG} [DODANO] HamburgerMenu");
+            Debug.Log($"{LOG} [ADDED] HamburgerMenu");
+            return true;
+        }
+
+        private static bool ValidateSkyRotator()
+        {
+            if (Object.FindAnyObjectByType<Plaga44.SkyRotator>() != null)
+            {
+                Debug.Log($"{LOG} [OK] SkyRotator");
+                return false;
+            }
+
+            var go = new GameObject("_SkyRotator");
+            var sr = go.AddComponent<Plaga44.SkyRotator>();
+            sr.rotationSpeed = 0.5f;
+            Debug.Log($"{LOG} [ADDED] SkyRotator (0.5 deg/s)");
             return true;
         }
     }

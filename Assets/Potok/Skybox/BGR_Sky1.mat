@@ -113,7 +113,7 @@ Material:
     - _DstBlendAlpha: 0
     - _EmissionScaleUI: 0
     - _EnvironmentReflections: 1
-    - _Exposure: 0.08
+    - _Exposure: 0.09999993
     - _GlossMapScale: 0
     - _Glossiness: 0.5
     - _GlossyReflections: 0
@@ -126,7 +126,7 @@ Material:
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RotSpeed: 0
-    - _Rotation: 342.18497
+    - _Rotation: 353.41174
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1

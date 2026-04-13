@@ -1,13 +1,20 @@
 // =============================================================================
 // HamburgerMenu.cs
-// CYBERNOMAD -- Hamburger menu VR dla PLAGA '44.
+// CYBERNOMAD -- 3-level VR settings menu for PLAGA '44.
 //
-// Bazowane na VRMenuManager z bleeding-edge, oczyszczone z zaleznosci.
-// Button.Start = toggle. Thumbstick = nawigacja. Triggers = +/-.
-// 6 kwadratowych ikon kategorii. Time.timeScale = 0 gdy otwarte.
+// Level 1: Top categories (GAMEPLAY, VISUAL, SYSTEM) -- big tiles
+// Level 2: Sub-categories (LOCOMOTION, SHADOWS, etc.) -- grid of tiles
+// Level 3: Settings list -- thumbstick adjust values
 //
-// Canvas renderuje na stronie +Z. Zeby gracz widzial tekst poprawnie,
-// canvas musi patrzec W STRONE gracza (LookRotation(-forward)).
+// Controls:
+//   Start      = open/close menu
+//   Thumbstick = navigate (both sticks work)
+//   A / X      = enter / confirm
+//   B / Y      = back
+//   Triggers   = adjust value +/- (in settings)
+//
+// Canvas renders in world space, faces the player.
+// Time.timeScale = 0 when open.
 // =============================================================================
 
 using System;
@@ -37,46 +44,64 @@ namespace Plaga44.UI
         private const int CANVAS_W = 900;
         private const int CANVAS_H = 700;
 
-        // Kolory -- dark theme
+        // Colors -- dark theme
         private static readonly Color BG_COLOR = new Color(0.08f, 0.08f, 0.08f, 0.92f);
         private static readonly Color BTN_COLOR = new Color(0.18f, 0.18f, 0.18f);
-        private static readonly Color BTN_HOVER = new Color(0.30f, 0.30f, 0.30f);
         private static readonly Color BTN_SELECTED = new Color(0.20f, 0.35f, 0.55f);
+        private static readonly Color TOP_COLOR = new Color(0.25f, 0.25f, 0.25f);
+        private static readonly Color TOP_SELECTED = new Color(0.35f, 0.45f, 0.60f);
         private static readonly Color ACCENT = new Color(0.9f, 0.5f, 0.1f);
         private static readonly Color TEXT_WHITE = Color.white;
         private static readonly Color TEXT_GREY = new Color(0.55f, 0.55f, 0.55f);
 
         // =====================================================================
-        // Kategorie -- dynamiczne z SettingsRegistry
+        // Groups definition
         // =====================================================================
 
-        private string[] _categories;
+        private static readonly (string name, string[] sections)[] GROUPS = new[]
+        {
+            ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "GAME STATE" }),
+            ("VISUAL",   new[] { "SHADOWS", "SUN", "FOG", "AMBIENT", "SKYBOX", "BLOOM", "COLOR", "COMFORT", "LGG" }),
+            ("SYSTEM",   new[] { "MISC", "AUDIO", "PHYSICS", "QUALITY", "CAMERA", "OCULUS", "TERRAIN", "PRESETS" }),
+        };
 
         // =====================================================================
-        // Stan
+        // State
         // =====================================================================
 
+        private enum MenuLevel { Top, Group, Settings }
+        private MenuLevel _level = MenuLevel.Top;
+
+        private string[] _allCategories; // flat from SettingsRegistry
         private Canvas _canvas;
-        private Image[] _categoryBGs;
-        private Text _selectedLabel;
-        private Text _valueText;
-        private int _selectedIndex;
+        private OVRCameraRig _rig;
 
-        private float _lastStickTime;
-        private const float STICK_COOLDOWN = 0.2f;
-        private float _lastTriggerTime;
-        private const float TRIGGER_COOLDOWN = 0.25f;
+        // Navigation
+        private int _topIndex;          // selected group in level 1
+        private int _groupIndex;        // selected section in level 2
+        private int _settingIndex;      // selected setting in level 3
+        private string[] _currentGroupSections; // sections in current group
 
-        // Submenu state
-        private bool _inSubmenu;
+        // UI roots (destroyed/rebuilt per level)
+        private GameObject _contentRoot;
+        private Image[] _tileBGs;
+        private int _tileCount;
+
+        // Footer
+        private Text _titleLabel;
+        private Text _footerLabel;
+        private Text _footerValue;
+
+        // Settings
         private List<SettingDef> _currentSettings;
-        private int _settingIndex;
-        private GameObject _gridRoot;
-        private GameObject _submenuRoot;
         private Text[] _settingTexts;
         private const int VISIBLE_ROWS = 10;
 
-        private OVRCameraRig _rig;
+        // Input cooldown
+        private float _lastStickTime;
+        private const float STICK_COOLDOWN = 0.18f;
+        private float _lastTriggerTime;
+        private const float TRIGGER_COOLDOWN = 0.2f;
 
         // =====================================================================
         // Unity lifecycle
@@ -86,76 +111,57 @@ namespace Plaga44.UI
         {
             if (Instance != null && Instance != this) { Destroy(gameObject); return; }
             Instance = this;
-            Debug.Log($"{LOG} Awake");
         }
 
         private void Start()
         {
             _rig = FindFirstObjectByType<OVRCameraRig>();
-            _categories = SettingsRegistry.GetSectionNames();
+            _allCategories = SettingsRegistry.GetSectionNames();
             BuildCanvas();
-            BuildGrid();
-            BuildFooter();
             _canvas.gameObject.SetActive(false);
-            UpdateSelection();
-            Debug.Log($"{LOG} Start: {_categories.Length} kategorii, rig={(_rig != null ? _rig.name : "NULL")}");
+            Debug.Log($"{LOG} Start: {_allCategories.Length} categories, {GROUPS.Length} groups");
         }
 
         private void Update()
         {
             if (_rig == null) _rig = FindFirstObjectByType<OVRCameraRig>();
 
-            // Button.Start = trzy kreski na lewym kontrolerze
+            // Start = toggle menu
             if (OVRInput.GetDown(OVRInput.Button.Start))
-            {
-                Debug.Log($"{LOG} Button.Start PRESSED, MenuOpen={MenuOpen}");
                 Toggle();
-            }
 
             if (!MenuOpen) return;
 
-            // B = wstecz z submenu do gridu
-            if (_inSubmenu && OVRInput.GetDown(OVRInput.Button.Two)) // B button
+            // A or X = enter / confirm
+            bool enter = OVRInput.GetDown(OVRInput.Button.One) || OVRInput.GetDown(OVRInput.Button.Three);
+            // B or Y = back
+            bool back = OVRInput.GetDown(OVRInput.Button.Two) || OVRInput.GetDown(OVRInput.Button.Four);
+
+            if (back)
             {
-                ExitSubmenu();
+                GoBack();
                 return;
             }
 
-            // A = wejdz w submenu wybranego kafelka
-            if (!_inSubmenu && OVRInput.GetDown(OVRInput.Button.One)) // A button
+            if (enter && _level != MenuLevel.Settings)
             {
-                EnterSubmenu(_categories[_selectedIndex]);
+                GoForward();
                 return;
             }
 
-            if (_inSubmenu)
-            {
-                HandleSubmenuInput();
-            }
-            else
-            {
-                HandleThumbstick();
-                HandleTriggers();
-            }
+            HandleNavigation();
         }
 
         private void OnDestroy()
         {
-            if (Instance == this)
-            {
-                MenuOpen = false;
-                Instance = null;
-            }
+            if (Instance == this) { MenuOpen = false; Instance = null; }
         }
 
         // =====================================================================
         // Open / Close
         // =====================================================================
 
-        public void Toggle()
-        {
-            if (MenuOpen) Close(); else Open();
-        }
+        public void Toggle() { if (MenuOpen) Close(); else Open(); }
 
         public void Open()
         {
@@ -164,7 +170,10 @@ namespace Plaga44.UI
             _canvas.gameObject.SetActive(true);
             MenuOpen = true;
             Time.timeScale = 0f;
-            Debug.Log($"{LOG} OPEN (timeScale=0)");
+            _level = MenuLevel.Top;
+            _topIndex = 0;
+            ShowLevel();
+            Debug.Log($"{LOG} OPEN");
         }
 
         public void Close()
@@ -173,92 +182,64 @@ namespace Plaga44.UI
             _canvas.gameObject.SetActive(false);
             MenuOpen = false;
             Time.timeScale = 1f;
-            Debug.Log($"{LOG} CLOSE (timeScale=1)");
-        }
-
-        public bool IsOpen => MenuOpen;
-
-        // =====================================================================
-        // Input -- thumbstick nawigacja
-        // =====================================================================
-
-        private void HandleThumbstick()
-        {
-            // Oba thumbsticki dzialaja do nawigacji
-            Vector2 stickL = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
-            Vector2 stickR = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch);
-            // Bierz ten ktory jest bardziej wychylony
-            Vector2 stick = stickL.sqrMagnitude > stickR.sqrMagnitude ? stickL : stickR;
-
-            if (Time.unscaledTime - _lastStickTime < STICK_COOLDOWN) return;
-
-            int cols = 5;
-            if (stick.x > 0.5f) { MoveSelection(1); _lastStickTime = Time.unscaledTime; }
-            else if (stick.x < -0.5f) { MoveSelection(-1); _lastStickTime = Time.unscaledTime; }
-            else if (stick.y > 0.5f) { MoveSelection(-cols); _lastStickTime = Time.unscaledTime; }
-            else if (stick.y < -0.5f) { MoveSelection(cols); _lastStickTime = Time.unscaledTime; }
-        }
-
-        private void MoveSelection(int delta)
-        {
-            int newIndex = _selectedIndex + delta;
-            if (newIndex < 0 || newIndex >= _categories.Length) return;
-            _selectedIndex = newIndex;
-            UpdateSelection();
-            Debug.Log($"{LOG} Wybrano: {_categories[_selectedIndex]} [{_selectedIndex}]");
+            Debug.Log($"{LOG} CLOSE");
         }
 
         // =====================================================================
-        // Input -- triggers +/-
+        // Navigation logic
         // =====================================================================
 
-        private void HandleTriggers()
+        private void GoForward()
         {
-            // W grid mode triggery tez wchodza w submenu (jak A)
-            if (Time.unscaledTime - _lastTriggerTime < TRIGGER_COOLDOWN) return;
-
-            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
+            if (_level == MenuLevel.Top)
             {
-                _lastTriggerTime = Time.unscaledTime;
-                EnterSubmenu(_categories[_selectedIndex]);
+                // Enter group -> show sub-tiles
+                var group = GROUPS[_topIndex];
+                _currentGroupSections = FilterExisting(group.sections);
+                if (_currentGroupSections.Length == 0) return;
+                _groupIndex = 0;
+                _level = MenuLevel.Group;
+                ShowLevel();
+                Debug.Log($"{LOG} -> Group: {group.name}");
+            }
+            else if (_level == MenuLevel.Group)
+            {
+                // Enter section -> show settings
+                string section = _currentGroupSections[_groupIndex];
+                _currentSettings = SettingsRegistry.GetSettings(section);
+                if (_currentSettings.Count == 0)
+                {
+                    Debug.Log($"{LOG} {section}: no runtime settings");
+                    return;
+                }
+                _settingIndex = 0;
+                _level = MenuLevel.Settings;
+                ShowLevel();
+                Debug.Log($"{LOG} -> Settings: {section} ({_currentSettings.Count})");
             }
         }
 
-        // =====================================================================
-        // Submenu -- lista settingow per modul
-        // =====================================================================
-
-        private void EnterSubmenu(string moduleName)
+        private void GoBack()
         {
-            _currentSettings = SettingsRegistry.GetSettings(moduleName);
-            if (_currentSettings.Count == 0)
+            if (_level == MenuLevel.Settings)
             {
-                Debug.Log($"{LOG} {moduleName}: brak ustawien runtime");
-                return;
+                _level = MenuLevel.Group;
+                ShowLevel();
+                Debug.Log($"{LOG} <- back to group");
             }
-
-            _inSubmenu = true;
-            _settingIndex = 0;
-            // Ukryj grid
-            if (_gridRoot != null) _gridRoot.SetActive(false);
-
-            // Buduj submenu UI
-            BuildSubmenuUI(moduleName);
-            UpdateSubmenuDisplay();
-            Debug.Log($"{LOG} Submenu: {moduleName} ({_currentSettings.Count} settings)");
+            else if (_level == MenuLevel.Group)
+            {
+                _level = MenuLevel.Top;
+                ShowLevel();
+                Debug.Log($"{LOG} <- back to top");
+            }
+            else
+            {
+                Close();
+            }
         }
 
-        private void ExitSubmenu()
-        {
-            _inSubmenu = false;
-            if (_submenuRoot != null) Destroy(_submenuRoot);
-            if (_gridRoot != null) _gridRoot.SetActive(true);
-            _selectedLabel.text = "> " + _categories[_selectedIndex] + " <";
-            _valueText.text = "A = wejdz    B = wstecz";
-            Debug.Log($"{LOG} Submenu: wyjscie");
-        }
-
-        private void HandleSubmenuInput()
+        private void HandleNavigation()
         {
             Vector2 stickL = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
             Vector2 stickR = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch);
@@ -266,81 +247,224 @@ namespace Plaga44.UI
 
             if (Time.unscaledTime - _lastStickTime < STICK_COOLDOWN) return;
 
-            // Gora/dol = wybor settingu
+            if (_level == MenuLevel.Settings)
+            {
+                HandleSettingsInput(stick);
+            }
+            else
+            {
+                HandleTileInput(stick);
+            }
+        }
+
+        private void HandleTileInput(Vector2 stick)
+        {
+            int cols = (_level == MenuLevel.Top) ? GROUPS.Length : 4;
+            int count = (_level == MenuLevel.Top) ? GROUPS.Length : _currentGroupSections.Length;
+            int idx = (_level == MenuLevel.Top) ? _topIndex : _groupIndex;
+
+            int newIdx = idx;
+            if (stick.x > 0.5f) newIdx = idx + 1;
+            else if (stick.x < -0.5f) newIdx = idx - 1;
+            else if (stick.y > 0.5f) newIdx = idx - cols;
+            else if (stick.y < -0.5f) newIdx = idx + cols;
+            else return;
+
+            if (newIdx < 0 || newIdx >= count) return;
+            _lastStickTime = Time.unscaledTime;
+
+            if (_level == MenuLevel.Top) _topIndex = newIdx;
+            else _groupIndex = newIdx;
+
+            UpdateTileSelection();
+        }
+
+        private void HandleSettingsInput(Vector2 stick)
+        {
+            // Up/down = select setting
             if (stick.y > 0.5f && _settingIndex > 0)
             {
                 _settingIndex--;
                 _lastStickTime = Time.unscaledTime;
-                UpdateSubmenuDisplay();
+                UpdateSettingsDisplay();
             }
             else if (stick.y < -0.5f && _settingIndex < _currentSettings.Count - 1)
             {
                 _settingIndex++;
                 _lastStickTime = Time.unscaledTime;
-                UpdateSubmenuDisplay();
+                UpdateSettingsDisplay();
             }
 
-            // Lewo/prawo = zmiana wartosci
-            if (stick.x > 0.5f)
-            {
-                AdjustSetting(1);
-                _lastStickTime = Time.unscaledTime;
-            }
-            else if (stick.x < -0.5f)
-            {
-                AdjustSetting(-1);
-                _lastStickTime = Time.unscaledTime;
-            }
+            // Left/right = adjust value
+            if (stick.x > 0.5f) { AdjustSetting(1); _lastStickTime = Time.unscaledTime; }
+            else if (stick.x < -0.5f) { AdjustSetting(-1); _lastStickTime = Time.unscaledTime; }
 
-            // Triggery tez zmieniaja wartosc
+            // Triggers also adjust
             if (Time.unscaledTime - _lastTriggerTime > TRIGGER_COOLDOWN)
             {
                 if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
-                {
-                    AdjustSetting(-1);
-                    _lastTriggerTime = Time.unscaledTime;
-                }
+                { AdjustSetting(-1); _lastTriggerTime = Time.unscaledTime; }
                 if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
-                {
-                    AdjustSetting(1);
-                    _lastTriggerTime = Time.unscaledTime;
-                }
+                { AdjustSetting(1); _lastTriggerTime = Time.unscaledTime; }
             }
         }
 
-        private void AdjustSetting(int direction)
+        private void AdjustSetting(int dir)
         {
             if (_settingIndex < 0 || _settingIndex >= _currentSettings.Count) return;
             var s = _currentSettings[_settingIndex];
-            float val = s.get();
-            val += s.step * direction;
-            val = Mathf.Clamp(val, s.min, s.max);
+            float val = Mathf.Clamp(s.get() + s.step * dir, s.min, s.max);
             s.set(val);
-            UpdateSubmenuDisplay();
+            UpdateSettingsDisplay();
         }
 
-        private void BuildSubmenuUI(string title)
+        // =====================================================================
+        // Show level -- rebuilds content area
+        // =====================================================================
+
+        private void ShowLevel()
         {
-            if (_submenuRoot != null) Destroy(_submenuRoot);
+            if (_contentRoot != null) Destroy(_contentRoot);
+            _contentRoot = new GameObject("Content");
+            _contentRoot.transform.SetParent(_canvas.transform, false);
+            var rt = _contentRoot.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(20, 80);
+            rt.offsetMax = new Vector2(-20, -60);
 
-            _submenuRoot = new GameObject("SubmenuPanel");
-            _submenuRoot.transform.SetParent(_canvas.transform, false);
-            var rootRT = _submenuRoot.AddComponent<RectTransform>();
-            rootRT.anchorMin = Vector2.zero;
-            rootRT.anchorMax = Vector2.one;
-            rootRT.offsetMin = new Vector2(20, 60);
-            rootRT.offsetMax = new Vector2(-20, -60);
+            switch (_level)
+            {
+                case MenuLevel.Top:
+                    BuildTopTiles();
+                    _titleLabel.text = "SETTINGS";
+                    _footerLabel.text = "";
+                    _footerValue.text = "A/X = enter    B/Y = close";
+                    break;
+                case MenuLevel.Group:
+                    BuildGroupTiles();
+                    _titleLabel.text = GROUPS[_topIndex].name;
+                    _footerLabel.text = "";
+                    _footerValue.text = "A/X = enter    B/Y = back";
+                    break;
+                case MenuLevel.Settings:
+                    BuildSettingsUI();
+                    _titleLabel.text = _currentGroupSections[_groupIndex];
+                    UpdateSettingsDisplay();
+                    break;
+            }
+        }
 
-            // Tytul submenu
-            _selectedLabel.text = "[ " + title + " ]  (B = wstecz)";
+        // =====================================================================
+        // Level 1: Top tiles (GAMEPLAY, VISUAL, SYSTEM)
+        // =====================================================================
 
-            // Wiersze settingow
+        private void BuildTopTiles()
+        {
+            _tileCount = GROUPS.Length;
+            _tileBGs = new Image[_tileCount];
+
+            float tileW = 240f;
+            float tileH = 120f;
+            float spacing = 20f;
+            float totalW = _tileCount * tileW + (_tileCount - 1) * spacing;
+            float startX = -totalW / 2f + tileW / 2f;
+
+            for (int i = 0; i < _tileCount; i++)
+            {
+                float x = startX + i * (tileW + spacing);
+                var tile = CreateTile(_contentRoot.transform, GROUPS[i].name, x, 100f, tileW, tileH, 20);
+                _tileBGs[i] = tile;
+            }
+
+            UpdateTileSelection();
+        }
+
+        // =====================================================================
+        // Level 2: Group tiles (e.g. LOCOMOTION, SMOOTH TURN, etc.)
+        // =====================================================================
+
+        private void BuildGroupTiles()
+        {
+            _tileCount = _currentGroupSections.Length;
+            _tileBGs = new Image[_tileCount];
+
+            int cols = 4;
+            float tileW = 180f;
+            float tileH = 60f;
+            float spacing = 10f;
+            float gridW = cols * tileW + (cols - 1) * spacing;
+            float startX = -gridW / 2f + tileW / 2f;
+            float startY = 200f;
+
+            for (int i = 0; i < _tileCount; i++)
+            {
+                int col = i % cols;
+                int row = i / cols;
+                float x = startX + col * (tileW + spacing);
+                float y = startY - row * (tileH + spacing);
+                var tile = CreateTile(_contentRoot.transform, _currentGroupSections[i], x, y, tileW, tileH, 14);
+                _tileBGs[i] = tile;
+            }
+
+            UpdateTileSelection();
+        }
+
+        private Image CreateTile(Transform parent, string label, float x, float y, float w, float h, int fontSize)
+        {
+            var go = new GameObject(label);
+            go.transform.SetParent(parent, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = new Vector2(x, y);
+            rt.sizeDelta = new Vector2(w, h);
+
+            var img = go.AddComponent<Image>();
+            img.color = (_level == MenuLevel.Top) ? TOP_COLOR : BTN_COLOR;
+
+            var labelGO = new GameObject("Label");
+            labelGO.transform.SetParent(go.transform, false);
+            var labelRT = labelGO.AddComponent<RectTransform>();
+            labelRT.anchorMin = Vector2.zero;
+            labelRT.anchorMax = Vector2.one;
+            labelRT.offsetMin = new Vector2(6, 0);
+            labelRT.offsetMax = new Vector2(-6, 0);
+            var txt = labelGO.AddComponent<Text>();
+            txt.text = label;
+            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.fontSize = fontSize;
+            txt.color = TEXT_WHITE;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.horizontalOverflow = HorizontalWrapMode.Wrap;
+
+            return img;
+        }
+
+        private void UpdateTileSelection()
+        {
+            int idx = (_level == MenuLevel.Top) ? _topIndex : _groupIndex;
+            Color normal = (_level == MenuLevel.Top) ? TOP_COLOR : BTN_COLOR;
+            Color selected = (_level == MenuLevel.Top) ? TOP_SELECTED : BTN_SELECTED;
+
+            for (int i = 0; i < _tileCount; i++)
+                _tileBGs[i].color = (i == idx) ? selected : normal;
+
+            string name = (_level == MenuLevel.Top) ? GROUPS[_topIndex].name : _currentGroupSections[_groupIndex];
+            _footerLabel.text = "> " + name + " <";
+        }
+
+        // =====================================================================
+        // Level 3: Settings list
+        // =====================================================================
+
+        private void BuildSettingsUI()
+        {
             _settingTexts = new Text[VISIBLE_ROWS];
             float rowH = 30f;
             for (int i = 0; i < VISIBLE_ROWS; i++)
             {
                 var rowGO = new GameObject($"Row_{i}");
-                rowGO.transform.SetParent(_submenuRoot.transform, false);
+                rowGO.transform.SetParent(_contentRoot.transform, false);
                 var rowRT = rowGO.AddComponent<RectTransform>();
                 rowRT.anchorMin = new Vector2(0, 1);
                 rowRT.anchorMax = new Vector2(1, 1);
@@ -357,41 +481,43 @@ namespace Plaga44.UI
             }
         }
 
-        private void UpdateSubmenuDisplay()
+        private void UpdateSettingsDisplay()
         {
             if (_settingTexts == null || _currentSettings == null) return;
 
-            // Scroll zeby wybrany setting byl widoczny
             int scrollOffset = Mathf.Max(0, _settingIndex - VISIBLE_ROWS + 3);
 
             for (int i = 0; i < VISIBLE_ROWS; i++)
             {
                 int idx = scrollOffset + i;
-                if (idx >= _currentSettings.Count)
-                {
-                    _settingTexts[i].text = "";
-                    continue;
-                }
+                if (idx >= _currentSettings.Count) { _settingTexts[i].text = ""; continue; }
 
                 var s = _currentSettings[idx];
-                bool selected = (idx == _settingIndex);
-                float val = s.get();
-                string prefix = selected ? "> " : "  ";
-                _settingTexts[i].text = $"{prefix}{s.name}: {val.ToString(s.format)}";
-                _settingTexts[i].color = selected ? TEXT_WHITE : TEXT_GREY;
+                bool sel = (idx == _settingIndex);
+                _settingTexts[i].text = $"{(sel ? "> " : "  ")}{s.name}: {s.get().ToString(s.format)}";
+                _settingTexts[i].color = sel ? TEXT_WHITE : TEXT_GREY;
             }
 
-            // Footer -- wartosc + opis
-            {
-                var s = _currentSettings[_settingIndex];
-                float val = s.get();
-                _selectedLabel.text = s.desc ?? "";
-                _valueText.text = $"<  {val.ToString(s.format)}  >    [{s.min}..{s.max}]";
-            }
+            var cur = _currentSettings[_settingIndex];
+            _footerLabel.text = cur.desc ?? "";
+            _footerValue.text = $"<  {cur.get().ToString(cur.format)}  >    [{cur.min}..{cur.max}]   B/Y = back";
         }
 
         // =====================================================================
-        // Pozycjonowanie
+        // Helpers
+        // =====================================================================
+
+        private string[] FilterExisting(string[] sections)
+        {
+            var result = new List<string>();
+            foreach (var s in sections)
+                if (System.Array.IndexOf(_allCategories, s) >= 0)
+                    result.Add(s);
+            return result.ToArray();
+        }
+
+        // =====================================================================
+        // Positioning
         // =====================================================================
 
         private void PlaceInFrontOfPlayer()
@@ -399,28 +525,21 @@ namespace Plaga44.UI
             if (_rig != null)
             {
                 var head = _rig.centerEyeAnchor;
-                Vector3 forward = head.forward;
-                forward.y = 0f;
-                if (forward.sqrMagnitude < 0.001f) forward = Vector3.forward;
-                forward.Normalize();
-
-                _canvas.transform.position = head.position + forward * MENU_DISTANCE;
-                _canvas.transform.position += Vector3.down * 0.1f;
-
-                // Mirror fix: w tym renderze canvas jest widoczny od strony +Z = forward
-                _canvas.transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
-                Debug.Log($"{LOG} Placed at {_canvas.transform.position}, facing player");
+                Vector3 fwd = head.forward; fwd.y = 0f;
+                if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
+                fwd.Normalize();
+                _canvas.transform.position = head.position + fwd * MENU_DISTANCE + Vector3.down * 0.1f;
+                _canvas.transform.rotation = Quaternion.LookRotation(fwd, Vector3.up);
             }
             else
             {
                 _canvas.transform.position = new Vector3(0f, 1.5f, MENU_DISTANCE);
                 _canvas.transform.rotation = Quaternion.LookRotation(Vector3.back, Vector3.up);
-                Debug.LogWarning($"{LOG} No OVRCameraRig -- fallback position");
             }
         }
 
         // =====================================================================
-        // Budowanie UI
+        // Build canvas (once)
         // =====================================================================
 
         private void BuildCanvas()
@@ -430,142 +549,90 @@ namespace Plaga44.UI
 
             _canvas = go.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.WorldSpace;
-
             var rt = go.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(CANVAS_W, CANVAS_H);
             rt.localScale = Vector3.one * CANVAS_SCALE;
-
             go.AddComponent<GraphicRaycaster>();
 
-            // Tlo
+            // Background
             var bgGO = new GameObject("BG");
             bgGO.transform.SetParent(go.transform, false);
             var bgRT = bgGO.AddComponent<RectTransform>();
-            bgRT.anchorMin = Vector2.zero;
-            bgRT.anchorMax = Vector2.one;
+            bgRT.anchorMin = Vector2.zero; bgRT.anchorMax = Vector2.one;
             bgRT.offsetMin = bgRT.offsetMax = Vector2.zero;
-            var bgImg = bgGO.AddComponent<Image>();
-            bgImg.color = BG_COLOR;
+            bgGO.AddComponent<Image>().color = BG_COLOR;
 
-            // Tytul
+            // Title (top bar)
             var titleGO = new GameObject("Title");
             titleGO.transform.SetParent(go.transform, false);
             var titleRT = titleGO.AddComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0, 1);
-            titleRT.anchorMax = new Vector2(1, 1);
-            titleRT.pivot = new Vector2(0.5f, 1);
-            titleRT.sizeDelta = new Vector2(0, 50);
-            var titleText = titleGO.AddComponent<Text>();
-            titleText.text = "PLAGA '44";
-            titleText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            titleText.fontSize = 28;
-            titleText.color = ACCENT;
-            titleText.alignment = TextAnchor.MiddleCenter;
-            titleText.fontStyle = FontStyle.Bold;
+            titleRT.anchorMin = new Vector2(0, 1); titleRT.anchorMax = new Vector2(1, 1);
+            titleRT.pivot = new Vector2(0.5f, 1); titleRT.sizeDelta = new Vector2(0, 50);
+            _titleLabel = titleGO.AddComponent<Text>();
+            _titleLabel.text = "SETTINGS";
+            _titleLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            _titleLabel.fontSize = 28;
+            _titleLabel.color = ACCENT;
+            _titleLabel.alignment = TextAnchor.MiddleCenter;
+            _titleLabel.fontStyle = FontStyle.Bold;
+
+            // Version info (pod tytulem)
+            var verGO = new GameObject("VersionInfo");
+            verGO.transform.SetParent(go.transform, false);
+            var verRT = verGO.AddComponent<RectTransform>();
+            verRT.anchorMin = new Vector2(0, 1); verRT.anchorMax = new Vector2(1, 1);
+            verRT.pivot = new Vector2(0.5f, 1); verRT.sizeDelta = new Vector2(0, 20);
+            verRT.anchoredPosition = new Vector2(0, -50);
+            var verText = verGO.AddComponent<Text>();
+            verText.text = GetVersionString();
+            verText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            verText.fontSize = 12;
+            verText.color = TEXT_GREY;
+            verText.alignment = TextAnchor.MiddleCenter;
+
+            // Footer label
+            var flGO = new GameObject("FooterLabel");
+            flGO.transform.SetParent(go.transform, false);
+            var flRT = flGO.AddComponent<RectTransform>();
+            flRT.anchorMin = new Vector2(0, 0); flRT.anchorMax = new Vector2(1, 0);
+            flRT.pivot = new Vector2(0.5f, 0); flRT.sizeDelta = new Vector2(0, 35);
+            flRT.anchoredPosition = new Vector2(0, 40);
+            _footerLabel = flGO.AddComponent<Text>();
+            _footerLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            _footerLabel.fontSize = 20;
+            _footerLabel.color = TEXT_WHITE;
+            _footerLabel.alignment = TextAnchor.MiddleCenter;
+
+            // Footer value
+            var fvGO = new GameObject("FooterValue");
+            fvGO.transform.SetParent(go.transform, false);
+            var fvRT = fvGO.AddComponent<RectTransform>();
+            fvRT.anchorMin = new Vector2(0, 0); fvRT.anchorMax = new Vector2(1, 0);
+            fvRT.pivot = new Vector2(0.5f, 0); fvRT.sizeDelta = new Vector2(0, 25);
+            fvRT.anchoredPosition = new Vector2(0, 10);
+            _footerValue = fvGO.AddComponent<Text>();
+            _footerValue.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            _footerValue.fontSize = 16;
+            _footerValue.color = TEXT_GREY;
+            _footerValue.alignment = TextAnchor.MiddleCenter;
         }
 
-        private void BuildGrid()
+        // =====================================================================
+        // Version info
+        // =====================================================================
+
+        private string GetVersionString()
         {
-            _gridRoot = new GameObject("GridRoot");
-            _gridRoot.transform.SetParent(_canvas.transform, false);
-            var gridRootRT = _gridRoot.AddComponent<RectTransform>();
-            gridRootRT.anchorMin = Vector2.zero;
-            gridRootRT.anchorMax = Vector2.one;
-            gridRootRT.offsetMin = gridRootRT.offsetMax = Vector2.zero;
-
-            int cols = 5;
-            float iconSize = 100f;
-            float spacing = 10f;
-            float gridW = cols * iconSize + (cols - 1) * spacing;
-            float startX = -gridW / 2f + iconSize / 2f;
-            float startY = 220f;
-
-            _categoryBGs = new Image[_categories.Length];
-
-            for (int i = 0; i < _categories.Length; i++)
+            var asset = Resources.Load<TextAsset>("BuildInfo");
+            if (asset != null && !string.IsNullOrWhiteSpace(asset.text))
             {
-                int col = i % cols;
-                int row = i / cols;
-                float x = startX + col * (iconSize + spacing);
-                float y = startY - row * (iconSize + spacing);
-
-                var cellGO = new GameObject(_categories[i]);
-                cellGO.transform.SetParent(_gridRoot.transform, false);
-                var cellRT = cellGO.AddComponent<RectTransform>();
-                cellRT.anchorMin = cellRT.anchorMax = new Vector2(0.5f, 0.5f);
-                cellRT.anchoredPosition = new Vector2(x, y);
-                cellRT.sizeDelta = new Vector2(iconSize, iconSize);
-
-                var cellImg = cellGO.AddComponent<Image>();
-                cellImg.color = BTN_COLOR;
-                _categoryBGs[i] = cellImg;
-
-                // Nazwa kafelka -- centrowana
-                var labelGO = new GameObject("Label");
-                labelGO.transform.SetParent(cellGO.transform, false);
-                var labelRT = labelGO.AddComponent<RectTransform>();
-                labelRT.anchorMin = Vector2.zero;
-                labelRT.anchorMax = Vector2.one;
-                labelRT.offsetMin = Vector2.zero;
-                labelRT.offsetMax = Vector2.zero;
-                var labelText = labelGO.AddComponent<Text>();
-                labelText.text = _categories[i];
-                labelText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                labelText.fontSize = 16;
-                labelText.color = TEXT_WHITE;
-                labelText.alignment = TextAnchor.MiddleCenter;
+                string[] lines = asset.text.Split('\n');
+                string branch = lines.Length > 0 ? lines[0].Trim() : "?";
+                string time   = lines.Length > 1 ? lines[1].Trim() : "?";
+                string hash   = lines.Length > 2 ? lines[2].Trim() : "?";
+                return $"{branch} | {time} | {hash}";
             }
-        }
-
-        private void BuildFooter()
-        {
-            var selGO = new GameObject("SelectedLabel");
-            selGO.transform.SetParent(_canvas.transform, false);
-            var selRT = selGO.AddComponent<RectTransform>();
-            selRT.anchorMin = new Vector2(0, 0);
-            selRT.anchorMax = new Vector2(1, 0);
-            selRT.pivot = new Vector2(0.5f, 0);
-            selRT.sizeDelta = new Vector2(0, 40);
-            selRT.anchoredPosition = new Vector2(0, 45);
-            _selectedLabel = selGO.AddComponent<Text>();
-            _selectedLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _selectedLabel.fontSize = 22;
-            _selectedLabel.color = TEXT_WHITE;
-            _selectedLabel.alignment = TextAnchor.MiddleCenter;
-
-            var valGO = new GameObject("ValueText");
-            valGO.transform.SetParent(_canvas.transform, false);
-            var valRT = valGO.AddComponent<RectTransform>();
-            valRT.anchorMin = new Vector2(0, 0);
-            valRT.anchorMax = new Vector2(1, 0);
-            valRT.pivot = new Vector2(0.5f, 0);
-            valRT.sizeDelta = new Vector2(0, 30);
-            valRT.anchoredPosition = new Vector2(0, 10);
-            _valueText = valGO.AddComponent<Text>();
-            _valueText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _valueText.fontSize = 18;
-            _valueText.color = TEXT_GREY;
-            _valueText.alignment = TextAnchor.MiddleCenter;
-            _valueText.text = "A = wejdz    B = wstecz";
-        }
-
-        // =====================================================================
-        // Update wizualu
-        // =====================================================================
-
-        private void UpdateSelection()
-        {
-            for (int i = 0; i < _categoryBGs.Length; i++)
-                _categoryBGs[i].color = (i == _selectedIndex) ? BTN_SELECTED : BTN_COLOR;
-
-            _selectedLabel.text = "> " + _categories[_selectedIndex] + " <";
-            UpdateValueDisplay();
-        }
-
-        private void UpdateValueDisplay()
-        {
-            if (!_inSubmenu)
-                _valueText.text = "A = wejdz    B = wstecz";
+            return $"editor | {System.DateTime.Now:yyyy-MM-dd HH:mm} | local";
         }
     }
 }
