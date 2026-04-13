@@ -290,23 +290,13 @@ namespace Plaga44.UI
                     s.Add(S("Tint B", "Sky tint B", () => sky.GetColor("_Tint").b, v => { var c=sky.GetColor("_Tint"); c.b=v; sky.SetColor("_Tint",c); }, 0, 2, 0.02f, "F2"));
                 }
                 if (sky.HasFloat("_Exposure")) s.Add(S("Exposure", "Sky brightness", () => sky.GetFloat("_Exposure"), v => sky.SetFloat("_Exposure",v), 0, 8, 0.1f));
-                if (sky.HasFloat("_Rotation")) s.Add(S("Rotation", "Skybox rotation (deg)", () => sky.GetFloat("_Rotation"), v => sky.SetFloat("_Rotation",v), 0, 360, 5, "F0"));
-                // _RotSpeed shader property pominieta -- SkyRotator skrypt ogarnia rotacje
-                if (sky.HasColor("_GroundColor")) {
-                    s.Add(S("Ground R", "Ground/horizon color R", () => sky.GetColor("_GroundColor").r, v => { var c=sky.GetColor("_GroundColor"); c.r=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
-                    s.Add(S("Ground G", "Ground/horizon color G", () => sky.GetColor("_GroundColor").g, v => { var c=sky.GetColor("_GroundColor"); c.g=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
-                    s.Add(S("Ground B", "Ground/horizon color B", () => sky.GetColor("_GroundColor").b, v => { var c=sky.GetColor("_GroundColor"); c.b=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
-                }
-                if (sky.HasFloat("_GroundBlend")) s.Add(S("Ground Blend", "Horizon height (-0.5..0.5)", () => sky.GetFloat("_GroundBlend"), v => sky.SetFloat("_GroundBlend",v), -0.5f, 0.5f, 0.01f, "F2"));
-                if (sky.HasFloat("_GroundFade")) s.Add(S("Ground Fade", "Sky-ground transition softness", () => sky.GetFloat("_GroundFade"), v => sky.SetFloat("_GroundFade",v), 0.01f, 1, 0.02f, "F2"));
-                if (sky.HasColor("_CloudTint")) {
-                    s.Add(S("Cloud R", "Cloud color R", () => sky.GetColor("_CloudTint").r, v => { var c=sky.GetColor("_CloudTint"); c.r=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
-                    s.Add(S("Cloud G", "Cloud color G", () => sky.GetColor("_CloudTint").g, v => { var c=sky.GetColor("_CloudTint"); c.g=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
-                    s.Add(S("Cloud B", "Cloud color B", () => sky.GetColor("_CloudTint").b, v => { var c=sky.GetColor("_CloudTint"); c.b=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
-                }
+                if (sky.HasFloat("_Rotation")) s.Add(S("Rotation", "Skybox static rotation (degrees)", () => sky.GetFloat("_Rotation"), v => sky.SetFloat("_Rotation",v), 0, 360, 5, "F0"));
+                if (sky.HasFloat("_CloudBoost")) s.Add(S("Cloud Bright", "Cloud brightness multiplier (1=normal)", () => sky.GetFloat("_CloudBoost"), v => sky.SetFloat("_CloudBoost",v), 0, 5, 0.1f));
+                if (sky.HasFloat("_CloudThreshold")) s.Add(S("Cloud Thresh", "Luminance threshold for cloud effect (lower=more clouds)", () => sky.GetFloat("_CloudThreshold"), v => sky.SetFloat("_CloudThreshold",v), 0, 1, 0.01f, "F2"));
+                if (sky.HasFloat("_RotSpeed")) s.Add(S("Shader Rot Speed", "Built-in shader sky rotation (deg/s)", () => sky.GetFloat("_RotSpeed"), v => sky.SetFloat("_RotSpeed",v), 0, 30, 0.5f));
                 // SkyRotator script speed
                 if (skyRot != null)
-                    s.Add(S("Rot Speed", "Predkosc auto-rotacji nieba (skrypt)", () => skyRot.rotationSpeed, v => skyRot.rotationSpeed=v, 0, 5, 0.1f));
+                    s.Add(S("Rot Speed", "SkyRotator script speed (deg/s)", () => skyRot.rotationSpeed, v => skyRot.rotationSpeed=v, 0, 5, 0.1f));
             });
 
             // =============================================================
