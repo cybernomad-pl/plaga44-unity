@@ -1,54 +1,272 @@
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Rendering;
 
 namespace Plaga44.Editor
 {
+    /// <summary>
+    /// Laduje scene PLAGA44 Demo, waliduje i naprawia brakujace elementy.
+    /// Odpala sie automatycznie po otwarciu projektu w edytorze
+    /// oraz dostepne z menu CYBERNOMAD > Scene > Load PLAGA44 Demo.
+    /// </summary>
     [InitializeOnLoad]
     public static class Bootstrap
     {
         private const string ScenePath = "Assets/PLAGA44/TESTBED_V6.unity";
-        private const string BootstrapKey = "Plaga44.Bootstrap.Done";
-        private const string LOG = "[Plaga44.Bootstrap]";
+        private const string TerrainAsset = "Assets/Potok/Terrain/Scene_A_Terrain.asset";
+        private const string TerrainMatPath = "Assets/PLAGA44/Materials/TerrainLit.mat";
+        private const string SkyboxMat = "Assets/Potok/Skybox/BGR_Sky1.mat";
+        private const string BootstrapKey = "Plaga44.OpenScene.Done";
+        private const string LOG = "[PLAGA44][OpenScene]";
+
+        // =====================================================================
+        // Auto-run po starcie edytora
+        // =====================================================================
 
         static Bootstrap()
         {
-            EditorApplication.delayCall += Run;
+            EditorApplication.delayCall += AutoRun;
         }
 
-        private static void Run()
+        private static void AutoRun()
         {
             if (SessionState.GetBool(BootstrapKey, false)) return;
             SessionState.SetBool(BootstrapKey, true);
 
             if (EditorApplication.isCompiling || EditorApplication.isUpdating)
             {
-                EditorApplication.delayCall += Run;
+                EditorApplication.delayCall += AutoRun;
                 return;
             }
 
-            // Otworz scene
+            Debug.Log($"{LOG} Auto-run: ladowanie sceny i walidacja...");
+            LoadAndValidate();
+        }
+
+        // =====================================================================
+        // Menu item
+        // =====================================================================
+
+        [MenuItem("CYBERNOMAD/Scene/Load PLAGA44 Demo", false, 1)]
+        public static void LoadFromMenu()
+        {
+            // Reset flagi zeby walidacja przeszla nawet jesli juz sie odpalila
+            SessionState.SetBool(BootstrapKey, true);
+
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+            LoadAndValidate();
+        }
+
+        // =====================================================================
+        // Glowna metoda: wczytaj + waliduj + napraw
+        // =====================================================================
+
+        private static void LoadAndValidate()
+        {
+            // --- 1. Otworz scene jesli nie jest otwarta ---
             var active = SceneManager.GetActiveScene();
             if (!active.IsValid() || !active.path.Contains("TESTBED_V6"))
             {
-                if (System.IO.File.Exists(ScenePath))
+                if (!System.IO.File.Exists(ScenePath))
                 {
-                    Debug.Log($"{LOG} Opening TESTBED_V6");
-                    EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+                    Debug.LogError($"{LOG} Scena nie istnieje: {ScenePath}");
+                    return;
+                }
+                EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+                Debug.Log($"{LOG} Scena otwarta: {ScenePath}");
+            }
+
+            // Daj edytorowi chwile na zaladowanie sceny
+            EditorApplication.delayCall += ValidateScene;
+        }
+
+        private static void ValidateScene()
+        {
+            bool changed = false;
+
+            changed |= ValidateTerrain();
+            changed |= ValidateSkybox();
+            changed |= ValidateDirectionalLight();
+            changed |= ValidatePlayerRig();
+
+            if (changed)
+            {
+                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+                EditorSceneManager.SaveOpenScenes();
+                Debug.Log($"{LOG} === Walidacja zakonczona, scena zapisana ===");
+            }
+            else
+            {
+                Debug.Log($"{LOG} === Walidacja OK, nic nie brakuje ===");
+            }
+
+            // Fokus na teren w SceneView
+            var terrain = Object.FindFirstObjectByType<Terrain>();
+            if (terrain != null)
+            {
+                Selection.activeGameObject = terrain.gameObject;
+                SceneView.lastActiveSceneView?.FrameSelected();
+            }
+        }
+
+        // =====================================================================
+        // Walidatory -- kazdy sprawdza jeden element sceny
+        // =====================================================================
+
+        /// <summary>
+        /// Sprawdza czy teren istnieje. Jesli nie -- tworzy z Scene_A_Terrain.asset.
+        /// Sprawdza tez material -- jesli brakuje lub rozowy, ustawia URP Terrain/Lit.
+        /// </summary>
+        private static bool ValidateTerrain()
+        {
+            bool changed = false;
+            var existing = Object.FindFirstObjectByType<Terrain>();
+
+            if (existing == null)
+            {
+                var terrainData = AssetDatabase.LoadAssetAtPath<TerrainData>(TerrainAsset);
+                if (terrainData == null)
+                {
+                    Debug.LogError($"{LOG} [BRAK] Scene_A_Terrain.asset nie znaleziony: {TerrainAsset}");
+                    return false;
+                }
+
+                var terrainGO = Terrain.CreateTerrainGameObject(terrainData);
+                terrainGO.name = "Terrain_SceneA";
+
+                float halfX = terrainData.size.x * 0.5f;
+                float halfZ = terrainData.size.z * 0.5f;
+                terrainGO.transform.position = new Vector3(-halfX, 0f, -halfZ);
+
+                existing = terrainGO.GetComponent<Terrain>();
+                changed = true;
+                Debug.Log($"{LOG} [DODANO] Teren: {terrainData.size.x:F0}x{terrainData.size.z:F0}m, wycentrowany");
+            }
+            else
+            {
+                Debug.Log($"{LOG} [OK] Teren: {existing.name} ({existing.terrainData.size})");
+            }
+
+            // Walidacja materialu -- rozowy = brakujacy shader/material
+            changed |= ValidateTerrainMaterial(existing);
+            return changed;
+        }
+
+        /// <summary>
+        /// Sprawdza material terenu. Jesli null lub uzywa brakujacego shadera
+        /// (rozowy = "Hidden/InternalErrorShader") -- tworzy URP Terrain/Lit.
+        /// </summary>
+        private static bool ValidateTerrainMaterial(Terrain terrain)
+        {
+            var mat = terrain.materialTemplate;
+            if (mat != null && mat.shader != null && mat.shader.name != "Hidden/InternalErrorShader")
+            {
+                Debug.Log($"{LOG} [OK] Terrain material: {mat.name} (shader: {mat.shader.name})");
+                return false;
+            }
+
+            Debug.LogWarning($"{LOG} [NAPRAWIAM] Terrain material brakujacy lub rozowy");
+
+            // Sprobuj zaladowac istniejacy material
+            var existingMat = AssetDatabase.LoadAssetAtPath<Material>(TerrainMatPath);
+            if (existingMat != null)
+            {
+                terrain.materialTemplate = existingMat;
+                Debug.Log($"{LOG} [OK] Przypisano istniejacy TerrainLit.mat");
+                return true;
+            }
+
+            // Stworz nowy URP Terrain/Lit material
+            var shader = Shader.Find("Universal Render Pipeline/Terrain/Lit");
+            if (shader == null)
+            {
+                Debug.LogError($"{LOG} [BLAD] Shader 'Universal Render Pipeline/Terrain/Lit' nie znaleziony!");
+                return false;
+            }
+
+            var newMat = new Material(shader);
+            newMat.name = "TerrainLit";
+
+            // Upewnij sie ze folder istnieje
+            if (!AssetDatabase.IsValidFolder("Assets/PLAGA44/Materials"))
+            {
+                AssetDatabase.CreateFolder("Assets/PLAGA44", "Materials");
+            }
+
+            AssetDatabase.CreateAsset(newMat, TerrainMatPath);
+            AssetDatabase.SaveAssets();
+
+            terrain.materialTemplate = newMat;
+            Debug.Log($"{LOG} [DODANO] Stworzono i przypisano TerrainLit.mat (URP Terrain/Lit)");
+            return true;
+        }
+
+        /// <summary>
+        /// Sprawdza czy skybox jest ustawiony. Jesli nie -- ustawia BGR_Sky1.
+        /// </summary>
+        private static bool ValidateSkybox()
+        {
+            var skyboxMat = AssetDatabase.LoadAssetAtPath<Material>(SkyboxMat);
+            if (skyboxMat == null)
+            {
+                Debug.LogWarning($"{LOG} [BRAK] Skybox material nie znaleziony: {SkyboxMat}");
+                return false;
+            }
+
+            if (RenderSettings.skybox == skyboxMat)
+            {
+                Debug.Log($"{LOG} [OK] Skybox: {skyboxMat.name}");
+                return false;
+            }
+
+            RenderSettings.skybox = skyboxMat;
+            Debug.Log($"{LOG} [DODANO] Skybox: {skyboxMat.name}");
+            return true;
+        }
+
+        /// <summary>
+        /// Sprawdza czy jest Directional Light. Jesli nie -- tworzy.
+        /// </summary>
+        private static bool ValidateDirectionalLight()
+        {
+            var lights = Object.FindObjectsByType<Light>(FindObjectsSortMode.None);
+            foreach (var light in lights)
+            {
+                if (light.type == LightType.Directional)
+                {
+                    Debug.Log($"{LOG} [OK] Directional Light: {light.name}");
+                    return false;
                 }
             }
 
-            EditorApplication.delayCall += ConfigureScene;
+            var lightGO = new GameObject("Directional Light");
+            var lightComp = lightGO.AddComponent<Light>();
+            lightComp.type = LightType.Directional;
+            lightComp.color = new Color(1f, 0.95f, 0.84f); // ciepla barwa slonca
+            lightComp.intensity = 1f;
+            lightComp.shadows = LightShadows.Soft;
+
+            // Slonce pod katem -- typowe oswietlenie terenu
+            lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+
+            Debug.Log($"{LOG} [DODANO] Directional Light");
+            return true;
         }
 
-        private static void ConfigureScene()
+        /// <summary>
+        /// Sprawdza OVRCameraRig: CharacterController + LocomotionController.
+        /// Jesli brakuje komponentow -- dodaje.
+        /// </summary>
+        private static bool ValidatePlayerRig()
         {
             var rig = GameObject.Find("OVRCameraRig");
             if (rig == null)
             {
-                Debug.LogWarning($"{LOG} OVRCameraRig not found");
-                return;
+                Debug.LogWarning($"{LOG} [BRAK] OVRCameraRig nie znaleziony w scenie");
+                return false;
             }
 
             bool changed = false;
@@ -64,7 +282,11 @@ namespace Plaga44.Editor
                 cc.skinWidth = 0.08f;
                 cc.stepOffset = 0.5f;
                 changed = true;
-                Debug.Log($"{LOG} Added CharacterController");
+                Debug.Log($"{LOG} [DODANO] CharacterController na OVRCameraRig");
+            }
+            else
+            {
+                Debug.Log($"{LOG} [OK] CharacterController na OVRCameraRig");
             }
 
             // LocomotionController
@@ -75,89 +297,24 @@ namespace Plaga44.Editor
                 loco.moveSpeed = 2.5f;
                 loco.strafeFactor = 0.8f;
                 changed = true;
-                Debug.Log($"{LOG} Added LocomotionController");
+                Debug.Log($"{LOG} [DODANO] LocomotionController na OVRCameraRig");
             }
-
-            // Teren Potok
-            if (Object.FindFirstObjectByType<Terrain>() == null)
+            else
             {
-                changed |= PlaceTerrain();
+                Debug.Log($"{LOG} [OK] LocomotionController na OVRCameraRig");
             }
 
-            // Spawn gracza nad terenem
+            // Spawn gracza nad terenem jesli cos sie zmienilo
             if (changed)
             {
-                rig.transform.position = new Vector3(0f, 200f, 0f);
-                Debug.Log($"{LOG} Player spawned at (0, 200, 0) -- will fall onto terrain");
+                var terrain = Object.FindFirstObjectByType<Terrain>();
+                float spawnY = terrain != null ? terrain.terrainData.size.y + 10f : 200f;
+                rig.transform.position = new Vector3(0f, spawnY, 0f);
+                Debug.Log($"{LOG} Gracz ustawiony na (0, {spawnY}, 0)");
             }
 
-            if (changed)
-            {
-                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-                EditorSceneManager.SaveOpenScenes();
-                Debug.Log($"{LOG} Scene configured and saved");
-            }
-        }
-
-        private static bool PlaceTerrain()
-        {
-            const string TERRAIN_ASSET = "Assets/Potok/Terrain/Tile_0.asset";
-            const string MOSS_LAYER = "Assets/Potok/TerrainLayers/layer_GR_Moss1_ASGR_Moss1_N3d1cca0d6d0e9938.terrainlayer";
-            const string SKYBOX_MAT = "Assets/Potok/Skybox/BGR_Sky1.mat";
-
-            var terrainData = AssetDatabase.LoadAssetAtPath<TerrainData>(TERRAIN_ASSET);
-            if (terrainData == null)
-            {
-                Debug.LogWarning($"{LOG} Tile_0.asset not found -- no terrain");
-                return false;
-            }
-
-            // Wyczysc brakujace drzewa/detale
-            terrainData.treeInstances = new TreeInstance[0];
-            terrainData.treePrototypes = new TreePrototype[0];
-            terrainData.detailPrototypes = new DetailPrototype[0];
-
-            // Skaluj teren
-            terrainData.size = new Vector3(512f * 20f, 600f * 20f, 512f * 20f);
-
-            // Warstwa mchu
-            var mossLayer = AssetDatabase.LoadAssetAtPath<TerrainLayer>(MOSS_LAYER);
-            if (mossLayer != null)
-            {
-                mossLayer.tileSize = new Vector2(5f, 5f);
-                EditorUtility.SetDirty(mossLayer);
-                terrainData.terrainLayers = new TerrainLayer[] { mossLayer };
-            }
-
-            EditorUtility.SetDirty(terrainData);
-
-            // Stworz terrain GO, wycentruj
-            var terrainGO = Terrain.CreateTerrainGameObject(terrainData);
-            terrainGO.name = "Terrain_Potok";
-            float halfX = terrainData.size.x * 0.5f;
-            float halfZ = terrainData.size.z * 0.5f;
-            terrainGO.transform.position = new Vector3(-halfX, 0f, -halfZ);
-
-            Debug.Log($"{LOG} Terrain placed: {terrainData.size.x:F0}x{terrainData.size.z:F0}m");
-
-            // Skybox
-            var skyboxMat = AssetDatabase.LoadAssetAtPath<Material>(SKYBOX_MAT);
-            if (skyboxMat != null)
-            {
-                skyboxMat.SetFloat("_CloudOpacity", 0f);
-                EditorUtility.SetDirty(skyboxMat);
-                RenderSettings.skybox = skyboxMat;
-                Debug.Log($"{LOG} Skybox set");
-            }
-
-            // Fog
-            RenderSettings.fog = true;
-            RenderSettings.fogMode = FogMode.Linear;
-            RenderSettings.fogColor = new Color(0.02f, 0.02f, 0.02f);
-            RenderSettings.fogStartDistance = 50f;
-            RenderSettings.fogEndDistance = 300f;
-
-            return true;
+            return changed;
         }
     }
 }
+#endif
