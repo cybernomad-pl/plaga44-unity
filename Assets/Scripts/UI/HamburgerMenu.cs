@@ -81,12 +81,20 @@ namespace Plaga44.UI
         private Text _selectedLabel;
         private Text _valueText;
         private int _selectedIndex;
-        private float _value;
 
         private float _lastStickTime;
         private const float STICK_COOLDOWN = 0.2f;
         private float _lastTriggerTime;
         private const float TRIGGER_COOLDOWN = 0.25f;
+
+        // Submenu state
+        private bool _inSubmenu;
+        private List<SettingDef> _currentSettings;
+        private int _settingIndex;
+        private GameObject _gridRoot;
+        private GameObject _submenuRoot;
+        private Text[] _settingTexts;
+        private const int VISIBLE_ROWS = 10;
 
         private OVRCameraRig _rig;
 
@@ -125,8 +133,29 @@ namespace Plaga44.UI
 
             if (!MenuOpen) return;
 
-            HandleThumbstick();
-            HandleTriggers();
+            // B = wstecz z submenu do gridu
+            if (_inSubmenu && OVRInput.GetDown(OVRInput.Button.Two)) // B button
+            {
+                ExitSubmenu();
+                return;
+            }
+
+            // A = wejdz w submenu wybranego kafelka
+            if (!_inSubmenu && OVRInput.GetDown(OVRInput.Button.One)) // A button
+            {
+                EnterSubmenu(CATEGORIES[_selectedIndex]);
+                return;
+            }
+
+            if (_inSubmenu)
+            {
+                HandleSubmenuInput();
+            }
+            else
+            {
+                HandleThumbstick();
+                HandleTriggers();
+            }
         }
 
         private void OnDestroy()
@@ -204,22 +233,199 @@ namespace Plaga44.UI
 
         private void HandleTriggers()
         {
+            // W grid mode triggery tez wchodza w submenu (jak A)
             if (Time.unscaledTime - _lastTriggerTime < TRIGGER_COOLDOWN) return;
-
-            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
-            {
-                _value -= 1f;
-                _lastTriggerTime = Time.unscaledTime;
-                UpdateValueDisplay();
-                Debug.Log($"{LOG} {CATEGORIES[_selectedIndex]} MINUS -> {_value}");
-            }
 
             if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
             {
-                _value += 1f;
                 _lastTriggerTime = Time.unscaledTime;
-                UpdateValueDisplay();
-                Debug.Log($"{LOG} {CATEGORIES[_selectedIndex]} PLUS -> {_value}");
+                EnterSubmenu(CATEGORIES[_selectedIndex]);
+            }
+        }
+
+        // =====================================================================
+        // Submenu -- lista settingow per modul
+        // =====================================================================
+
+        private void EnterSubmenu(string moduleName)
+        {
+            _currentSettings = SettingsRegistry.GetSettings(moduleName);
+            if (_currentSettings.Count == 0)
+            {
+                Debug.Log($"{LOG} {moduleName}: brak ustawien runtime");
+                return;
+            }
+
+            _inSubmenu = true;
+            _settingIndex = 0;
+            // Ukryj grid
+            if (_gridRoot != null) _gridRoot.SetActive(false);
+
+            // Buduj submenu UI
+            BuildSubmenuUI(moduleName);
+            UpdateSubmenuDisplay();
+            Debug.Log($"{LOG} Submenu: {moduleName} ({_currentSettings.Count} settings)");
+        }
+
+        private void ExitSubmenu()
+        {
+            _inSubmenu = false;
+            if (_submenuRoot != null) Destroy(_submenuRoot);
+            if (_gridRoot != null) _gridRoot.SetActive(true);
+            _selectedLabel.text = "> " + CATEGORIES[_selectedIndex] + " <";
+            _valueText.text = "A = wejdz    B = wstecz";
+            Debug.Log($"{LOG} Submenu: wyjscie");
+        }
+
+        private void HandleSubmenuInput()
+        {
+            Vector2 stickL = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
+            Vector2 stickR = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch);
+            Vector2 stick = stickL.sqrMagnitude > stickR.sqrMagnitude ? stickL : stickR;
+
+            if (Time.unscaledTime - _lastStickTime < STICK_COOLDOWN) return;
+
+            // Gora/dol = wybor settingu
+            if (stick.y > 0.5f && _settingIndex > 0)
+            {
+                _settingIndex--;
+                // Przeskocz headery
+                while (_settingIndex > 0 && _currentSettings[_settingIndex].isHeader)
+                    _settingIndex--;
+                _lastStickTime = Time.unscaledTime;
+                UpdateSubmenuDisplay();
+            }
+            else if (stick.y < -0.5f && _settingIndex < _currentSettings.Count - 1)
+            {
+                _settingIndex++;
+                while (_settingIndex < _currentSettings.Count - 1 && _currentSettings[_settingIndex].isHeader)
+                    _settingIndex++;
+                _lastStickTime = Time.unscaledTime;
+                UpdateSubmenuDisplay();
+            }
+
+            // Lewo/prawo = zmiana wartosci
+            if (stick.x > 0.5f)
+            {
+                AdjustSetting(1);
+                _lastStickTime = Time.unscaledTime;
+            }
+            else if (stick.x < -0.5f)
+            {
+                AdjustSetting(-1);
+                _lastStickTime = Time.unscaledTime;
+            }
+
+            // Triggery tez zmieniaja wartosc
+            if (Time.unscaledTime - _lastTriggerTime > TRIGGER_COOLDOWN)
+            {
+                if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch))
+                {
+                    AdjustSetting(-1);
+                    _lastTriggerTime = Time.unscaledTime;
+                }
+                if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
+                {
+                    AdjustSetting(1);
+                    _lastTriggerTime = Time.unscaledTime;
+                }
+            }
+        }
+
+        private void AdjustSetting(int direction)
+        {
+            if (_settingIndex < 0 || _settingIndex >= _currentSettings.Count) return;
+            var s = _currentSettings[_settingIndex];
+            if (s.isHeader) return;
+
+            float val = s.get();
+            val += s.step * direction;
+            val = Mathf.Clamp(val, s.min, s.max);
+            s.set(val);
+            UpdateSubmenuDisplay();
+        }
+
+        private void BuildSubmenuUI(string title)
+        {
+            if (_submenuRoot != null) Destroy(_submenuRoot);
+
+            _submenuRoot = new GameObject("SubmenuPanel");
+            _submenuRoot.transform.SetParent(_canvas.transform, false);
+            var rootRT = _submenuRoot.AddComponent<RectTransform>();
+            rootRT.anchorMin = Vector2.zero;
+            rootRT.anchorMax = Vector2.one;
+            rootRT.offsetMin = new Vector2(20, 60);
+            rootRT.offsetMax = new Vector2(-20, -60);
+
+            // Tytul submenu
+            _selectedLabel.text = "[ " + title + " ]  (B = wstecz)";
+
+            // Wiersze settingow
+            _settingTexts = new Text[VISIBLE_ROWS];
+            float rowH = 30f;
+            for (int i = 0; i < VISIBLE_ROWS; i++)
+            {
+                var rowGO = new GameObject($"Row_{i}");
+                rowGO.transform.SetParent(_submenuRoot.transform, false);
+                var rowRT = rowGO.AddComponent<RectTransform>();
+                rowRT.anchorMin = new Vector2(0, 1);
+                rowRT.anchorMax = new Vector2(1, 1);
+                rowRT.pivot = new Vector2(0.5f, 1);
+                rowRT.sizeDelta = new Vector2(0, rowH);
+                rowRT.anchoredPosition = new Vector2(0, -i * (rowH + 2));
+
+                var txt = rowGO.AddComponent<Text>();
+                txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                txt.fontSize = 18;
+                txt.color = TEXT_WHITE;
+                txt.alignment = TextAnchor.MiddleLeft;
+                _settingTexts[i] = txt;
+            }
+        }
+
+        private void UpdateSubmenuDisplay()
+        {
+            if (_settingTexts == null || _currentSettings == null) return;
+
+            // Scroll zeby wybrany setting byl widoczny
+            int scrollOffset = Mathf.Max(0, _settingIndex - VISIBLE_ROWS + 3);
+
+            for (int i = 0; i < VISIBLE_ROWS; i++)
+            {
+                int idx = scrollOffset + i;
+                if (idx >= _currentSettings.Count)
+                {
+                    _settingTexts[i].text = "";
+                    continue;
+                }
+
+                var s = _currentSettings[idx];
+                bool selected = (idx == _settingIndex);
+
+                if (s.isHeader)
+                {
+                    _settingTexts[i].text = s.name;
+                    _settingTexts[i].color = ACCENT;
+                }
+                else
+                {
+                    float val = s.get();
+                    string prefix = selected ? "> " : "  ";
+                    _settingTexts[i].text = $"{prefix}{s.name}: {val.ToString(s.format)}";
+                    _settingTexts[i].color = selected ? TEXT_WHITE : TEXT_GREY;
+                }
+            }
+
+            // Footer
+            if (!_currentSettings[_settingIndex].isHeader)
+            {
+                var s = _currentSettings[_settingIndex];
+                float val = s.get();
+                _valueText.text = $"<  {val.ToString(s.format)}  >    [{s.min} .. {s.max}]  step {s.step}";
+            }
+            else
+            {
+                _valueText.text = "";
             }
         }
 
@@ -299,13 +505,19 @@ namespace Plaga44.UI
 
         private void BuildGrid()
         {
-            // Dynamiczny grid -- 5 kolumn, tyle wierszy ile trzeba
+            _gridRoot = new GameObject("GridRoot");
+            _gridRoot.transform.SetParent(_canvas.transform, false);
+            var gridRootRT = _gridRoot.AddComponent<RectTransform>();
+            gridRootRT.anchorMin = Vector2.zero;
+            gridRootRT.anchorMax = Vector2.one;
+            gridRootRT.offsetMin = gridRootRT.offsetMax = Vector2.zero;
+
             int cols = 5;
             float iconSize = 100f;
             float spacing = 10f;
             float gridW = cols * iconSize + (cols - 1) * spacing;
             float startX = -gridW / 2f + iconSize / 2f;
-            float startY = 220f; // od gory canvasa
+            float startY = 220f;
 
             _categoryBGs = new Image[CATEGORIES.Length];
 
@@ -317,7 +529,7 @@ namespace Plaga44.UI
                 float y = startY - row * (iconSize + spacing);
 
                 var cellGO = new GameObject(CATEGORIES[i]);
-                cellGO.transform.SetParent(_canvas.transform, false);
+                cellGO.transform.SetParent(_gridRoot.transform, false);
                 var cellRT = cellGO.AddComponent<RectTransform>();
                 cellRT.anchorMin = cellRT.anchorMax = new Vector2(0.5f, 0.5f);
                 cellRT.anchoredPosition = new Vector2(x, y);
@@ -373,7 +585,7 @@ namespace Plaga44.UI
             _valueText.fontSize = 18;
             _valueText.color = TEXT_GREY;
             _valueText.alignment = TextAnchor.MiddleCenter;
-            _valueText.text = "L.Trigger [-]     R.Trigger [+]";
+            _valueText.text = "A = wejdz    B = wstecz";
         }
 
         // =====================================================================
@@ -392,7 +604,8 @@ namespace Plaga44.UI
 
         private void UpdateValueDisplay()
         {
-            _valueText.text = $"L.Trigger [-]     {_value:+0;-0;0}     R.Trigger [+]";
+            if (!_inSubmenu)
+                _valueText.text = "A = wejdz    B = wstecz";
         }
     }
 }
