@@ -599,7 +599,6 @@ namespace Plaga44.UI
                 _categoryBGs[i].color = (i == _selectedIndex) ? BTN_SELECTED : BTN_COLOR;
 
             _selectedLabel.text = "> " + CATEGORIES[_selectedIndex] + " <";
-            _value = 0f;
             UpdateValueDisplay();
         }
 
