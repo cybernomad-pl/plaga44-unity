@@ -47,31 +47,10 @@ namespace Plaga44.UI
         private static readonly Color TEXT_GREY = new Color(0.55f, 0.55f, 0.55f);
 
         // =====================================================================
-        // Kategorie menu
+        // Kategorie -- dynamiczne z SettingsRegistry
         // =====================================================================
 
-        private static readonly string[] CATEGORIES = new string[]
-        {
-            "MISC.",
-            "Audio",
-            "Physics",
-            "Quality",
-            "Graphics",
-            "Oculus",
-            "Pipeline",
-            "Renderer",
-            "URP",
-            "Volume",
-            "Layers",
-            "Manifest",
-            "Packages",
-            "Input",
-            "Memory",
-            "NavMesh",
-            "Project",
-            "Editor",
-            "Build",
-        };
+        private string[] _categories;
 
         // =====================================================================
         // Stan
@@ -113,12 +92,13 @@ namespace Plaga44.UI
         private void Start()
         {
             _rig = FindFirstObjectByType<OVRCameraRig>();
+            _categories = SettingsRegistry.GetSectionNames();
             BuildCanvas();
             BuildGrid();
             BuildFooter();
             _canvas.gameObject.SetActive(false);
             UpdateSelection();
-            Debug.Log($"{LOG} Start: {CATEGORIES.Length} kategorii, rig={(_rig != null ? _rig.name : "NULL")}");
+            Debug.Log($"{LOG} Start: {_categories.Length} kategorii, rig={(_rig != null ? _rig.name : "NULL")}");
         }
 
         private void Update()
@@ -144,7 +124,7 @@ namespace Plaga44.UI
             // A = wejdz w submenu wybranego kafelka
             if (!_inSubmenu && OVRInput.GetDown(OVRInput.Button.One)) // A button
             {
-                EnterSubmenu(CATEGORIES[_selectedIndex]);
+                EnterSubmenu(_categories[_selectedIndex]);
                 return;
             }
 
@@ -222,10 +202,10 @@ namespace Plaga44.UI
         private void MoveSelection(int delta)
         {
             int newIndex = _selectedIndex + delta;
-            if (newIndex < 0 || newIndex >= CATEGORIES.Length) return;
+            if (newIndex < 0 || newIndex >= _categories.Length) return;
             _selectedIndex = newIndex;
             UpdateSelection();
-            Debug.Log($"{LOG} Wybrano: {CATEGORIES[_selectedIndex]} [{_selectedIndex}]");
+            Debug.Log($"{LOG} Wybrano: {_categories[_selectedIndex]} [{_selectedIndex}]");
         }
 
         // =====================================================================
@@ -240,7 +220,7 @@ namespace Plaga44.UI
             if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch))
             {
                 _lastTriggerTime = Time.unscaledTime;
-                EnterSubmenu(CATEGORIES[_selectedIndex]);
+                EnterSubmenu(_categories[_selectedIndex]);
             }
         }
 
@@ -280,7 +260,7 @@ namespace Plaga44.UI
             _inSubmenu = false;
             if (_submenuRoot != null) Destroy(_submenuRoot);
             if (_gridRoot != null) _gridRoot.SetActive(true);
-            _selectedLabel.text = "> " + CATEGORIES[_selectedIndex] + " <";
+            _selectedLabel.text = "> " + _categories[_selectedIndex] + " <";
             _valueText.text = "A = wejdz    B = wstecz";
             Debug.Log($"{LOG} Submenu: wyjscie");
         }
@@ -527,16 +507,16 @@ namespace Plaga44.UI
             float startX = -gridW / 2f + iconSize / 2f;
             float startY = 220f;
 
-            _categoryBGs = new Image[CATEGORIES.Length];
+            _categoryBGs = new Image[_categories.Length];
 
-            for (int i = 0; i < CATEGORIES.Length; i++)
+            for (int i = 0; i < _categories.Length; i++)
             {
                 int col = i % cols;
                 int row = i / cols;
                 float x = startX + col * (iconSize + spacing);
                 float y = startY - row * (iconSize + spacing);
 
-                var cellGO = new GameObject(CATEGORIES[i]);
+                var cellGO = new GameObject(_categories[i]);
                 cellGO.transform.SetParent(_gridRoot.transform, false);
                 var cellRT = cellGO.AddComponent<RectTransform>();
                 cellRT.anchorMin = cellRT.anchorMax = new Vector2(0.5f, 0.5f);
@@ -556,7 +536,7 @@ namespace Plaga44.UI
                 labelRT.offsetMin = Vector2.zero;
                 labelRT.offsetMax = Vector2.zero;
                 var labelText = labelGO.AddComponent<Text>();
-                labelText.text = CATEGORIES[i];
+                labelText.text = _categories[i];
                 labelText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
                 labelText.fontSize = 16;
                 labelText.color = TEXT_WHITE;
@@ -605,7 +585,7 @@ namespace Plaga44.UI
             for (int i = 0; i < _categoryBGs.Length; i++)
                 _categoryBGs[i].color = (i == _selectedIndex) ? BTN_SELECTED : BTN_COLOR;
 
-            _selectedLabel.text = "> " + CATEGORIES[_selectedIndex] + " <";
+            _selectedLabel.text = "> " + _categories[_selectedIndex] + " <";
             UpdateValueDisplay();
         }
 
