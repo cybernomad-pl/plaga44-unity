@@ -35,11 +35,39 @@ namespace Plaga44.UI
         public static string[] GetSectionNames() { if (!_built) Build(); return _names; }
         public static void Rebuild() { _built = false; _sec = null; }
 
+        // Current section name (set by Sec, captured by S for log context).
+        private static string _currentSection = "?";
+
         static SettingDef S(string n, string d, Func<float> g, Action<float> s, float mn, float mx, float st, string f="F1")
-            => new SettingDef(n,d,g,s,mn,mx,st,f);
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            // Dev-only: wrap setter with change logging via SettingsLogger.
+            // Release builds get the raw setter -- zero allocation, zero Debug.Log cost on Quest.
+            string sectionCapture = _currentSection;
+            Action<float> loggingSetter = (v) =>
+            {
+                float oldVal = g();
+                s(v);
+                if (!Mathf.Approximately(oldVal, v))
+                    SettingsLogger.Log(n, oldVal, v, sectionCapture);
+            };
+            return new SettingDef(n, d, g, loggingSetter, mn, mx, st, f);
+#else
+            return new SettingDef(n, d, g, s, mn, mx, st, f);
+#endif
+        }
 
         static void Sec(string name, Action<List<SettingDef>> b)
-        { var l = new List<SettingDef>(); b(l); if (l.Count > 0) _sec[name] = l; }
+        {
+            _currentSection = name;
+            try
+            {
+                var l = new List<SettingDef>();
+                b(l);
+                if (l.Count > 0) _sec[name] = l;
+            }
+            finally { _currentSection = "?"; }
+        }
 
         // =====================================================================
         // Defaults snapshot -- captured on first Build()
@@ -186,6 +214,20 @@ namespace Plaga44.UI
             // =============================================================
             Sec("GAME STATE", s => {
                 s.Add(S("Phase", "Game phase (0=Splash 1=Menu 2=Load 3=Play 4=Inv 5=Pause 6=Dead)", () => (float)GameState.Current, v => GameState.SetState((GamePhase)(int)v), 0, 6, 1, "F0"));
+            });
+
+            // =============================================================
+            // AVATAR -- dynamiczny max z AvatarGallery (fallback=1 jesli brak)
+            // =============================================================
+            var playerAvatar = UnityEngine.Object.FindAnyObjectByType<Plaga44.PlayerAvatar>();
+            if (playerAvatar != null) Sec("AVATAR", s => {
+                int maxMode = Mathf.Max(1, playerAvatar.MaxMode);
+                string modeDesc = maxMode > 1
+                    ? $"0=None(robot), 1..{maxMode}=Avatar z Gallery"
+                    : "0=None(robot), 1=Survivor (legacy)";
+                s.Add(S("Mode", modeDesc, () => playerAvatar.avatarMode, v => playerAvatar.SetAvatarMode((int)v), 0, maxMode, 1, "F0"));
+                s.Add(S("Hide Head", "Hide head+neck to avoid camera clipping (player avatars)", () => playerAvatar.hideHead?1:0, v => playerAvatar.hideHead=v>0.5f, 0, 1, 1, "F0"));
+                s.Add(S("Y Offset", "Avatar feet offset from rig base", () => playerAvatar.yOffset, v => playerAvatar.yOffset=v, -1f, 1f, 0.05f, "F2"));
             });
 
             // =============================================================

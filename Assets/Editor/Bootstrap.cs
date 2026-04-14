@@ -97,6 +97,8 @@ namespace Plaga44.Editor
             changed |= ValidatePlayerRig();
             changed |= ValidateHamburgerMenu();
             changed |= ValidateSkyRotator();
+            changed |= ValidateInventorySystem();
+            ValidateAvatarRegistry(); // read-only, no scene mutation
 
             if (changed)
             {
@@ -318,19 +320,63 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} [OK] SmoothTurnController on OVRCameraRig");
             }
 
-            // PlayerAvatar
+            // PlayerAvatar -- default state: Mode=None (no avatar), default rig visible
             var avatar = rig.GetComponent<Plaga44.PlayerAvatar>();
             if (avatar == null)
             {
                 avatar = rig.AddComponent<Plaga44.PlayerAvatar>();
-                avatar.avatarPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
-                    "Assets/PLAGA44/Player/Survivor_A_Lusth.fbx");
                 changed = true;
-                Debug.Log($"{LOG} [ADDED] PlayerAvatar (Survivor_A_Lusth)");
+                Debug.Log($"{LOG} [ADDED] PlayerAvatar");
             }
             else
             {
                 Debug.Log($"{LOG} [OK] PlayerAvatar");
+            }
+
+            // Force default: Mode=None so player starts as default rig (robot/skeleton)
+            if (avatar.avatarMode != 0)
+            {
+                avatar.avatarMode = 0;
+                changed = true;
+                Debug.Log($"{LOG} [FIX] PlayerAvatar.avatarMode reset to 0 (None)");
+            }
+
+            // Clear legacy prefab override (avatar now loads per-mode from Resources)
+            if (avatar.avatarPrefab != null)
+            {
+                avatar.avatarPrefab = null;
+                changed = true;
+                Debug.Log($"{LOG} [FIX] Cleared PlayerAvatar.avatarPrefab (uses Resources per mode)");
+            }
+
+            // Wire default rig -- search for StylizedCharacterLocomotion (or any child named *StylizedCharacter*)
+            if (avatar.defaultRig == null)
+            {
+                GameObject defRig = GameObject.Find("StylizedCharacterLocomotion");
+                if (defRig == null)
+                {
+                    // fallback: scan children of rig
+                    foreach (var t in rig.GetComponentsInChildren<Transform>(true))
+                        if (t != rig.transform && t.name.Contains("StylizedCharacter")) { defRig = t.gameObject; break; }
+                }
+                if (defRig != null)
+                {
+                    avatar.defaultRig = defRig;
+                    changed = true;
+                    Debug.Log($"{LOG} [FIX] PlayerAvatar.defaultRig -> {defRig.name}");
+                }
+                else
+                {
+                    Debug.LogWarning($"{LOG} [WARN] StylizedCharacterLocomotion not found -- assign defaultRig manually in inspector");
+                }
+            }
+
+            // Ensure default rig is visible at start
+            if (avatar.defaultRig != null && !avatar.defaultRig.activeSelf)
+            {
+                avatar.defaultRig.SetActive(true);
+                changed = true;
+                Debug.Log($"{LOG} [FIX] defaultRig activated");
             }
 
             // Always spawn player 1km above terrain
@@ -372,6 +418,144 @@ namespace Plaga44.Editor
             sr.rotationSpeed = 0.5f;
             Debug.Log($"{LOG} [ADDED] SkyRotator (0.5 deg/s)");
             return true;
+        }
+
+        // =====================================================================
+        // Avatar Registry -- read-only check (Gallery spawn-uje runtime)
+        // =====================================================================
+        private static void ValidateAvatarRegistry()
+        {
+            const string RegistryPath = "Assets/PLAGA44/Resources/AvatarRegistry.asset";
+            var reg = AssetDatabase.LoadAssetAtPath<Plaga44.AvatarRegistry>(RegistryPath);
+            if (reg == null)
+            {
+                Debug.LogWarning($"{LOG} [MISS] AvatarRegistry not found at {RegistryPath}. Run CYBERNOMAD > Import > Rescan Avatars.");
+                return;
+            }
+            if (reg.Count == 0)
+            {
+                Debug.LogWarning($"{LOG} [EMPTY] AvatarRegistry has 0 avatars. Drop DAE into Assets/PLAGA44/Avatars/<Name>/ and rescan.");
+                return;
+            }
+            Debug.Log($"{LOG} [OK] AvatarRegistry: {reg.Count} avatars");
+            for (int i = 0; i < reg.Count; i++)
+            {
+                var e = reg.Get(i);
+                string status = (e != null && e.prefab != null) ? "OK" : "MISSING";
+                string name = e != null ? e.name : "?";
+                Debug.Log($"{LOG}   [{i}] {name} -- {status}");
+            }
+        }
+
+        // =====================================================================
+        // Inventory / Haptic / Grab -- revolver in RightHip holster on start
+        // =====================================================================
+        private static bool ValidateInventorySystem()
+        {
+            if (!RevolverPrefabBuilder.EnsurePrefab())
+                Debug.LogWarning($"{LOG} [WARN] Revolver prefab missing -- loadout will fail.");
+
+            var rig = GameObject.Find("OVRCameraRig");
+            if (rig == null)
+            {
+                Debug.LogWarning($"{LOG} [MISSING] OVRCameraRig not found -- skipping inventory setup");
+                return false;
+            }
+
+            bool changed = false;
+            changed |= EnsureComponent<Plaga44.Feedback.HapticManager>(rig, "HapticManager");
+            changed |= EnsureComponent<Plaga44.Inventory.PlayerInventory>(rig, "PlayerInventory");
+            changed |= EnsureComponent<Plaga44.Inventory.InventoryLoadout>(rig, "InventoryLoadout (RightHip=Revolver)");
+            changed |= EnsureGrabberOnHand(rig, "RightHandAnchor", OVRInput.Controller.RTouch);
+            changed |= EnsureGrabberOnHand(rig, "LeftHandAnchor",  OVRInput.Controller.LTouch);
+            return changed;
+        }
+
+        /// <summary>Generic idempotent "component on GameObject" validator. Returns true if added.</summary>
+        private static bool EnsureComponent<T>(GameObject go, string label) where T : Component
+        {
+            if (go.GetComponent<T>() != null)
+            {
+                Debug.Log($"{LOG} [OK] {label}");
+                return false;
+            }
+            go.AddComponent<T>();
+            Debug.Log($"{LOG} [ADDED] {label} on {go.name}");
+            return true;
+        }
+
+        private static bool EnsureGrabberOnHand(GameObject rig, string anchorName, OVRInput.Controller ctrl)
+        {
+            var anchor = FindChildByName(rig.transform, anchorName);
+            if (anchor == null)
+            {
+                Debug.LogWarning($"{LOG} [MISSING] {anchorName} on OVRCameraRig -- grabber not added");
+                return false;
+            }
+
+            if (anchor.GetComponent<OVRGrabber>() != null)
+            {
+                Debug.Log($"{LOG} [OK] OVRGrabber on {anchorName}");
+                return false;
+            }
+
+            // Trigger collider (grab volume) -- small sphere in palm
+            var triggerGO = new GameObject("GrabVolume");
+            triggerGO.transform.SetParent(anchor, worldPositionStays: false);
+            triggerGO.transform.localPosition = Vector3.zero;
+            var sph = triggerGO.AddComponent<SphereCollider>();
+            sph.isTrigger = true;
+            sph.radius = 0.08f;
+
+            // OVRGrabber needs a kinematic Rigidbody on its own GO
+            var rb = anchor.GetComponent<Rigidbody>();
+            if (rb == null)
+            {
+                rb = anchor.gameObject.AddComponent<Rigidbody>();
+                rb.isKinematic = true;
+                rb.useGravity = false;
+            }
+
+            var grabber = anchor.gameObject.AddComponent<OVRGrabber>();
+            ConfigureOVRGrabber(grabber, anchor, sph, ctrl);
+
+            Debug.Log($"{LOG} [ADDED] OVRGrabber on {anchorName} ({ctrl})");
+            return true;
+        }
+
+        /// <summary>
+        /// OVRGrabber fields are protected -- configure via reflection.
+        /// Logs SDK-break error if a field name has changed, so upgrades fail loud.
+        /// </summary>
+        private static void ConfigureOVRGrabber(OVRGrabber grabber, Transform gripXform, Collider volume, OVRInput.Controller ctrl)
+        {
+            var t = typeof(OVRGrabber);
+            const System.Reflection.BindingFlags flags =
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+
+            SetPrivateField(t, grabber, "m_gripTransform",    gripXform,                 flags);
+            SetPrivateField(t, grabber, "m_grabVolumes",      new Collider[] { volume }, flags);
+            SetPrivateField(t, grabber, "m_controller",       ctrl,                      flags);
+            SetPrivateField(t, grabber, "m_parentHeldObject", true,                      flags);
+        }
+
+        private static void SetPrivateField(System.Type t, object target, string fieldName, object value, System.Reflection.BindingFlags flags)
+        {
+            var f = t.GetField(fieldName, flags);
+            if (f == null)
+            {
+                Debug.LogError($"{LOG} [SDK BREAK] {t.Name}.{fieldName} not found -- Oculus SDK likely renamed this field. Update ConfigureOVRGrabber.");
+                return;
+            }
+            f.SetValue(target, value);
+        }
+
+        /// <summary>Recursive by-name lookup; mirrors the pattern used for StylizedCharacterLocomotion.</summary>
+        private static Transform FindChildByName(Transform root, string name)
+        {
+            foreach (var t in root.GetComponentsInChildren<Transform>(true))
+                if (t.name == name) return t;
+            return null;
         }
     }
 }

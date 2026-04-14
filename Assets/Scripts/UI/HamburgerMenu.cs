@@ -60,7 +60,7 @@ namespace Plaga44.UI
 
         private static readonly (string name, string[] sections)[] GROUPS = new[]
         {
-            ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "GAME STATE", "NAVMESH" }),
+            ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "AVATAR", "GAME STATE", "NAVMESH" }),
             ("VISUAL",   new[] { "SHADOWS", "SUN", "FOG", "AMBIENT", "SKYBOX", "BLOOM", "COLOR", "COMFORT", "LGG", "URP" }),
             ("SYSTEM",   new[] { "PROFILE", "MISC", "AUDIO", "PHYSICS", "QUALITY", "CAMERA", "OCULUS", "TERRAIN", "PRESETS" }),
         };
@@ -501,6 +501,10 @@ namespace Plaga44.UI
 
             int scrollOffset = Mathf.Max(0, _settingIndex - VISIBLE_ROWS + 3);
 
+            string section = _currentGroupSections[_groupIndex];
+            bool isAvatarSection = (section == "AVATAR");
+            var pa = isAvatarSection ? Plaga44.PlayerAvatar.FindCurrent() : null;
+
             for (int i = 0; i < VISIBLE_ROWS; i++)
             {
                 int idx = scrollOffset + i;
@@ -508,13 +512,37 @@ namespace Plaga44.UI
 
                 var s = _currentSettings[idx];
                 bool sel = (idx == _settingIndex);
-                _settingTexts[i].text = $"{(sel ? "> " : "  ")}{s.name}: {s.get().ToString(s.format)}";
-                _settingTexts[i].color = sel ? TEXT_WHITE : TEXT_GREY;
+
+                // Specjalny rendering dla AVATAR > Mode -- zamiast liczby pokaz nazwe avatara
+                bool isAvatarMode = isAvatarSection && s.name == "Mode" && pa != null;
+                bool brokenHere = false;
+                string valueStr;
+                if (isAvatarMode)
+                {
+                    valueStr = pa.CurrentLabel; // "None" / "PINEA_YNG5" / "AVATAR_ERROR"
+                    brokenHere = pa.IsCurrentBroken;
+                }
+                else
+                {
+                    valueStr = s.get().ToString(s.format);
+                }
+
+                _settingTexts[i].text = $"{(sel ? "> " : "  ")}{s.name}: {valueStr}";
+                _settingTexts[i].color = brokenHere ? Color.red : (sel ? TEXT_WHITE : TEXT_GREY);
             }
 
             var cur = _currentSettings[_settingIndex];
+            bool curIsAvatarMode = isAvatarSection && cur.name == "Mode" && pa != null;
+            bool curBroken = curIsAvatarMode && pa.IsCurrentBroken;
+
             _footerLabel.text = cur.desc ?? "";
-            _footerValue.text = $"<  {cur.get().ToString(cur.format)}  >    [{cur.min}..{cur.max}]   B/Y = back";
+            _footerLabel.color = curBroken ? Color.red : TEXT_WHITE;
+
+            string footerValueStr = curIsAvatarMode
+                ? $"<  {pa.CurrentLabel}  >    [{cur.min}..{cur.max}]   B/Y = back"
+                : $"<  {cur.get().ToString(cur.format)}  >    [{cur.min}..{cur.max}]   B/Y = back";
+            _footerValue.text = footerValueStr;
+            _footerValue.color = curBroken ? Color.red : TEXT_GREY;
         }
 
         // =====================================================================
