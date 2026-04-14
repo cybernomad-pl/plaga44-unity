@@ -1,85 +1,89 @@
-using UnityEditor;
-using UnityEngine;
-using System;
+// =============================================================================
+// BuildScript.cs
+// CYBERNOMAD -- APK build Quest. Menu: CYBERNOMAD > Build > Build APK (Quest).
+// Batch mode: unity -executeMethod Plaga44.Editor.BuildScript.Build
+// =============================================================================
 using System.IO;
 using System.Linq;
+using UnityEditor;
+using UnityEditor.Build.Reporting;
+using UnityEngine;
 
-public static class BuildScript
+namespace Plaga44.Editor
 {
-    private static readonly string BuildDir = "Builds";
-    private static readonly string ApkName = "plaga44.apk";
-
-    // TESTBED_V6 -- hardcoded target scene (ignores stale EditorBuildSettings).
-    private const string TargetScenePath = "Assets/PLAGA44/TESTBED.unity";
-
-    [MenuItem("CYBERNOMAD/Build/Build APK (Quest)")]
-    public static void BuildQuest()
+    public static class BuildScript
     {
-        // Prefer the known TESTBED scene; fall back to EditorBuildSettings if it's missing.
-        string[] scenes;
-        if (File.Exists(TargetScenePath))
+        private const string LOG = "[BuildScript]";
+        private const string BuildDir = "Builds";
+        private const string ApkName = "plaga44.apk";
+        private const string TargetScenePath = "Assets/PLAGA44/TESTBED.unity";
+
+        [MenuItem("CYBERNOMAD/Build/Build APK (Quest)")]
+        public static void BuildQuest()
         {
-            scenes = new[] { TargetScenePath };
+            string[] scenes = ResolveBuildScenes();
+            if (scenes.Length == 0)
+            {
+                Debug.LogError($"{LOG} No valid scenes found!");
+                return;
+            }
+            Debug.Log($"{LOG} Building {scenes.Length} scene(s): {string.Join(", ", scenes)}");
+
+            EnsureBuildDir();
+            SwitchToAndroid();
+            BuildApk(scenes, Path.Combine(BuildDir, ApkName));
         }
-        else
+
+        /// <summary>Batch mode entry point: -executeMethod Plaga44.Editor.BuildScript.Build</summary>
+        public static void Build() => BuildQuest(); // TextureOptimizer is bleeding-edge only -- skip na TESTBED_V6
+
+        private static string[] ResolveBuildScenes()
         {
-            scenes = EditorBuildSettings.scenes
+            if (File.Exists(TargetScenePath))
+                return new[] { TargetScenePath };
+            return EditorBuildSettings.scenes
                 .Where(s => s.enabled && File.Exists(s.path))
                 .Select(s => s.path)
                 .ToArray();
         }
 
-        if (scenes.Length == 0)
+        private static void EnsureBuildDir()
         {
-            Debug.LogError("[BuildScript] No valid scenes found!");
-            return;
+            if (!Directory.Exists(BuildDir)) Directory.CreateDirectory(BuildDir);
         }
 
-        Debug.Log($"[BuildScript] Building {scenes.Length} scene(s): {string.Join(", ", scenes)}");
-
-        if (!Directory.Exists(BuildDir))
-            Directory.CreateDirectory(BuildDir);
-
-        string path = Path.Combine(BuildDir, ApkName);
-
-        EditorUserBuildSettings.SwitchActiveBuildTarget(
-            BuildTargetGroup.Android, BuildTarget.Android);
-
-        var options = new BuildPlayerOptions
+        private static void SwitchToAndroid()
         {
-            scenes = scenes,
-            locationPathName = path,
-            target = BuildTarget.Android,
-            options = BuildOptions.None
-        };
-
-        var report = BuildPipeline.BuildPlayer(options);
-
-        if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
-        {
-            Debug.Log($"[BuildScript] BUILD OK -> {path} ({report.summary.totalSize / 1024 / 1024} MB)");
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
         }
-        else
+
+        private static void BuildApk(string[] scenes, string path)
         {
-            Debug.LogError($"[BuildScript] BUILD FAILED: {report.summary.totalErrors} error(s)");
-            foreach (var step in report.steps)
+            var options = new BuildPlayerOptions
             {
+                scenes = scenes,
+                locationPathName = path,
+                target = BuildTarget.Android,
+                options = BuildOptions.None
+            };
+            var report = BuildPipeline.BuildPlayer(options);
+
+            if (report.summary.result == BuildResult.Succeeded)
+                Debug.Log($"{LOG} BUILD OK -> {path} ({report.summary.totalSize / 1024 / 1024} MB)");
+            else
+                LogFailedBuild(report);
+        }
+
+        private static void LogFailedBuild(BuildReport report)
+        {
+            Debug.LogError($"{LOG} BUILD FAILED: {report.summary.totalErrors} error(s)");
+            foreach (var step in report.steps)
                 foreach (var msg in step.messages)
-                {
                     if (msg.type == LogType.Error)
                         Debug.LogError($"  {msg.content}");
-                }
-            }
 
             if (Application.isBatchMode)
                 EditorApplication.Exit(1);
         }
-    }
-
-    // Entry point for batch mode: -executeMethod BuildScript.Build
-    public static void Build()
-    {
-        // TextureOptimizer is bleeding-edge only -- skip on TESTBED_V6.
-        BuildQuest();
     }
 }

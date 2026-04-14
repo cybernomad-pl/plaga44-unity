@@ -9,6 +9,11 @@ namespace Plaga44
 {
     public class SkyRotator : MonoBehaviour
     {
+        private const string LOG = "[PLAGA44][SkyRotator]";
+        private const string RotationProperty = "_Rotation";
+        private const float FullRotationDeg = 360f;
+        private const float HalfRotationDeg = 180f;
+
         public float rotationSpeed = 0.5f; // stopnie na sekunde
         public float logIntervalSec = 5f;  // co ile sekund logowac stan (0 = nigdy)
 
@@ -16,43 +21,52 @@ namespace Plaga44
         private float _lastLogTime;
         private float _lastLoggedRot;
 
-        void Start()
+        private void Start()
         {
             _skyMat = RenderSettings.skybox;
-            if (_skyMat != null)
-                Debug.Log($"[PLAGA44][SkyRotator] Start: mat={_skyMat.name}, speed={rotationSpeed}");
-            else
-                Debug.LogWarning("[PLAGA44][SkyRotator] Brak skybox materialu");
+            if (_skyMat == null) { Debug.LogWarning($"{LOG} Brak skybox materialu"); return; }
 
+            Debug.Log($"{LOG} Start: mat={_skyMat.name}, speed={rotationSpeed}");
             _lastLogTime = Time.time;
-            if (_skyMat != null && _skyMat.HasFloat("_Rotation"))
-                _lastLoggedRot = _skyMat.GetFloat("_Rotation");
+            if (_skyMat.HasFloat(RotationProperty))
+                _lastLoggedRot = _skyMat.GetFloat(RotationProperty);
         }
 
-        void Update()
+        private void Update()
         {
-            if (_skyMat == null || !_skyMat.HasFloat("_Rotation")) return;
+            if (_skyMat == null || !_skyMat.HasFloat(RotationProperty)) return;
 
-            float rot = _skyMat.GetFloat("_Rotation");
-            float newRot = rot + rotationSpeed * Time.deltaTime;
-            if (newRot > 360f) newRot -= 360f;
-            if (newRot < 0f) newRot += 360f;
-            _skyMat.SetFloat("_Rotation", newRot);
+            float newRot = AdvanceRotation(_skyMat.GetFloat(RotationProperty));
+            _skyMat.SetFloat(RotationProperty, newRot);
+            LogRotationOccasionally(newRot);
+        }
 
-            // Throttled log -- raz na logIntervalSec
-            if (logIntervalSec > 0 && Time.time - _lastLogTime >= logIntervalSec)
-            {
-                float deltaRot = newRot - _lastLoggedRot;
-                // Kompensuj owrap 0/360
-                if (deltaRot < -180f) deltaRot += 360f;
-                if (deltaRot >  180f) deltaRot -= 360f;
-                Debug.Log(
-                    $"[PLAGA44][SkyRotator] Rotation: {_lastLoggedRot:F1} -> {newRot:F1} " +
-                    $"(delta={deltaRot:+0.0;-0.0;0.0} over {logIntervalSec}s, speed={rotationSpeed:F2}dps)"
-                );
-                _lastLogTime = Time.time;
-                _lastLoggedRot = newRot;
-            }
+        private float AdvanceRotation(float current)
+        {
+            float next = current + rotationSpeed * Time.deltaTime;
+            if (next >= FullRotationDeg) next -= FullRotationDeg;
+            if (next < 0f) next += FullRotationDeg;
+            return next;
+        }
+
+        private void LogRotationOccasionally(float currentRot)
+        {
+            if (logIntervalSec <= 0 || Time.time - _lastLogTime < logIntervalSec) return;
+
+            float delta = WrapDelta(currentRot - _lastLoggedRot);
+            Debug.Log(
+                $"{LOG} Rotation: {_lastLoggedRot:F1} -> {currentRot:F1} " +
+                $"(delta={delta:+0.0;-0.0;0.0} over {logIntervalSec}s, speed={rotationSpeed:F2}dps)");
+            _lastLogTime = Time.time;
+            _lastLoggedRot = currentRot;
+        }
+
+        // Kompensuje wrap 0/360 zeby delta pokazywalo sensowny kierunek
+        private static float WrapDelta(float delta)
+        {
+            if (delta < -HalfRotationDeg) return delta + FullRotationDeg;
+            if (delta > HalfRotationDeg) return delta - FullRotationDeg;
+            return delta;
         }
     }
 }

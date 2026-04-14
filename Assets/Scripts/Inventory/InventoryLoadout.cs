@@ -58,22 +58,32 @@ namespace Plaga44.Inventory
 
         private bool SpawnInto(LoadoutEntry entry)
         {
-            var holster = PlayerInventory.Instance.GetHolster(entry.holsterId);
-            if (holster == null)
-            {
-                Debug.LogWarning($"{LOG} Holster '{entry.holsterId}' not found -- skipping {entry.resourcePath}");
-                return false;
-            }
+            if (!TryResolveHolster(entry, out HolsterAnchor holster)) return false;
+            if (!TryLoadPrefab(entry, out GameObject prefab)) return false;
+            InstantiateAndAttach(prefab, holster, entry);
+            return true;
+        }
 
-            var prefab = Resources.Load<GameObject>(entry.resourcePath);
-            if (prefab == null)
-            {
-                Debug.LogWarning($"{LOG} Resource not found: {entry.resourcePath}");
-                return false;
-            }
+        private bool TryResolveHolster(LoadoutEntry entry, out HolsterAnchor holster)
+        {
+            holster = PlayerInventory.Instance.GetHolster(entry.holsterId);
+            if (holster != null) return true;
+            Debug.LogWarning($"{LOG} Holster '{entry.holsterId}' not found -- skipping {entry.resourcePath}");
+            return false;
+        }
 
+        private bool TryLoadPrefab(LoadoutEntry entry, out GameObject prefab)
+        {
+            prefab = Resources.Load<GameObject>(entry.resourcePath);
+            if (prefab != null) return true;
+            Debug.LogWarning($"{LOG} Resource not found: {entry.resourcePath}");
+            return false;
+        }
+
+        private void InstantiateAndAttach(GameObject prefab, HolsterAnchor holster, LoadoutEntry entry)
+        {
             var item = Instantiate(prefab);
-            item.name = prefab.name;  // strip "(Clone)"
+            item.name = prefab.name; // strip "(Clone)"
 
             // Wire homeHolster so it snaps back on release near this anchor.
             var grabbable = item.GetComponent<PlagaGrabbable>();
@@ -81,7 +91,6 @@ namespace Plaga44.Inventory
 
             holster.Holster(item);
             Debug.Log($"{LOG} Spawned '{item.name}' into holster '{entry.holsterId}'");
-            return true;
         }
     }
 }

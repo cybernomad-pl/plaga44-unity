@@ -155,3 +155,25 @@ Unity: 6000.3.7f1 | URP 17.3.0 | Meta XR SDK 81.0.0
 
 Stara pelna implementacja: branch `reference-branch`
 Stary bleeding-edge: branch `bleeding-edge` (na remote)
+
+## 2026-04-14 (wieczor) -- Locomotion / Haptic / Presets
+
+- [x] **Jetpack** -- R thumbstick click (hold) powoduje wzlot (flySpeed=3m/s, konfigurowalne w Inspector). LocomotionController.cs.
+- [x] **Grab vibration fix** -- ControllerModeHelper.IsControllerActive juz nie wymaga SampleRateHz>0 (blokowalo w Quest Link). SetControllerVibration dziala nawet w Link.
+- [x] **Auto-save biezacych ustawien** -- kazdy slider zapisuje do PlayerPrefs (flush przy Close menu/OnApplicationQuit/Pause). PRESETS + GAME STATE wyjete z persist.
+- [x] **PRESETS pierwsze w SYSTEM** -- kafelek na pierwszym miejscu.
+- [x] **Preset timestamp** -- sloty pokazuja "[14.04 15:30]" jesli zapisane, "[empty]" jesli puste.
+- [x] **Toast sukces/error** -- footer menu pokazuje "SAVED slot 1 (92 values)" na zielono / "SAVE FAILED: ..." na czerwono przez 3.5s po akcji.
+
+## 2026-04-14 -- Terrain / Avatar system
+
+- [ ] **Reimport FloodedGrounds terrain** -- usuniecie materialow dirt i asfalt stworzylo dziury w terenie, trzeba ponownie zaimportowac texture splats / terrain layers.
+- [ ] Rescan Avatars po zapisie fixa (SaveAssetIfDirty) -- upewnic sie ze Assets/PLAGA44/Resources/AvatarRegistry.asset fizycznie istnieje.
+- [ ] Meta XR Movement CharacterRetargeter spam "Failed to retarget source frame data!" -- sprawdzic ktory character ma komponent CharacterRetargeter, moze to StylizedCharacterLocomotion z missing prefab. Jesli tak -- wylacz komponent albo usun default rig.
+- [ ] Oculus Interaction LocomotionEventsConnection Handlers[0] null -- skonfigurowac albo usunac nieuzywany LocomotionOutput z sceny.
+- [ ] RevolverPrefabBuilder NullRef (OVRGrabbable.Awake + Rigidbody.get_mass) -- osobny issue, inventory builder.
+- [ ] Missing Prefab StylizedCharacterLocomotion guid 286d7e2005861d341a0a94d7f615675a -- znalezc w backup/testbed lub zrobic unpack.
+- [ ] _batch2/ (6 plikow alternatywnych wersji FBX) -- decyzja: zintegrowac jako _v2 avatary, czy wyrzucic.
+- [ ] CharacterController namespace warning -- szukac zrodla (nie ma pliku .cs, moze prefab z broken script reference).
+- [ ] Build Settings -- aktualnie TESTBED.unity (naprawione z dead guid TESTBED_V2.unity).
+

@@ -1,23 +1,10 @@
 // =============================================================================
 // HamburgerMenu.cs
-// CYBERNOMAD -- 3-level VR settings menu for PLAGA '44.
-//
-// Level 1: Top categories (GAMEPLAY, VISUAL, SYSTEM) -- big tiles
-// Level 2: Sub-categories (LOCOMOTION, SHADOWS, etc.) -- grid of tiles
-// Level 3: Settings list -- thumbstick adjust values
-//
-// Controls:
-//   Start      = open/close menu
-//   Thumbstick = navigate (both sticks work)
-//   A / X      = enter / confirm
-//   B / Y      = back
-//   Triggers   = adjust value +/- (in settings)
-//
-// Canvas renders in world space, faces the player.
-// GameState.Pause() when open, GameState.Resume() on close.
+// CYBERNOMAD -- 3-level VR settings menu PLAGA '44.
+// Poziomy: TOP (kafelki kategorii) -> GROUP (sub-kategorie) -> SETTINGS (slider list).
+// Kontrolki: Start=toggle, thumbstick=nav, A/X=enter, B/Y=back, triggery=value +/-.
+// World-space canvas, faces player. Menu pauzuje GameState.
 // =============================================================================
-
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,23 +15,61 @@ namespace Plaga44.UI
     {
         private const string LOG = "[PLAGA44][Menu]";
 
-        // =====================================================================
-        // Singleton
-        // =====================================================================
-
-        public static HamburgerMenu Instance { get; private set; }
-        public static bool MenuOpen { get; private set; }
-
-        // =====================================================================
-        // Config
-        // =====================================================================
-
+        // ---- Canvas ---------------------------------------------------------
         private const float MENU_DISTANCE = 1.4f;
         private const float CANVAS_SCALE = 0.001f;
         private const int CANVAS_W = 900;
         private const int CANVAS_H = 700;
+        private const float CANVAS_DROP = 0.1f;
 
-        // Colors -- dark theme
+        // ---- Layout: tiles --------------------------------------------------
+        private const float TOP_TILE_W = 240f;
+        private const float TOP_TILE_H = 120f;
+        private const float TOP_TILE_SPACING = 20f;
+        private const float TOP_TILE_Y = 100f;
+        private const int TOP_TILE_FONT = 20;
+
+        private const int GROUP_COLS = 4;
+        private const float GROUP_TILE_W = 180f;
+        private const float GROUP_TILE_H = 60f;
+        private const float GROUP_TILE_SPACING = 10f;
+        private const float GROUP_TILE_START_Y = 200f;
+        private const int GROUP_TILE_FONT = 14;
+
+        // ---- Layout: settings list -----------------------------------------
+        private const int VISIBLE_ROWS = 10;
+        private const float ROW_HEIGHT = 30f;
+        private const float ROW_GAP = 2f;
+        private const int ROW_FONT = 18;
+
+        // ---- Layout: chrome (title, version, footer) -----------------------
+        private const float TITLE_HEIGHT = 50f;
+        private const int TITLE_FONT = 28;
+        private const float VERSION_HEIGHT = 20f;
+        private const int VERSION_FONT = 12;
+        private const float FOOTER_LABEL_HEIGHT = 35f;
+        private const float FOOTER_LABEL_Y = 40f;
+        private const int FOOTER_LABEL_FONT = 20;
+        private const float FOOTER_VALUE_HEIGHT = 25f;
+        private const float FOOTER_VALUE_Y = 10f;
+        private const int FOOTER_VALUE_FONT = 16;
+        private const float CONTENT_PAD_X = 20f;
+        private const float CONTENT_PAD_TOP = 80f;
+        private const float CONTENT_PAD_BOTTOM = 60f;
+        private const float TILE_LABEL_PAD = 6f;
+
+        // ---- Input ----------------------------------------------------------
+        private const float STICK_COOLDOWN = 0.18f;
+        private const float STICK_THRESHOLD = 0.5f;
+        private const float TRIGGER_REPEAT_INITIAL = 0.2f;
+        private const float TRIGGER_REPEAT_MIN = 0.05f;
+        private const float TRIGGER_ACCEL_TIME = 1f;
+
+        // ---- Section names (routing) ---------------------------------------
+        private const string AvatarSection = "AVATAR";
+        private const string PresetsSection = "PRESETS";
+
+        // ---- Colors (dark theme) -------------------------------------------
         private static readonly Color BG_COLOR = new Color(0.08f, 0.08f, 0.08f, 0.92f);
         private static readonly Color BTN_COLOR = new Color(0.18f, 0.18f, 0.18f);
         private static readonly Color BTN_SELECTED = new Color(0.20f, 0.35f, 0.55f);
@@ -54,16 +79,20 @@ namespace Plaga44.UI
         private static readonly Color TEXT_WHITE = Color.white;
         private static readonly Color TEXT_GREY = new Color(0.55f, 0.55f, 0.55f);
 
-        // =====================================================================
-        // Groups definition
-        // =====================================================================
-
+        // ---- Groups (TOP-level) --------------------------------------------
         private static readonly (string name, string[] sections)[] GROUPS = new[]
         {
             ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "AVATAR", "GAME STATE", "NAVMESH" }),
             ("VISUAL",   new[] { "SHADOWS", "SUN", "FOG", "AMBIENT", "SKYBOX", "BLOOM", "COLOR", "COMFORT", "LGG", "URP" }),
-            ("SYSTEM",   new[] { "PROFILE", "MISC", "AUDIO", "PHYSICS", "QUALITY", "CAMERA", "OCULUS", "TERRAIN", "PRESETS" }),
+            ("SYSTEM",   new[] { "PRESETS", "PROFILE", "MISC", "AUDIO", "PHYSICS", "QUALITY", "CAMERA", "OCULUS", "TERRAIN" }),
         };
+
+        // =====================================================================
+        // Singleton + public state
+        // =====================================================================
+
+        public static HamburgerMenu Instance { get; private set; }
+        public static bool MenuOpen { get; private set; }
 
         // =====================================================================
         // State
@@ -72,34 +101,30 @@ namespace Plaga44.UI
         private enum MenuLevel { Top, Group, Settings }
         private MenuLevel _level = MenuLevel.Top;
 
-        private string[] _allCategories; // flat from SettingsRegistry
+        private string[] _allCategories;
         private Canvas _canvas;
         private OVRCameraRig _rig;
 
         // Navigation
-        private int _topIndex;          // selected group in level 1
-        private int _groupIndex;        // selected section in level 2
-        private int _settingIndex;      // selected setting in level 3
-        private string[] _currentGroupSections; // sections in current group
+        private int _topIndex;
+        private int _groupIndex;
+        private int _settingIndex;
+        private string[] _currentGroupSections;
 
-        // UI roots (destroyed/rebuilt per level)
+        // UI content (re-created per level)
         private GameObject _contentRoot;
         private Image[] _tileBGs;
         private int _tileCount;
 
-        // Footer
         private Text _titleLabel;
         private Text _footerLabel;
         private Text _footerValue;
 
-        // Settings
         private List<SettingDef> _currentSettings;
         private Text[] _settingTexts;
-        private const int VISIBLE_ROWS = 10;
 
-        // Input cooldown
+        // Input timing
         private float _lastStickTime;
-        private const float STICK_COOLDOWN = 0.18f;
         private float _lastTriggerTime;
         private float _triggerHoldStart;
 
@@ -126,28 +151,11 @@ namespace Plaga44.UI
         {
             if (_rig == null) _rig = FindFirstObjectByType<OVRCameraRig>();
 
-            // Start = toggle menu
-            if (OVRInput.GetDown(OVRInput.Button.Start))
-                Toggle();
-
+            if (OVRInput.GetDown(OVRInput.Button.Start)) Toggle();
             if (!MenuOpen) return;
 
-            // A or X = enter / confirm
-            bool enter = OVRInput.GetDown(OVRInput.Button.One) || OVRInput.GetDown(OVRInput.Button.Three);
-            // B or Y = back
-            bool back = OVRInput.GetDown(OVRInput.Button.Two) || OVRInput.GetDown(OVRInput.Button.Four);
-
-            if (back)
-            {
-                GoBack();
-                return;
-            }
-
-            if (enter && _level != MenuLevel.Settings)
-            {
-                GoForward();
-                return;
-            }
+            if (PressedBack()) { GoBack(); return; }
+            if (PressedEnter() && _level != MenuLevel.Settings) { GoForward(); return; }
 
             HandleNavigation();
         }
@@ -156,6 +164,15 @@ namespace Plaga44.UI
         {
             if (Instance == this) { MenuOpen = false; Instance = null; }
         }
+
+        private void OnApplicationQuit() => SettingsRegistry.FlushPlayerPrefs();
+        private void OnApplicationPause(bool paused) { if (paused) SettingsRegistry.FlushPlayerPrefs(); }
+
+        private static bool PressedEnter()
+            => OVRInput.GetDown(OVRInput.Button.One) || OVRInput.GetDown(OVRInput.Button.Three);
+
+        private static bool PressedBack()
+            => OVRInput.GetDown(OVRInput.Button.Two) || OVRInput.GetDown(OVRInput.Button.Four);
 
         // =====================================================================
         // Open / Close
@@ -181,8 +198,9 @@ namespace Plaga44.UI
             if (!MenuOpen) return;
             _canvas.gameObject.SetActive(false);
             MenuOpen = false;
-            if (GameState.Current == GamePhase.Paused)
-                GameState.Resume();
+            if (GameState.Current == GamePhase.Paused) GameState.Resume();
+            // Flush biezacych ustawien na dysk -- slidery juz zapisaly PlayerPrefs.SetFloat, brakuje Save().
+            SettingsRegistry.FlushPlayerPrefs();
             Debug.Log($"{LOG} CLOSE");
         }
 
@@ -192,86 +210,72 @@ namespace Plaga44.UI
 
         private void GoForward()
         {
-            if (_level == MenuLevel.Top)
+            switch (_level)
             {
-                // Enter group -> show sub-tiles
-                var group = GROUPS[_topIndex];
-                _currentGroupSections = FilterExisting(group.sections);
-                if (_currentGroupSections.Length == 0) return;
-                _groupIndex = 0;
-                _level = MenuLevel.Group;
-                ShowLevel();
-                Debug.Log($"{LOG} -> Group: {group.name}");
+                case MenuLevel.Top: EnterGroup(); break;
+                case MenuLevel.Group: EnterSettings(); break;
             }
-            else if (_level == MenuLevel.Group)
+        }
+
+        private void EnterGroup()
+        {
+            var group = GROUPS[_topIndex];
+            _currentGroupSections = FilterExisting(group.sections);
+            if (_currentGroupSections.Length == 0) return;
+            _groupIndex = 0;
+            _level = MenuLevel.Group;
+            ShowLevel();
+            Debug.Log($"{LOG} -> Group: {group.name}");
+        }
+
+        private void EnterSettings()
+        {
+            string section = _currentGroupSections[_groupIndex];
+            _currentSettings = SettingsRegistry.GetSettings(section);
+            if (_currentSettings.Count == 0)
             {
-                // Enter section -> show settings
-                string section = _currentGroupSections[_groupIndex];
-                _currentSettings = SettingsRegistry.GetSettings(section);
-                if (_currentSettings.Count == 0)
-                {
-                    Debug.Log($"{LOG} {section}: no runtime settings");
-                    return;
-                }
-                _settingIndex = 0;
-                _level = MenuLevel.Settings;
-                ShowLevel();
-                Debug.Log($"{LOG} -> Settings: {section} ({_currentSettings.Count})");
+                Debug.Log($"{LOG} {section}: no runtime settings");
+                return;
             }
+            _settingIndex = 0;
+            _level = MenuLevel.Settings;
+            ShowLevel();
+            Debug.Log($"{LOG} -> Settings: {section} ({_currentSettings.Count})");
         }
 
         private void GoBack()
         {
-            if (_level == MenuLevel.Settings)
+            switch (_level)
             {
-                _level = MenuLevel.Group;
-                ShowLevel();
-                Debug.Log($"{LOG} <- back to group");
-            }
-            else if (_level == MenuLevel.Group)
-            {
-                _level = MenuLevel.Top;
-                ShowLevel();
-                Debug.Log($"{LOG} <- back to top");
-            }
-            else
-            {
-                Close();
+                case MenuLevel.Settings: _level = MenuLevel.Group; ShowLevel(); Debug.Log($"{LOG} <- back to group"); break;
+                case MenuLevel.Group: _level = MenuLevel.Top; ShowLevel(); Debug.Log($"{LOG} <- back to top"); break;
+                default: Close(); break;
             }
         }
 
         private void HandleNavigation()
         {
-            Vector2 stickL = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
-            Vector2 stickR = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch);
-            Vector2 stick = stickL.sqrMagnitude > stickR.sqrMagnitude ? stickL : stickR;
-
+            Vector2 stick = GetStrongerThumbstick();
             if (Time.unscaledTime - _lastStickTime < STICK_COOLDOWN) return;
 
-            if (_level == MenuLevel.Settings)
-            {
-                HandleSettingsInput(stick);
-            }
-            else
-            {
-                HandleTileInput(stick);
-            }
+            if (_level == MenuLevel.Settings) HandleSettingsInput(stick);
+            else HandleTileInput(stick);
+        }
+
+        private static Vector2 GetStrongerThumbstick()
+        {
+            var l = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
+            var r = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch);
+            return l.sqrMagnitude > r.sqrMagnitude ? l : r;
         }
 
         private void HandleTileInput(Vector2 stick)
         {
-            int cols = (_level == MenuLevel.Top) ? GROUPS.Length : 4;
+            int cols = (_level == MenuLevel.Top) ? GROUPS.Length : GROUP_COLS;
             int count = (_level == MenuLevel.Top) ? GROUPS.Length : _currentGroupSections.Length;
             int idx = (_level == MenuLevel.Top) ? _topIndex : _groupIndex;
 
-            int newIdx = idx;
-            if (stick.x > 0.5f) newIdx = idx + 1;
-            else if (stick.x < -0.5f) newIdx = idx - 1;
-            else if (stick.y > 0.5f) newIdx = idx - cols;
-            else if (stick.y < -0.5f) newIdx = idx + cols;
-            else return;
-
-            if (newIdx < 0 || newIdx >= count) return;
+            if (!TryMoveIndex(stick, idx, cols, count, out int newIdx)) return;
             _lastStickTime = Time.unscaledTime;
 
             if (_level == MenuLevel.Top) _topIndex = newIdx;
@@ -280,47 +284,61 @@ namespace Plaga44.UI
             UpdateTileSelection();
         }
 
+        private static bool TryMoveIndex(Vector2 stick, int current, int cols, int count, out int next)
+        {
+            next = current;
+            if (stick.x > STICK_THRESHOLD) next = current + 1;
+            else if (stick.x < -STICK_THRESHOLD) next = current - 1;
+            else if (stick.y > STICK_THRESHOLD) next = current - cols;
+            else if (stick.y < -STICK_THRESHOLD) next = current + cols;
+            else return false;
+            return next >= 0 && next < count;
+        }
+
         private void HandleSettingsInput(Vector2 stick)
         {
-            // Up/down = select setting
-            if (stick.y > 0.5f && _settingIndex > 0)
-            {
-                _settingIndex--;
-                _lastStickTime = Time.unscaledTime;
-                UpdateSettingsDisplay();
-            }
-            else if (stick.y < -0.5f && _settingIndex < _currentSettings.Count - 1)
-            {
-                _settingIndex++;
-                _lastStickTime = Time.unscaledTime;
-                UpdateSettingsDisplay();
-            }
+            UpdateSettingsSelection(stick);
+            UpdateSettingsValueByStick(stick);
+            UpdateSettingsValueByTriggers();
+        }
 
-            // Left/right = adjust value
-            if (stick.x > 0.5f) { AdjustSetting(1); _lastStickTime = Time.unscaledTime; }
-            else if (stick.x < -0.5f) { AdjustSetting(-1); _lastStickTime = Time.unscaledTime; }
+        private void UpdateSettingsSelection(Vector2 stick)
+        {
+            if (stick.y > STICK_THRESHOLD && _settingIndex > 0)
+            {
+                _settingIndex--; _lastStickTime = Time.unscaledTime; UpdateSettingsDisplay();
+            }
+            else if (stick.y < -STICK_THRESHOLD && _settingIndex < _currentSettings.Count - 1)
+            {
+                _settingIndex++; _lastStickTime = Time.unscaledTime; UpdateSettingsDisplay();
+            }
+        }
 
-            // Triggers: hold to repeat, accelerates over time
+        private void UpdateSettingsValueByStick(Vector2 stick)
+        {
+            if (stick.x > STICK_THRESHOLD) { AdjustSetting(1); _lastStickTime = Time.unscaledTime; }
+            else if (stick.x < -STICK_THRESHOLD) { AdjustSetting(-1); _lastStickTime = Time.unscaledTime; }
+        }
+
+        private void UpdateSettingsValueByTriggers()
+        {
             bool trigL = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch);
             bool trigR = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
 
-            if (trigL || trigR)
-            {
-                // Accelerate: start at 0.2s delay, speed up to 0.05s after 1s of holding
-                float holdTime = Time.unscaledTime - _triggerHoldStart;
-                float repeatRate = Mathf.Lerp(0.2f, 0.05f, Mathf.Clamp01(holdTime / 1f));
-
-                if (Time.unscaledTime - _lastTriggerTime > repeatRate)
-                {
-                    if (trigL) AdjustSetting(-1);
-                    if (trigR) AdjustSetting(1);
-                    _lastTriggerTime = Time.unscaledTime;
-                }
-            }
-            else
+            if (!trigL && !trigR)
             {
                 _triggerHoldStart = Time.unscaledTime;
+                return;
             }
+
+            float holdTime = Time.unscaledTime - _triggerHoldStart;
+            float repeatRate = Mathf.Lerp(TRIGGER_REPEAT_INITIAL, TRIGGER_REPEAT_MIN,
+                Mathf.Clamp01(holdTime / TRIGGER_ACCEL_TIME));
+            if (Time.unscaledTime - _lastTriggerTime <= repeatRate) return;
+
+            if (trigL) AdjustSetting(-1);
+            if (trigR) AdjustSetting(1);
+            _lastTriggerTime = Time.unscaledTime;
         }
 
         private void AdjustSetting(int dir)
@@ -333,10 +351,21 @@ namespace Plaga44.UI
         }
 
         // =====================================================================
-        // Show level -- rebuilds content area
+        // Level rendering
         // =====================================================================
 
         private void ShowLevel()
+        {
+            RebuildContentRoot();
+            switch (_level)
+            {
+                case MenuLevel.Top: ShowTopLevel(); break;
+                case MenuLevel.Group: ShowGroupLevel(); break;
+                case MenuLevel.Settings: ShowSettingsLevel(); break;
+            }
+        }
+
+        private void RebuildContentRoot()
         {
             if (_contentRoot != null) Destroy(_contentRoot);
             _contentRoot = new GameObject("Content");
@@ -344,33 +373,35 @@ namespace Plaga44.UI
             var rt = _contentRoot.AddComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
-            rt.offsetMin = new Vector2(20, 80);
-            rt.offsetMax = new Vector2(-20, -60);
+            rt.offsetMin = new Vector2(CONTENT_PAD_X, CONTENT_PAD_TOP);
+            rt.offsetMax = new Vector2(-CONTENT_PAD_X, -CONTENT_PAD_BOTTOM);
+        }
 
-            switch (_level)
-            {
-                case MenuLevel.Top:
-                    BuildTopTiles();
-                    _titleLabel.text = "SETTINGS";
-                    _footerLabel.text = "";
-                    _footerValue.text = "A/X = enter    B/Y = close";
-                    break;
-                case MenuLevel.Group:
-                    BuildGroupTiles();
-                    _titleLabel.text = GROUPS[_topIndex].name;
-                    _footerLabel.text = "";
-                    _footerValue.text = "A/X = enter    B/Y = back";
-                    break;
-                case MenuLevel.Settings:
-                    BuildSettingsUI();
-                    _titleLabel.text = _currentGroupSections[_groupIndex];
-                    UpdateSettingsDisplay();
-                    break;
-            }
+        private void ShowTopLevel()
+        {
+            BuildTopTiles();
+            _titleLabel.text = "SETTINGS";
+            _footerLabel.text = "";
+            _footerValue.text = "A/X = enter    B/Y = close";
+        }
+
+        private void ShowGroupLevel()
+        {
+            BuildGroupTiles();
+            _titleLabel.text = GROUPS[_topIndex].name;
+            _footerLabel.text = "";
+            _footerValue.text = "A/X = enter    B/Y = back";
+        }
+
+        private void ShowSettingsLevel()
+        {
+            BuildSettingsUI();
+            _titleLabel.text = _currentGroupSections[_groupIndex];
+            UpdateSettingsDisplay();
         }
 
         // =====================================================================
-        // Level 1: Top tiles (GAMEPLAY, VISUAL, SYSTEM)
+        // Top tiles
         // =====================================================================
 
         private void BuildTopTiles()
@@ -378,24 +409,19 @@ namespace Plaga44.UI
             _tileCount = GROUPS.Length;
             _tileBGs = new Image[_tileCount];
 
-            float tileW = 240f;
-            float tileH = 120f;
-            float spacing = 20f;
-            float totalW = _tileCount * tileW + (_tileCount - 1) * spacing;
-            float startX = -totalW / 2f + tileW / 2f;
+            float totalW = _tileCount * TOP_TILE_W + (_tileCount - 1) * TOP_TILE_SPACING;
+            float startX = -totalW / 2f + TOP_TILE_W / 2f;
 
             for (int i = 0; i < _tileCount; i++)
             {
-                float x = startX + i * (tileW + spacing);
-                var tile = CreateTile(_contentRoot.transform, GROUPS[i].name, x, 100f, tileW, tileH, 20);
-                _tileBGs[i] = tile;
+                float x = startX + i * (TOP_TILE_W + TOP_TILE_SPACING);
+                _tileBGs[i] = CreateTile(_contentRoot.transform, GROUPS[i].name, x, TOP_TILE_Y, TOP_TILE_W, TOP_TILE_H, TOP_TILE_FONT);
             }
-
             UpdateTileSelection();
         }
 
         // =====================================================================
-        // Level 2: Group tiles (e.g. LOCOMOTION, SMOOTH TURN, etc.)
+        // Group tiles
         // =====================================================================
 
         private void BuildGroupTiles()
@@ -403,24 +429,17 @@ namespace Plaga44.UI
             _tileCount = _currentGroupSections.Length;
             _tileBGs = new Image[_tileCount];
 
-            int cols = 4;
-            float tileW = 180f;
-            float tileH = 60f;
-            float spacing = 10f;
-            float gridW = cols * tileW + (cols - 1) * spacing;
-            float startX = -gridW / 2f + tileW / 2f;
-            float startY = 200f;
+            float gridW = GROUP_COLS * GROUP_TILE_W + (GROUP_COLS - 1) * GROUP_TILE_SPACING;
+            float startX = -gridW / 2f + GROUP_TILE_W / 2f;
 
             for (int i = 0; i < _tileCount; i++)
             {
-                int col = i % cols;
-                int row = i / cols;
-                float x = startX + col * (tileW + spacing);
-                float y = startY - row * (tileH + spacing);
-                var tile = CreateTile(_contentRoot.transform, _currentGroupSections[i], x, y, tileW, tileH, 14);
-                _tileBGs[i] = tile;
+                int col = i % GROUP_COLS;
+                int row = i / GROUP_COLS;
+                float x = startX + col * (GROUP_TILE_W + GROUP_TILE_SPACING);
+                float y = GROUP_TILE_START_Y - row * (GROUP_TILE_H + GROUP_TILE_SPACING);
+                _tileBGs[i] = CreateTile(_contentRoot.transform, _currentGroupSections[i], x, y, GROUP_TILE_W, GROUP_TILE_H, GROUP_TILE_FONT);
             }
-
             UpdateTileSelection();
         }
 
@@ -436,22 +455,27 @@ namespace Plaga44.UI
             var img = go.AddComponent<Image>();
             img.color = (_level == MenuLevel.Top) ? TOP_COLOR : BTN_COLOR;
 
-            var labelGO = new GameObject("Label");
-            labelGO.transform.SetParent(go.transform, false);
-            var labelRT = labelGO.AddComponent<RectTransform>();
-            labelRT.anchorMin = Vector2.zero;
-            labelRT.anchorMax = Vector2.one;
-            labelRT.offsetMin = new Vector2(6, 0);
-            labelRT.offsetMax = new Vector2(-6, 0);
-            var txt = labelGO.AddComponent<Text>();
+            CreateTileLabel(go.transform, label, fontSize);
+            return img;
+        }
+
+        private static void CreateTileLabel(Transform parent, string label, int fontSize)
+        {
+            var go = new GameObject("Label");
+            go.transform.SetParent(parent, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(TILE_LABEL_PAD, 0);
+            rt.offsetMax = new Vector2(-TILE_LABEL_PAD, 0);
+
+            var txt = go.AddComponent<Text>();
             txt.text = label;
-            txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            txt.font = LegacyFont();
             txt.fontSize = fontSize;
             txt.color = TEXT_WHITE;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.horizontalOverflow = HorizontalWrapMode.Wrap;
-
-            return img;
         }
 
         private void UpdateTileSelection()
@@ -468,31 +492,33 @@ namespace Plaga44.UI
         }
 
         // =====================================================================
-        // Level 3: Settings list
+        // Settings list
         // =====================================================================
 
         private void BuildSettingsUI()
         {
             _settingTexts = new Text[VISIBLE_ROWS];
-            float rowH = 30f;
             for (int i = 0; i < VISIBLE_ROWS; i++)
-            {
-                var rowGO = new GameObject($"Row_{i}");
-                rowGO.transform.SetParent(_contentRoot.transform, false);
-                var rowRT = rowGO.AddComponent<RectTransform>();
-                rowRT.anchorMin = new Vector2(0, 1);
-                rowRT.anchorMax = new Vector2(1, 1);
-                rowRT.pivot = new Vector2(0.5f, 1);
-                rowRT.sizeDelta = new Vector2(0, rowH);
-                rowRT.anchoredPosition = new Vector2(0, -i * (rowH + 2));
+                _settingTexts[i] = CreateSettingRow(i);
+        }
 
-                var txt = rowGO.AddComponent<Text>();
-                txt.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                txt.fontSize = 18;
-                txt.color = TEXT_WHITE;
-                txt.alignment = TextAnchor.MiddleLeft;
-                _settingTexts[i] = txt;
-            }
+        private Text CreateSettingRow(int rowIdx)
+        {
+            var go = new GameObject($"Row_{rowIdx}");
+            go.transform.SetParent(_contentRoot.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.sizeDelta = new Vector2(0, ROW_HEIGHT);
+            rt.anchoredPosition = new Vector2(0, -rowIdx * (ROW_HEIGHT + ROW_GAP));
+
+            var txt = go.AddComponent<Text>();
+            txt.font = LegacyFont();
+            txt.fontSize = ROW_FONT;
+            txt.color = TEXT_WHITE;
+            txt.alignment = TextAnchor.MiddleLeft;
+            return txt;
         }
 
         private void UpdateSettingsDisplay()
@@ -500,11 +526,15 @@ namespace Plaga44.UI
             if (_settingTexts == null || _currentSettings == null) return;
 
             int scrollOffset = Mathf.Max(0, _settingIndex - VISIBLE_ROWS + 3);
-
             string section = _currentGroupSections[_groupIndex];
-            bool isAvatarSection = (section == "AVATAR");
-            var pa = isAvatarSection ? Plaga44.PlayerAvatar.FindCurrent() : null;
+            var ctx = new RowContext(section);
 
+            RenderRows(scrollOffset, ctx);
+            RenderFooterForSelection(ctx);
+        }
+
+        private void RenderRows(int scrollOffset, RowContext ctx)
+        {
             for (int i = 0; i < VISIBLE_ROWS; i++)
             {
                 int idx = scrollOffset + i;
@@ -512,37 +542,92 @@ namespace Plaga44.UI
 
                 var s = _currentSettings[idx];
                 bool sel = (idx == _settingIndex);
-
-                // Specjalny rendering dla AVATAR > Mode -- zamiast liczby pokaz nazwe avatara
-                bool isAvatarMode = isAvatarSection && s.name == "Mode" && pa != null;
-                bool brokenHere = false;
-                string valueStr;
-                if (isAvatarMode)
-                {
-                    valueStr = pa.CurrentLabel; // "None" / "PINEA_YNG5" / "AVATAR_ERROR"
-                    brokenHere = pa.IsCurrentBroken;
-                }
-                else
-                {
-                    valueStr = s.get().ToString(s.format);
-                }
-
-                _settingTexts[i].text = $"{(sel ? "> " : "  ")}{s.name}: {valueStr}";
-                _settingTexts[i].color = brokenHere ? Color.red : (sel ? TEXT_WHITE : TEXT_GREY);
+                (string line, Color color) = FormatSettingRow(s, sel, ctx);
+                _settingTexts[i].text = line;
+                _settingTexts[i].color = color;
             }
+        }
 
+        private void RenderFooterForSelection(RowContext ctx)
+        {
             var cur = _currentSettings[_settingIndex];
-            bool curIsAvatarMode = isAvatarSection && cur.name == "Mode" && pa != null;
-            bool curBroken = curIsAvatarMode && pa.IsCurrentBroken;
+            bool broken = ctx.IsBrokenAvatarMode(cur);
 
             _footerLabel.text = cur.desc ?? "";
-            _footerLabel.color = curBroken ? Color.red : TEXT_WHITE;
+            _footerLabel.color = broken ? Color.red : TEXT_WHITE;
 
-            string footerValueStr = curIsAvatarMode
-                ? $"<  {pa.CurrentLabel}  >    [{cur.min}..{cur.max}]   B/Y = back"
-                : $"<  {cur.get().ToString(cur.format)}  >    [{cur.min}..{cur.max}]   B/Y = back";
-            _footerValue.text = footerValueStr;
-            _footerValue.color = curBroken ? Color.red : TEXT_GREY;
+            _footerValue.text = BuildFooterValue(cur, ctx);
+            _footerValue.color = broken ? Color.red : TEXT_GREY;
+        }
+
+        private static (string line, Color color) FormatSettingRow(SettingDef s, bool selected, RowContext ctx)
+        {
+            string prefix = selected ? "> " : "  ";
+            Color color = selected ? TEXT_WHITE : TEXT_GREY;
+
+            if (ctx.IsAvatarMode(s))
+            {
+                color = ctx.Player.IsCurrentBroken ? Color.red : color;
+                return ($"{prefix}{s.name}: {ctx.Player.CurrentLabel}", color);
+            }
+            if (ctx.IsPresets)
+                return ($"{prefix}{RenderPresetLine(s.name)}", color);
+
+            return ($"{prefix}{s.name}: {s.get().ToString(s.format)}", color);
+        }
+
+        private static string BuildFooterValue(SettingDef cur, RowContext ctx)
+        {
+            if (ctx.IsAvatarMode(cur))
+                return $"<  {ctx.Player.CurrentLabel}  >    [{cur.min}..{cur.max}]   B/Y = back";
+            if (ctx.IsPresets)
+                return $"<  {RenderPresetLine(cur.name)}  >    A/X=execute   B/Y=back";
+            return $"<  {cur.get().ToString(cur.format)}  >    [{cur.min}..{cur.max}]   B/Y = back";
+        }
+
+        /// <summary>
+        /// "SAVE 1:HI-END" -> "SAVE 1:HI-END [14.04 15:30]" lub "[empty]" jesli slot pusty.
+        /// "RESET ALL" / "LOG ALL" -> bez modyfikacji (akcja, nie slot).
+        /// </summary>
+        private static string RenderPresetLine(string settingName)
+        {
+            if (!TryParseSlotFromPresetName(settingName, out int slot)) return settingName;
+            string ts = SettingsRegistry.GetPresetTimestamp(slot);
+            return $"{settingName} {(ts != null ? $"[{ts}]" : "[empty]")}";
+        }
+
+        private static bool TryParseSlotFromPresetName(string settingName, out int slot)
+        {
+            slot = 0;
+            if (settingName == null) return false;
+            bool isSaveOrLoad = settingName.StartsWith("SAVE ") || settingName.StartsWith("LOAD ");
+            if (!isSaveOrLoad || settingName.Length < 7) return false;
+
+            int space = settingName.IndexOf(' ');
+            int colon = settingName.IndexOf(':');
+            if (space <= 0 || colon <= space) return false;
+
+            return int.TryParse(settingName.Substring(space + 1, colon - space - 1), out slot);
+        }
+
+        /// <summary>Kontekst per-render -- raz wyliczony section/avatar ptr zamiast 3x field lookupy.</summary>
+        private readonly struct RowContext
+        {
+            public readonly string Section;
+            public readonly bool IsAvatarSection;
+            public readonly bool IsPresets;
+            public readonly Plaga44.PlayerAvatar Player;
+
+            public RowContext(string section)
+            {
+                Section = section;
+                IsAvatarSection = section == AvatarSection;
+                IsPresets = section == PresetsSection;
+                Player = IsAvatarSection ? Plaga44.PlayerAvatar.FindCurrent() : null;
+            }
+
+            public bool IsAvatarMode(SettingDef s) => IsAvatarSection && s.name == "Mode" && Player != null;
+            public bool IsBrokenAvatarMode(SettingDef s) => IsAvatarMode(s) && Player.IsCurrentBroken;
         }
 
         // =====================================================================
@@ -558,33 +643,43 @@ namespace Plaga44.UI
             return result.ToArray();
         }
 
-        // =====================================================================
-        // Positioning
-        // =====================================================================
-
         private void PlaceInFrontOfPlayer()
         {
-            if (_rig != null)
-            {
-                var head = _rig.centerEyeAnchor;
-                Vector3 fwd = head.forward; fwd.y = 0f;
-                if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
-                fwd.Normalize();
-                _canvas.transform.position = head.position + fwd * MENU_DISTANCE + Vector3.down * 0.1f;
-                _canvas.transform.rotation = Quaternion.LookRotation(fwd, Vector3.up);
-            }
-            else
-            {
-                _canvas.transform.position = new Vector3(0f, 1.5f, MENU_DISTANCE);
-                _canvas.transform.rotation = Quaternion.LookRotation(Vector3.back, Vector3.up);
-            }
+            if (_rig != null) PlaceInFrontOfRig(_rig.centerEyeAnchor);
+            else PlaceFallback();
+        }
+
+        private void PlaceInFrontOfRig(Transform head)
+        {
+            Vector3 fwd = head.forward; fwd.y = 0f;
+            if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
+            fwd.Normalize();
+            _canvas.transform.position = head.position + fwd * MENU_DISTANCE + Vector3.down * CANVAS_DROP;
+            _canvas.transform.rotation = Quaternion.LookRotation(fwd, Vector3.up);
+        }
+
+        private void PlaceFallback()
+        {
+            _canvas.transform.position = new Vector3(0f, 1.5f, MENU_DISTANCE);
+            _canvas.transform.rotation = Quaternion.LookRotation(Vector3.back, Vector3.up);
         }
 
         // =====================================================================
-        // Build canvas (once)
+        // Canvas build (once)
         // =====================================================================
 
         private void BuildCanvas()
+        {
+            var root = CreateCanvasRoot();
+            CreateBackground(root);
+            _titleLabel = CreateTitleLabel(root);
+            CreateVersionLabel(root);
+            _footerLabel = CreateFooterLabel(root);
+            _footerValue = CreateFooterValue(root);
+            CreateNotifier(root);
+        }
+
+        private GameObject CreateCanvasRoot()
         {
             var go = new GameObject("HamburgerMenu_Canvas");
             go.transform.SetParent(transform);
@@ -595,83 +690,113 @@ namespace Plaga44.UI
             rt.sizeDelta = new Vector2(CANVAS_W, CANVAS_H);
             rt.localScale = Vector3.one * CANVAS_SCALE;
             go.AddComponent<GraphicRaycaster>();
-
-            // Background
-            var bgGO = new GameObject("BG");
-            bgGO.transform.SetParent(go.transform, false);
-            var bgRT = bgGO.AddComponent<RectTransform>();
-            bgRT.anchorMin = Vector2.zero; bgRT.anchorMax = Vector2.one;
-            bgRT.offsetMin = bgRT.offsetMax = Vector2.zero;
-            bgGO.AddComponent<Image>().color = BG_COLOR;
-
-            // Title (top bar)
-            var titleGO = new GameObject("Title");
-            titleGO.transform.SetParent(go.transform, false);
-            var titleRT = titleGO.AddComponent<RectTransform>();
-            titleRT.anchorMin = new Vector2(0, 1); titleRT.anchorMax = new Vector2(1, 1);
-            titleRT.pivot = new Vector2(0.5f, 1); titleRT.sizeDelta = new Vector2(0, 50);
-            _titleLabel = titleGO.AddComponent<Text>();
-            _titleLabel.text = "SETTINGS";
-            _titleLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _titleLabel.fontSize = 28;
-            _titleLabel.color = ACCENT;
-            _titleLabel.alignment = TextAnchor.MiddleCenter;
-            _titleLabel.fontStyle = FontStyle.Bold;
-
-            // Version info (pod tytulem)
-            var verGO = new GameObject("VersionInfo");
-            verGO.transform.SetParent(go.transform, false);
-            var verRT = verGO.AddComponent<RectTransform>();
-            verRT.anchorMin = new Vector2(0, 1); verRT.anchorMax = new Vector2(1, 1);
-            verRT.pivot = new Vector2(0.5f, 1); verRT.sizeDelta = new Vector2(0, 20);
-            verRT.anchoredPosition = new Vector2(0, -50);
-            var verText = verGO.AddComponent<Text>();
-            verText.text = GetVersionString();
-            verText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            verText.fontSize = 12;
-            verText.color = TEXT_GREY;
-            verText.alignment = TextAnchor.MiddleCenter;
-
-            // Footer label
-            var flGO = new GameObject("FooterLabel");
-            flGO.transform.SetParent(go.transform, false);
-            var flRT = flGO.AddComponent<RectTransform>();
-            flRT.anchorMin = new Vector2(0, 0); flRT.anchorMax = new Vector2(1, 0);
-            flRT.pivot = new Vector2(0.5f, 0); flRT.sizeDelta = new Vector2(0, 35);
-            flRT.anchoredPosition = new Vector2(0, 40);
-            _footerLabel = flGO.AddComponent<Text>();
-            _footerLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _footerLabel.fontSize = 20;
-            _footerLabel.color = TEXT_WHITE;
-            _footerLabel.alignment = TextAnchor.MiddleCenter;
-
-            // Footer value
-            var fvGO = new GameObject("FooterValue");
-            fvGO.transform.SetParent(go.transform, false);
-            var fvRT = fvGO.AddComponent<RectTransform>();
-            fvRT.anchorMin = new Vector2(0, 0); fvRT.anchorMax = new Vector2(1, 0);
-            fvRT.pivot = new Vector2(0.5f, 0); fvRT.sizeDelta = new Vector2(0, 25);
-            fvRT.anchoredPosition = new Vector2(0, 10);
-            _footerValue = fvGO.AddComponent<Text>();
-            _footerValue.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-            _footerValue.fontSize = 16;
-            _footerValue.color = TEXT_GREY;
-            _footerValue.alignment = TextAnchor.MiddleCenter;
+            return go;
         }
 
+        private static void CreateBackground(GameObject parent)
+        {
+            var go = new GameObject("BG");
+            go.transform.SetParent(parent.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero; rt.anchorMax = Vector2.one;
+            rt.offsetMin = rt.offsetMax = Vector2.zero;
+            go.AddComponent<Image>().color = BG_COLOR;
+        }
+
+        private static Text CreateTitleLabel(GameObject parent)
+        {
+            var rt = CreateAnchoredTopRow(parent, "Title", TITLE_HEIGHT, 0);
+            var txt = rt.gameObject.AddComponent<Text>();
+            txt.text = "SETTINGS";
+            txt.font = LegacyFont();
+            txt.fontSize = TITLE_FONT;
+            txt.color = ACCENT;
+            txt.alignment = TextAnchor.MiddleCenter;
+            txt.fontStyle = FontStyle.Bold;
+            return txt;
+        }
+
+        private static void CreateVersionLabel(GameObject parent)
+        {
+            var rt = CreateAnchoredTopRow(parent, "VersionInfo", VERSION_HEIGHT, -TITLE_HEIGHT);
+            var txt = rt.gameObject.AddComponent<Text>();
+            txt.text = GetVersionString();
+            txt.font = LegacyFont();
+            txt.fontSize = VERSION_FONT;
+            txt.color = TEXT_GREY;
+            txt.alignment = TextAnchor.MiddleCenter;
+        }
+
+        private static Text CreateFooterLabel(GameObject parent)
+        {
+            var rt = CreateAnchoredBottomRow(parent, "FooterLabel", FOOTER_LABEL_HEIGHT, FOOTER_LABEL_Y);
+            var txt = rt.gameObject.AddComponent<Text>();
+            txt.font = LegacyFont();
+            txt.fontSize = FOOTER_LABEL_FONT;
+            txt.color = TEXT_WHITE;
+            txt.alignment = TextAnchor.MiddleCenter;
+            return txt;
+        }
+
+        private static Text CreateFooterValue(GameObject parent)
+        {
+            var rt = CreateAnchoredBottomRow(parent, "FooterValue", FOOTER_VALUE_HEIGHT, FOOTER_VALUE_Y);
+            var txt = rt.gameObject.AddComponent<Text>();
+            txt.font = LegacyFont();
+            txt.fontSize = FOOTER_VALUE_FONT;
+            txt.color = TEXT_GREY;
+            txt.alignment = TextAnchor.MiddleCenter;
+            return txt;
+        }
+
+        private static void CreateNotifier(GameObject parent)
+        {
+            var go = new GameObject("Notifier");
+            go.transform.SetParent(parent.transform, false);
+            go.AddComponent<MenuNotifier>();
+        }
+
+        private static RectTransform CreateAnchoredTopRow(GameObject parent, string name, float height, float offsetY)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(0.5f, 1);
+            rt.sizeDelta = new Vector2(0, height);
+            rt.anchoredPosition = new Vector2(0, offsetY);
+            return rt;
+        }
+
+        private static RectTransform CreateAnchoredBottomRow(GameObject parent, string name, float height, float offsetY)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent.transform, false);
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = new Vector2(0, 0);
+            rt.anchorMax = new Vector2(1, 0);
+            rt.pivot = new Vector2(0.5f, 0);
+            rt.sizeDelta = new Vector2(0, height);
+            rt.anchoredPosition = new Vector2(0, offsetY);
+            return rt;
+        }
+
+        private static Font LegacyFont() => Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
         // =====================================================================
-        // Version info
+        // Version info (Resources/BuildInfo.txt: line0=branch line1=time line2=hash)
         // =====================================================================
 
-        private string GetVersionString()
+        private static string GetVersionString()
         {
             var asset = Resources.Load<TextAsset>("BuildInfo");
             if (asset != null && !string.IsNullOrWhiteSpace(asset.text))
             {
                 string[] lines = asset.text.Split('\n');
                 string branch = lines.Length > 0 ? lines[0].Trim() : "?";
-                string time   = lines.Length > 1 ? lines[1].Trim() : "?";
-                string hash   = lines.Length > 2 ? lines[2].Trim() : "?";
+                string time = lines.Length > 1 ? lines[1].Trim() : "?";
+                string hash = lines.Length > 2 ? lines[2].Trim() : "?";
                 return $"{branch} | {time} | {hash}";
             }
             return $"editor | {System.DateTime.Now:yyyy-MM-dd HH:mm} | local";

@@ -67,6 +67,13 @@ namespace Plaga44.Locomotion
         [Tooltip("Transform kamery VR (CenterEyeAnchor). Jesli puste -- szuka automatycznie.")]
         [SerializeField] private Transform _headTransform;
 
+        [Header("Latanie (jetpack)")]
+        [Tooltip("Wznoszenie w m/s gdy prawy thumbstick jest wcisniety (click down). Rozgladanie dziala normalnie.")]
+        public float flySpeed = 3f;
+
+        [Tooltip("Wlacz/wylacz jetpack mode. Mozna wylaczyc dla konkretnych misji.")]
+        public bool jetpackEnabled = true;
+
         // =====================================================================
         // Stan runtime (prywatny)
         // =====================================================================
@@ -84,13 +91,11 @@ namespace Plaga44.Locomotion
         /// </summary>
         private float _verticalVelocity;
 
-        /// <summary>
-        /// Stala mala wartosc ciagniaca gracza w dol gdy stoi na ziemi.
-        /// Dzieki temu CharacterController.isGrounded zwraca true konsekwentnie,
-        /// nawet na lekko nierównym terenie. Bez tego gracz moze "drgac" miedzy
-        /// isGrounded = true i false na pochylych powierzchniach.
-        /// </summary>
+        // Stala ciagniaca gracza w dol gdy stoi na ziemi -- zeby CC.isGrounded
+        // konsekwentnie zwracal true nawet na pochylych powierzchniach.
         private const float GroundedPullDown = -2f;
+        private const float InputDeadZoneSqr = 0.01f;
+        private const float GroundedLogThrottleSec = 0.5f;
 
         // =====================================================================
         // Property publiczne (read-only z zewnatrz)
@@ -160,32 +165,39 @@ namespace Plaga44.Locomotion
             if (!GameState.CanMove) return;
             if (_headTransform == null) return;
 
-            // 1. Odczytaj input z lewego thumbsticka (lub klawiatury)
             Vector2 moveInput = GetMoveInput();
-
-            // 2. Przelicz input na ruch 3D relatywny do kierunku glowy
             Vector3 horizontalMove = CalculateHeadRelativeMovement(moveInput);
-
-            // 3. Zastosuj grawitacje (lub utrzymaj gracza na ziemi)
-            ApplyGravity();
-
-            // 4. Zloz ruch poziomy i pionowy w jeden wektor i wykonaj Move()
-            // CharacterController.Move() automatycznie obsluguje kolizje.
-            Vector3 finalMove = horizontalMove + (Vector3.up * _verticalVelocity * Time.deltaTime);
-            _cc.Move(finalMove);
+            UpdateVerticalVelocity();
+            ApplyMove(horizontalMove);
 
             NormalisedSpeed = Mathf.Clamp01(moveInput.magnitude);
+            LogGroundedChangesThrottled();
+        }
 
-            // Log zmian grounded (throttled: max co 0.5s zeby uniknac spam przy drganiach CC)
-            if (_cc.isGrounded != _wasGrounded)
+        private void UpdateVerticalVelocity()
+        {
+            if (IsJetpackActive()) _verticalVelocity = flySpeed;
+            else ApplyGravity();
+        }
+
+        private bool IsJetpackActive()
+            => jetpackEnabled && OVRInput.Get(OVRInput.Button.SecondaryThumbstick);
+
+        private void ApplyMove(Vector3 horizontalMove)
+        {
+            Vector3 finalMove = horizontalMove + (Vector3.up * _verticalVelocity * Time.deltaTime);
+            _cc.Move(finalMove);
+        }
+
+        private void LogGroundedChangesThrottled()
+        {
+            if (_cc.isGrounded == _wasGrounded) return;
+            if (Time.time - _lastGroundedLogTime > GroundedLogThrottleSec)
             {
-                if (Time.time - _lastGroundedLogTime > 0.5f)
-                {
-                    Debug.Log($"{LOG} Grounded: {_wasGrounded} -> {_cc.isGrounded}, pos={transform.position}, vVel={_verticalVelocity:F2}");
-                    _lastGroundedLogTime = Time.time;
-                }
-                _wasGrounded = _cc.isGrounded;
+                Debug.Log($"{LOG} Grounded: {_wasGrounded} -> {_cc.isGrounded}, pos={transform.position}, vVel={_verticalVelocity:F2}");
+                _lastGroundedLogTime = Time.time;
             }
+            _wasGrounded = _cc.isGrounded;
         }
 
         // =====================================================================
@@ -214,9 +226,8 @@ namespace Plaga44.Locomotion
         /// <returns>Wektor ruchu w przestrzeni swiata, juz pomnozony przez predkosc i deltaTime.</returns>
         private Vector3 CalculateHeadRelativeMovement(Vector2 input)
         {
-            // Jesli thumbstick jest w martwej strefie, nie ruszamy sie.
-            // sqrMagnitude jest tansza obliczeniowo niz magnitude (brak sqrt).
-            if (input.sqrMagnitude < 0.01f)
+            // sqrMagnitude tanszy niz magnitude (bez sqrt)
+            if (input.sqrMagnitude < InputDeadZoneSqr)
                 return Vector3.zero;
 
             // --- Rzutowanie kierunku glowy na plaszczyzne pozioma ---

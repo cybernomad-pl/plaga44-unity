@@ -27,7 +27,7 @@ UNITY_PATH="/mnt/c/Program Files/Unity/Hub/Editor/6000.3.7f1/Editor/Unity.exe"
 BUILDS_DIR="$PROJECT_PATH/Builds"
 BACKUP_DIR="/mnt/c/Users/boris/NordLocker_8592730/PLAGA44/builds"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-BUILD_METHOD="BuildScript.Build"
+BUILD_METHOD="Plaga44.Editor.BuildScript.Build"
 
 # --- Detect git info ---
 BRANCH=$(cd "$PROJECT_PATH" && git branch --show-current 2>/dev/null || echo "detached")

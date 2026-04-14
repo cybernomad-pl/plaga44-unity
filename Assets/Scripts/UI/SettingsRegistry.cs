@@ -35,26 +35,88 @@ namespace Plaga44.UI
         public static string[] GetSectionNames() { if (!_built) Build(); return _names; }
         public static void Rebuild() { _built = false; _sec = null; }
 
+        // Sekcje ktorych aktualnych wartosci NIE trwalimy (akcje, stan gry, read-only)
+        private static readonly HashSet<string> NON_PERSISTENT_SECTIONS =
+            new HashSet<string> { "PRESETS", "GAME STATE" };
+
+        /// <summary>PlayerPrefs keys -- single source of truth, koniec z literal strings w kodzie.</summary>
+        private static class PrefsKeys
+        {
+            private const string CurrentPrefix = "Plaga44_Current_";
+            private const string PresetPrefix = "Plaga44_Preset";
+            private const string CountSuffix = "__count";
+            private const string SavedAtSuffix = "__savedAt";
+
+            public static string Current(string section, string name) => $"{CurrentPrefix}{section}_{name}";
+            public static string PresetValue(int slot, string name) => $"{PresetPrefix}{slot}_{name}";
+            public static string PresetCount(int slot) => $"{PresetPrefix}{slot}_{CountSuffix}";
+            public static string PresetSavedAt(int slot) => $"{PresetPrefix}{slot}_{SavedAtSuffix}";
+        }
+
+        /// <summary>Nazwy slotow presetów.</summary>
+        private static string GetSlotName(int slot) => slot switch
+        {
+            1 => "HI-END",
+            2 => "CUSTOM",
+            3 => "SAFE",
+            _ => $"SLOT{slot}"
+        };
+
+        // Last action info -- HamburgerMenu pokazuje jako toast przez kilka sekund
+        public static string LastActionMessage { get; private set; } = "";
+        public static float LastActionTime { get; private set; } = -999f;
+        public static bool LastActionSuccess { get; private set; } = true;
+
+        /// <summary>Event invokowany po kazdej akcji (save/load/reset/error).
+        /// MenuNotifier subskrybuje, pokazuje banner w canvas menu.</summary>
+        public static event System.Action<string, bool> OnAction;
+
+        static void SetAction(string msg, bool success = true)
+        {
+            LastActionMessage = msg;
+            LastActionTime = Time.unscaledTime;
+            LastActionSuccess = success;
+            Debug.Log($"[PLAGA44][Settings] {msg}");
+            OnAction?.Invoke(msg, success);
+        }
+
         // Current section name (set by Sec, captured by S for log context).
         private static string _currentSection = "?";
 
+        // Flag ze zapis do PlayerPrefs jest pending (faktyczny flush w HamburgerMenu.Close / OnApplicationQuit)
+        public static bool PendingSave { get; private set; }
+
+        /// <summary>Flush PlayerPrefs do dysku. Wywolywane przy zamknieciu menu / aplikacji.</summary>
+        public static void FlushPlayerPrefs()
+        {
+            if (!PendingSave) return;
+            PlayerPrefs.Save();
+            PendingSave = false;
+        }
+
         static SettingDef S(string n, string d, Func<float> g, Action<float> s, float mn, float mx, float st, string f="F1")
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            // Dev-only: wrap setter with change logging via SettingsLogger.
-            // Release builds get the raw setter -- zero allocation, zero Debug.Log cost on Quest.
             string sectionCapture = _currentSection;
-            Action<float> loggingSetter = (v) =>
+            bool persistent = st > 0 && !NON_PERSISTENT_SECTIONS.Contains(sectionCapture);
+            string prefKey = persistent ? PrefsKeys.Current(sectionCapture, n) : null;
+
+            Action<float> wrappedSetter = (v) =>
             {
                 float oldVal = g();
                 s(v);
                 if (!Mathf.Approximately(oldVal, v))
+                {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
                     SettingsLogger.Log(n, oldVal, v, sectionCapture);
-            };
-            return new SettingDef(n, d, g, loggingSetter, mn, mx, st, f);
-#else
-            return new SettingDef(n, d, g, s, mn, mx, st, f);
 #endif
+                    if (prefKey != null)
+                    {
+                        PlayerPrefs.SetFloat(prefKey, v);
+                        PendingSave = true;
+                    }
+                }
+            };
+            return new SettingDef(n, d, g, wrappedSetter, mn, mx, st, f);
         }
 
         static void Sec(string name, Action<List<SettingDef>> b)
@@ -85,7 +147,7 @@ namespace Plaga44.UI
 
         public static void ResetToDefaults()
         {
-            if (_defaults == null) { Debug.LogWarning("[PLAGA44][Settings] No defaults captured"); return; }
+            if (_defaults == null) { SetAction("RESET FAILED -- no defaults captured", false); return; }
             int count = 0;
             foreach (var s in _allSettings)
             {
@@ -95,7 +157,7 @@ namespace Plaga44.UI
                     count++;
                 }
             }
-            Debug.Log($"[PLAGA44][Settings] RESET {count} values to defaults");
+            SetAction($"RESET {count} values to defaults", true);
         }
 
         // =====================================================================
@@ -105,39 +167,61 @@ namespace Plaga44.UI
         public static void SavePreset(int slot)
         {
             if (!_built) Build();
-            string prefix = $"Plaga44_Preset{slot}_";
-            foreach (var s in _allSettings)
+            try
             {
-                float val = s.get();
-                PlayerPrefs.SetFloat(prefix + s.name, val);
+                foreach (var s in _allSettings)
+                    PlayerPrefs.SetFloat(PrefsKeys.PresetValue(slot, s.name), s.get());
+                PlayerPrefs.SetInt(PrefsKeys.PresetCount(slot), _allSettings.Count);
+                PlayerPrefs.SetString(PrefsKeys.PresetSavedAt(slot), System.DateTime.Now.ToString("dd.MM HH:mm"));
+                PlayerPrefs.Save();
+                SetAction($"SAVED slot {slot} ({_allSettings.Count} values)", true);
             }
-            PlayerPrefs.SetInt(prefix + "__count", _allSettings.Count);
-            PlayerPrefs.Save();
-            Debug.Log($"[PLAGA44][Settings] SAVED preset {slot} ({_allSettings.Count} values)");
+            catch (System.Exception e)
+            {
+                SetAction($"SAVE slot {slot} FAILED: {e.Message}", false);
+            }
         }
 
         public static void LoadPreset(int slot)
         {
             if (!_built) Build();
-            string prefix = $"Plaga44_Preset{slot}_";
-            if (!PlayerPrefs.HasKey(prefix + "__count"))
+            if (!PlayerPrefs.HasKey(PrefsKeys.PresetCount(slot)))
             {
-                Debug.LogWarning($"[PLAGA44][Settings] Preset {slot} not found");
+                SetAction($"LOAD slot {slot} -- empty, cannot load", false);
                 return;
             }
+            try
+            {
+                int loaded = LoadPresetValues(slot);
+                SetAction($"LOADED slot {slot} ({loaded} values)", true);
+            }
+            catch (System.Exception e)
+            {
+                SetAction($"LOAD slot {slot} FAILED: {e.Message}", false);
+            }
+        }
+
+        private static int LoadPresetValues(int slot)
+        {
             int loaded = 0;
             foreach (var s in _allSettings)
             {
-                string key = prefix + s.name;
-                if (PlayerPrefs.HasKey(key))
-                {
-                    float val = PlayerPrefs.GetFloat(key);
-                    val = Mathf.Clamp(val, s.min, s.max);
-                    s.set(val);
-                    loaded++;
-                }
+                string key = PrefsKeys.PresetValue(slot, s.name);
+                if (!PlayerPrefs.HasKey(key)) continue;
+                s.set(Mathf.Clamp(PlayerPrefs.GetFloat(key), s.min, s.max));
+                loaded++;
             }
-            Debug.Log($"[PLAGA44][Settings] LOADED preset {slot} ({loaded} values)");
+            return loaded;
+        }
+
+        /// <summary>True jesli slot ma zapisane dane. Uzywane przez HamburgerMenu do stanu.</summary>
+        public static bool IsPresetSaved(int slot) => PlayerPrefs.HasKey(PrefsKeys.PresetCount(slot));
+
+        /// <summary>Sformatowana data zapisu slotu, albo null jesli pusty.</summary>
+        public static string GetPresetTimestamp(int slot)
+        {
+            string key = PrefsKeys.PresetSavedAt(slot);
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : null;
         }
 
         public static void LogAll()
@@ -488,11 +572,10 @@ namespace Plaga44.UI
             // PRESETS (save/load as "settings")
             // =============================================================
             Sec("PRESETS", s => {
-                // Slot 1-3: value 0=none, 1=save, 2=load
                 for (int slot = 1; slot <= 3; slot++)
                 {
-                    int sl = slot; // capture
-                    string slotName = slot == 1 ? "HI-END" : slot == 2 ? "CUSTOM" : "SAFE";
+                    int sl = slot; // capture for lambda
+                    string slotName = GetSlotName(sl);
                     s.Add(S($"SAVE {sl}:{slotName}", $"Save all settings to slot {sl}", () => 0, v => { if(v>0.5f) SavePreset(sl); }, 0, 1, 1, "F0"));
                     s.Add(S($"LOAD {sl}:{slotName}", $"Load settings from slot {sl}", () => 0, v => { if(v>0.5f) LoadPreset(sl); }, 0, 1, 1, "F0"));
                 }
@@ -500,7 +583,20 @@ namespace Plaga44.UI
                 s.Add(S("LOG ALL", "Print all settings to console", () => 0, v => { if(v>0.5f) LogAll(); }, 0, 1, 1, "F0"));
             });
 
-            // --- build index + flat list ---
+            FinalizeBuild();
+        }
+
+        private static void FinalizeBuild()
+        {
+            CollectFlatSettingsList();
+            if (_defaults == null) CaptureDefaults(); // musi byc PRZED RestorePersistedValues
+            int restored = RestorePersistedValues();
+            _built = true;
+            Debug.Log($"[PLAGA44][Settings] Built: {_sec.Count} sections, {_allSettings.Count} saveable settings, {restored} restored from PlayerPrefs");
+        }
+
+        private static void CollectFlatSettingsList()
+        {
             _names = new string[_sec.Count];
             _sec.Keys.CopyTo(_names, 0);
             _allSettings.Clear();
@@ -508,12 +604,24 @@ namespace Plaga44.UI
                 foreach (var setting in kv.Value)
                     if (setting.step > 0) // skip read-only and actions
                         _allSettings.Add(setting);
+        }
 
-            // Capture defaults on first build only
-            if (_defaults == null) CaptureDefaults();
-
-            _built = true;
-            Debug.Log($"[PLAGA44][Settings] Built: {_sec.Count} sections, {_allSettings.Count} saveable settings");
+        private static int RestorePersistedValues()
+        {
+            int restored = 0;
+            foreach (var kv in _sec)
+            {
+                if (NON_PERSISTENT_SECTIONS.Contains(kv.Key)) continue;
+                foreach (var setting in kv.Value)
+                {
+                    if (setting.step <= 0) continue;
+                    string key = PrefsKeys.Current(kv.Key, setting.name);
+                    if (!PlayerPrefs.HasKey(key)) continue;
+                    setting.set(Mathf.Clamp(PlayerPrefs.GetFloat(key), setting.min, setting.max));
+                    restored++;
+                }
+            }
+            return restored;
         }
 
         static void ApplyProfile(int profile)

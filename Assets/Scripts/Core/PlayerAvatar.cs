@@ -54,12 +54,11 @@ namespace Plaga44
 
         public int CurrentMode => avatarMode;
 
-        // Cache zeby UI nie szukal co frame
+        // Cache zeby UI nie szukal co frame. Unity's null check laga null-po-destroy.
         private static PlayerAvatar _cached;
         public static PlayerAvatar FindCurrent()
         {
-            if (_cached != null) return _cached;
-            _cached = Object.FindAnyObjectByType<PlayerAvatar>();
+            if (_cached == null) _cached = Object.FindAnyObjectByType<PlayerAvatar>();
             return _cached;
         }
 
@@ -86,19 +85,21 @@ namespace Plaga44
             mode = Mathf.Clamp(mode, 0, MaxMode);
             avatarMode = mode;
 
-            if (mode == 0)
-            {
-                DespawnAvatar();
-                ShowDefaultRig(true);
-                // Gallery: wylacz wszystkie
-                if (AvatarGallery.Instance != null) AvatarGallery.Instance.SetActiveIndex(-1);
-                Debug.Log($"{LOG} Mode=None -- default rig visible, no avatar spawned");
-            }
-            else
-            {
-                ShowDefaultRig(false);
-                SpawnAvatar(mode);
-            }
+            if (mode == 0) ShowDefaultRigOnly();
+            else { ShowDefaultRig(false); SpawnAvatar(mode); }
+        }
+
+        private void ShowDefaultRigOnly()
+        {
+            DespawnAvatar();
+            ShowDefaultRig(true);
+            DeactivateGalleryPreviews();
+            Debug.Log($"{LOG} Mode=None -- default rig visible, no avatar spawned");
+        }
+
+        private static void DeactivateGalleryPreviews()
+        {
+            if (AvatarGallery.Instance != null) AvatarGallery.Instance.SetActiveIndex(-1);
         }
 
         private void ShowDefaultRig(bool visible)
@@ -176,40 +177,47 @@ namespace Plaga44
             if (_instance != null) DespawnAvatar();
 
             var prefab = ResolvePrefabForMode(mode);
-            if (prefab == null)
-            {
-                Debug.LogWarning($"{LOG} No prefab for mode={mode}. Falling back to None.");
-                avatarMode = 0;
-                ShowDefaultRig(true);
-                if (AvatarGallery.Instance != null) AvatarGallery.Instance.SetActiveIndex(-1);
-                return;
-            }
+            if (prefab == null) { FallbackToNone(mode); return; }
 
+            InstantiateAvatar(prefab, mode);
+            CacheAnimatorBones();
+            SyncGalleryActiveIndex(mode);
+
+            Debug.Log($"{LOG} Spawned '{_instance.name}' mode={mode} (humanoid={(_animator != null && _animator.isHuman)})");
+        }
+
+        private void FallbackToNone(int mode)
+        {
+            Debug.LogWarning($"{LOG} No prefab for mode={mode}. Falling back to None.");
+            avatarMode = 0;
+            ShowDefaultRig(true);
+            DeactivateGalleryPreviews();
+        }
+
+        private void InstantiateAvatar(GameObject prefab, int mode)
+        {
             _instance = Instantiate(prefab, transform);
             _instance.name = "Avatar_" + prefab.name;
             _instance.transform.localPosition = new Vector3(0f, yOffset, 0f);
             _spawnedMode = mode;
+        }
 
+        private void CacheAnimatorBones()
+        {
             _animator = _instance.GetComponent<Animator>();
             _headBone = null;
             _neckBone = null;
-            if (_animator != null && _animator.isHuman)
-            {
-                _headBone = _animator.GetBoneTransform(HumanBodyBones.Head);
-                _neckBone = _animator.GetBoneTransform(HumanBodyBones.Neck);
-            }
+            if (_animator == null || !_animator.isHuman) return;
+            _headBone = _animator.GetBoneTransform(HumanBodyBones.Head);
+            _neckBone = _animator.GetBoneTransform(HumanBodyBones.Neck);
+        }
 
-            // Poinformuj Gallery zeby wylaczyla pozostale preview
-            if (AvatarGallery.Instance != null)
-            {
-                int galleryIdx = mode - 1;
-                if (galleryIdx >= 0 && galleryIdx < AvatarGallery.Instance.Count)
-                    AvatarGallery.Instance.SetActiveIndex(galleryIdx);
-                else
-                    AvatarGallery.Instance.SetActiveIndex(-1);
-            }
-
-            Debug.Log($"{LOG} Spawned '{_instance.name}' mode={mode} (humanoid={(_animator != null && _animator.isHuman)})");
+        private static void SyncGalleryActiveIndex(int mode)
+        {
+            var gallery = AvatarGallery.Instance;
+            if (gallery == null) return;
+            int idx = mode - 1;
+            gallery.SetActiveIndex((idx >= 0 && idx < gallery.Count) ? idx : -1);
         }
 
         private void DespawnAvatar()

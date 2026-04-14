@@ -1,30 +1,37 @@
+// =============================================================================
+// PlayerAvatarImporter.cs
+// CYBERNOMAD -- Legacy importer dla Survivor_A_Lusth FBX (Mixamo).
+// UWAGA: AvatarImport.AvatarModelPreprocessor juz obsluguje wszystko w Avatars/,
+// ten importer dziala dla sciezek z "Survivor_A_Lusth" w nazwie gdziekolwiek.
+// Po przeniesieniu starego Survivora do Avatars/ -- ten plik mozna usunac.
+// =============================================================================
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 
 namespace Plaga44.Editor
 {
-    /// <summary>
-    /// Auto-configures Survivor A Lusth FBX imports: Humanoid rig, correct scale.
-    /// Mixamo FBX ships with 1cm scale -- needs globalScale=1 + useFileScale=false
-    /// to end up at human size (1.7m).
-    /// </summary>
     public class PlayerAvatarImporter : AssetPostprocessor
     {
+        private const string TargetNameToken = "Survivor_A_Lusth";
+        private const string LOG = "[PLAGA44] PlayerAvatarImporter";
+
         private void OnPreprocessModel()
         {
-            if (!assetPath.Contains("Survivor_A_Lusth")) return;
+            if (!assetPath.Contains(TargetNameToken)) return;
+            if (assetImporter is not ModelImporter mi) return;
 
-            var importer = assetImporter as ModelImporter;
-            if (importer == null) return;
+            ConfigureMixamoHumanoid(mi);
+            Debug.Log($"{LOG}: Humanoid rig configured for {assetPath}");
+        }
 
-            importer.animationType = ModelImporterAnimationType.Human;
-            importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
-            importer.globalScale = 1f;
-            importer.useFileScale = false;
-            importer.importBlendShapes = true;
-
-            Debug.Log($"[PLAGA44] PlayerAvatarImporter: Humanoid rig configured for {assetPath}");
+        private static void ConfigureMixamoHumanoid(ModelImporter mi)
+        {
+            mi.animationType = ModelImporterAnimationType.Human;
+            mi.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
+            mi.globalScale = 1f;
+            mi.useFileScale = false;
+            mi.importBlendShapes = true;
         }
     }
 }

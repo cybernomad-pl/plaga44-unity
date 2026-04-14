@@ -18,7 +18,7 @@ using UnityEngine.Rendering;
 
 namespace Plaga44.Editor
 {
-    public struct ProjectSettings_
+    public struct ProjectPreset
     {
         public string companyName;
         public string productName;
@@ -45,7 +45,7 @@ namespace Plaga44.Editor
         // Presety
         // ---------------------------------------------------------------------
 
-        public static readonly ProjectSettings_ INITIAL = new ProjectSettings_
+        public static readonly ProjectPreset INITIAL = new ProjectPreset
         {
             companyName         = "Cybernomad",
             productName         = "PLAGA 44",
@@ -67,7 +67,7 @@ namespace Plaga44.Editor
         // Apply
         // ---------------------------------------------------------------------
 
-        public static void Apply(ProjectSettings_ s)
+        public static void Apply(ProjectPreset s)
         {
             if (s.companyName != null) PlayerSettings.companyName = s.companyName;
             if (s.productName != null) PlayerSettings.productName = s.productName;

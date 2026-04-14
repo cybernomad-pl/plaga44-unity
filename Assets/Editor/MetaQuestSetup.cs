@@ -1,17 +1,9 @@
-// MetaQuestSetup.cs -- CYBERNOMAD Editor Tool
-//
-// Auto-detects missing Meta XR SDK on editor open and offers to install it.
-// Manual triggers: CYBERNOMAD > Meta SDK Setup > 1. Setup Meta SDK / 2. Switch to Android
-//
-// What it does:
-//   1. Adds Meta XR scoped registry to manifest.json
-//   2. Adds required packages (OpenXR, Meta XR Core, Interaction, Audio)
-//   3. Enables OpenXR Loader in XR Plugin Management
-//   4. Switches build target to Android
-//
-// Player/Quality settings are baked into ProjectSettings/*.asset in the repo.
-// Version: META_SDK_VERSION constant below. Change it to upgrade all packages at once.
-
+// =============================================================================
+// MetaQuestSetup.cs
+// CYBERNOMAD -- Auto-detect + install Meta XR SDK, enable OpenXR, switch Android.
+// Menu: CYBERNOMAD > Meta SDK Setup > 1. Setup Meta SDK / 2. Switch to Android.
+// Wersja SDK w META_SDK_VERSION -- zmiana upgraduje wszystkie Meta XR paczki razem.
+// =============================================================================
 using System.IO;
 using UnityEditor;
 using UnityEditor.XR.Management;
@@ -28,14 +20,28 @@ namespace Plaga44.Editor
         private const string META_SDK_VERSION = "81.0.0";
         private const string SESSION_KEY = "PLAGA44_SDK_CHECK_DONE";
 
-        private static readonly string[][] PackagesToInstall = new[]
+        // ---- Manifest / registry ------------------------------------------
+        private const string DependenciesToken = "\"dependencies\"";
+        private const string ScopedRegistryUrl = "https://npm.developer.oculus.com";
+        private const string ScopedRegistryScope = "com.meta.xr";
+        private const string ScopedRegistryMarker = "npm.developer.oculus.com";
+        private const string MetaCoreMarker = "com.meta.xr.sdk.core";
+
+        // ---- XR Plug-in Management paths ----------------------------------
+        private const string XrSettingsFolder = "Assets/XR/Settings";
+        private const string XrPerBuildTargetAsset = XrSettingsFolder + "/XRGeneralSettingsPerBuildTarget.asset";
+        private const string XrAndroidSettingsAsset = XrSettingsFolder + "/XRGeneralSettings_Android.asset";
+        private const string XrAndroidManagerAsset = XrSettingsFolder + "/XRManager_Android.asset";
+        private const string OpenXRLoaderTypeName = "Unity.XR.OpenXR.OpenXRLoader";
+
+        private static readonly (string id, string version)[] PackagesToInstall =
         {
-            new[] { "com.unity.xr.openxr",                "1.14.0" },
-            new[] { "com.unity.xr.meta-openxr",            "2.4.0"  },
-            new[] { "com.meta.xr.sdk.core",                META_SDK_VERSION },
-            new[] { "com.meta.xr.sdk.interaction",         META_SDK_VERSION },
-            new[] { "com.meta.xr.sdk.interaction.ovr",     META_SDK_VERSION },
-            new[] { "com.meta.xr.sdk.audio",               META_SDK_VERSION },
+            ("com.unity.xr.openxr",                "1.14.0"),
+            ("com.unity.xr.meta-openxr",            "2.4.0"),
+            ("com.meta.xr.sdk.core",                META_SDK_VERSION),
+            ("com.meta.xr.sdk.interaction",         META_SDK_VERSION),
+            ("com.meta.xr.sdk.interaction.ovr",     META_SDK_VERSION),
+            ("com.meta.xr.sdk.audio",               META_SDK_VERSION),
         };
 
         // =====================================================================
@@ -49,34 +55,36 @@ namespace Plaga44.Editor
             EditorApplication.delayCall += AutoCheck;
         }
 
-        static void AutoCheck()
+        private static void AutoCheck()
         {
-            // Don't run in play mode
             if (EditorApplication.isPlaying) return;
-
-            // Scene loading handled by Bootstrap.cs (LoadAndValidate)
 
             if (IsMetaXRInstalled())
             {
                 Debug.Log($"{LOG} Meta XR SDK detected -- OK.");
-
-                if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
-                {
-                    bool doSwitch = EditorUtility.DisplayDialog(
-                        "PLAGA '44 -- Switch to Android?",
-                        "Meta XR SDK is installed but build target is not Android.\n\nSwitch now?",
-                        "Switch to Android", "Not now");
-                    if (doSwitch) SwitchToAndroid();
-                }
+                OfferAndroidSwitchIfNeeded();
                 return;
             }
+            OfferFullSetup();
+        }
 
+        private static void OfferAndroidSwitchIfNeeded()
+        {
+            if (EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android) return;
+            bool doSwitch = EditorUtility.DisplayDialog(
+                "PLAGA '44 -- Switch to Android?",
+                "Meta XR SDK is installed but build target is not Android.\n\nSwitch now?",
+                "Switch to Android", "Not now");
+            if (doSwitch) SwitchToAndroid();
+        }
+
+        private static void OfferFullSetup()
+        {
             bool doSetup = EditorUtility.DisplayDialog(
                 "PLAGA '44 -- Meta XR SDK not found",
                 "This project requires Meta XR SDK for Quest development.\n\n" +
                 "Install Meta XR SDK + configure project settings automatically?",
                 "Setup Everything", "Skip");
-
             if (doSetup)
             {
                 SetupMetaSDK();
@@ -84,10 +92,10 @@ namespace Plaga44.Editor
             }
         }
 
-        static bool IsMetaXRInstalled()
+        private static bool IsMetaXRInstalled()
         {
             string manifest = ReadManifest();
-            return manifest != null && manifest.Contains("com.meta.xr.sdk.core");
+            return manifest != null && manifest.Contains(MetaCoreMarker);
         }
 
         // =====================================================================
@@ -113,80 +121,76 @@ namespace Plaga44.Editor
                 return;
             }
             Debug.Log($"{LOG} Switching to Android...");
-            EditorUserBuildSettings.SwitchActiveBuildTarget(
-                BuildTargetGroup.Android, BuildTarget.Android);
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
         }
 
         // =====================================================================
-        // 1. Scoped Registry (npm.developer.oculus.com)
+        // 1. Scoped Registry -- dodaje blok "scopedRegistries" przed "dependencies"
         // =====================================================================
 
-        static void AddScopedRegistry()
+        private static void AddScopedRegistry()
         {
             string path = GetManifestPath();
             if (path == null) return;
 
             string manifest = File.ReadAllText(path);
-            if (manifest.Contains("npm.developer.oculus.com"))
+            if (manifest.Contains(ScopedRegistryMarker))
             {
                 Debug.Log($"{LOG} Registry already present.");
                 return;
             }
 
-            int depsIdx = manifest.IndexOf("\"dependencies\"");
-            if (depsIdx < 0)
+            int insertAt = FindDependenciesLineStart(manifest);
+            if (insertAt < 0)
             {
                 Debug.LogError($"{LOG} Cannot find 'dependencies' in manifest.json");
                 return;
             }
 
-            int lineStart = manifest.LastIndexOf('\n', depsIdx);
-            if (lineStart < 0) lineStart = 0;
-            else lineStart += 1;
-
-            string registry = @"  ""scopedRegistries"": [
-    {
-      ""name"": ""Meta XR"",
-      ""url"": ""https://npm.developer.oculus.com"",
-      ""scopes"": [
-        ""com.meta.xr""
-      ]
-    }
-  ],
-";
-            manifest = manifest.Substring(0, lineStart) + registry + manifest.Substring(lineStart);
-            File.WriteAllText(path, manifest);
+            File.WriteAllText(path, manifest.Substring(0, insertAt) + BuildRegistryBlock() + manifest.Substring(insertAt));
             Debug.Log($"{LOG} Added Meta XR scoped registry.");
         }
 
+        private static int FindDependenciesLineStart(string manifest)
+        {
+            int depsIdx = manifest.IndexOf(DependenciesToken);
+            if (depsIdx < 0) return -1;
+            int lineStart = manifest.LastIndexOf('\n', depsIdx);
+            return lineStart < 0 ? 0 : lineStart + 1;
+        }
+
+        private static string BuildRegistryBlock() =>
+            "  \"scopedRegistries\": [\n" +
+            "    {\n" +
+            $"      \"name\": \"Meta XR\",\n" +
+            $"      \"url\": \"{ScopedRegistryUrl}\",\n" +
+            $"      \"scopes\": [\n" +
+            $"        \"{ScopedRegistryScope}\"\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  ],\n";
+
         // =====================================================================
-        // 2. Packages (manifest.json)
+        // 2. Packages -- wstrzykuje entries do "dependencies"
         // =====================================================================
 
-        static void AddPackagesToManifest()
+        private static void AddPackagesToManifest()
         {
             string path = GetManifestPath();
             if (path == null) return;
 
             string manifest = File.ReadAllText(path);
             bool changed = false;
-
-            foreach (var pkg in PackagesToInstall)
+            foreach (var (id, version) in PackagesToInstall)
             {
-                if (manifest.Contains(pkg[0]))
+                if (manifest.Contains(id))
                 {
-                    Debug.Log($"{LOG} {pkg[0]} already in manifest.");
+                    Debug.Log($"{LOG} {id} already in manifest.");
                     continue;
                 }
-
-                int depsIdx = manifest.IndexOf("\"dependencies\"");
-                int braceIdx = manifest.IndexOf('{', depsIdx);
-                if (braceIdx < 0) continue;
-
-                string entry = $"\n    \"{pkg[0]}\": \"{pkg[1]}\",";
-                manifest = manifest.Substring(0, braceIdx + 1) + entry + manifest.Substring(braceIdx + 1);
+                if (!TryInsertPackage(ref manifest, id, version)) continue;
                 changed = true;
-                Debug.Log($"{LOG} Added {pkg[0]}@{pkg[1]}");
+                Debug.Log($"{LOG} Added {id}@{version}");
             }
 
             if (changed)
@@ -201,113 +205,90 @@ namespace Plaga44.Editor
             }
         }
 
+        private static bool TryInsertPackage(ref string manifest, string id, string version)
+        {
+            int depsIdx = manifest.IndexOf(DependenciesToken);
+            int braceIdx = manifest.IndexOf('{', depsIdx);
+            if (braceIdx < 0) return false;
+            string entry = $"\n    \"{id}\": \"{version}\",";
+            manifest = manifest.Substring(0, braceIdx + 1) + entry + manifest.Substring(braceIdx + 1);
+            return true;
+        }
+
         // =====================================================================
         // 3. OpenXR Loader (XR Plugin Management)
         // =====================================================================
 
-        static void EnableOpenXRLoader()
+        private static void EnableOpenXRLoader()
         {
-            // Find existing settings asset or create one
+            var perBuildTarget = LoadOrCreatePerBuildTargetSettings();
+            var generalSettings = EnsureAndroidGeneralSettings(perBuildTarget);
+            AssignOpenXRLoader(generalSettings);
+            AssetDatabase.SaveAssets();
+        }
+
+        private static XRGeneralSettingsPerBuildTarget LoadOrCreatePerBuildTargetSettings()
+        {
             string[] guids = AssetDatabase.FindAssets("t:XRGeneralSettingsPerBuildTarget");
-            XRGeneralSettingsPerBuildTarget perBuildTarget = null;
-
             if (guids.Length > 0)
-            {
-                string assetPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-                perBuildTarget = AssetDatabase.LoadAssetAtPath<XRGeneralSettingsPerBuildTarget>(assetPath);
-            }
+                return AssetDatabase.LoadAssetAtPath<XRGeneralSettingsPerBuildTarget>(
+                    AssetDatabase.GUIDToAssetPath(guids[0]));
 
-            if (perBuildTarget == null)
-            {
-                EnsureDirectory("Assets/XR/Settings");
-                perBuildTarget = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
-                AssetDatabase.CreateAsset(perBuildTarget, "Assets/XR/Settings/XRGeneralSettingsPerBuildTarget.asset");
-            }
+            EnsureDirectory(XrSettingsFolder);
+            var asset = ScriptableObject.CreateInstance<XRGeneralSettingsPerBuildTarget>();
+            AssetDatabase.CreateAsset(asset, XrPerBuildTargetAsset);
+            return asset;
+        }
 
-            // Ensure Android general settings exist
-            var generalSettings = perBuildTarget.SettingsForBuildTarget(BuildTargetGroup.Android);
-            if (generalSettings == null)
-            {
-                EnsureDirectory("Assets/XR/Settings");
-                generalSettings = ScriptableObject.CreateInstance<XRGeneralSettings>();
-                var manager = ScriptableObject.CreateInstance<XRManagerSettings>();
-                generalSettings.Manager = manager;
+        private static XRGeneralSettings EnsureAndroidGeneralSettings(XRGeneralSettingsPerBuildTarget perBuildTarget)
+        {
+            var settings = perBuildTarget.SettingsForBuildTarget(BuildTargetGroup.Android);
+            if (settings != null) return settings;
 
-                AssetDatabase.CreateAsset(generalSettings, "Assets/XR/Settings/XRGeneralSettings_Android.asset");
-                AssetDatabase.CreateAsset(manager, "Assets/XR/Settings/XRManager_Android.asset");
+            EnsureDirectory(XrSettingsFolder);
+            settings = ScriptableObject.CreateInstance<XRGeneralSettings>();
+            var manager = ScriptableObject.CreateInstance<XRManagerSettings>();
+            settings.Manager = manager;
 
-                perBuildTarget.SetSettingsForBuildTarget(BuildTargetGroup.Android, generalSettings);
-                EditorUtility.SetDirty(perBuildTarget);
-                Debug.Log($"{LOG} Created XR General Settings for Android.");
-            }
+            AssetDatabase.CreateAsset(settings, XrAndroidSettingsAsset);
+            AssetDatabase.CreateAsset(manager, XrAndroidManagerAsset);
+            perBuildTarget.SetSettingsForBuildTarget(BuildTargetGroup.Android, settings);
+            EditorUtility.SetDirty(perBuildTarget);
 
-            // Assign the loader
+            Debug.Log($"{LOG} Created XR General Settings for Android.");
+            return settings;
+        }
+
+        private static void AssignOpenXRLoader(XRGeneralSettings generalSettings)
+        {
             bool assigned = XRPackageMetadataStore.AssignLoader(
-                generalSettings.Manager, "Unity.XR.OpenXR.OpenXRLoader", BuildTargetGroup.Android);
-
+                generalSettings.Manager, OpenXRLoaderTypeName, BuildTargetGroup.Android);
             if (assigned)
                 Debug.Log($"{LOG} OpenXR Loader enabled for Android.");
             else
                 Debug.LogWarning($"{LOG} Could not enable OpenXR Loader automatically. " +
                     "Do it manually: Project Settings > XR Plug-in Management > Android > OpenXR.");
-
-            AssetDatabase.SaveAssets();
         }
 
         // =====================================================================
         // Utilities
         // =====================================================================
 
-        static string ReadManifest()
+        private static string ReadManifest()
         {
             string path = GetManifestPath();
             return path != null ? File.ReadAllText(path) : null;
         }
 
-        static string GetManifestPath()
+        private static string GetManifestPath()
         {
             string p = Path.Combine(Application.dataPath, "..", "Packages", "manifest.json");
-            if (!File.Exists(p))
-            {
-                Debug.LogError($"{LOG} manifest.json not found!");
-                return null;
-            }
-            return p;
+            if (File.Exists(p)) return p;
+            Debug.LogError($"{LOG} manifest.json not found!");
+            return null;
         }
 
-        /// <summary>
-        /// Czyści brakujace tree/detail prototypy z terrain data assetow na dysku
-        /// ZANIM scena sie zaladuje (zeby uniknac warningow "Tree prefab at index X is missing").
-        /// </summary>
-        static void CleanTerrainDataAssets()
-        {
-            string[] tilePaths = new string[10];
-            for (int i = 0; i < 9; i++)
-                tilePaths[i] = $"Assets/Potok/Terrain/Tile_{i}.asset";
-            tilePaths[9] = "Assets/Potok/Terrain/Scene_A_Terrain.asset";
-
-            int cleaned = 0;
-            foreach (var path in tilePaths)
-            {
-                var data = AssetDatabase.LoadAssetAtPath<TerrainData>(path);
-                if (data == null) continue;
-                if (data.treePrototypes.Length == 0 && data.detailPrototypes.Length == 0) continue;
-
-                data.treeInstances = new TreeInstance[0];
-                data.treePrototypes = new TreePrototype[0];
-                data.detailPrototypes = new DetailPrototype[0];
-                EditorUtility.SetDirty(data);
-                cleaned++;
-            }
-
-            if (cleaned > 0)
-            {
-                AssetDatabase.SaveAssets();
-                Debug.Log($"{LOG} Wyczyszczono drzewa/detale z {cleaned} terrain data assetow.");
-            }
-        }
-
-        static void EnsureDirectory(string assetPath)
+        private static void EnsureDirectory(string assetPath)
         {
             string fullPath = Path.Combine(Application.dataPath, "..", assetPath);
             if (!Directory.Exists(fullPath))

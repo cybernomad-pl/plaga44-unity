@@ -31,6 +31,12 @@ namespace Plaga44.Feedback
     {
         private const string LOG = "[PLAGA44][Haptic]";
 
+        // Impact scaling -- magic values wyciagniete na gore
+        private const float ImpactLightFloor = 0.05f;           // min amplitude dla slabego impactu
+        private const float ImpactMediumFromFactor = 0.7f;      // lerp start: 70% medium amp przy threshold
+        private const float ImpactHeartbeatTailMul = 0.75f;     // drugi puls heartbeat = 75% amplitude
+        private const float DivZeroGuard = 0.001f;              // unikniecie dzielenia przez 0 przy threshold
+
         // --- Singleton ----------------------------------------------------------
         private static HapticManager _instance;
         public static HapticManager Instance
@@ -94,32 +100,33 @@ namespace Plaga44.Feedback
         /// <summary>Impact scaled by force magnitude (light/medium/heavy tier).</summary>
         public void PlayImpact(OVRInput.Controller controller, float force)
         {
-            HapticEvent evt;
-            string tier;
-            if      (force >= impactHeavyThreshold)  { evt = impactHeavy;  tier = "heavy"; }
-            else if (force >= impactMediumThreshold) { evt = impactMedium; tier = "medium"; }
-            else                                     { evt = impactLight;  tier = "light"; }
+            (HapticEvent evt, string tier) = ResolveImpactTier(force);
+            float scaledAmp = ScaleAmplitudeByForce(force, evt);
+            var scaled = new HapticEvent { amplitude = scaledAmp, frequency = evt.frequency, duration = evt.duration };
+            PlayOnce(controller, scaled, $"impact.{tier}(force={force:F1}N)");
+        }
 
-            float scaledAmplitude = evt.amplitude;
+        private (HapticEvent evt, string tier) ResolveImpactTier(float force)
+        {
+            if (force >= impactHeavyThreshold) return (impactHeavy, "heavy");
+            if (force >= impactMediumThreshold) return (impactMedium, "medium");
+            return (impactLight, "light");
+        }
+
+        private float ScaleAmplitudeByForce(float force, HapticEvent evt)
+        {
             if (force < impactMediumThreshold)
             {
-                scaledAmplitude = Mathf.Lerp(0.05f, impactLight.amplitude,
-                    Mathf.Clamp01(force / Mathf.Max(impactMediumThreshold, 0.001f)));
+                float t = Mathf.Clamp01(force / Mathf.Max(impactMediumThreshold, DivZeroGuard));
+                return Mathf.Clamp01(Mathf.Lerp(ImpactLightFloor, impactLight.amplitude, t));
             }
-            else if (force < impactHeavyThreshold)
+            if (force < impactHeavyThreshold)
             {
-                float t = Mathf.Clamp01((force - impactMediumThreshold) /
-                    Mathf.Max(impactHeavyThreshold - impactMediumThreshold, 0.001f));
-                scaledAmplitude = Mathf.Lerp(impactMedium.amplitude * 0.7f, impactMedium.amplitude, t);
+                float range = Mathf.Max(impactHeavyThreshold - impactMediumThreshold, DivZeroGuard);
+                float t = Mathf.Clamp01((force - impactMediumThreshold) / range);
+                return Mathf.Clamp01(Mathf.Lerp(impactMedium.amplitude * ImpactMediumFromFactor, impactMedium.amplitude, t));
             }
-
-            var scaled = new HapticEvent
-            {
-                amplitude = Mathf.Clamp01(scaledAmplitude),
-                frequency = evt.frequency,
-                duration  = evt.duration
-            };
-            PlayOnce(controller, scaled, $"impact.{tier}(force={force:F1}N)");
+            return Mathf.Clamp01(evt.amplitude);
         }
 
         public void PlayHeartbeat(OVRInput.Controller controller) => StartCoroutine(HeartbeatCoroutine(controller));
@@ -127,20 +134,18 @@ namespace Plaga44.Feedback
 
         /// <summary>Low-level: play arbitrary event with custom amplitude. Used by HapticOnGrab.</summary>
         public void PlayCustom(OVRInput.Controller controller, float amplitude, float frequency, float duration, string tag)
+            => PlayVibration(controller, amplitude, frequency, duration, tag);
+
+        // --- Internal -----------------------------------------------------------
+        private void PlayOnce(OVRInput.Controller controller, HapticEvent evt, string tag)
+            => PlayVibration(controller, evt.amplitude, evt.frequency, evt.duration, tag);
+
+        private void PlayVibration(OVRInput.Controller controller, float amplitude, float frequency, float duration, string tag)
         {
             if (!ControllerModeHelper.IsControllerActive(controller)) return;
             if (verboseLogs)
                 Debug.Log($"{LOG} {tag} | ctrl={controller} amp={amplitude:F2} freq={frequency:F2} dur={duration:F2}s");
             StartCoroutine(VibrationCoroutine(controller, amplitude, frequency, duration));
-        }
-
-        // --- Internal -----------------------------------------------------------
-        private void PlayOnce(OVRInput.Controller controller, HapticEvent evt, string tag)
-        {
-            if (!ControllerModeHelper.IsControllerActive(controller)) return;
-            if (verboseLogs)
-                Debug.Log($"{LOG} {tag} | ctrl={controller} amp={evt.amplitude:F2} freq={evt.frequency:F2} dur={evt.duration:F2}s");
-            StartCoroutine(VibrationCoroutine(controller, evt.amplitude, evt.frequency, evt.duration));
         }
 
         private IEnumerator VibrationCoroutine(OVRInput.Controller controller, float amplitude, float frequency, float duration)
@@ -160,7 +165,7 @@ namespace Plaga44.Feedback
                     heartbeatPulse.amplitude, heartbeatPulse.frequency, heartbeatPulse.duration));
                 yield return new WaitForSeconds(heartbeatInnerGap);
                 yield return StartCoroutine(VibrationCoroutine(controller,
-                    heartbeatPulse.amplitude * 0.75f, heartbeatPulse.frequency, heartbeatPulse.duration));
+                    heartbeatPulse.amplitude * ImpactHeartbeatTailMul, heartbeatPulse.frequency, heartbeatPulse.duration));
                 if (i < cycles - 1) yield return new WaitForSeconds(heartbeatOuterGap);
             }
         }

@@ -13,22 +13,31 @@ namespace Plaga44.Core
 {
     public static class ControllerModeHelper
     {
-        /// <summary>Connected + haptics initialized (SampleRateHz > 0).</summary>
+        /// <summary>Connected kontroler -- wystarczy dla SetControllerVibration.
+        /// UWAGA: starsza wersja sprawdzala tez OVRHaptics.Config.SampleRateHz > 0, ale
+        /// w Quest Link SampleRateHz potrafi byc 0 a simple SetControllerVibration dziala.
+        /// Strict check uzyj IsControllerHapticsReady() (dla OVRHaptics buffer pipeline).</summary>
         public static bool IsControllerActive(OVRInput.Controller controller)
+        {
+            return OVRInput.IsControllerConnected(controller);
+        }
+
+        /// <summary>Strict check -- tylko jesli chcesz submitowac do OVRHaptics buffer.</summary>
+        public static bool IsControllerHapticsReady(OVRInput.Controller controller)
         {
             if (!OVRInput.IsControllerConnected(controller)) return false;
             if (OVRHaptics.Config.SampleRateHz <= 0) return false;
             return true;
         }
 
-        /// <summary>True if any Touch controller is connected and ready.</summary>
+        /// <summary>True if any Touch controller is connected.</summary>
         public static bool AnyControllerActive()
         {
             return IsControllerActive(OVRInput.Controller.LTouch) ||
                    IsControllerActive(OVRInput.Controller.RTouch);
         }
 
-        /// <summary>Safe wrapper: skips call (no log spam) if controller inactive.</summary>
+        /// <summary>Safe wrapper: skips call if controller disconnected.</summary>
         public static void SafeVibration(float frequency, float amplitude, OVRInput.Controller controller)
         {
             if (!IsControllerActive(controller)) return;

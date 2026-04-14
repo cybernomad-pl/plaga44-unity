@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Plaga44.Editor
 {
-    public struct AudioSettings_
+    public struct AudioPreset
     {
         public int dspBufferSize;           // 256, 512, 1024 (mniej = mniej latency, wiecej CPU)
         public int speakerMode;             // 0=Raw, 1=Mono, 2=Stereo, 3=Quad, 4=Surround, 5=5.1, 6=7.1
@@ -30,7 +30,7 @@ namespace Plaga44.Editor
         // Presety
         // ---------------------------------------------------------------------
 
-        public static readonly AudioSettings_ INITIAL = new AudioSettings_
+        public static readonly AudioPreset INITIAL = new AudioPreset
         {
             dspBufferSize    = 512,
             speakerMode      = 2,               // Stereo
@@ -39,7 +39,7 @@ namespace Plaga44.Editor
             sampleRate       = 0,               // system default
         };
 
-        public static readonly AudioSettings_ DEFAULT = new AudioSettings_
+        public static readonly AudioPreset DEFAULT = new AudioPreset
         {
             dspBufferSize    = 1024,
             speakerMode      = 2,
@@ -52,7 +52,7 @@ namespace Plaga44.Editor
         // Apply all
         // ---------------------------------------------------------------------
 
-        public static void Apply(AudioSettings_ s)
+        public static void Apply(AudioPreset s)
         {
             var so = LoadAsset();
             if (so == null) return;

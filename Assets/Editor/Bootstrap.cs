@@ -1,40 +1,90 @@
+// =============================================================================
+// Bootstrap.cs
+// CYBERNOMAD -- Ladowanie sceny PLAGA '44 + walidacja/napraw elementow.
+// Uruchamia sie automatycznie przy starcie edytora (InitializeOnLoad).
+// Menu: CYBERNOMAD > Scene > Load PLAGA44 Demo / CYBERNOMAD > Bootstrap.
+// =============================================================================
 #if UNITY_EDITOR
+using System;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Rendering;
+using Plaga44.Locomotion;
+using Plaga44.UI;
+using Plaga44.Feedback;
+using Plaga44.Inventory;
 
 namespace Plaga44.Editor
 {
-    /// <summary>
-    /// Loads PLAGA44 Demo scene, validates and fixes missing elements.
-    /// Runs automatically on editor open (InitializeOnLoad).
-    /// Also available from menu: CYBERNOMAD > Scene > Load PLAGA44 Demo.
-    /// </summary>
     [InitializeOnLoad]
     public static class Bootstrap
     {
+        // ---- Paths ---------------------------------------------------------
         private const string ScenePath = "Assets/PLAGA44/TESTBED.unity";
         private const string TerrainAsset = "Assets/Potok/Terrain/Scene_A_Terrain.asset";
         private const string TerrainMatPath = "Assets/PLAGA44/Materials/TerrainLit.mat";
-        private const string SkyboxMat = "Assets/Potok/Skybox/BGR_Sky1.mat";
-        private const string BootstrapKey = "Plaga44.OpenScene.Done";
+        private const string TerrainMatFolderParent = "Assets/PLAGA44";
+        private const string TerrainMatFolderName = "Materials";
+        private const string SkyboxMatPath = "Assets/Potok/Skybox/BGR_Sky1.mat";
+        private const string AvatarRegistryPath = "Assets/PLAGA44/Resources/AvatarRegistry.asset";
+        private const string BootstrapSessionKey = "Plaga44.OpenScene.Done";
+
+        // ---- Scene object names -------------------------------------------
+        private const string OvrRigName = "OVRCameraRig";
+        private const string RightHandAnchorName = "RightHandAnchor";
+        private const string LeftHandAnchorName = "LeftHandAnchor";
+        private const string DefaultRigName = "StylizedCharacterLocomotion";
+        private const string DefaultRigPartialMatch = "StylizedCharacter";
+        private const string HamburgerMenuGoName = "_HamburgerMenu";
+        private const string SkyRotatorGoName = "_SkyRotator";
+        private const string DirectionalLightGoName = "Directional Light";
+        private const string TerrainGoName = "Terrain_SceneA";
+        private const string GrabVolumeGoName = "GrabVolume";
+
+        // ---- Shaders ------------------------------------------------------
+        private const string TerrainLitShader = "Universal Render Pipeline/Terrain/Lit";
+        private const string MissingShaderMarker = "Hidden/InternalErrorShader";
+
+        // ---- CharacterController defaults ---------------------------------
+        private const float CcHeight = 1.8f;
+        private const float CcRadius = 0.3f;
+        private const float CcSkinWidth = 0.08f;
+        private const float CcStepOffset = 0.5f;
+        private static readonly Vector3 CcCenter = new Vector3(0f, 0.9f, 0f);
+
+        // ---- Locomotion defaults ------------------------------------------
+        private const float MoveSpeedDefault = 2.5f;
+        private const float StrafeFactorDefault = 0.8f;
+        private const float TurnSpeedDefault = 120f;
+        private const float TurnDeadZoneDefault = 0.15f;
+        private const float SkyRotateSpeedDefault = 0.5f;
+
+        // ---- Player spawn -------------------------------------------------
+        private const float SpawnAboveTerrain = 1000f;
+        private const float SpawnFallbackY = 1200f;
+
+        // ---- Lights -------------------------------------------------------
+        private static readonly Color WarmSunlight = new Color(1f, 0.95f, 0.84f);
+        private static readonly Quaternion SunRotation = Quaternion.Euler(50f, -30f, 0f);
+
+        // ---- Grab volume --------------------------------------------------
+        private const float GrabVolumeRadius = 0.08f;
+
+        // ---- Logging ------------------------------------------------------
         private const string LOG = "[PLAGA44][Bootstrap]";
 
         // =====================================================================
-        // Auto-run on editor start
+        // Auto-run + menu
         // =====================================================================
 
-        static Bootstrap()
-        {
-            EditorApplication.delayCall += AutoRun;
-        }
+        static Bootstrap() => EditorApplication.delayCall += AutoRun;
 
         private static void AutoRun()
         {
-            if (SessionState.GetBool(BootstrapKey, false)) return;
-            SessionState.SetBool(BootstrapKey, true);
+            if (SessionState.GetBool(BootstrapSessionKey, false)) return;
+            SessionState.SetBool(BootstrapSessionKey, true);
 
             if (EditorApplication.isCompiling || EditorApplication.isUpdating)
             {
@@ -46,14 +96,10 @@ namespace Plaga44.Editor
             LoadAndValidate();
         }
 
-        // =====================================================================
-        // Menu items
-        // =====================================================================
-
         [MenuItem("CYBERNOMAD/Scene/Load PLAGA44 Demo", false, 1)]
         public static void LoadFromMenu()
         {
-            SessionState.SetBool(BootstrapKey, true);
+            SessionState.SetBool(BootstrapSessionKey, true);
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             LoadAndValidate();
         }
@@ -66,13 +112,12 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // Main: load + validate + fix
+        // Load + validate orchestration
         // =====================================================================
 
         private static void LoadAndValidate()
         {
-            var active = SceneManager.GetActiveScene();
-            if (!active.IsValid() || active.path != ScenePath)
+            if (!IsTargetSceneActive())
             {
                 if (!System.IO.File.Exists(ScenePath))
                 {
@@ -82,15 +127,18 @@ namespace Plaga44.Editor
                 EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
                 Debug.Log($"{LOG} Scene opened: {ScenePath}");
             }
-
-            // Give editor a frame to finish loading
             EditorApplication.delayCall += ValidateScene;
+        }
+
+        private static bool IsTargetSceneActive()
+        {
+            var active = SceneManager.GetActiveScene();
+            return active.IsValid() && active.path == ScenePath;
         }
 
         private static void ValidateScene()
         {
             bool changed = false;
-
             changed |= ValidateTerrain();
             changed |= ValidateSkybox();
             changed |= ValidateDirectionalLight();
@@ -98,8 +146,14 @@ namespace Plaga44.Editor
             changed |= ValidateHamburgerMenu();
             changed |= ValidateSkyRotator();
             changed |= ValidateInventorySystem();
-            ValidateAvatarRegistry(); // read-only, no scene mutation
+            ValidateAvatarRegistry();
 
+            SaveSceneIfDirty(changed);
+            FocusCameraOnTerrain();
+        }
+
+        private static void SaveSceneIfDirty(bool changed)
+        {
             if (changed)
             {
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
@@ -110,326 +164,301 @@ namespace Plaga44.Editor
             {
                 Debug.Log($"{LOG} === Validation OK, nothing missing ===");
             }
+        }
 
-            // Focus on terrain in SceneView
-            var terrain = Object.FindFirstObjectByType<Terrain>();
-            if (terrain != null)
-            {
-                Selection.activeGameObject = terrain.gameObject;
-                SceneView.lastActiveSceneView?.FrameSelected();
-            }
+        private static void FocusCameraOnTerrain()
+        {
+            var terrain = UnityEngine.Object.FindFirstObjectByType<Terrain>();
+            if (terrain == null) return;
+            Selection.activeGameObject = terrain.gameObject;
+            try { SceneView.lastActiveSceneView?.FrameSelected(); }
+            catch (Exception e) { Debug.LogWarning($"{LOG} FrameSelected failed (Unity internal): {e.GetType().Name}"); }
         }
 
         // =====================================================================
-        // Validators -- each checks one scene element
+        // Terrain
         // =====================================================================
 
-        /// <summary>
-        /// Checks if terrain exists. If not -- creates from Scene_A_Terrain.asset.
-        /// Also checks material -- if missing or pink, assigns URP Terrain/Lit.
-        /// </summary>
         private static bool ValidateTerrain()
         {
             bool changed = false;
-            var existing = Object.FindFirstObjectByType<Terrain>();
-
-            if (existing == null)
+            var terrain = UnityEngine.Object.FindFirstObjectByType<Terrain>();
+            if (terrain == null)
             {
-                var terrainData = AssetDatabase.LoadAssetAtPath<TerrainData>(TerrainAsset);
-                if (terrainData == null)
-                {
-                    Debug.LogError($"{LOG} [MISSING] Scene_A_Terrain.asset not found: {TerrainAsset}");
-                    return false;
-                }
-
-                var terrainGO = Terrain.CreateTerrainGameObject(terrainData);
-                terrainGO.name = "Terrain_SceneA";
-
-                float halfX = terrainData.size.x * 0.5f;
-                float halfZ = terrainData.size.z * 0.5f;
-                terrainGO.transform.position = new Vector3(-halfX, 0f, -halfZ);
-
-                existing = terrainGO.GetComponent<Terrain>();
+                terrain = CreateTerrainFromAsset();
+                if (terrain == null) return false;
                 changed = true;
-                Debug.Log($"{LOG} [ADDED] Terrain: {terrainData.size.x:F0}x{terrainData.size.z:F0}m, centered");
             }
             else
             {
-                Debug.Log($"{LOG} [OK] Terrain: {existing.name} ({existing.terrainData.size})");
+                Debug.Log($"{LOG} [OK] Terrain: {terrain.name} ({terrain.terrainData.size})");
             }
-
-            // Validate material -- pink = missing shader/material
-            changed |= ValidateTerrainMaterial(existing);
+            changed |= ValidateTerrainMaterial(terrain);
             return changed;
         }
 
-        /// <summary>
-        /// Checks terrain material. If null or using missing shader
-        /// (pink = "Hidden/InternalErrorShader") -- creates URP Terrain/Lit.
-        /// </summary>
+        private static Terrain CreateTerrainFromAsset()
+        {
+            var data = AssetDatabase.LoadAssetAtPath<TerrainData>(TerrainAsset);
+            if (data == null)
+            {
+                Debug.LogError($"{LOG} [MISSING] Scene_A_Terrain.asset not found: {TerrainAsset}");
+                return null;
+            }
+
+            var terrainGO = Terrain.CreateTerrainGameObject(data);
+            terrainGO.name = TerrainGoName;
+            terrainGO.transform.position = new Vector3(-data.size.x * 0.5f, 0f, -data.size.z * 0.5f);
+
+            Debug.Log($"{LOG} [ADDED] Terrain: {data.size.x:F0}x{data.size.z:F0}m, centered");
+            return terrainGO.GetComponent<Terrain>();
+        }
+
         private static bool ValidateTerrainMaterial(Terrain terrain)
         {
-            var mat = terrain.materialTemplate;
-            if (mat != null && mat.shader != null && mat.shader.name != "Hidden/InternalErrorShader")
+            if (HasValidMaterial(terrain))
             {
+                var mat = terrain.materialTemplate;
                 Debug.Log($"{LOG} [OK] Terrain material: {mat.name} (shader: {mat.shader.name})");
                 return false;
             }
 
             Debug.LogWarning($"{LOG} [FIX] Terrain material missing or pink");
-
-            var existingMat = AssetDatabase.LoadAssetAtPath<Material>(TerrainMatPath);
-            if (existingMat != null)
+            var existing = AssetDatabase.LoadAssetAtPath<Material>(TerrainMatPath);
+            if (existing != null)
             {
-                terrain.materialTemplate = existingMat;
+                terrain.materialTemplate = existing;
                 Debug.Log($"{LOG} [OK] Assigned existing TerrainLit.mat");
                 return true;
             }
+            return CreateAndAssignTerrainMaterial(terrain);
+        }
 
-            var shader = Shader.Find("Universal Render Pipeline/Terrain/Lit");
+        private static bool HasValidMaterial(Terrain terrain)
+        {
+            var mat = terrain.materialTemplate;
+            return mat != null && mat.shader != null && mat.shader.name != MissingShaderMarker;
+        }
+
+        private static bool CreateAndAssignTerrainMaterial(Terrain terrain)
+        {
+            var shader = Shader.Find(TerrainLitShader);
             if (shader == null)
             {
-                Debug.LogError($"{LOG} [ERROR] Shader 'Universal Render Pipeline/Terrain/Lit' not found!");
+                Debug.LogError($"{LOG} [ERROR] Shader '{TerrainLitShader}' not found!");
                 return false;
             }
 
-            var newMat = new Material(shader);
-            newMat.name = "TerrainLit";
-
-            if (!AssetDatabase.IsValidFolder("Assets/PLAGA44/Materials"))
-                AssetDatabase.CreateFolder("Assets/PLAGA44", "Materials");
-
-            AssetDatabase.CreateAsset(newMat, TerrainMatPath);
+            EnsureFolder(TerrainMatFolderParent, TerrainMatFolderName);
+            var mat = new Material(shader) { name = "TerrainLit" };
+            AssetDatabase.CreateAsset(mat, TerrainMatPath);
             AssetDatabase.SaveAssets();
+            terrain.materialTemplate = mat;
 
-            terrain.materialTemplate = newMat;
             Debug.Log($"{LOG} [ADDED] Created and assigned TerrainLit.mat (URP Terrain/Lit)");
             return true;
         }
 
-        /// <summary>
-        /// Checks if skybox is set. If not -- assigns BGR_Sky1.
-        /// </summary>
+        private static void EnsureFolder(string parent, string folderName)
+        {
+            string full = $"{parent}/{folderName}";
+            if (!AssetDatabase.IsValidFolder(full))
+                AssetDatabase.CreateFolder(parent, folderName);
+        }
+
+        // =====================================================================
+        // Skybox + directional light
+        // =====================================================================
+
         private static bool ValidateSkybox()
         {
-            var skyboxMat = AssetDatabase.LoadAssetAtPath<Material>(SkyboxMat);
-            if (skyboxMat == null)
+            var mat = AssetDatabase.LoadAssetAtPath<Material>(SkyboxMatPath);
+            if (mat == null)
             {
-                Debug.LogWarning($"{LOG} [MISSING] Skybox material not found: {SkyboxMat}");
+                Debug.LogWarning($"{LOG} [MISSING] Skybox material not found: {SkyboxMatPath}");
                 return false;
             }
-
-            if (RenderSettings.skybox == skyboxMat)
+            if (RenderSettings.skybox == mat)
             {
-                Debug.Log($"{LOG} [OK] Skybox: {skyboxMat.name}");
+                Debug.Log($"{LOG} [OK] Skybox: {mat.name}");
                 return false;
             }
-
-            RenderSettings.skybox = skyboxMat;
-            Debug.Log($"{LOG} [ADDED] Skybox: {skyboxMat.name}");
+            RenderSettings.skybox = mat;
+            Debug.Log($"{LOG} [ADDED] Skybox: {mat.name}");
             return true;
         }
 
-        /// <summary>
-        /// Checks for Directional Light. If missing -- creates one.
-        /// </summary>
         private static bool ValidateDirectionalLight()
         {
-            var lights = Object.FindObjectsByType<Light>(FindObjectsSortMode.None);
-            foreach (var light in lights)
+            if (FindDirectionalLight() is Light existing)
             {
-                if (light.type == LightType.Directional)
-                {
-                    Debug.Log($"{LOG} [OK] Directional Light: {light.name}");
-                    return false;
-                }
+                Debug.Log($"{LOG} [OK] Directional Light: {existing.name}");
+                return false;
             }
-
-            var lightGO = new GameObject("Directional Light");
-            var lightComp = lightGO.AddComponent<Light>();
-            lightComp.type = LightType.Directional;
-            lightComp.color = new Color(1f, 0.95f, 0.84f); // warm sunlight
-            lightComp.intensity = 1f;
-            lightComp.shadows = LightShadows.Soft;
-            lightGO.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
-
+            CreateDirectionalLight();
             Debug.Log($"{LOG} [ADDED] Directional Light");
             return true;
         }
 
-        /// <summary>
-        /// Validates OVRCameraRig: CharacterController + LocomotionController + SmoothTurnController.
-        /// Adds missing components.
-        /// </summary>
+        private static Light FindDirectionalLight()
+        {
+            foreach (var light in UnityEngine.Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
+                if (light.type == LightType.Directional) return light;
+            return null;
+        }
+
+        private static void CreateDirectionalLight()
+        {
+            var go = new GameObject(DirectionalLightGoName);
+            var light = go.AddComponent<Light>();
+            light.type = LightType.Directional;
+            light.color = WarmSunlight;
+            light.intensity = 1f;
+            light.shadows = LightShadows.Soft;
+            go.transform.rotation = SunRotation;
+        }
+
+        // =====================================================================
+        // Player rig (OVRCameraRig + CC + locomotion + avatar)
+        // =====================================================================
+
         private static bool ValidatePlayerRig()
         {
-            var rig = GameObject.Find("OVRCameraRig");
+            var rig = GameObject.Find(OvrRigName);
             if (rig == null)
             {
-                Debug.LogWarning($"{LOG} [MISSING] OVRCameraRig not found in scene");
+                Debug.LogWarning($"{LOG} [MISSING] {OvrRigName} not found in scene");
                 return false;
             }
 
             bool changed = false;
-
-            // CharacterController
-            var cc = rig.GetComponent<CharacterController>();
-            if (cc == null)
-            {
-                cc = rig.AddComponent<CharacterController>();
-                cc.height = 1.8f;
-                cc.radius = 0.3f;
-                cc.center = new Vector3(0f, 0.9f, 0f);
-                cc.skinWidth = 0.08f;
-                cc.stepOffset = 0.5f;
-                changed = true;
-                Debug.Log($"{LOG} [ADDED] CharacterController on OVRCameraRig");
-            }
-            else
-            {
-                Debug.Log($"{LOG} [OK] CharacterController on OVRCameraRig");
-            }
-
-            // LocomotionController
-            var loco = rig.GetComponent<Plaga44.Locomotion.LocomotionController>();
-            if (loco == null)
-            {
-                loco = rig.AddComponent<Plaga44.Locomotion.LocomotionController>();
-                loco.moveSpeed = 2.5f;
-                loco.strafeFactor = 0.8f;
-                changed = true;
-                Debug.Log($"{LOG} [ADDED] LocomotionController on OVRCameraRig");
-            }
-            else
-            {
-                Debug.Log($"{LOG} [OK] LocomotionController on OVRCameraRig");
-            }
-
-            // SmoothTurnController
-            var turn = rig.GetComponent<Plaga44.Locomotion.SmoothTurnController>();
-            if (turn == null)
-            {
-                turn = rig.AddComponent<Plaga44.Locomotion.SmoothTurnController>();
-                turn.turnSpeed = 120f;
-                turn.deadZone = 0.15f;
-                changed = true;
-                Debug.Log($"{LOG} [ADDED] SmoothTurnController on OVRCameraRig (120 deg/s)");
-            }
-            else
-            {
-                Debug.Log($"{LOG} [OK] SmoothTurnController on OVRCameraRig");
-            }
-
-            // PlayerAvatar -- default state: Mode=None (no avatar), default rig visible
-            var avatar = rig.GetComponent<Plaga44.PlayerAvatar>();
-            if (avatar == null)
-            {
-                avatar = rig.AddComponent<Plaga44.PlayerAvatar>();
-                changed = true;
-                Debug.Log($"{LOG} [ADDED] PlayerAvatar");
-            }
-            else
-            {
-                Debug.Log($"{LOG} [OK] PlayerAvatar");
-            }
-
-            // Force default: Mode=None so player starts as default rig (robot/skeleton)
-            if (avatar.avatarMode != 0)
-            {
-                avatar.avatarMode = 0;
-                changed = true;
-                Debug.Log($"{LOG} [FIX] PlayerAvatar.avatarMode reset to 0 (None)");
-            }
-
-            // Clear legacy prefab override (avatar now loads per-mode from Resources)
-            if (avatar.avatarPrefab != null)
-            {
-                avatar.avatarPrefab = null;
-                changed = true;
-                Debug.Log($"{LOG} [FIX] Cleared PlayerAvatar.avatarPrefab (uses Resources per mode)");
-            }
-
-            // Wire default rig -- search for StylizedCharacterLocomotion (or any child named *StylizedCharacter*)
-            if (avatar.defaultRig == null)
-            {
-                GameObject defRig = GameObject.Find("StylizedCharacterLocomotion");
-                if (defRig == null)
-                {
-                    // fallback: scan children of rig
-                    foreach (var t in rig.GetComponentsInChildren<Transform>(true))
-                        if (t != rig.transform && t.name.Contains("StylizedCharacter")) { defRig = t.gameObject; break; }
-                }
-                if (defRig != null)
-                {
-                    avatar.defaultRig = defRig;
-                    changed = true;
-                    Debug.Log($"{LOG} [FIX] PlayerAvatar.defaultRig -> {defRig.name}");
-                }
-                else
-                {
-                    Debug.LogWarning($"{LOG} [WARN] StylizedCharacterLocomotion not found -- assign defaultRig manually in inspector");
-                }
-            }
-
-            // Ensure default rig is visible at start
-            if (avatar.defaultRig != null && !avatar.defaultRig.activeSelf)
-            {
-                avatar.defaultRig.SetActive(true);
-                changed = true;
-                Debug.Log($"{LOG} [FIX] defaultRig activated");
-            }
-
-            // Always spawn player 1km above terrain
-            var terrain = Object.FindFirstObjectByType<Terrain>();
-            float spawnY = terrain != null ? terrain.terrainData.size.y + 1000f : 1200f;
-            rig.transform.position = new Vector3(0f, spawnY, 0f);
-            Debug.Log($"{LOG} Player placed at (0, {spawnY}, 0)");
-
+            changed |= EnsureCharacterController(rig);
+            changed |= EnsureLocomotion(rig);
+            changed |= EnsureSmoothTurn(rig);
+            changed |= EnsurePlayerAvatar(rig);
+            PlacePlayerAboveTerrain(rig);
             return changed;
         }
 
-        /// <summary>
-        /// Checks if HamburgerMenu exists in scene. If not -- creates GO with component.
-        /// </summary>
-        private static bool ValidateHamburgerMenu()
+        private static bool EnsureCharacterController(GameObject rig)
         {
-            if (Object.FindAnyObjectByType<Plaga44.UI.HamburgerMenu>() != null)
+            return EnsureComponent<CharacterController>(rig, "CharacterController on OVRCameraRig", cc =>
             {
-                Debug.Log($"{LOG} [OK] HamburgerMenu");
+                cc.height = CcHeight;
+                cc.radius = CcRadius;
+                cc.center = CcCenter;
+                cc.skinWidth = CcSkinWidth;
+                cc.stepOffset = CcStepOffset;
+            });
+        }
+
+        private static bool EnsureLocomotion(GameObject rig)
+        {
+            return EnsureComponent<LocomotionController>(rig, "LocomotionController on OVRCameraRig", loco =>
+            {
+                loco.moveSpeed = MoveSpeedDefault;
+                loco.strafeFactor = StrafeFactorDefault;
+            });
+        }
+
+        private static bool EnsureSmoothTurn(GameObject rig)
+        {
+            return EnsureComponent<SmoothTurnController>(rig, "SmoothTurnController on OVRCameraRig (120 deg/s)", turn =>
+            {
+                turn.turnSpeed = TurnSpeedDefault;
+                turn.deadZone = TurnDeadZoneDefault;
+            });
+        }
+
+        private static bool EnsurePlayerAvatar(GameObject rig)
+        {
+            bool changed = EnsureComponent<PlayerAvatar>(rig, "PlayerAvatar", null);
+            var avatar = rig.GetComponent<PlayerAvatar>();
+            changed |= ResetAvatarToDefaultMode(avatar);
+            changed |= ClearLegacyPrefabOverride(avatar);
+            changed |= WireDefaultRig(avatar, rig);
+            changed |= ActivateDefaultRig(avatar);
+            return changed;
+        }
+
+        private static bool ResetAvatarToDefaultMode(PlayerAvatar avatar)
+        {
+            if (avatar.avatarMode == 0) return false;
+            avatar.avatarMode = 0;
+            Debug.Log($"{LOG} [FIX] PlayerAvatar.avatarMode reset to 0 (None)");
+            return true;
+        }
+
+        private static bool ClearLegacyPrefabOverride(PlayerAvatar avatar)
+        {
+            if (avatar.avatarPrefab == null) return false;
+            avatar.avatarPrefab = null;
+            Debug.Log($"{LOG} [FIX] Cleared PlayerAvatar.avatarPrefab (uses Resources per mode)");
+            return true;
+        }
+
+        private static bool WireDefaultRig(PlayerAvatar avatar, GameObject rig)
+        {
+            if (avatar.defaultRig != null) return false;
+            var found = GameObject.Find(DefaultRigName) ?? FindChildContaining(rig.transform, DefaultRigPartialMatch);
+            if (found == null)
+            {
+                Debug.LogWarning($"{LOG} [WARN] {DefaultRigName} not found -- assign defaultRig manually in inspector");
                 return false;
             }
-
-            var menuGO = new GameObject("_HamburgerMenu");
-            menuGO.AddComponent<Plaga44.UI.HamburgerMenu>();
-            Debug.Log($"{LOG} [ADDED] HamburgerMenu");
+            avatar.defaultRig = found;
+            Debug.Log($"{LOG} [FIX] PlayerAvatar.defaultRig -> {found.name}");
             return true;
+        }
+
+        private static bool ActivateDefaultRig(PlayerAvatar avatar)
+        {
+            if (avatar.defaultRig == null || avatar.defaultRig.activeSelf) return false;
+            avatar.defaultRig.SetActive(true);
+            Debug.Log($"{LOG} [FIX] defaultRig activated");
+            return true;
+        }
+
+        private static GameObject FindChildContaining(Transform root, string partialName)
+        {
+            foreach (var t in root.GetComponentsInChildren<Transform>(true))
+                if (t != root && t.name.Contains(partialName)) return t.gameObject;
+            return null;
+        }
+
+        private static void PlacePlayerAboveTerrain(GameObject rig)
+        {
+            var terrain = UnityEngine.Object.FindFirstObjectByType<Terrain>();
+            float y = terrain != null ? terrain.terrainData.size.y + SpawnAboveTerrain : SpawnFallbackY;
+            rig.transform.position = new Vector3(0f, y, 0f);
+            Debug.Log($"{LOG} Player placed at (0, {y}, 0)");
+        }
+
+        // =====================================================================
+        // Scene singletons (HamburgerMenu, SkyRotator)
+        // =====================================================================
+
+        private static bool ValidateHamburgerMenu()
+        {
+            return EnsureSceneSingleton<HamburgerMenu>(HamburgerMenuGoName, "HamburgerMenu", null);
         }
 
         private static bool ValidateSkyRotator()
         {
-            if (Object.FindAnyObjectByType<Plaga44.SkyRotator>() != null)
-            {
-                Debug.Log($"{LOG} [OK] SkyRotator");
-                return false;
-            }
-
-            var go = new GameObject("_SkyRotator");
-            var sr = go.AddComponent<Plaga44.SkyRotator>();
-            sr.rotationSpeed = 0.5f;
-            Debug.Log($"{LOG} [ADDED] SkyRotator (0.5 deg/s)");
-            return true;
+            return EnsureSceneSingleton<SkyRotator>(SkyRotatorGoName, "SkyRotator (0.5 deg/s)",
+                sr => sr.rotationSpeed = SkyRotateSpeedDefault);
         }
 
         // =====================================================================
-        // Avatar Registry -- read-only check (Gallery spawn-uje runtime)
+        // Avatar registry (read-only)
         // =====================================================================
+
         private static void ValidateAvatarRegistry()
         {
-            const string RegistryPath = "Assets/PLAGA44/Resources/AvatarRegistry.asset";
-            var reg = AssetDatabase.LoadAssetAtPath<Plaga44.AvatarRegistry>(RegistryPath);
+            var reg = AssetDatabase.LoadAssetAtPath<Plaga44.AvatarRegistry>(AvatarRegistryPath);
             if (reg == null)
             {
-                Debug.LogWarning($"{LOG} [MISS] AvatarRegistry not found at {RegistryPath}. Run CYBERNOMAD > Import > Rescan Avatars.");
+                Debug.LogWarning($"{LOG} [MISS] AvatarRegistry not found at {AvatarRegistryPath}. Run CYBERNOMAD > Import > Rescan Avatars.");
                 return;
             }
             if (reg.Count == 0)
@@ -448,40 +477,28 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // Inventory / Haptic / Grab -- revolver in RightHip holster on start
+        // Inventory / haptic / grab
         // =====================================================================
+
         private static bool ValidateInventorySystem()
         {
             if (!RevolverPrefabBuilder.EnsurePrefab())
                 Debug.LogWarning($"{LOG} [WARN] Revolver prefab missing -- loadout will fail.");
 
-            var rig = GameObject.Find("OVRCameraRig");
+            var rig = GameObject.Find(OvrRigName);
             if (rig == null)
             {
-                Debug.LogWarning($"{LOG} [MISSING] OVRCameraRig not found -- skipping inventory setup");
+                Debug.LogWarning($"{LOG} [MISSING] {OvrRigName} not found -- skipping inventory setup");
                 return false;
             }
 
             bool changed = false;
-            changed |= EnsureComponent<Plaga44.Feedback.HapticManager>(rig, "HapticManager");
-            changed |= EnsureComponent<Plaga44.Inventory.PlayerInventory>(rig, "PlayerInventory");
-            changed |= EnsureComponent<Plaga44.Inventory.InventoryLoadout>(rig, "InventoryLoadout (RightHip=Revolver)");
-            changed |= EnsureGrabberOnHand(rig, "RightHandAnchor", OVRInput.Controller.RTouch);
-            changed |= EnsureGrabberOnHand(rig, "LeftHandAnchor",  OVRInput.Controller.LTouch);
+            changed |= EnsureComponent<HapticManager>(rig, "HapticManager", null);
+            changed |= EnsureComponent<PlayerInventory>(rig, "PlayerInventory", null);
+            changed |= EnsureComponent<InventoryLoadout>(rig, "InventoryLoadout (RightHip=Revolver)", null);
+            changed |= EnsureGrabberOnHand(rig, RightHandAnchorName, OVRInput.Controller.RTouch);
+            changed |= EnsureGrabberOnHand(rig, LeftHandAnchorName, OVRInput.Controller.LTouch);
             return changed;
-        }
-
-        /// <summary>Generic idempotent "component on GameObject" validator. Returns true if added.</summary>
-        private static bool EnsureComponent<T>(GameObject go, string label) where T : Component
-        {
-            if (go.GetComponent<T>() != null)
-            {
-                Debug.Log($"{LOG} [OK] {label}");
-                return false;
-            }
-            go.AddComponent<T>();
-            Debug.Log($"{LOG} [ADDED] {label} on {go.name}");
-            return true;
         }
 
         private static bool EnsureGrabberOnHand(GameObject rig, string anchorName, OVRInput.Controller ctrl)
@@ -489,57 +506,56 @@ namespace Plaga44.Editor
             var anchor = FindChildByName(rig.transform, anchorName);
             if (anchor == null)
             {
-                Debug.LogWarning($"{LOG} [MISSING] {anchorName} on OVRCameraRig -- grabber not added");
+                Debug.LogWarning($"{LOG} [MISSING] {anchorName} on {OvrRigName} -- grabber not added");
                 return false;
             }
-
             if (anchor.GetComponent<OVRGrabber>() != null)
             {
                 Debug.Log($"{LOG} [OK] OVRGrabber on {anchorName}");
                 return false;
             }
 
-            // Trigger collider (grab volume) -- small sphere in palm
-            var triggerGO = new GameObject("GrabVolume");
-            triggerGO.transform.SetParent(anchor, worldPositionStays: false);
-            triggerGO.transform.localPosition = Vector3.zero;
-            var sph = triggerGO.AddComponent<SphereCollider>();
-            sph.isTrigger = true;
-            sph.radius = 0.08f;
-
-            // OVRGrabber needs a kinematic Rigidbody on its own GO
-            var rb = anchor.GetComponent<Rigidbody>();
-            if (rb == null)
-            {
-                rb = anchor.gameObject.AddComponent<Rigidbody>();
-                rb.isKinematic = true;
-                rb.useGravity = false;
-            }
-
+            var grabVolume = CreateGrabVolume(anchor);
+            EnsureKinematicRigidbody(anchor.gameObject);
             var grabber = anchor.gameObject.AddComponent<OVRGrabber>();
-            ConfigureOVRGrabber(grabber, anchor, sph, ctrl);
+            ConfigureOVRGrabber(grabber, anchor, grabVolume, ctrl);
 
             Debug.Log($"{LOG} [ADDED] OVRGrabber on {anchorName} ({ctrl})");
             return true;
         }
 
-        /// <summary>
-        /// OVRGrabber fields are protected -- configure via reflection.
-        /// Logs SDK-break error if a field name has changed, so upgrades fail loud.
-        /// </summary>
+        private static SphereCollider CreateGrabVolume(Transform parent)
+        {
+            var go = new GameObject(GrabVolumeGoName);
+            go.transform.SetParent(parent, worldPositionStays: false);
+            go.transform.localPosition = Vector3.zero;
+            var sph = go.AddComponent<SphereCollider>();
+            sph.isTrigger = true;
+            sph.radius = GrabVolumeRadius;
+            return sph;
+        }
+
+        private static void EnsureKinematicRigidbody(GameObject go)
+        {
+            var rb = go.GetComponent<Rigidbody>();
+            if (rb != null) return;
+            rb = go.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+        }
+
+        // OVRGrabber fields are protected -- reflection. Logs [SDK BREAK] if Oculus renames a field.
         private static void ConfigureOVRGrabber(OVRGrabber grabber, Transform gripXform, Collider volume, OVRInput.Controller ctrl)
         {
             var t = typeof(OVRGrabber);
-            const System.Reflection.BindingFlags flags =
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
-
-            SetPrivateField(t, grabber, "m_gripTransform",    gripXform,                 flags);
-            SetPrivateField(t, grabber, "m_grabVolumes",      new Collider[] { volume }, flags);
-            SetPrivateField(t, grabber, "m_controller",       ctrl,                      flags);
-            SetPrivateField(t, grabber, "m_parentHeldObject", true,                      flags);
+            const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
+            SetPrivateField(t, grabber, "m_gripTransform", gripXform, flags);
+            SetPrivateField(t, grabber, "m_grabVolumes", new Collider[] { volume }, flags);
+            SetPrivateField(t, grabber, "m_controller", ctrl, flags);
+            SetPrivateField(t, grabber, "m_parentHeldObject", true, flags);
         }
 
-        private static void SetPrivateField(System.Type t, object target, string fieldName, object value, System.Reflection.BindingFlags flags)
+        private static void SetPrivateField(Type t, object target, string fieldName, object value, BindingFlags flags)
         {
             var f = t.GetField(fieldName, flags);
             if (f == null)
@@ -550,7 +566,39 @@ namespace Plaga44.Editor
             f.SetValue(target, value);
         }
 
-        /// <summary>Recursive by-name lookup; mirrors the pattern used for StylizedCharacterLocomotion.</summary>
+        // =====================================================================
+        // Generic helpers
+        // =====================================================================
+
+        /// <summary>Adds component of type T if missing. Runs optional configure(comp) when added.</summary>
+        private static bool EnsureComponent<T>(GameObject go, string label, Action<T> configure) where T : Component
+        {
+            if (go.GetComponent<T>() != null)
+            {
+                Debug.Log($"{LOG} [OK] {label}");
+                return false;
+            }
+            var comp = go.AddComponent<T>();
+            configure?.Invoke(comp);
+            Debug.Log($"{LOG} [ADDED] {label}");
+            return true;
+        }
+
+        /// <summary>Finds component T in scene, otherwise creates new GameObject with given name + T.</summary>
+        private static bool EnsureSceneSingleton<T>(string goName, string label, Action<T> configure) where T : Component
+        {
+            if (UnityEngine.Object.FindAnyObjectByType<T>() != null)
+            {
+                Debug.Log($"{LOG} [OK] {label}");
+                return false;
+            }
+            var go = new GameObject(goName);
+            var comp = go.AddComponent<T>();
+            configure?.Invoke(comp);
+            Debug.Log($"{LOG} [ADDED] {label}");
+            return true;
+        }
+
         private static Transform FindChildByName(Transform root, string name)
         {
             foreach (var t in root.GetComponentsInChildren<Transform>(true))
