@@ -318,6 +318,21 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} [OK] SmoothTurnController on OVRCameraRig");
             }
 
+            // PlayerAvatar
+            var avatar = rig.GetComponent<Plaga44.PlayerAvatar>();
+            if (avatar == null)
+            {
+                avatar = rig.AddComponent<Plaga44.PlayerAvatar>();
+                avatar.avatarPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/PLAGA44/Player/Survivor_A_Lusth.fbx");
+                changed = true;
+                Debug.Log($"{LOG} [ADDED] PlayerAvatar (Survivor_A_Lusth)");
+            }
+            else
+            {
+                Debug.Log($"{LOG} [OK] PlayerAvatar");
+            }
+
             // Always spawn player 1km above terrain
             var terrain = Object.FindFirstObjectByType<Terrain>();
             float spawnY = terrain != null ? terrain.terrainData.size.y + 1000f : 1200f;
