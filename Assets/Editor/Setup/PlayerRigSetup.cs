@@ -134,12 +134,17 @@ namespace Plaga44.Editor.Setup
 
         private static void SpawnAboveTerrain(GameObject rig, BootstrapConfig cfg)
         {
+            if (!cfg.stratoJump)
+            {
+                Debug.Log($"{LOG} StratoJump OFF -- spawn position unchanged");
+                return;
+            }
             var terrain = Object.FindFirstObjectByType<Terrain>();
             float y = terrain != null
                 ? terrain.terrainData.size.y + cfg.spawnAboveTerrain
                 : cfg.spawnAboveTerrain;
             rig.transform.position = new Vector3(0f, y, 0f);
-            Debug.Log($"{LOG} Spawn at Y={y} (falls onto terrain in Play Mode)");
+            Debug.Log($"{LOG} [StratoJump] Spawn at Y={y}");
         }
 
         private static GameObject FindChildContaining(Transform root, string partial)

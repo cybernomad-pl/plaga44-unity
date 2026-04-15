@@ -45,8 +45,13 @@ namespace Plaga44
 
         [Header("Player Spawn")]
         public float spawnAboveTerrain = 1000f;
+        [Tooltip("Gracz spawnuje 1km nad terenem i opada w Play Mode. Wylacz jesli chcesz testowac bez skoku.")]
+        public bool stratoJump = true;
 
         [Header("Grab Volume")]
         public float grabVolumeRadius = 0.08f;
+
+        [Header("Avatar Registry")]
+        public string avatarRegistryPath = "Assets/PLAGA44/Resources/AvatarRegistry.asset";
     }
 }

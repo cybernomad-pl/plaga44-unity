@@ -12,14 +12,13 @@ namespace Plaga44.Editor.Setup
     public static class AvatarRegistrySetup
     {
         private const string LOG = "[PLAGA44][AvatarRegistrySetup]";
-        private const string RegistryPath = "Assets/PLAGA44/Resources/AvatarRegistry.asset";
 
-        public static void Run()
+        public static void Run(BootstrapConfig cfg)
         {
-            var reg = AssetDatabase.LoadAssetAtPath<AvatarRegistry>(RegistryPath);
+            var reg = AssetDatabase.LoadAssetAtPath<AvatarRegistry>(cfg.avatarRegistryPath);
             if (reg == null)
             {
-                Debug.LogWarning($"{LOG} [MISSING] AvatarRegistry not found. Run CYBERNOMAD > Import > Rescan Avatars.");
+                Debug.LogWarning($"{LOG} [MISSING] AvatarRegistry not found at {cfg.avatarRegistryPath}. Run CYBERNOMAD > Import > Rescan Avatars.");
                 return;
             }
             if (reg.Count == 0)

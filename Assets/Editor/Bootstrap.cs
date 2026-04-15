@@ -2,7 +2,10 @@
 // Bootstrap.cs
 // CYBERNOMAD -- jeden entry point, orkiestrator setupu sceny PLAGA '44.
 // Uruchamia sie automatycznie przy starcie edytora (InitializeOnLoad).
-// Menu: CYBERNOMAD > Bootstrap
+//
+// Menu:
+//   CYBERNOMAD > Bootstrap          -- pelny setup sceny
+//   CYBERNOMAD > StratoJump Toggle  -- wlacz/wylacz spawn ponad terenem
 //
 // Konfiguracja: Assets/PLAGA44/Config/BootstrapConfig_Quest.asset
 // Setup rozdzielony na osobne klasy w Assets/Editor/Setup/
@@ -24,7 +27,7 @@ namespace Plaga44.Editor
         private const string SessionKey = "Plaga44.Bootstrap.Done";
 
         // =====================================================================
-        // Entry points
+        // Auto-run przy starcie edytora
         // =====================================================================
 
         static Bootstrap() => EditorApplication.delayCall += AutoRun;
@@ -43,14 +46,37 @@ namespace Plaga44.Editor
             Run();
         }
 
+        // =====================================================================
+        // Menu items
+        // =====================================================================
+
         [MenuItem("CYBERNOMAD/Bootstrap", false, 1)]
         public static void Run()
         {
             var cfg = LoadConfig();
             if (cfg == null) return;
-
             OpenScene(cfg);
             EditorApplication.delayCall += () => RunSetup(cfg);
+        }
+
+        [MenuItem("CYBERNOMAD/StratoJump Toggle", false, 50)]
+        public static void ToggleStratoJump()
+        {
+            var cfg = AssetDatabase.LoadAssetAtPath<BootstrapConfig>(ConfigPath);
+            if (cfg == null) { Debug.LogWarning($"{LOG} Config not found"); return; }
+            cfg.stratoJump = !cfg.stratoJump;
+            EditorUtility.SetDirty(cfg);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"{LOG} StratoJump: {(cfg.stratoJump ? "ON" : "OFF")}");
+        }
+
+        // Checkmark w menu pokazuje aktualny stan
+        [MenuItem("CYBERNOMAD/StratoJump Toggle", true)]
+        private static bool ToggleStratoJumpValidate()
+        {
+            var cfg = AssetDatabase.LoadAssetAtPath<BootstrapConfig>(ConfigPath);
+            Menu.SetChecked("CYBERNOMAD/StratoJump Toggle", cfg != null && cfg.stratoJump);
+            return true;
         }
 
         // =====================================================================
@@ -62,19 +88,13 @@ namespace Plaga44.Editor
             var cfg = AssetDatabase.LoadAssetAtPath<BootstrapConfig>(ConfigPath);
             if (cfg != null) return cfg;
 
-            Debug.Log($"{LOG} Config not found -- creating default Quest config at {ConfigPath}");
-            EnsureFolder("Assets/PLAGA44", "Config");
+            Debug.Log($"{LOG} Config not found -- creating default Quest config");
+            BootstrapUtils.EnsureFolder("Assets/PLAGA44", "Config");
             cfg = ScriptableObject.CreateInstance<BootstrapConfig>();
             AssetDatabase.CreateAsset(cfg, ConfigPath);
             AssetDatabase.SaveAssets();
-            Debug.Log($"{LOG} [CREATED] {ConfigPath} -- edit values in Inspector if needed");
+            Debug.Log($"{LOG} [CREATED] {ConfigPath}");
             return cfg;
-        }
-
-        private static void EnsureFolder(string parent, string name)
-        {
-            if (!AssetDatabase.IsValidFolder($"{parent}/{name}"))
-                AssetDatabase.CreateFolder(parent, name);
         }
 
         // =====================================================================
@@ -97,12 +117,12 @@ namespace Plaga44.Editor
         }
 
         // =====================================================================
-        // Setup orchestration
+        // Setup
         // =====================================================================
 
         private static void RunSetup(BootstrapConfig cfg)
         {
-            Debug.Log($"{LOG} === Setup start ===");
+            Debug.Log($"{LOG} === Setup start (StratoJump: {(cfg.stratoJump ? "ON" : "OFF")}) ===");
             bool changed = false;
 
             changed |= TerrainSetup.Run(cfg);
@@ -110,7 +130,7 @@ namespace Plaga44.Editor
             changed |= PlayerRigSetup.Run(cfg);
             changed |= InventorySetup.Run(cfg);
             changed |= SceneSingletonsSetup.Run(cfg);
-            AvatarRegistrySetup.Run();
+            AvatarRegistrySetup.Run(cfg);
 
             if (changed)
             {

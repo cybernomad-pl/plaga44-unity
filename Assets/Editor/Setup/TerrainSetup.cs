@@ -95,7 +95,7 @@ namespace Plaga44.Editor.Setup
                 return false;
             }
 
-            EnsureFolder("Assets/PLAGA44", "Materials");
+            BootstrapUtils.EnsureFolder("Assets/PLAGA44", "Materials");
             var mat = new Material(shader) { name = "TerrainLit" };
             AssetDatabase.CreateAsset(mat, cfg.terrainMaterialPath);
             AssetDatabase.SaveAssets();
@@ -109,7 +109,9 @@ namespace Plaga44.Editor.Setup
         private static bool SetupTerrainLayers(Terrain terrain, BootstrapConfig cfg)
         {
             var data = terrain.terrainData;
-            if (data.terrainLayers != null && data.terrainLayers.Length > 0)
+            // Sprawdz czy sa warstwy -- ale ignoruj tablice pelna nulli (usuniety asset)
+            if (data.terrainLayers != null && data.terrainLayers.Length > 0
+                && System.Array.Exists(data.terrainLayers, l => l != null))
             {
                 Debug.Log($"{LOG} [OK] Terrain layers: {data.terrainLayers.Length}");
                 return false;
@@ -135,11 +137,6 @@ namespace Plaga44.Editor.Setup
             return true;
         }
 
-        private static void EnsureFolder(string parent, string name)
-        {
-            if (!AssetDatabase.IsValidFolder($"{parent}/{name}"))
-                AssetDatabase.CreateFolder(parent, name);
-        }
     }
 }
 #endif
