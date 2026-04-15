@@ -22,7 +22,7 @@ namespace Plaga44.Editor
     public static class Bootstrap
     {
         // ---- Paths ---------------------------------------------------------
-        private const string ScenePath = "Assets/PLAGA44/TESTBED.unity";
+        private const string ScenePath = "Assets/PLAGA44/TESTBED_V6.unity";
         private const string TerrainAsset = "Assets/Potok/Terrain/Scene_A_Terrain.asset";
         private const string TerrainMatPath = "Assets/PLAGA44/Materials/TerrainLit.mat";
         private const string TerrainMatFolderParent = "Assets/PLAGA44";
@@ -209,6 +209,7 @@ namespace Plaga44.Editor
             var terrainGO = Terrain.CreateTerrainGameObject(data);
             terrainGO.name = TerrainGoName;
             terrainGO.transform.position = new Vector3(-data.size.x * 0.5f, 0f, -data.size.z * 0.5f);
+            Undo.RegisterCreatedObjectUndo(terrainGO, "Bootstrap: Add Terrain");
 
             Debug.Log($"{LOG} [ADDED] Terrain: {data.size.x:F0}x{data.size.z:F0}m, centered");
             return terrainGO.GetComponent<Terrain>();
@@ -316,6 +317,7 @@ namespace Plaga44.Editor
             light.intensity = 1f;
             light.shadows = LightShadows.Soft;
             go.transform.rotation = SunRotation;
+            Undo.RegisterCreatedObjectUndo(go, "Bootstrap: Add Directional Light");
         }
 
         // =====================================================================
@@ -518,8 +520,20 @@ namespace Plaga44.Editor
             var grabVolume = CreateGrabVolume(anchor);
             EnsureKinematicRigidbody(anchor.gameObject);
             var grabber = anchor.gameObject.AddComponent<OVRGrabber>();
-            ConfigureOVRGrabber(grabber, anchor, grabVolume, ctrl);
 
+            if (!ConfigureOVRGrabber(grabber, anchor, grabVolume, ctrl))
+            {
+                // Reflection failed -- at least one SDK field was not found.
+                // Remove what we added to avoid a misconfigured grabber in the scene.
+                Debug.LogError($"{LOG} [SDK BREAK] OVRGrabber on {anchorName} could not be configured -- removing to prevent silent failure. Check field names in ConfigureOVRGrabber.");
+                UnityEngine.Object.DestroyImmediate(grabber);
+                UnityEngine.Object.DestroyImmediate(grabVolume.gameObject);
+                var rb = anchor.GetComponent<Rigidbody>();
+                if (rb != null) UnityEngine.Object.DestroyImmediate(rb);
+                return false;
+            }
+
+            Undo.RegisterCreatedObjectUndo(grabVolume.gameObject, $"Bootstrap: Add GrabVolume on {anchorName}");
             Debug.Log($"{LOG} [ADDED] OVRGrabber on {anchorName} ({ctrl})");
             return true;
         }
@@ -544,33 +558,37 @@ namespace Plaga44.Editor
             rb.useGravity = false;
         }
 
-        // OVRGrabber fields are protected -- reflection. Logs [SDK BREAK] if Oculus renames a field.
-        private static void ConfigureOVRGrabber(OVRGrabber grabber, Transform gripXform, Collider volume, OVRInput.Controller ctrl)
+        // OVRGrabber fields are protected -- set via reflection.
+        // Returns true if ALL fields were found and set. False = SDK renamed a field.
+        private static bool ConfigureOVRGrabber(OVRGrabber grabber, Transform gripXform, Collider volume, OVRInput.Controller ctrl)
         {
             var t = typeof(OVRGrabber);
             const BindingFlags flags = BindingFlags.NonPublic | BindingFlags.Instance;
-            SetPrivateField(t, grabber, "m_gripTransform", gripXform, flags);
-            SetPrivateField(t, grabber, "m_grabVolumes", new Collider[] { volume }, flags);
-            SetPrivateField(t, grabber, "m_controller", ctrl, flags);
-            SetPrivateField(t, grabber, "m_parentHeldObject", true, flags);
+            bool ok = true;
+            ok &= SetPrivateField(t, grabber, "m_gripTransform", gripXform, flags);
+            ok &= SetPrivateField(t, grabber, "m_grabVolumes", new Collider[] { volume }, flags);
+            ok &= SetPrivateField(t, grabber, "m_controller", ctrl, flags);
+            ok &= SetPrivateField(t, grabber, "m_parentHeldObject", true, flags);
+            return ok;
         }
 
-        private static void SetPrivateField(Type t, object target, string fieldName, object value, BindingFlags flags)
+        private static bool SetPrivateField(Type t, object target, string fieldName, object value, BindingFlags flags)
         {
             var f = t.GetField(fieldName, flags);
             if (f == null)
             {
                 Debug.LogError($"{LOG} [SDK BREAK] {t.Name}.{fieldName} not found -- Oculus SDK likely renamed this field. Update ConfigureOVRGrabber.");
-                return;
+                return false;
             }
             f.SetValue(target, value);
+            return true;
         }
 
         // =====================================================================
         // Generic helpers
         // =====================================================================
 
-        /// <summary>Adds component of type T if missing. Runs optional configure(comp) when added.</summary>
+        /// <summary>Adds component of type T if missing. Runs optional configure(comp) when added. Registers Undo.</summary>
         private static bool EnsureComponent<T>(GameObject go, string label, Action<T> configure) where T : Component
         {
             if (go.GetComponent<T>() != null)
@@ -578,13 +596,13 @@ namespace Plaga44.Editor
                 Debug.Log($"{LOG} [OK] {label}");
                 return false;
             }
-            var comp = go.AddComponent<T>();
+            var comp = Undo.AddComponent<T>(go);
             configure?.Invoke(comp);
             Debug.Log($"{LOG} [ADDED] {label}");
             return true;
         }
 
-        /// <summary>Finds component T in scene, otherwise creates new GameObject with given name + T.</summary>
+        /// <summary>Finds component T in scene, otherwise creates new GameObject with given name + T. Registers Undo.</summary>
         private static bool EnsureSceneSingleton<T>(string goName, string label, Action<T> configure) where T : Component
         {
             if (UnityEngine.Object.FindAnyObjectByType<T>() != null)
@@ -593,6 +611,7 @@ namespace Plaga44.Editor
                 return false;
             }
             var go = new GameObject(goName);
+            Undo.RegisterCreatedObjectUndo(go, $"Bootstrap: Add {label}");
             var comp = go.AddComponent<T>();
             configure?.Invoke(comp);
             Debug.Log($"{LOG} [ADDED] {label}");
