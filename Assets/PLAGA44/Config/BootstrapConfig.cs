@@ -26,6 +26,7 @@ namespace Plaga44
         public Color sunColor = new Color(1f, 0.95f, 0.84f);
         public float sunIntensity = 1f;
         public Vector3 sunRotation = new Vector3(50f, -30f, 0f);
+        public LightShadows sunShadows = LightShadows.Soft;
 
         [Header("Character Controller")]
         public float ccHeight = 1.8f;

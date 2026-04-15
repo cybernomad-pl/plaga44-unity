@@ -54,11 +54,11 @@ namespace Plaga44.Editor.Setup
             l.type = LightType.Directional;
             l.color = cfg.sunColor;
             l.intensity = cfg.sunIntensity;
-            l.shadows = LightShadows.Soft;
+            l.shadows = cfg.sunShadows;
             go.transform.rotation = Quaternion.Euler(cfg.sunRotation);
             Undo.RegisterCreatedObjectUndo(go, "Bootstrap: Add Directional Light");
 
-            Debug.Log($"{LOG} [ADDED] Directional Light");
+            Debug.Log($"{LOG} [ADDED] Directional Light (shadows: {cfg.sunShadows})");
             return true;
         }
     }
