@@ -60,9 +60,21 @@ namespace Plaga44.Editor
         private static BootstrapConfig LoadConfig()
         {
             var cfg = AssetDatabase.LoadAssetAtPath<BootstrapConfig>(ConfigPath);
-            if (cfg == null)
-                Debug.LogError($"{LOG} Config not found: {ConfigPath}. Create via Assets > Create > PLAGA44 > Bootstrap Config.");
+            if (cfg != null) return cfg;
+
+            Debug.Log($"{LOG} Config not found -- creating default Quest config at {ConfigPath}");
+            EnsureFolder("Assets/PLAGA44", "Config");
+            cfg = ScriptableObject.CreateInstance<BootstrapConfig>();
+            AssetDatabase.CreateAsset(cfg, ConfigPath);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"{LOG} [CREATED] {ConfigPath} -- edit values in Inspector if needed");
             return cfg;
+        }
+
+        private static void EnsureFolder(string parent, string name)
+        {
+            if (!AssetDatabase.IsValidFolder($"{parent}/{name}"))
+                AssetDatabase.CreateFolder(parent, name);
         }
 
         // =====================================================================
