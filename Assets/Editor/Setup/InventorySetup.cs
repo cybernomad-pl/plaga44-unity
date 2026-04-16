@@ -75,10 +75,10 @@ namespace Plaga44.Editor.Setup
             if (!ConfigureGrabber(grabber, anchor, volume, ctrl))
             {
                 Debug.LogError($"{LOG} [SDK BREAK] OVRGrabber on {anchorName} not configured -- removing. Check field names.");
-                Object.DestroyImmediate(grabber);
-                Object.DestroyImmediate(volume.gameObject);
+                UnityEngine.Object.DestroyImmediate(grabber);
+                UnityEngine.Object.DestroyImmediate(volume.gameObject);
                 var rb = anchor.GetComponent<Rigidbody>();
-                if (rb != null) Object.DestroyImmediate(rb);
+                if (rb != null) UnityEngine.Object.DestroyImmediate(rb);
                 return false;
             }
 

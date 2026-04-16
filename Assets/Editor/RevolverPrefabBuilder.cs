@@ -76,7 +76,7 @@ namespace Plaga44.Editor
 
         private static GameObject BuildRevolverInstance(GameObject fbx)
         {
-            var instance = Object.Instantiate(fbx);
+            var instance = UnityEngine.Object.Instantiate(fbx);
             instance.name = PrefabInstanceName;
             AttachPhysics(instance);
             AttachCollider(instance, ComputeRendererBounds(instance));
@@ -112,7 +112,7 @@ namespace Plaga44.Editor
         private static bool SaveAsResourcesPrefab(GameObject instance, Bounds bounds)
         {
             var prefab = PrefabUtility.SaveAsPrefabAsset(instance, PrefabPath, out bool success);
-            Object.DestroyImmediate(instance);
+            UnityEngine.Object.DestroyImmediate(instance);
             if (success && prefab != null) return true;
             Debug.LogError($"{LOG} Failed to save prefab at {PrefabPath}");
             return false;

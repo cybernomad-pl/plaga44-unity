@@ -43,15 +43,19 @@ namespace Plaga44.UI
         private static class PrefsKeys
         {
             private const string CurrentPrefix = "Plaga44_Current_";
+            private const string DefaultPrefix = "Plaga44_Default_";
             private const string PresetPrefix = "Plaga44_Preset";
             private const string CountSuffix = "__count";
             private const string SavedAtSuffix = "__savedAt";
 
             public static string Current(string section, string name) => $"{CurrentPrefix}{section}_{name}";
+            public static string Default(string section, string name) => $"{DefaultPrefix}{section}_{name}";
             public static string PresetValue(int slot, string name) => $"{PresetPrefix}{slot}_{name}";
             public static string PresetCount(int slot) => $"{PresetPrefix}{slot}_{CountSuffix}";
             public static string PresetSavedAt(int slot) => $"{PresetPrefix}{slot}_{SavedAtSuffix}";
         }
+
+        private static string DefaultsDictKey(string section, string name) => $"{section}_{name}";
 
         /// <summary>Nazwy slotow presetów.</summary>
         private static string GetSlotName(int slot) => slot switch
@@ -140,8 +144,20 @@ namespace Plaga44.UI
         private static void CaptureDefaults()
         {
             _defaults = new Dictionary<string, float>();
-            foreach (var s in _allSettings)
-                _defaults[s.name] = s.get();
+            foreach (var kv in _sec)
+            {
+                if (NON_PERSISTENT_SECTIONS.Contains(kv.Key)) continue;
+                foreach (var s in kv.Value)
+                {
+                    if (s.step <= 0) continue; // skip read-only / actions
+                    string dictKey = DefaultsDictKey(kv.Key, s.name);
+                    // Prefer persisted defaults (from SaveCurrentAsDefaults) over live scene value
+                    string prefKey = PrefsKeys.Default(kv.Key, s.name);
+                    _defaults[dictKey] = PlayerPrefs.HasKey(prefKey)
+                        ? PlayerPrefs.GetFloat(prefKey)
+                        : s.get();
+                }
+            }
             Debug.Log($"[PLAGA44][Settings] Captured {_defaults.Count} default values");
         }
 
@@ -149,15 +165,44 @@ namespace Plaga44.UI
         {
             if (_defaults == null) { SetAction("RESET FAILED -- no defaults captured", false); return; }
             int count = 0;
-            foreach (var s in _allSettings)
+            foreach (var kv in _sec)
             {
-                if (_defaults.TryGetValue(s.name, out float val))
+                if (NON_PERSISTENT_SECTIONS.Contains(kv.Key)) continue;
+                foreach (var s in kv.Value)
                 {
-                    s.set(Mathf.Clamp(val, s.min, s.max));
-                    count++;
+                    if (s.step <= 0) continue;
+                    string dictKey = DefaultsDictKey(kv.Key, s.name);
+                    if (_defaults.TryGetValue(dictKey, out float val))
+                    {
+                        s.set(Mathf.Clamp(val, s.min, s.max));
+                        count++;
+                    }
                 }
             }
             SetAction($"RESET {count} values to defaults", true);
+        }
+
+        /// <summary>Zapisuje biezace wartosci jako nowe domyslne.
+        /// Po tej operacji RESET ALL przywroci do stanu z tego momentu, nie ze startu aplikacji.</summary>
+        public static void SaveCurrentAsDefaults()
+        {
+            if (!_built) Build();
+            int count = 0;
+            foreach (var kv in _sec)
+            {
+                if (NON_PERSISTENT_SECTIONS.Contains(kv.Key)) continue;
+                foreach (var s in kv.Value)
+                {
+                    if (s.step <= 0) continue;
+                    float val = s.get();
+                    PlayerPrefs.SetFloat(PrefsKeys.Default(kv.Key, s.name), val);
+                    _defaults[DefaultsDictKey(kv.Key, s.name)] = val;
+                    count++;
+                }
+            }
+            PlayerPrefs.Save();
+            PendingSave = false;
+            SetAction($"DEFAULTS SET ({count} values saved)", true);
         }
 
         // =====================================================================
@@ -579,7 +624,8 @@ namespace Plaga44.UI
                     s.Add(S($"SAVE {sl}:{slotName}", $"Save all settings to slot {sl}", () => 0, v => { if(v>0.5f) SavePreset(sl); }, 0, 1, 1, "F0"));
                     s.Add(S($"LOAD {sl}:{slotName}", $"Load settings from slot {sl}", () => 0, v => { if(v>0.5f) LoadPreset(sl); }, 0, 1, 1, "F0"));
                 }
-                s.Add(S("RESET ALL", "Reset all settings to startup defaults", () => 0, v => { if(v>0.5f) ResetToDefaults(); }, 0, 1, 1, "F0"));
+                s.Add(S("SET DEFAULTS", "Save current values as new defaults (RESET will restore these)", () => 0, v => { if(v>0.5f) SaveCurrentAsDefaults(); }, 0, 1, 1, "F0"));
+                s.Add(S("RESET ALL", "Reset all settings to saved defaults", () => 0, v => { if(v>0.5f) ResetToDefaults(); }, 0, 1, 1, "F0"));
                 s.Add(S("LOG ALL", "Print all settings to console", () => 0, v => { if(v>0.5f) LogAll(); }, 0, 1, 1, "F0"));
             });
 

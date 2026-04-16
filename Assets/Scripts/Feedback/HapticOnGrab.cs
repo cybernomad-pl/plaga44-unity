@@ -5,7 +5,7 @@
 //
 // Mass influence: heavier = stronger amplitude (configurable curve).
 // Integration: call OnGrab(controller) / OnRelease(controller) from grab system.
-// Used by OVRGrabbable wrapper (PlagaOVRGrabbable) -- no manual wiring needed.
+// Used by OVRGrabbable wrapper (PlagaGrabbable) -- no manual wiring needed.
 // =============================================================================
 
 using UnityEngine;
