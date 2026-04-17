@@ -79,8 +79,12 @@ namespace Plaga44.Locomotion
         private Stance _currentStance = Stance.Stand;
 
         // Thresholds
+        // Issue #139: Borys reports 'R thumbstick UP nie łapie zawsze że jest wciśnięty'.
+        // Lowered from 0.25 -> 0.15 (lighter push required to start fly).
+        // Hysteresis: separate higher threshold for initial latch, lower for release (prevents flicker).
         private const float StickDownThreshold = 0.3f;
-        private const float StickUpThreshold = 0.25f;
+        private const float StickUpThreshold = 0.15f;     // was 0.25 -- easier to trigger fly
+        private const float StickUpReleaseThreshold = 0.05f; // hysteresis below = stop fly
         private const float GroundedPullDown = -2f;
         private const float InputDeadZoneSqr = 0.01f;
         private const float GroundedLogThrottleSec = 0.5f;
@@ -210,7 +214,9 @@ namespace Plaga44.Locomotion
                     break;
 
                 case FlyState.Ascending:
-                    if (rightY > StickUpThreshold)
+                    // Hysteresis: once ascending, use LOWER threshold to keep ascending.
+                    // Prevents flicker when stick is near the UP threshold (issue #139).
+                    if (rightY > StickUpReleaseThreshold)
                     {
                         // Accelerating upward
                         _flySpeed += flyAcceleration * _dt;
