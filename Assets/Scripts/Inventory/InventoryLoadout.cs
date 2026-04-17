@@ -30,13 +30,21 @@ namespace Plaga44.Inventory
         }
 
         [Header("Starting Loadout")]
-        public List<LoadoutEntry> startingItems = new List<LoadoutEntry>
-        {
-            new LoadoutEntry { holsterId = "RightHip", resourcePath = "Items/Revolver", enabled = true }
-        };
+        [Tooltip("DEPRECATED per issue #163 -- holster system disabled. Items now spawn in-hand via ObjectSpawner. Keep list empty or set enabled=false.")]
+        public List<LoadoutEntry> startingItems = new List<LoadoutEntry>(); // empty by default
+
+        [Header("Enable Loadout (deprecated)")]
+        [Tooltip("Issue #163: holster loadout disabled by default. Enable only for legacy test.")]
+        public bool enableLoadout = false;
 
         private IEnumerator Start()
         {
+            if (!enableLoadout)
+            {
+                Debug.Log($"{LOG} DISABLED -- holster loadout deprecated (issue #163). Use ObjectSpawner instead.");
+                yield break;
+            }
+
             // Wait one frame so PlayerInventory.Awake() has created anchors.
             yield return null;
 
