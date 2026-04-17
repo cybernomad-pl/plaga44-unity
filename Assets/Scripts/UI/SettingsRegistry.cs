@@ -239,6 +239,8 @@ namespace Plaga44.UI
             if (loco != null) Sec("LOCOMOTION", s => {
                 s.Add(S("Move Speed", "Walk speed m/s", () => loco.moveSpeed, v => loco.moveSpeed=v, 0.5f, 10, 0.5f));
                 s.Add(S("Strafe", "Strafe speed multiplier (0.8=80%)", () => loco.strafeFactor, v => loco.strafeFactor=v, 0.1f, 1, 0.05f, "F2"));
+                s.Add(S("Fly Accel", "Fly acceleration m/s^2 while R stick UP held", () => loco.flyAcceleration, v => loco.flyAcceleration=v, 1f, 50f, 1f, "F0"));
+                s.Add(S("Fly Max Speed", "Max fly speed cap m/s", () => loco.flyMaxSpeed, v => loco.flyMaxSpeed=v, 5f, 50f, 1f, "F0"));
                 s.Add(S("Speed (RO)", "Current normalised speed (0-1)", () => loco.NormalisedSpeed, v => {}, 0, 1, 0, "F2"));
                 s.Add(S("VVel (RO)", "Vertical velocity (fall/jump)", () => loco.VerticalVelocity, v => {}, -100, 100, 0, "F1"));
                 s.Add(S("Grounded", "Is player grounded (RO)", () => loco.IsGrounded?1:0, v => {}, 0, 1, 0, "F0"));

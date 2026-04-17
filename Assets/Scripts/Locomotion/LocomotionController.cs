@@ -42,10 +42,10 @@ namespace Plaga44.Locomotion
 
         [Header("Fly (R thumbstick UP)")]
         [Tooltip("Fly acceleration (m/s^2). Speed increases while held.")]
-        public float flyAcceleration = 5f;
+        public float flyAcceleration = 10f;
 
-        [Tooltip("Max fly speed cap (m/s).")]
-        public float flyMaxSpeed = 8f;
+        [Tooltip("Max fly speed cap (m/s). Default 25 (~90 km/h).")]
+        public float flyMaxSpeed = 25f;
 
         [Header("Stance (R thumbstick DOWN)")]
         [Tooltip("CC height when standing (captured from CC at Awake).")]
