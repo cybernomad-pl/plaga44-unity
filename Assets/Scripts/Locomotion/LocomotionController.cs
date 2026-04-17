@@ -235,16 +235,17 @@ namespace Plaga44.Locomotion
                 case FlyState.Hovering:
                     if (rightY > StickUpThreshold)
                     {
-                        // Boost again
+                        // R stick UP -> normal fly up (NOT boost). Start from 0, accelerate normally.
+                        // Issue #162: 'jak jesteś hover to góra to góra i tyle' -- no special boost treatment.
                         _flyState = FlyState.Ascending;
-                        _flySpeed = 1f; // start with some speed
-                        Debug.Log($"{LOG} Fly: ASCENDING (from hover)");
+                        _flySpeed = 0f;
+                        Debug.Log($"{LOG} Fly: ASCENDING (from hover, normal accel)");
                     }
                     else if (rightY < -StickDownThreshold)
                     {
-                        // Stick DOWN -- drop, gravity returns
+                        // R stick DOWN -> end flight, gravity takes over (player falls)
                         EndFlight();
-                        Debug.Log($"{LOG} Fly: DROPPING");
+                        Debug.Log($"{LOG} Fly: DROPPING (R stick DOWN in hover)");
                     }
                     else
                     {
