@@ -31,8 +31,34 @@ namespace Plaga44.Editor.Setup
             changed |= SetupLocomotion(rig, cfg);
             changed |= SetupSmoothTurn(rig, cfg);
             changed |= SetupPlayerAvatar(rig);
+            changed |= SetupPositionPersistence(rig, cfg);
             changed |= SnapRigToGround(rig);
             return changed;
+        }
+
+        // PlayerPositionPersistence saves/restores rig position between sessions.
+        // If cfg.savePlayerPosition = true, adds the component (restore on Start, save on quit).
+        private static bool SetupPositionPersistence(GameObject rig, BootstrapConfig cfg)
+        {
+            var existing = rig.GetComponent<PlayerPositionPersistence>();
+            if (cfg.savePlayerPosition)
+            {
+                if (existing != null)
+                {
+                    Debug.Log($"{LOG} [OK] PlayerPositionPersistence (already present)");
+                    return false;
+                }
+                Undo.AddComponent<PlayerPositionPersistence>(rig);
+                Debug.Log($"{LOG} [ADDED] PlayerPositionPersistence (cfg.savePlayerPosition=true)");
+                return true;
+            }
+            else if (existing != null)
+            {
+                Undo.DestroyObjectImmediate(existing);
+                Debug.Log($"{LOG} [REMOVED] PlayerPositionPersistence (cfg.savePlayerPosition=false)");
+                return true;
+            }
+            return false;
         }
 
         // Snap rig to terrain ground level so player doesn't spawn 42m up in the air.

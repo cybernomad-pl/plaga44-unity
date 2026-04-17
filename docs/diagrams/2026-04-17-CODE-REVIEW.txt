@@ -1,0 +1,362 @@
+PLAGA '44 TESTBED V6 -- GRUNTOWNY CODE REVIEW 2026-04-17
+===========================================================
+
+Review po linijce, klasa po klasie. Szukamy:
+  - Błędów logicznych
+  - Race conditions
+  - Złamania SOLID (SRP/OCP/LSP/ISP/DIP)
+  - Memory leaks
+  - Hidden dependencies
+  - Anti-patterns
+
+═══════════════════════════════════════════════════════════════════
+  CZĘŚĆ 1 -- DIAGRAM PEŁNEJ LOGIKI
+═══════════════════════════════════════════════════════════════════
+
+  EDITOR LOAD (Bootstrap):
+  ┌────────────────────────────────────────────────────────────────┐
+  │ [InitializeOnLoad] Bootstrap.cctor()                           │
+  │   EditorApplication.update += WaitForReady                     │
+  │     (poll every tick until !isCompiling && !isUpdating)        │
+  │       ↓                                                         │
+  │   Run() → LoadConfig → OpenScene → delayCall(RunSetup)         │
+  │       ↓                                                         │
+  │   RunSetup() -- 8 STEPS sekwencyjnie:                          │
+  │     TerrainSetup → SkyboxSetup → BounceLightSetup              │
+  │     PlayerRigSetup → InventorySetup → SceneSingletonsSetup     │
+  │     ObjectSpawnerSetup → AvatarRegistrySetup                   │
+  │       ↓                                                         │
+  │   SaveOpenScenes if changed                                    │
+  └────────────────────────────────────────────────────────────────┘
+
+  PLAY MODE LOAD:
+  ┌────────────────────────────────────────────────────────────────┐
+  │ [BeforeSceneLoad] RetargeterGuard.Install                      │
+  │   replaces Debug.unityLogger.logHandler globally               │
+  │       ↓                                                         │
+  │ Scene Awake() in execution order (-100 first):                 │
+  │   HapticManager.Awake → DontDestroyOnLoad                      │
+  │   AvatarGallery.Awake → static Instance                        │
+  │   ItemBrowser.Awake → static Instance                          │
+  │   PlayerAvatar.Awake → _cached static                          │
+  │   HamburgerMenu.Awake → static Instance                        │
+  │   PlagaGrabber.Awake → grabEnd=-1 (toggle mode)                │
+  │   LocomotionController.Awake → cache CC, headTransform         │
+  │       ↓                                                         │
+  │ [AfterSceneLoad] AutoBoot fallbacks (Gallery, ItemBrowser,     │
+  │                  ObjectSpawner -- only if not in scene)        │
+  │       ↓                                                         │
+  │ Scene Start() in execution order:                              │
+  │   AvatarGallery.Start → TryLoadRegistry, defer spawn           │
+  │   PlayerAvatar.Start → restore PlayerPrefs, SetAvatarMode      │
+  │     - mode=0: ShowDefaultRig(true) + Gallery.SetActiveIndex(-1)│
+  │     - mode=N: ShowDefaultRig(false) + SpawnAvatar(N)           │
+  │   LocomotionController.Start → reset CC to standHeight         │
+  │   ItemBrowser.Start → load + restore selected (spawns!)        │
+  │   ObjectSpawner.Start → defer spawn until grounded             │
+  │       ↓                                                         │
+  │ Update loop:                                                   │
+  │   AvatarGallery.Update → if !_spawned && grounded → spawn      │
+  │   ObjectSpawner.Update → if !_spawnTriggered && grounded → spawn│
+  │   LocomotionController.Update → fly/stance/move (if CanMove)   │
+  │   SmoothTurnController.Update → rotate (if CanMove)            │
+  │   HamburgerMenu.Update → toggle pause on Start button          │
+  │   PlagaGrabbable.Update → continuous haptic (if grabbed)       │
+  └────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════
+  CZĘŚĆ 2 -- BŁĘDY LOGICZNE I ANTI-PATTERNS
+═══════════════════════════════════════════════════════════════════
+
+  [BUG-1] ItemBrowser.SetItem(restored) na Start -- SPAWN W POWIETRZU
+  ─────────────────────────────────────────────────────────────────
+  ItemBrowser.cs:90-95
+    Start() {
+      LoadItems();
+      int saved = PlayerPrefs.GetInt(PrefsKey, 0);
+      SetItem(Mathf.Clamp(saved, 0, MaxItem));  // <-- spawn natychmiast
+    }
+  SetItem -> SpawnPreview używa head.position. Gracz może być w
+  powietrzu (Y=42). Wtedy item spawnuje też w powietrzu.
+  FIX: defer SetItem(restored) do grounded LUB do menu open.
+
+  [BUG-2] AvatarGallery.Update -- POLLUJE GameObject.Find CO FRAME
+  ─────────────────────────────────────────────────────────────────
+  AvatarGallery.cs:117-141
+    Update() {
+      if (_spawned) return;
+      if (!IsPlayerGrounded()) return;  // -> GameObject.Find each frame
+    }
+  GameObject.Find iteruje całą scenę. Wykonywane co frame przed
+  pierwszym spawn -- może to być setki frames przy spadaniu.
+  FIX: cache rig reference w Awake / przy pierwszym znalezieniu.
+
+  [BUG-3] LocomotionController.Awake -- standHeight NADPISANY przez CC
+  ─────────────────────────────────────────────────────────────────
+  LocomotionController.cs:113-114
+    _cc = GetComponent<CharacterController>();
+    if (_cc != null) standHeight = _cc.height;  // <-- field overwritten
+  Inspector value standHeight=1.8 jest IGNOROWANY -- używa CC.height.
+  Inverted dependency: CC powinien być derived from standHeight.
+  FIX: _cc.height = standHeight; (set CC from inspector value)
+
+  [BUG-4] PlayerAvatar.Start vs AvatarGallery.Start -- RACE CONDITION
+  ─────────────────────────────────────────────────────────────────
+  AvatarGallery.Start defers spawn to Update.
+  PlayerAvatar.Start runs SetAvatarMode immediately.
+  Jeśli execution order PlayerAvatar przed Gallery, MaxMode może być
+  niepoprawny (Gallery.Count=0 bo _instances null).
+  Aktualnie OK bo Gallery.TryLoadRegistry tworzy _instances tablicę
+  na Start (przed deferred spawn). Ale ZALEŻNE od execution order.
+  FIX: explicit DefaultExecutionOrder na Gallery (-50).
+
+  [BUG-5] LocomotionController.Update -- LATAŁ + MENU = stale velocity
+  ─────────────────────────────────────────────────────────────────
+  LocomotionController.cs:156-181
+    Update() {
+      if (!GameState.CanMove) return;  // <-- early exit
+      ...
+      if (_flyState == FlyState.Grounded) ApplyGravity();
+      ApplyMove(horizontalMove);
+    }
+  Scenariusz: gracz LATA, otwiera menu. Update zwraca early.
+  _verticalVelocity zostaje (np. +5 m/s ascending). Gracz wisi.
+  Po Resume gracz dalej leci w górę z 5 m/s -- pozornie OK ale
+  stick nie był puszczony, gracz może być zdezorientowany.
+  Niski priorytet.
+
+  [BUG-6] AvatarGallery + PlayerAvatar -- NormalizeToHeight DUPLICATED
+  ─────────────────────────────────────────────────────────────────
+  AvatarGallery.cs:279-290 + PlayerAvatar.cs:237-256
+  Identyczna metoda w obu klasach. DRY violation.
+  FIX: extract do AvatarUtils.NormalizeToHeight static helper.
+
+  [BUG-7] PlagaGrabbable.Update -- nie sprawdza GameState
+  ─────────────────────────────────────────────────────────────────
+  PlagaGrabbable.cs:44-89
+  Update() polluje OVRInput nawet w pauzie. Trzymając grip w menu,
+  haptic dalej buzz. Może to OK (intencja "fizyczny grip"), ale
+  zarówno trigger haptic odpala się w menu -- nie chcemy.
+  FIX: if (!GameState.CanInteract) { StopGripHaptic; return; }
+
+  [BUG-8] ItemBrowser.SetItem -- ZAWSZE despawn + respawn
+  ─────────────────────────────────────────────────────────────────
+  ItemBrowser.cs:126-145
+    SetItem(index) {
+      DespawnPreview();  // <-- ZAWSZE
+      _selectedIndex = index;
+      ...
+    }
+  Jeśli gracz wybiera ten sam item, item znika i pojawia się.
+  FIX: if (index == _selectedIndex) return;
+
+  [BUG-9] AvatarGallery._spawned -- DUPLICATED STATE
+  ─────────────────────────────────────────────────────────────────
+  bool _spawned + GameObject[] _instances. Mogą być out of sync.
+  FIX: spawn check via _instances.Any(x => x != null).
+
+
+═══════════════════════════════════════════════════════════════════
+  CZĘŚĆ 3 -- ZŁAMANIA SOLID
+═══════════════════════════════════════════════════════════════════
+
+  [SOLID-S1] PlayerAvatar -- 4 odpowiedzialności
+  ─────────────────────────────────────────────────────────────────
+  Single Responsibility VIOLATION:
+    1. Stan avatara (mode, instance, animator)
+    2. Spawn/despawn avatara
+    3. Zarządzanie gallery preview state (DeactivateGalleryPreviews,
+       SyncGalleryActiveIndex)
+    4. Bone hiding (LateUpdate, head/neck scale)
+  FIX: split na PlayerAvatarState, AvatarSpawner, AvatarBoneHider.
+
+  [SOLID-S2] AvatarGallery -- 3 odpowiedzialności
+  ─────────────────────────────────────────────────────────────────
+  1. Loading registry
+  2. Spawning preview row
+  3. Tracking active index (UI state)
+  FIX: split na RegistryLoader, GalleryRowSpawner, GalleryActiveSelector.
+
+  [SOLID-S3] LocomotionController -- 4 odpowiedzialności
+  ─────────────────────────────────────────────────────────────────
+  448 linii. Robi:
+    1. Movement (ApplyMove, CalculateHeadRelativeMovement)
+    2. Fly state machine (UpdateFly, EndFlight)
+    3. Stance state machine (UpdateStance, SetStance, LerpStance)
+    4. Gravity
+  FIX: split na 4 klasy z LocomotionController jako orchestrator.
+
+  [SOLID-O1] PlagaGrabber -- modyfikacja base'a
+  ─────────────────────────────────────────────────────────────────
+  Open/Closed VIOLATION:
+    grabEnd = -1f w Awake -- zmiana zachowania base klasy
+  Hack na SDK które nie jest open for extension.
+  Nie do naprawy bez modyfikacji SDK.
+
+  [SOLID-L1] PlagaGrabber.GrabBegin -- LISKOV
+  ─────────────────────────────────────────────────────────────────
+  Liskov Substitution VIOLATION:
+    base.GrabBegin() oczekuje że chwyci obiekt
+    PlagaGrabber.GrabBegin() czasem wywołuje GrabEnd (releasuje)
+  Nie krytyczne (SDK nie wywołuje GrabBegin externally) ale dziwne.
+
+  [SOLID-D1] GameObject.Find używane wszędzie -- DIP
+  ─────────────────────────────────────────────────────────────────
+  Dependency Inversion VIOLATION:
+    AvatarGallery, ItemBrowser, ObjectSpawner, PlayerAvatar
+    wszystkie zależą KONKRETNIE od GameObject o nazwie "OVRCameraRig".
+  FIX: wstrzyknij IPlayerRig interface (test, swap, mock).
+
+  [SOLID-S4] GameState -- public static event leak risk
+  ─────────────────────────────────────────────────────────────────
+  Statyczny event = persistuje między scenami. Subskrybenci ze
+  starej sceny zostają zawieszeni jeśli nie unsubscribe w OnDestroy.
+  FIX: subskrybenci muszą OnDestroy -= OnStateChanged. Lub użyć
+  ScriptableObject jako event bus.
+
+
+═══════════════════════════════════════════════════════════════════
+  CZĘŚĆ 4 -- COUPLING / HIDDEN DEPENDENCIES
+═══════════════════════════════════════════════════════════════════
+
+  [COUPLE-1] Singleton instability
+  ─────────────────────────────────────────────────────────────────
+  Jednolity pattern: AvatarGallery.Instance, ItemBrowser.Instance,
+  ObjectSpawner.Instance, HapticManager.Instance, HamburgerMenu.Instance.
+
+  Tylko HapticManager ma DontDestroyOnLoad.
+  Inne -- pozostaną przy load nowej sceny? NIE -- GameObject zniknie,
+  Instance będzie ze zniszczonym referencjami.
+
+  [COUPLE-2] Magic strings
+  ─────────────────────────────────────────────────────────────────
+  "OVRCameraRig", "TrackingSpace", "CenterEyeAnchor",
+  "StylizedCharacterLocomotion", "Plaga44_Current_AVATAR_Mode"
+  -- każdy string w wielu miejscach.
+  FIX: const w jednym pliku Constants.
+
+  [COUPLE-3] PlayerAvatar zna Gallery API
+  ─────────────────────────────────────────────────────────────────
+  PlayerAvatar wywołuje Gallery.SetActiveIndex, Gallery.GetPrefab,
+  Gallery.IsBroken, Gallery.GetName, Gallery.GetError, Gallery.Count.
+  Tight coupling.
+  FIX: PlayerAvatar emituje OnAvatarModeChanged event, Gallery
+  subskrybuje i sam zarządza preview state.
+
+
+═══════════════════════════════════════════════════════════════════
+  CZĘŚĆ 5 -- POTENCJALNE BUGI RUNTIME
+═══════════════════════════════════════════════════════════════════
+
+  [RUNTIME-1] AvatarGallery deferred spawn -- jeśli gracz NIGDY
+              nie wyląduje (np. spawn w wodzie)
+              -> _spawned zostaje false na zawsze, slider nie
+                 pokaże avatarów w menu
+  FIX: timeout (np. 5s) z forced spawn na rig.position.
+
+  [RUNTIME-2] ObjectSpawner deferred -- ten sam problem
+  FIX: jak wyżej.
+
+  [RUNTIME-3] PlayerAvatar.Start na mode=1 z broken Gallery
+              -> SpawnAvatar -> ResolvePrefabForMode -> null
+              -> FallbackToNone -> ShowDefaultRig(true)
+              ALE jeśli defaultRig=null -> ERROR log, robot niewidoczny
+              Brak ostrzeżenia użytkownika.
+  FIX: notifier banner "AVATAR ERROR -- defaulting to None"
+
+  [RUNTIME-4] PlagaGrabber.GrabBegin -- m_grabbedObj null check
+              po GrabEnd nie czekamy frame. Możliwe ze SDK nie
+              wyczyścił m_grabbedObj synchronicznie.
+              Test: szybkie toggle grab dwa razy.
+
+  [RUNTIME-5] LocomotionController.Update -- _headTransform null
+              early return: "if (_headTransform == null) return;"
+              Brak loga -- gracz cicho nie może się ruszać.
+  FIX: log warning raz przy NULL.
+
+
+═══════════════════════════════════════════════════════════════════
+  CZĘŚĆ 6 -- POZYTYWY (CO DOBRZE)
+═══════════════════════════════════════════════════════════════════
+
+  [GOOD-1] Bootstrap -- per-step timing + try/catch -- świetny debug
+  [GOOD-2] LocomotionController -- Floating stance + safety guard
+  [GOOD-3] PlagaGrabbable -- continuous haptic Update + cleanup w
+           GrabEnd (StopGripHaptic, _gripHeldLastFrame=false)
+  [GOOD-4] GameState -- centralized, prosty API, brak timeScale hack
+  [GOOD-5] PlayerRigSetup -- SnapRigToGround + clear PlayerPrefs
+  [GOOD-6] AvatarRegistrySetup -- ForceReimportAvatarModels +
+           rescan w przypadku BROKEN entries
+  [GOOD-7] AvatarImport -- per-asset preprocessor
+  [GOOD-8] RetargeterGuard -- granular pattern matching, nie wyłącza
+           SDK komponentów
+
+
+═══════════════════════════════════════════════════════════════════
+  CZĘŚĆ 7 -- PRIORYTETY NAPRAW
+═══════════════════════════════════════════════════════════════════
+
+  P0 (KRYTYCZNE -- użytkownik widzi BUG):
+    [BUG-1] ItemBrowser.SetItem(restored) defer to grounded
+    [BUG-3] LocomotionController standHeight inverted
+    [RUNTIME-1] AvatarGallery timeout fallback
+
+  P1 (WAŻNE -- może zaboleć):
+    [BUG-2] cache rig reference (perf)
+    [BUG-7] PlagaGrabbable check GameState.CanInteract
+    [BUG-8] ItemBrowser.SetItem skip if same
+    [RUNTIME-3] FallbackToNone notification
+    [RUNTIME-5] _headTransform null log
+
+  P2 (REFACTOR -- gdy będzie czas):
+    [SOLID-S1] split PlayerAvatar
+    [SOLID-S2] split AvatarGallery
+    [SOLID-S3] split LocomotionController
+    [BUG-6] dedupe NormalizeToHeight
+    [COUPLE-2] string constants
+    [COUPLE-3] decouple PlayerAvatar/Gallery via event
+
+  P3 (NICE TO HAVE):
+    [SOLID-D1] IPlayerRig interface
+    [SOLID-S4] GameState event bus refactor
+
+
+═══════════════════════════════════════════════════════════════════
+  CZĘŚĆ 8 -- METRYKI
+═══════════════════════════════════════════════════════════════════
+
+  Pliki C# total:                    56
+  Linii kodu (Scripts/):             ~3500
+  Linii kodu (Editor/):              ~2500
+  Najdłuższy plik:                   HamburgerMenu.cs (812 linii)
+  SettingsRegistry.cs:               670 linii
+  LocomotionController.cs:           448 linii
+  AvatarImport.cs:                   723 linii
+
+  Klasy z >300 linii:                4 (HamburgerMenu, SettingsRegistry,
+                                        LocomotionController, AvatarImport)
+  Klasy z TODO/HACK/FIXME:          0
+  Singleton bez DontDestroyOnLoad:   4
+  GameObject.Find użyć:              7+
+  Static eventy:                     2 (GameState.OnStateChanged,
+                                        SettingsRegistry.OnAction)
+
+
+═══════════════════════════════════════════════════════════════════
+  WERDYKT
+═══════════════════════════════════════════════════════════════════
+
+  Kod DZIAŁA -- Bootstrap zielony, registry OK, defaultRig wired,
+  toggle grab działa, fly/stance OK.
+
+  Ale jest WIELE drobnych problemów logicznych i SOLID violations
+  które będą bolały przy:
+    - skalowaniu (więcej avatarów, więcej itemów)
+    - multi-scene (singletony nie przeżyją scene change)
+    - testach (tight coupling, brak interfejsów)
+    - performance (GameObject.Find co frame, deferred polling)
+
+  P0 fixy (3 pozycje) ZAŁATWIĄ user-visible bugi.
+  P1 fixy (5 pozycji) zrobią kod robust.
+  P2/P3 -- when time permits.
