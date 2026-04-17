@@ -441,9 +441,21 @@ namespace Plaga44.UI
             // =============================================================
             Sec("FOG", s => {
                 s.Add(S("On/Off", "Toggle fog", () => RenderSettings.fog?1:0, v => RenderSettings.fog=v>0.5f, 0, 1, 1, "F0"));
-                s.Add(S("Density", "Density (exponential)", () => RenderSettings.fogDensity, v => RenderSettings.fogDensity=v, 0, 0.1f, 0.002f, "F3"));
-                s.Add(S("Start", "Start distance (linear)", () => RenderSettings.fogStartDistance, v => RenderSettings.fogStartDistance=v, 0, 200, 5, "F0"));
-                s.Add(S("End", "Full fog distance (linear)", () => RenderSettings.fogEndDistance, v => RenderSettings.fogEndDistance=v, 10, 500, 10, "F0"));
+                // Mode: 0=Linear, 1=Exp, 2=ExpSquared. Density slider only works in Exp/ExpSquared modes.
+                s.Add(S("Mode", "0=Linear (Start/End) 1=Exp (Density) 2=ExpSquared (Density)",
+                    () => (float)RenderSettings.fogMode,
+                    v => RenderSettings.fogMode = (FogMode)Mathf.Clamp((int)v, 1, 3),
+                    1, 3, 1, "F0"));
+                // Density: switches fogMode to Exp automatically if slider moved (issue #152).
+                // Linear mode ignores fogDensity -- user changing it without seeing effect was the bug.
+                s.Add(S("Density", "Density (auto-switches Mode to Exp)",
+                    () => RenderSettings.fogDensity,
+                    v => {
+                        if (RenderSettings.fogMode == FogMode.Linear) RenderSettings.fogMode = FogMode.ExponentialSquared;
+                        RenderSettings.fogDensity = v;
+                    }, 0, 0.1f, 0.002f, "F3"));
+                s.Add(S("Start", "Start distance (Linear mode only)", () => RenderSettings.fogStartDistance, v => RenderSettings.fogStartDistance=v, 0, 200, 5, "F0"));
+                s.Add(S("End", "Full fog distance (Linear mode only)", () => RenderSettings.fogEndDistance, v => RenderSettings.fogEndDistance=v, 10, 500, 10, "F0"));
                 s.Add(S("R", "Fog color R", () => RenderSettings.fogColor.r, v => { var c=RenderSettings.fogColor; c.r=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
                 s.Add(S("G", "Fog color G", () => RenderSettings.fogColor.g, v => { var c=RenderSettings.fogColor; c.g=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
                 s.Add(S("B", "Fog color B", () => RenderSettings.fogColor.b, v => { var c=RenderSettings.fogColor; c.b=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
