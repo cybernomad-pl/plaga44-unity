@@ -18,6 +18,8 @@ namespace Plaga44
         public string terrainAssetPath = "Assets/Potok/Terrain/Scene_A_Terrain.asset";
         public string terrainMaterialPath = "Assets/PLAGA44/Materials/TerrainLit.mat";
         public string terrainLayersFolder = "Assets/PLAGA44/TerrainLayers";
+        [Tooltip("Horizontal scale multiplier (X,Z) applied to terrain size. 1.0 = default. 2.0 = 2x wider in both directions.")]
+        public float terrainHorizontalScale = 2.0f;
 
         [Header("Skybox")]
         public string skyboxMatPath = "Assets/Potok/Skybox/BGR_Sky1.mat";
@@ -45,8 +47,10 @@ namespace Plaga44
         public float skyRotationSpeed = 0.5f;
 
         [Header("Player Spawn")]
-        [Tooltip("Player spawns at last saved position. No more StratoJump.")]
-        public bool savePlayerPosition = true;
+        [Tooltip("StratoJump height (meters above ground). 0 = snap to ground. >0 = spawn at this altitude (fun drop). Overrides savePlayerPosition.")]
+        public float stratoJumpHeight = 1000f;
+        [Tooltip("If true AND stratoJumpHeight=0 -- restore last session position from PlayerPrefs.")]
+        public bool savePlayerPosition = false;
 
         [Header("Grab Volume")]
         public float grabVolumeRadius = 0.08f;

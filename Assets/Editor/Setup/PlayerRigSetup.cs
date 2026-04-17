@@ -32,16 +32,18 @@ namespace Plaga44.Editor.Setup
             changed |= SetupSmoothTurn(rig, cfg);
             changed |= SetupPlayerAvatar(rig);
             changed |= SetupPositionPersistence(rig, cfg);
-            changed |= SnapRigToGround(rig);
+            changed |= PositionRig(rig, cfg);
             return changed;
         }
 
-        // PlayerPositionPersistence saves/restores rig position between sessions.
-        // If cfg.savePlayerPosition = true, adds the component (restore on Start, save on quit).
+        // PlayerPositionPersistence: restore last session position.
+        // Disabled if stratoJumpHeight > 0 (we want StratoJump each session).
         private static bool SetupPositionPersistence(GameObject rig, BootstrapConfig cfg)
         {
+            bool shouldHave = cfg.savePlayerPosition && cfg.stratoJumpHeight <= 0f;
             var existing = rig.GetComponent<PlayerPositionPersistence>();
-            if (cfg.savePlayerPosition)
+
+            if (shouldHave)
             {
                 if (existing != null)
                 {
@@ -49,38 +51,54 @@ namespace Plaga44.Editor.Setup
                     return false;
                 }
                 Undo.AddComponent<PlayerPositionPersistence>(rig);
-                Debug.Log($"{LOG} [ADDED] PlayerPositionPersistence (cfg.savePlayerPosition=true)");
+                Debug.Log($"{LOG} [ADDED] PlayerPositionPersistence (savePlayerPosition=true)");
                 return true;
             }
             else if (existing != null)
             {
                 Undo.DestroyObjectImmediate(existing);
-                Debug.Log($"{LOG} [REMOVED] PlayerPositionPersistence (cfg.savePlayerPosition=false)");
+                Debug.Log($"{LOG} [REMOVED] PlayerPositionPersistence (StratoJump mode OR savePlayerPosition=false)");
                 return true;
             }
             return false;
         }
 
-        // Snap rig to terrain ground level so player doesn't spawn 42m up in the air.
-        // Uses Terrain.SampleHeight at current XZ position. Player ends standing on terrain.
-        private static bool SnapRigToGround(GameObject rig)
+        // Position rig: StratoJump (spawn 1km above ground) OR snap to ground.
+        // Controlled by cfg.stratoJumpHeight:
+        //   > 0: spawn at terrain ground + stratoJumpHeight (fun free-fall)
+        //   = 0: snap to terrain ground (instant landing)
+        private static bool PositionRig(GameObject rig, BootstrapConfig cfg)
         {
             var terrain = Object.FindFirstObjectByType<Terrain>();
-            if (terrain == null) return false;
-
-            Vector3 pos = rig.transform.position;
-            float groundY = terrain.SampleHeight(pos) + terrain.transform.position.y;
-            float targetY = groundY; // CC.center.y handles standing height
-
-            if (Mathf.Abs(pos.y - targetY) < 0.01f)
+            if (terrain == null)
             {
-                Debug.Log($"{LOG} [OK] Rig already at ground level (y={pos.y:F2})");
+                Debug.LogWarning($"{LOG} [SKIP] No terrain -- cannot position rig");
                 return false;
             }
 
-            Undo.RecordObject(rig.transform, "PlayerRigSetup snap to ground");
+            Vector3 pos = rig.transform.position;
+            // Center rig on terrain if at origin (0,0,0)
+            if (Mathf.Approximately(pos.x, 0f) && Mathf.Approximately(pos.z, 0f))
+            {
+                var terrainData = terrain.terrainData;
+                pos.x = terrain.transform.position.x + terrainData.size.x * 0.5f;
+                pos.z = terrain.transform.position.z + terrainData.size.z * 0.5f;
+                Debug.Log($"{LOG} [FIX] Centering rig on terrain: x={pos.x:F0} z={pos.z:F0}");
+            }
+
+            float groundY = terrain.SampleHeight(pos) + terrain.transform.position.y;
+            float targetY = groundY + cfg.stratoJumpHeight;
+            string mode = cfg.stratoJumpHeight > 0f ? $"StratoJump +{cfg.stratoJumpHeight:F0}m" : "Ground snap";
+
+            if (Mathf.Abs(pos.y - targetY) < 0.01f)
+            {
+                Debug.Log($"{LOG} [OK] Rig already at target y={pos.y:F2} ({mode})");
+                return false;
+            }
+
+            Undo.RecordObject(rig.transform, "PlayerRigSetup position rig");
             rig.transform.position = new Vector3(pos.x, targetY, pos.z);
-            Debug.Log($"{LOG} [FIX] Snapped rig to ground: y={pos.y:F2} -> {targetY:F2}");
+            Debug.Log($"{LOG} [FIX] Positioned rig: y={pos.y:F2} -> {targetY:F2} ground={groundY:F2} mode={mode}");
             return true;
         }
 

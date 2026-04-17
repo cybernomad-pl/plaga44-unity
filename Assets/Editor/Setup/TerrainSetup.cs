@@ -33,7 +33,41 @@ namespace Plaga44.Editor.Setup
 
             changed |= SetupMaterial(terrain, cfg);
             changed |= SetupTerrainLayers(terrain, cfg);
+            changed |= SetupTerrainScale(terrain, cfg);
             return changed;
+        }
+
+        // Scales terrain horizontally (X,Z) by cfg.terrainHorizontalScale.
+        // Modifies TerrainData asset -- changes are persistent across sessions.
+        private static bool SetupTerrainScale(Terrain terrain, BootstrapConfig cfg)
+        {
+            if (Mathf.Approximately(cfg.terrainHorizontalScale, 1.0f))
+            {
+                Debug.Log($"{LOG} [OK] Terrain scale: 1.0 (default)");
+                return false;
+            }
+
+            var data = terrain.terrainData;
+            Vector3 currentSize = data.size;
+            // Target size: we want default base size (1024x1024) * scale.
+            // We derive "base" by checking if current is already scaled.
+            // For simplicity: assume default base = 1024. Target = 1024 * scale.
+            const float BaseSize = 1024f;
+            float targetX = BaseSize * cfg.terrainHorizontalScale;
+            float targetZ = BaseSize * cfg.terrainHorizontalScale;
+
+            if (Mathf.Approximately(currentSize.x, targetX) && Mathf.Approximately(currentSize.z, targetZ))
+            {
+                Debug.Log($"{LOG} [OK] Terrain size already {currentSize.x:F0}x{currentSize.z:F0} (scale={cfg.terrainHorizontalScale:F1})");
+                return false;
+            }
+
+            Debug.Log($"{LOG} [FIX] Scaling terrain: {currentSize.x:F0}x{currentSize.z:F0} -> {targetX:F0}x{targetZ:F0} (scale={cfg.terrainHorizontalScale:F1})");
+            Undo.RecordObject(data, "Bootstrap: Scale Terrain");
+            data.size = new Vector3(targetX, currentSize.y, targetZ);
+            EditorUtility.SetDirty(data);
+            AssetDatabase.SaveAssetIfDirty(data);
+            return true;
         }
 
         // ---- Tworzenie terenu -----------------------------------------------
