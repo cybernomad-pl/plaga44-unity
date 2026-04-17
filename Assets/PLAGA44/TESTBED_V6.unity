@@ -312,15 +312,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 512
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 42
+      value: 1015.541
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 512
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_LocalRotation.w
@@ -445,13 +445,13 @@ PrefabInstance:
       addedObject: {fileID: 1007391263}
     - targetCorrespondingSourceObject: {fileID: 109308, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1007391262}
+      addedObject: {fileID: 1007391264}
     - targetCorrespondingSourceObject: {fileID: 113768, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1007391261}
     - targetCorrespondingSourceObject: {fileID: 113768, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1007391260}
+      addedObject: {fileID: 1007391262}
   m_SourcePrefab: {fileID: 100100000, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
 --- !u!4 &387489576 stripped
 Transform:
@@ -815,28 +815,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 109308, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
   m_PrefabInstance: {fileID: 387489575}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1007391260
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1007391258}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd425c2d06f39bf4899d07c05d0f10eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Oculus.VR::OVRGrabber
-  grabBegin: 0.55
-  grabEnd: 0.35
-  m_parentHeldObject: 1
-  m_moveHandPosition: 0
-  m_gripTransform: {fileID: 387489578}
-  m_grabVolumes:
-  - {fileID: 29900357}
-  m_controller: 2
-  m_parentTransform: {fileID: 0}
-  m_player: {fileID: 0}
 --- !u!54 &1007391261
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -870,20 +848,20 @@ MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1007391259}
+  m_GameObject: {fileID: 1007391258}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd425c2d06f39bf4899d07c05d0f10eb, type: 3}
+  m_Script: {fileID: 11500000, guid: 24b867055d828014684aa3cfcd180e91, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Oculus.VR::OVRGrabber
+  m_EditorClassIdentifier: Assembly-CSharp::Plaga44.Inventory.PlagaGrabber
   grabBegin: 0.55
   grabEnd: 0.35
   m_parentHeldObject: 1
   m_moveHandPosition: 0
-  m_gripTransform: {fileID: 387489579}
+  m_gripTransform: {fileID: 387489578}
   m_grabVolumes:
-  - {fileID: 577479621}
-  m_controller: 1
+  - {fileID: 29900357}
+  m_controller: 2
   m_parentTransform: {fileID: 0}
   m_player: {fileID: 0}
 --- !u!54 &1007391263
@@ -913,6 +891,28 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &1007391264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007391259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 24b867055d828014684aa3cfcd180e91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Plaga44.Inventory.PlagaGrabber
+  grabBegin: 0.55
+  grabEnd: 0.35
+  m_parentHeldObject: 1
+  m_moveHandPosition: 0
+  m_gripTransform: {fileID: 387489579}
+  m_grabVolumes:
+  - {fileID: 577479621}
+  m_controller: 1
+  m_parentTransform: {fileID: 0}
+  m_player: {fileID: 0}
 --- !u!1 &1195957848
 GameObject:
   m_ObjectHideFlags: 0
@@ -1465,6 +1465,14 @@ MonoBehaviour:
   heartbeatInnerGap: 0.12
   heartbeatOuterGap: 0.55
   heartbeatCycles: 3
+  gripHold:
+    amplitude: 0.15
+    frequency: 0.3
+    duration: 0
+  triggerPull:
+    amplitude: 0.7
+    frequency: 0.6
+    duration: 0.08
   warning:
     amplitude: 0.8
     frequency: 0.7
