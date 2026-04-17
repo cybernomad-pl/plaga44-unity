@@ -180,6 +180,7 @@ namespace Plaga44.Editor
         {
             ApplyCommonImportFlags(mi);
             mi.animationType = ModelImporterAnimationType.Generic;
+            mi.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
             mi.materialImportMode = ModelImporterMaterialImportMode.None;
             mi.optimizeMeshPolygons = true;
             mi.optimizeMeshVertices = true;
@@ -347,8 +348,7 @@ namespace Plaga44.Editor
             var animator = prefab.GetComponentInChildren<Animator>(true);
             if (animator == null)
             {
-                if (prefab.GetComponentInChildren<Renderer>(true) == null)
-                    MarkBroken(entry, "no Animator and no Renderer");
+                MarkBroken(entry, "no Animator (model imported without rig -- check ModelImporter.avatarSetup)");
                 return;
             }
             if (animator.avatar == null)

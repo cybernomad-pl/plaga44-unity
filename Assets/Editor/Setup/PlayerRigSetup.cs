@@ -100,36 +100,67 @@ namespace Plaga44.Editor.Setup
                 changed = true;
                 Debug.Log($"{LOG} [FIX] avatarMode -> 0");
             }
+
+            // Clear persisted PlayerPrefs avatarMode -- otherwise PlayerAvatar.Start()
+            // will restore old broken mode (e.g. PINEA when its rig is broken).
+            // Bootstrap = fresh start, runtime persistence kicks in after first menu change.
+            const string AvatarPrefsKey = "Plaga44_Current_AVATAR_Mode";
+            if (PlayerPrefs.HasKey(AvatarPrefsKey))
+            {
+                PlayerPrefs.DeleteKey(AvatarPrefsKey);
+                PlayerPrefs.Save();
+                Debug.Log($"{LOG} [FIX] Cleared persisted AVATAR_Mode PlayerPrefs (fresh Bootstrap)");
+            }
             if (avatar.avatarPrefab != null)
             {
                 avatar.avatarPrefab = null;
                 changed = true;
                 Debug.Log($"{LOG} [FIX] cleared legacy avatarPrefab");
             }
-            if (avatar.defaultRig == null)
+            // ALWAYS re-resolve defaultRig from scene -- old reference may be stale after scene reload
+            var foundRig = GameObject.Find(DefaultRigName)
+                ?? FindChildContaining(rig.transform, DefaultRigPartial);
+            if (foundRig != null)
             {
-                var found = GameObject.Find(DefaultRigName)
-                    ?? FindChildContaining(rig.transform, DefaultRigPartial);
-                if (found != null)
+                if (avatar.defaultRig != foundRig)
                 {
-                    avatar.defaultRig = found;
+                    avatar.defaultRig = foundRig;
                     changed = true;
-                    Debug.Log($"{LOG} [FIX] defaultRig -> {found.name}");
+                    Debug.Log($"{LOG} [FIX] defaultRig -> {foundRig.name} (path={GetGameObjectPath(foundRig)})");
                 }
                 else
                 {
-                    Debug.LogWarning($"{LOG} [WARN] defaultRig not found -- assign manually");
+                    Debug.Log($"{LOG} [OK] defaultRig already wired to {foundRig.name}");
+                }
+                if (!foundRig.activeSelf)
+                {
+                    foundRig.SetActive(true);
+                    changed = true;
+                    Debug.Log($"{LOG} [FIX] defaultRig activated (was inactive)");
                 }
             }
-            if (avatar.defaultRig != null && !avatar.defaultRig.activeSelf)
+            else
             {
-                avatar.defaultRig.SetActive(true);
-                changed = true;
-                Debug.Log($"{LOG} [FIX] defaultRig activated");
+                Debug.LogError($"{LOG} [MISSING] defaultRig '{DefaultRigName}' not found in scene -- "
+                    + "SDK char prefab missing or scene corrupted");
             }
 
             if (!changed) Debug.Log($"{LOG} [OK] PlayerAvatar");
             return changed;
+        }
+
+        // Walk parents to print full hierarchy path -- useful for debugging defaultRig resolution
+        private static string GetGameObjectPath(GameObject go)
+        {
+            if (go == null) return "<null>";
+            string path = go.name;
+            var t = go.transform.parent;
+            while (t != null)
+            {
+                path = t.name + "/" + path;
+                t = t.parent;
+            }
+            return path;
         }
 
         // StratoJump removed -- player spawns at scene position (saved or default).
