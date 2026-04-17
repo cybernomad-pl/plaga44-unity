@@ -130,6 +130,22 @@ namespace Plaga44
             DoSpawn("force (menu open)");
         }
 
+        /// <summary>Destroy all spawned preview instances (issue #158).
+        /// Called by HamburgerMenu.Close -- preview should not linger after menu closes.
+        /// After Hide, next Open triggers ForceSpawnNow -> fresh spawn at new player pos.</summary>
+        public void HideAllPreviews()
+        {
+            if (!_spawned || _instances == null) return;
+            int destroyed = 0;
+            for (int i = 0; i < _instances.Length; i++)
+            {
+                if (_instances[i] != null) { Destroy(_instances[i]); _instances[i] = null; destroyed++; }
+            }
+            _spawned = false;
+            _activeIndex = -1;
+            Debug.Log($"{LOG} HideAllPreviews: {destroyed} instances destroyed");
+        }
+
         private void DoSpawn(string reason)
         {
             ResolveOrigin(out Vector3 origin, out Vector3 rowRight);
