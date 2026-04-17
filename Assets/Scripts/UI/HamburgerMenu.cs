@@ -191,6 +191,11 @@ namespace Plaga44.UI
             _level = MenuLevel.Top;
             _topIndex = 0;
             ShowLevel();
+
+            // Issue #157: force gallery spawn on menu open so preview is visible even mid-flight.
+            var gallery = Plaga44.AvatarGallery.Instance;
+            if (gallery != null) gallery.ForceSpawnNow();
+
             Debug.Log($"{LOG} OPEN");
         }
 

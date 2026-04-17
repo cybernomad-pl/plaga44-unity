@@ -118,7 +118,20 @@ namespace Plaga44
         {
             if (_spawned || _instances == null || _instances.Length == 0) return;
             if (!IsPlayerGrounded()) return;
+            DoSpawn("auto (grounded)");
+        }
 
+        /// <summary>Force spawn now regardless of grounded state (issue #157).
+        /// Called by HamburgerMenu on open -- preview should be visible whenever menu is open,
+        /// even if player is mid-flight.</summary>
+        public void ForceSpawnNow()
+        {
+            if (_spawned || _instances == null || _instances.Length == 0) return;
+            DoSpawn("force (menu open)");
+        }
+
+        private void DoSpawn(string reason)
+        {
             ResolveOrigin(out Vector3 origin, out Vector3 rowRight);
             Vector3 dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : rowRight;
             var rot = Quaternion.Euler(0f, yaw, 0f);
@@ -128,7 +141,7 @@ namespace Plaga44
 
             ApplyInitialLazyState();
             _spawned = true;
-            Debug.Log($"{LOG} Spawned {spawned}/{_instances.Length} avatars at {origin} (lazy={lazyDisplay}, active={_activeIndex}) [deferred until grounded]");
+            Debug.Log($"{LOG} Spawned {spawned}/{_instances.Length} avatars at {origin} (lazy={lazyDisplay}, active={_activeIndex}) [trigger={reason}]");
         }
 
         private static bool IsPlayerGrounded()
