@@ -37,6 +37,13 @@ namespace Plaga44.Locomotion
         [Range(0.1f, 1f)]
         public float strafeFactor = 0.8f;
 
+        [Header("Sprint (L thumbstick click)")]
+        [Tooltip("Sprint speed multiplier. 2.0 = 2x walk speed when sprinting.")]
+        public float sprintMultiplier = 2f;
+
+        [Tooltip("True if sprint toggle is currently active. Public for UI.")]
+        public bool sprintActive = false;
+
         [Header("Head Reference")]
         [SerializeField] private Transform _headTransform;
 
@@ -162,6 +169,13 @@ namespace Plaga44.Locomotion
             if (!GameState.CanMove) return;
             if (_headTransform == null) return;
             _dt = Time.deltaTime;
+
+            // Sprint toggle: L thumbstick click (Issue #142)
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick))
+            {
+                sprintActive = !sprintActive;
+                Debug.Log($"{LOG} Sprint: {(sprintActive ? "ON" : "OFF")}");
+            }
 
             Vector2 moveInput = GetMoveInput();
             // Prone blocks horizontal movement -- must stand up first
@@ -401,7 +415,9 @@ namespace Plaga44.Locomotion
             right.y = 0f; right.Normalize();
 
             Vector3 move = (fwd * input.y) + (right * input.x * strafeFactor);
-            move *= moveSpeed * _dt;
+            // Sprint multiplier applies when sprintActive AND player actually moving (issue #142)
+            float speedMul = sprintActive ? sprintMultiplier : 1f;
+            move *= moveSpeed * speedMul * _dt;
             return move;
         }
 
