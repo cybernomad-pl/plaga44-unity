@@ -5,7 +5,7 @@
 //
 // Menu:
 //   CYBERNOMAD > Bootstrap          -- pelny setup sceny
-//   CYBERNOMAD > StratoJump Toggle  -- wlacz/wylacz spawn ponad terenem
+//   StratoJump removed -- player spawns at last position.
 //
 // Konfiguracja: Assets/PLAGA44/Config/BootstrapConfig_Quest.asset
 // Setup rozdzielony na osobne klasy w Assets/Editor/Setup/
@@ -30,19 +30,20 @@ namespace Plaga44.Editor
         // Auto-run przy starcie edytora
         // =====================================================================
 
-        static Bootstrap() => EditorApplication.delayCall += AutoRun;
+        // Unity 6: delayCall from [InitializeOnLoad] constructor is unreliable.
+        // EditorApplication.update fires every editor tick -- we unhook after first call.
+        static Bootstrap() => EditorApplication.update += WaitForReady;
 
-        private static void AutoRun()
+        private static void WaitForReady()
         {
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating) return;
+
+            EditorApplication.update -= WaitForReady;
+
             if (SessionState.GetBool(SessionKey, false)) return;
             SessionState.SetBool(SessionKey, true);
 
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
-            {
-                EditorApplication.delayCall += AutoRun;
-                return;
-            }
-
+            Debug.Log($"{LOG} Auto-run: loading scene and validating...");
             Run();
         }
 
@@ -59,25 +60,7 @@ namespace Plaga44.Editor
             EditorApplication.delayCall += () => RunSetup(cfg);
         }
 
-        [MenuItem("CYBERNOMAD/StratoJump Toggle", false, 50)]
-        public static void ToggleStratoJump()
-        {
-            var cfg = AssetDatabase.LoadAssetAtPath<BootstrapConfig>(ConfigPath);
-            if (cfg == null) { Debug.LogWarning($"{LOG} Config not found"); return; }
-            cfg.stratoJump = !cfg.stratoJump;
-            EditorUtility.SetDirty(cfg);
-            AssetDatabase.SaveAssets();
-            Debug.Log($"{LOG} StratoJump: {(cfg.stratoJump ? "ON" : "OFF")}");
-        }
-
-        // Checkmark w menu pokazuje aktualny stan
-        [MenuItem("CYBERNOMAD/StratoJump Toggle", true)]
-        private static bool ToggleStratoJumpValidate()
-        {
-            var cfg = AssetDatabase.LoadAssetAtPath<BootstrapConfig>(ConfigPath);
-            Menu.SetChecked("CYBERNOMAD/StratoJump Toggle", cfg != null && cfg.stratoJump);
-            return true;
-        }
+        // StratoJump removed from menu -- player spawns at last saved position.
 
         // =====================================================================
         // Config
@@ -122,14 +105,16 @@ namespace Plaga44.Editor
 
         private static void RunSetup(BootstrapConfig cfg)
         {
-            Debug.Log($"{LOG} === Setup start (StratoJump: {(cfg.stratoJump ? "ON" : "OFF")}) ===");
+            Debug.Log($"{LOG} === Setup start ===");
             bool changed = false;
 
             changed |= TerrainSetup.Run(cfg);
             changed |= SkyboxSetup.Run(cfg);
+            changed |= BounceLightSetup.Run(cfg);
             changed |= PlayerRigSetup.Run(cfg);
             changed |= InventorySetup.Run(cfg);
             changed |= SceneSingletonsSetup.Run(cfg);
+            changed |= ObjectSpawnerSetup.Run(cfg);
             AvatarRegistrySetup.Run(cfg);
 
             if (changed)

@@ -1,6 +1,6 @@
 // =============================================================================
 // SceneSingletonsSetup.cs
-// Stawia HamburgerMenu i SkyRotator jesli ich nie ma w scenie.
+// Stawia WSZYSTKIE singletony w scenie jesli ich nie ma.
 // Wywolywany przez Bootstrap.
 // =============================================================================
 #if UNITY_EDITOR
@@ -19,6 +19,8 @@ namespace Plaga44.Editor.Setup
             bool changed = false;
             changed |= EnsureSingleton<HamburgerMenu>("_HamburgerMenu", "HamburgerMenu", null);
             changed |= EnsureSingleton<SkyRotator>("_SkyRotator", "SkyRotator", sr => sr.rotationSpeed = cfg.skyRotationSpeed);
+            changed |= EnsureSingleton<AvatarGallery>("_AvatarGallery", "AvatarGallery", null);
+            changed |= EnsureSingleton<ItemBrowser>("_ItemBrowser", "ItemBrowser", null);
             return changed;
         }
 

@@ -27,7 +27,7 @@ namespace Plaga44
 
         [Header("Layout (wzgledem OVRCameraRig jesli znaleziony)")]
         [Tooltip("Offset od gracza (x=w prawo, y=nad ziemia, z=przed)")]
-        public Vector3 relativeOffset = new Vector3(0f, 0f, FallbackOriginZ);
+        public Vector3 relativeOffset = new Vector3(0f, 0f, 2.0f);
 
         [Tooltip("Kierunek rzadu avatarow (znormalizowany)")]
         public Vector3 direction = Vector3.right;
@@ -37,6 +37,9 @@ namespace Plaga44
 
         [Tooltip("Obrot kazdej instancji wokol Y (stopnie). 180 = twarza do gracza.")]
         public float yaw = 180f;
+
+        [Tooltip("Target avatar height in meters. Avatars are auto-scaled to this height.")]
+        public float targetAvatarHeight = 1.8f;
 
         [Tooltip("Y = poziom terenu pod graczem (raycast w dol). Default: ziemia.")]
         public bool useGroundY = true;
@@ -83,8 +86,12 @@ namespace Plaga44
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoBoot()
         {
+            // Fallback -- Bootstrap should create _AvatarGallery in scene.
+            // This only fires if Bootstrap didn't run (e.g. standalone build without editor setup).
             if (Instance != null) return;
+            if (FindAnyObjectByType<AvatarGallery>() != null) return;
             new GameObject(AutoBootGoName).AddComponent<AvatarGallery>();
+            Debug.LogWarning("[PLAGA44][Gallery] AutoBoot fallback -- Bootstrap should create this GO");
         }
 
         private void Awake()
@@ -154,12 +161,17 @@ namespace Plaga44
 
         private void ResolveOriginFromRig(Transform rig, out Vector3 origin, out Vector3 rowRight)
         {
-            Vector3 fwd = rig.forward; fwd.y = 0f;
+            // Use head camera (CenterEyeAnchor) like HamburgerMenu so avatars
+            // appear in front of player at eye level, not at rig base (on head).
+            Transform head = rig.Find("TrackingSpace/CenterEyeAnchor");
+            Transform source = head != null ? head : rig;
+
+            Vector3 fwd = source.forward; fwd.y = 0f;
             if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
             fwd.Normalize();
             rowRight = Vector3.Cross(Vector3.up, fwd);
 
-            Vector3 basePos = rig.position;
+            Vector3 basePos = source.position;
             if (useGroundY) basePos.y = RaycastGroundY(basePos) ?? basePos.y;
 
             origin = basePos
@@ -192,6 +204,11 @@ namespace Plaga44
                 Vector3 pos = origin + dir * spacing * i;
                 var inst = Instantiate(entry.prefab, pos, rot, transform);
                 inst.name = $"Preview_{entry.name}";
+                NormalizeToHeight(inst, targetAvatarHeight);
+
+                // Preview in T-pose -- disable AnimatorController so skeleton stays in bind pose
+                var animator = inst.GetComponentInChildren<Animator>(true);
+                if (animator != null) animator.runtimeAnimatorController = null;
                 _instances[i] = inst;
                 spawned++;
             }
@@ -230,6 +247,20 @@ namespace Plaga44
         // =====================================================================
         // Active avatar switching
         // =====================================================================
+
+        /// <summary>Scale avatar instance so its bounds.height matches targetHeight.</summary>
+        private static void NormalizeToHeight(GameObject inst, float targetHeight)
+        {
+            var renderers = inst.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0) return;
+            Bounds b = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++) b.Encapsulate(renderers[i].bounds);
+            float currentHeight = b.size.y;
+            if (currentHeight < 0.001f) return;
+            float scale = targetHeight / currentHeight;
+            inst.transform.localScale *= scale;
+            Debug.Log($"[PLAGA44][Gallery] NormalizeToHeight: {inst.name} h={currentHeight:F2} -> scale={inst.transform.localScale.x:F4}");
+        }
 
         /// <summary>Aktywuje tylko jeden avatar. -1 = wszystkie disabled.</summary>
         public void SetActiveIndex(int index)

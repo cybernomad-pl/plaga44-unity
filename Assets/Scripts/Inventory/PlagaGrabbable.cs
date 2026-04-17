@@ -51,7 +51,15 @@ namespace Plaga44.Inventory
             Debug.Log($"{LOG} GrabEnd: {name} released, vel={linearVelocity.magnitude:F2}m/s");
             if (_haptic != null) _haptic.OnRelease(controller);
 
-            base.GrabEnd(linearVelocity, angularVelocity);
+            try
+            {
+                base.GrabEnd(linearVelocity, angularVelocity);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning($"{LOG} GrabEnd exception (non-fatal): {e.Message}");
+                // OVRGrabbable.GrabEnd can throw if Rigidbody was destroyed or kinematic state changed
+            }
 
             // Auto-return to holster if released near it
             if (homeHolster != null && homeHolster.IsInRange(transform.position))

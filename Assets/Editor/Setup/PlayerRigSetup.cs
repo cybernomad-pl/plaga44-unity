@@ -31,7 +31,7 @@ namespace Plaga44.Editor.Setup
             changed |= SetupLocomotion(rig, cfg);
             changed |= SetupSmoothTurn(rig, cfg);
             changed |= SetupPlayerAvatar(rig);
-            SpawnAboveTerrain(rig, cfg);
+            // StratoJump removed -- no spawn repositioning.
             return changed;
         }
 
@@ -132,20 +132,7 @@ namespace Plaga44.Editor.Setup
             return changed;
         }
 
-        private static void SpawnAboveTerrain(GameObject rig, BootstrapConfig cfg)
-        {
-            if (!cfg.stratoJump)
-            {
-                Debug.Log($"{LOG} StratoJump OFF -- spawn position unchanged");
-                return;
-            }
-            var terrain = Object.FindFirstObjectByType<Terrain>();
-            float y = terrain != null
-                ? terrain.terrainData.size.y + cfg.spawnAboveTerrain
-                : cfg.spawnAboveTerrain;
-            rig.transform.position = new Vector3(0f, y, 0f);
-            Debug.Log($"{LOG} [StratoJump] Spawn at Y={y}");
-        }
+        // StratoJump removed -- player spawns at scene position (saved or default).
 
         private static GameObject FindChildContaining(Transform root, string partial)
         {

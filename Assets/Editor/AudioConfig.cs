@@ -93,10 +93,10 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Audio/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/Audio/Apply INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/Audio/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/Audio/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

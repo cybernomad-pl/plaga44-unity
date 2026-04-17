@@ -24,7 +24,7 @@ namespace Plaga44
     public class PlayerAvatar : MonoBehaviour
     {
         private const string LOG = "[PLAGA44][Avatar]";
-        private const string LEGACY_RESOURCE = "Survivor_A_Lusth";
+        // Legacy fallback removed -- all avatars go through AvatarGallery now.
 
         public enum Mode { None = 0 } // legacy enum zostawione dla kompatybilnosci inspektora
 
@@ -72,13 +72,31 @@ namespace Plaga44
             }
         }
 
+        private const string AvatarPrefsKey = "Plaga44_Current_AVATAR_Mode";
+
         private void Start()
         {
+            // Restore persisted avatar mode (SettingsRegistry may not be built yet)
+            if (PlayerPrefs.HasKey(AvatarPrefsKey))
+                avatarMode = (int)PlayerPrefs.GetFloat(AvatarPrefsKey, 0f);
             SetAvatarMode(avatarMode);
         }
 
         /// <summary>
-        /// Switch avatar mode. Called from SettingsRegistry (AVATAR > Mode).
+        /// Preview avatar in gallery (does NOT swap yet). Called from slider.
+        /// </summary>
+        public void PreviewAvatarMode(int mode)
+        {
+            mode = Mathf.Clamp(mode, 0, MaxMode);
+            avatarMode = mode;
+            // Only update gallery preview -- don't spawn on player
+            var g = AvatarGallery.Instance;
+            if (g != null) g.SetActiveIndex(mode > 0 ? mode - 1 : -1);
+            Debug.Log($"{LOG} Preview mode={mode} ({CurrentLabel})");
+        }
+
+        /// <summary>
+        /// Actually SWAP avatar onto player. Called on confirm / GoBack from AVATAR section.
         /// </summary>
         public void SetAvatarMode(int mode)
         {
@@ -87,6 +105,13 @@ namespace Plaga44
 
             if (mode == 0) ShowDefaultRigOnly();
             else { ShowDefaultRig(false); SpawnAvatar(mode); }
+        }
+
+        /// <summary>Apply currently previewed mode as the actual avatar.</summary>
+        public void ConfirmPreview()
+        {
+            SetAvatarMode(avatarMode);
+            Debug.Log($"{LOG} Confirmed avatar mode={avatarMode} ({CurrentLabel})");
         }
 
         private void ShowDefaultRigOnly()
@@ -157,17 +182,6 @@ namespace Plaga44
                 Debug.LogWarning($"{LOG} Gallery has no prefab at index {idx} (mode={mode})");
             }
 
-            // 3. Legacy fallback -- Survivor_A_Lusth z Resources
-            if (mode == 1)
-            {
-                var legacy = Resources.Load<GameObject>(LEGACY_RESOURCE);
-                if (legacy != null)
-                {
-                    Debug.Log($"{LOG} Legacy fallback -- loaded '{LEGACY_RESOURCE}' from Resources/");
-                    return legacy;
-                }
-            }
-
             return null;
         }
 
@@ -194,12 +208,36 @@ namespace Plaga44
             DeactivateGalleryPreviews();
         }
 
+        private const float TargetAvatarHeight = 1.8f;
+
         private void InstantiateAvatar(GameObject prefab, int mode)
         {
             _instance = Instantiate(prefab, transform);
             _instance.name = "Avatar_" + prefab.name;
             _instance.transform.localPosition = new Vector3(0f, yOffset, 0f);
+            NormalizeToHeight(_instance, TargetAvatarHeight);
             _spawnedMode = mode;
+        }
+
+        private static void NormalizeToHeight(GameObject inst, float targetHeight)
+        {
+            var renderers = inst.GetComponentsInChildren<Renderer>(true);
+            if (renderers.Length == 0)
+            {
+                Debug.LogWarning($"[PLAGA44][Avatar] NormalizeToHeight: {inst.name} has NO renderers!");
+                return;
+            }
+            Bounds b = renderers[0].bounds;
+            for (int i = 1; i < renderers.Length; i++) b.Encapsulate(renderers[i].bounds);
+            float h = b.size.y;
+            if (h < 0.001f)
+            {
+                Debug.LogWarning($"[PLAGA44][Avatar] NormalizeToHeight: {inst.name} height={h} too small!");
+                return;
+            }
+            float scaleFactor = targetHeight / h;
+            inst.transform.localScale *= scaleFactor;
+            Debug.Log($"[PLAGA44][Avatar] NormalizeToHeight: {inst.name} h={h:F2} -> scale={inst.transform.localScale.x:F4}");
         }
 
         private void CacheAnimatorBones()

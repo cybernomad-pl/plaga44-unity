@@ -160,10 +160,10 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Quality/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/Quality/Apply INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/Quality/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/Quality/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

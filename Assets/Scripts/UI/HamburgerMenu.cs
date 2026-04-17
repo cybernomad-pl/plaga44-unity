@@ -67,24 +67,24 @@ namespace Plaga44.UI
 
         // ---- Section names (routing) ---------------------------------------
         private const string AvatarSection = "AVATAR";
-        private const string PresetsSection = "PRESETS";
+        private const string ItemsSection = "ITEMS";
 
         // ---- Colors (dark theme) -------------------------------------------
-        private static readonly Color BG_COLOR = new Color(0.08f, 0.08f, 0.08f, 0.92f);
+        private static readonly Color BG_COLOR = new Color(0f, 0f, 0f, 0f);
         private static readonly Color BTN_COLOR = new Color(0.18f, 0.18f, 0.18f);
         private static readonly Color BTN_SELECTED = new Color(0.20f, 0.35f, 0.55f);
         private static readonly Color TOP_COLOR = new Color(0.25f, 0.25f, 0.25f);
         private static readonly Color TOP_SELECTED = new Color(0.35f, 0.45f, 0.60f);
         private static readonly Color ACCENT = new Color(0.9f, 0.5f, 0.1f);
         private static readonly Color TEXT_WHITE = Color.white;
-        private static readonly Color TEXT_GREY = new Color(0.55f, 0.55f, 0.55f);
+        private static readonly Color TEXT_GREY = new Color(0.9f, 0.9f, 0.9f); // was 0.55 -- too dark on transparent BG
 
         // ---- Groups (TOP-level) --------------------------------------------
         private static readonly (string name, string[] sections)[] GROUPS = new[]
         {
-            ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "AVATAR", "GAME STATE", "NAVMESH" }),
+            ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "AVATAR", "ITEMS", "GAME STATE", "NAVMESH" }),
             ("VISUAL",   new[] { "SHADOWS", "SUN", "FOG", "AMBIENT", "SKYBOX", "BLOOM", "COLOR", "COMFORT", "LGG", "URP" }),
-            ("SYSTEM",   new[] { "PRESETS", "PROFILE", "MISC", "AUDIO", "PHYSICS", "QUALITY", "CAMERA", "OCULUS", "TERRAIN" }),
+            ("SYSTEM",   new[] { "PROFILE", "MISC", "AUDIO", "PHYSICS", "QUALITY", "CAMERA", "OCULUS", "TERRAIN", "EXIT" }),
         };
 
         // =====================================================================
@@ -121,6 +121,7 @@ namespace Plaga44.UI
         private Text _footerValue;
 
         private List<SettingDef> _currentSettings;
+        private string _activeSectionName;
         private Text[] _settingTexts;
 
         // Input timing
@@ -231,6 +232,7 @@ namespace Plaga44.UI
         private void EnterSettings()
         {
             string section = _currentGroupSections[_groupIndex];
+            _activeSectionName = section;
             _currentSettings = SettingsRegistry.GetSettings(section);
             if (_currentSettings.Count == 0)
             {
@@ -247,7 +249,10 @@ namespace Plaga44.UI
         {
             switch (_level)
             {
-                case MenuLevel.Settings: _level = MenuLevel.Group; ShowLevel(); Debug.Log($"{LOG} <- back to group"); break;
+                case MenuLevel.Settings:
+                    OnLeaveSection(_activeSectionName);
+                    SettingsRegistry.FlushPlayerPrefs();
+                    _level = MenuLevel.Group; ShowLevel(); Debug.Log($"{LOG} <- back to group (auto-saved)"); break;
                 case MenuLevel.Group: _level = MenuLevel.Top; ShowLevel(); Debug.Log($"{LOG} <- back to top"); break;
                 default: Close(); break;
             }
@@ -570,9 +575,8 @@ namespace Plaga44.UI
                 color = ctx.Player.IsCurrentBroken ? Color.red : color;
                 return ($"{prefix}{s.name}: {ctx.Player.CurrentLabel}", color);
             }
-            if (ctx.IsPresets)
-                return ($"{prefix}{RenderPresetLine(s.name)}", color);
-
+            if (ctx.IsItemMode(s))
+                return ($"{prefix}{s.name}: {ctx.Browser.CurrentLabel}", color);
             return ($"{prefix}{s.name}: {s.get().ToString(s.format)}", color);
         }
 
@@ -580,59 +584,59 @@ namespace Plaga44.UI
         {
             if (ctx.IsAvatarMode(cur))
                 return $"<  {ctx.Player.CurrentLabel}  >    [{cur.min}..{cur.max}]   B/Y = back";
-            if (ctx.IsPresets)
-                return $"<  {RenderPresetLine(cur.name)}  >    A/X=execute   B/Y=back";
+            if (ctx.IsItemMode(cur))
+                return $"<  {ctx.Browser.CurrentLabel}  >    [{cur.min}..{cur.max}]   B/Y = back";
             return $"<  {cur.get().ToString(cur.format)}  >    [{cur.min}..{cur.max}]   B/Y = back";
         }
 
         /// <summary>
-        /// "SAVE 1:HI-END" -> "SAVE 1:HI-END [14.04 15:30]" lub "[empty]" jesli slot pusty.
-        /// "RESET ALL" / "LOG ALL" -> bez modyfikacji (akcja, nie slot).
-        /// </summary>
-        private static string RenderPresetLine(string settingName)
-        {
-            if (!TryParseSlotFromPresetName(settingName, out int slot)) return settingName;
-            string ts = SettingsRegistry.GetPresetTimestamp(slot);
-            return $"{settingName} {(ts != null ? $"[{ts}]" : "[empty]")}";
-        }
-
-        private static bool TryParseSlotFromPresetName(string settingName, out int slot)
-        {
-            slot = 0;
-            if (settingName == null) return false;
-            bool isSaveOrLoad = settingName.StartsWith("SAVE ") || settingName.StartsWith("LOAD ");
-            if (!isSaveOrLoad || settingName.Length < 7) return false;
-
-            int space = settingName.IndexOf(' ');
-            int colon = settingName.IndexOf(':');
-            if (space <= 0 || colon <= space) return false;
-
-            return int.TryParse(settingName.Substring(space + 1, colon - space - 1), out slot);
-        }
-
         /// <summary>Kontekst per-render -- raz wyliczony section/avatar ptr zamiast 3x field lookupy.</summary>
         private readonly struct RowContext
         {
             public readonly string Section;
             public readonly bool IsAvatarSection;
-            public readonly bool IsPresets;
+            public readonly bool IsItemsSection;
             public readonly Plaga44.PlayerAvatar Player;
+            public readonly Plaga44.ItemBrowser Browser;
 
             public RowContext(string section)
             {
                 Section = section;
                 IsAvatarSection = section == AvatarSection;
-                IsPresets = section == PresetsSection;
+                IsItemsSection = section == ItemsSection;
                 Player = IsAvatarSection ? Plaga44.PlayerAvatar.FindCurrent() : null;
+                Browser = IsItemsSection ? Plaga44.ItemBrowser.Instance : null;
             }
 
             public bool IsAvatarMode(SettingDef s) => IsAvatarSection && s.name == "Mode" && Player != null;
             public bool IsBrokenAvatarMode(SettingDef s) => IsAvatarMode(s) && Player.IsCurrentBroken;
+            public bool IsItemMode(SettingDef s) => IsItemsSection && s.name == "Item" && Browser != null;
         }
 
         // =====================================================================
         // Helpers
         // =====================================================================
+
+        /// <summary>Called when leaving a settings section. Confirms previews.</summary>
+        private static void OnLeaveSection(string section)
+        {
+            if (section == AvatarSection)
+            {
+                var avatar = Plaga44.PlayerAvatar.FindCurrent();
+                if (avatar != null) avatar.ConfirmPreview();
+            }
+        }
+
+        /// <summary>Adds Outline + Shadow to a UI text object for readability on transparent BG.</summary>
+        private static void AddTextShadow(GameObject go)
+        {
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.85f);
+            outline.effectDistance = new Vector2(1.5f, -1.5f);
+            var shadow = go.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.6f);
+            shadow.effectDistance = new Vector2(2f, -2f);
+        }
 
         private string[] FilterExisting(string[] sections)
         {
@@ -713,6 +717,7 @@ namespace Plaga44.UI
             txt.color = ACCENT;
             txt.alignment = TextAnchor.MiddleCenter;
             txt.fontStyle = FontStyle.Bold;
+            AddTextShadow(rt.gameObject);
             return txt;
         }
 
@@ -735,6 +740,7 @@ namespace Plaga44.UI
             txt.fontSize = FOOTER_LABEL_FONT;
             txt.color = TEXT_WHITE;
             txt.alignment = TextAnchor.MiddleCenter;
+            AddTextShadow(rt.gameObject);
             return txt;
         }
 
@@ -746,6 +752,7 @@ namespace Plaga44.UI
             txt.fontSize = FOOTER_VALUE_FONT;
             txt.color = TEXT_GREY;
             txt.alignment = TextAnchor.MiddleCenter;
+            AddTextShadow(rt.gameObject);
             return txt;
         }
 

@@ -150,9 +150,9 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Project/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/Project/Apply INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
-        [MenuItem("CYBERNOMAD/Project/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/Project/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

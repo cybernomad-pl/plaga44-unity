@@ -22,6 +22,7 @@ namespace Plaga44.Editor
         public const string AvatarsRoot = "Assets/PLAGA44/Avatars";
         public const string AnimationsRoot = "Assets/PLAGA44/Animations";
         public const string ResourcesRoot = "Assets/PLAGA44/Resources";
+        public const string DefaultAnimatorController = "Assets/Samples/Meta XR Movement SDK/83.0.0/Advanced Samples/ISDKLocomotion/Animations/LocomotionController.controller";
         public const string ResourcesParent = "Assets/PLAGA44";
         public const string ResourcesFolderName = "Resources";
         public const string RegistryPath = ResourcesRoot + "/AvatarRegistry.asset";
@@ -159,7 +160,7 @@ namespace Plaga44.Editor
             mi.animationType = ModelImporterAnimationType.Human;
             mi.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
             mi.globalScale = 1f;
-            mi.useFileScale = false;
+            mi.useFileScale = true; // respect FBX embedded scale (Fuse/Blender = cm, Mixamo = m)
 
             if (isAvatar)
             {
@@ -393,6 +394,13 @@ namespace Plaga44.Editor
             if (!TryResolveModel(folder, name, out string modelPath, out bool isDae))
                 return false;
 
+            // Skip unrigged models -- no Animator or no valid avatar = not importable
+            if (!IsModelRigged(modelPath))
+            {
+                Debug.LogWarning($"{LOG} SKIPPED '{name}' -- no valid rig (Animator/avatar missing). Only rigged models are imported.");
+                return false;
+            }
+
             bool wasBuilding = IsBuilding;
             IsBuilding = true;
             try
@@ -405,6 +413,16 @@ namespace Plaga44.Editor
             {
                 IsBuilding = wasBuilding;
             }
+        }
+
+        private static bool IsModelRigged(string modelPath)
+        {
+            var model = AssetDatabase.LoadAssetAtPath<GameObject>(modelPath);
+            if (model == null) return false;
+            var animator = model.GetComponentInChildren<Animator>(true);
+            if (animator == null) return false;
+            // Accept both Humanoid and Generic rigs -- just needs a valid avatar
+            return animator.avatar != null && animator.avatar.isValid;
         }
 
         private static bool TryResolveModel(string folder, string name, out string modelPath, out bool isDae)
@@ -602,6 +620,8 @@ namespace Plaga44.Editor
             try
             {
                 if (material != null) AssignMaterialToAllRenderers(instance, material);
+                else UpgradeMaterialsToURP(instance); // FBX embedded materials -> URP/Lit
+                AssignAnimatorController(instance);
                 SavePrefabInstance(instance, prefabPath);
             }
             finally
@@ -627,6 +647,59 @@ namespace Plaga44.Editor
             if (mat == null)
                 Debug.LogWarning($"{LOG} material missing for prefab (will keep embedded): {matPath}");
             return mat;
+        }
+
+        /// <summary>Upgrades Standard (built-in) materials to URP/Lit. Mixamo FBX uses Standard shader.</summary>
+        private static void UpgradeMaterialsToURP(GameObject instance)
+        {
+            var urpShader = Shader.Find(UrpLit.ShaderName);
+            if (urpShader == null) return;
+
+            foreach (var r in instance.GetComponentsInChildren<Renderer>(includeInactive: true))
+            {
+                var mats = r.sharedMaterials;
+                bool changed = false;
+                for (int i = 0; i < mats.Length; i++)
+                {
+                    var mat = mats[i];
+                    if (mat == null) continue;
+                    if (mat.shader.name == "Standard" || mat.shader.name.Contains("Autodesk"))
+                    {
+                        // Remap Standard -> URP/Lit
+                        var mainTex = mat.HasProperty("_MainTex") ? mat.GetTexture("_MainTex") : null;
+                        var bumpMap = mat.HasProperty("_BumpMap") ? mat.GetTexture("_BumpMap") : null;
+                        var color = mat.HasProperty("_Color") ? mat.GetColor("_Color") : Color.white;
+
+                        mat.shader = urpShader;
+                        if (mainTex != null) mat.SetTexture(UrpLit.BaseMap, mainTex);
+                        if (bumpMap != null)
+                        {
+                            mat.SetTexture(UrpLit.BumpMap, bumpMap);
+                            mat.EnableKeyword(UrpLit.KeywordNormalMap);
+                        }
+                        mat.SetColor(UrpLit.BaseColor, color);
+                        EditorUtility.SetDirty(mat);
+                        changed = true;
+                        Debug.Log($"{LOG} Upgraded material '{mat.name}' to URP/Lit");
+                    }
+                }
+                if (changed) r.sharedMaterials = mats;
+            }
+        }
+
+        private static void AssignAnimatorController(GameObject instance)
+        {
+            var animator = instance.GetComponentInChildren<Animator>(true);
+            if (animator == null) return;
+            var controller = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(
+                AvatarImportConfig.DefaultAnimatorController);
+            if (controller == null)
+            {
+                Debug.LogWarning($"{LOG} AnimatorController not found: {AvatarImportConfig.DefaultAnimatorController}");
+                return;
+            }
+            animator.runtimeAnimatorController = controller;
+            Debug.Log($"{LOG} Assigned AnimatorController to {instance.name}");
         }
 
         private static void AssignMaterialToAllRenderers(GameObject instance, Material material)

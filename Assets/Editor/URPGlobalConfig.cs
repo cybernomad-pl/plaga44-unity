@@ -196,13 +196,13 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/URP Global/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/URP Global/Apply INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/URP Global/Apply DEBUG", false, 2)]
+        [MenuItem("CYBERNOMAD/Config/URP Global/Apply DEBUG", false, 2)]
         static void MenuDebug() => Apply(DEBUG);
 
-        [MenuItem("CYBERNOMAD/URP Global/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/URP Global/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

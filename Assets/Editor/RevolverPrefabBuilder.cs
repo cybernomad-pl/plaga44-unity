@@ -24,8 +24,8 @@ namespace Plaga44.Editor
 
         // Physics -- realistyczny rewolwer ~1.1 kg
         private const float RevolverMassKg = 1.1f;
-        private const float LinearDamping = 0.5f;
-        private const float AngularDamping = 0.8f;
+        private const float LinearDamping = 0f;  // was 0.5 -- made revolver fall slower than player
+        private const float AngularDamping = 0.05f;
 
         // Fallback bounds jesli brak MeshRenderer (mesh broken)
         private static readonly Vector3 FallbackBoundsSize = new Vector3(0.2f, 0.15f, 0.05f);
@@ -86,7 +86,8 @@ namespace Plaga44.Editor
 
         private static void AttachPhysics(GameObject instance)
         {
-            var rb = instance.GetComponent<Rigidbody>() ?? instance.AddComponent<Rigidbody>();
+            var rb = instance.GetComponent<Rigidbody>();
+            if (rb == null) rb = instance.AddComponent<Rigidbody>();
             rb.mass = RevolverMassKg;
             rb.linearDamping = LinearDamping;
             rb.angularDamping = AngularDamping;
@@ -96,7 +97,8 @@ namespace Plaga44.Editor
 
         private static void AttachCollider(GameObject instance, Bounds bounds)
         {
-            var col = instance.GetComponent<BoxCollider>() ?? instance.AddComponent<BoxCollider>();
+            var col = instance.GetComponent<BoxCollider>();
+            if (col == null) col = instance.AddComponent<BoxCollider>();
             col.center = instance.transform.InverseTransformPoint(bounds.center);
             col.size = bounds.size;
         }

@@ -1,179 +1,156 @@
-# PLAGA '44 -- TESTBED V2 -- Stan projektu i TODO
+# PLAGA '44 -- TESTBED V6 -- TODO
 
-Repo: cybernomad-pl/plaga44-unity branch: main
-Unity: 6000.3.7f1 | URP 17.3.0 | Meta XR SDK 81.0.0
-
----
-
-## CO JEST (stan obecny)
-
-### Branding
-- [x] companyName: Cybernomad
-- [x] productName: PLAGA 44
-- [x] bundleId: games.cybernomad.plaga44
-- [x] bundleVersion: 0.1.0
-- [x] AndroidBundleVersionCode: 1
-
-### Rendering
-- [x] Graphics API: Vulkan (Android), Auto (Standalone)
-- [x] Color Space: Linear
-- [x] Scripting Backend: IL2CPP
-- [x] Architecture: ARM64
-- [x] URP Mobile pipeline: Mobile_RPAsset + Mobile_Renderer
-- [x] URP PC pipeline: PC_RPAsset + PC_Renderer
-
-### Quality (Mobile level -- Quest)
-- [x] MSAA: x4
-- [x] Shadow distance: 20m
-- [x] Shadow cascades: 1
-- [x] Pixel lights: 2
-- [x] LOD bias: 1.0
-- [x] VSync: off (VR handles it)
-- [x] Realtime reflections: off
-- [x] Soft particles: off
-
-### URP Mobile_RPAsset (UWAGA -- wartosci default, do poprawy)
-- [ ] HDR: ON (powinno byc OFF na Quest -- kosztowne)
-- [ ] Render Scale: 0.8 (ok na start, mozna zwiekszyc do 1.0 na Quest 3)
-- [ ] Shadow Distance: 50m (NIESPOJNE z Quality 20m -- URP nadpisuje)
-- [ ] Shadow Resolution Main: 1024 (ok)
-- [ ] Shadow Resolution Additional: 2048 (za duzo na Quest, dac 512)
-- [ ] Soft Shadows: off (ok)
-- [ ] MSAA in URP: 1 (NIESPOJNE z Quality x4 -- URP nadpisuje, dac 4)
-
-### Android
-- [x] Min SDK: 32 (Android 12L)
-- [x] Target SDK: 32
-- [x] Orientation: Landscape Left locked
-
-### AndroidManifest.xml
-- [x] VR category: com.oculus.intent.category.VR
-- [x] Focus aware: true
-- [x] Splash background: black
-- [x] Supported devices: quest|quest2|questpro|quest3|quest3s
-- [x] Head tracking required: true
-
-### Audio
-- [x] Spatializer: Meta XR Audio
-- [x] Ambisonic decoder: Meta XR Audio
-- [ ] Speaker Mode: Stereo (default -- ok dla VR)
-- [ ] DSP Buffer: 1024 (default -- moze byc za duzy, 512 to mniej latency)
-
-### Physics
-- [x] Gravity: -9.81 (default, ok)
-- [ ] Solver iterations: 6 (default -- moze byc za duzo na Quest, 4 wystarczy)
-- [ ] Fixed Timestep: 0.02 (50Hz -- Quest to 72/90/120Hz, rozwazyc 0.01111 = 90Hz)
-
-### Oculus Config (OculusProjectConfig.asset)
-- [x] Target devices: Quest 1-3, Pro, 3S
-- [ ] Hand tracking: DISABLED (0) -- wlaczyc gdy potrzebne
-- [ ] Body tracking: DISABLED -- wlaczyc gdy potrzebne
-- [ ] Face tracking: DISABLED -- wlaczyc gdy potrzebne
-- [ ] Eye tracking: DISABLED -- wlaczyc gdy potrzebne
-- [ ] Anchor support: DISABLED -- wlaczyc dla MR
-- [ ] Scene support: DISABLED -- wlaczyc dla MR
-
-### XR Plugin Management
-- [x] OpenXR Loader enabled (Android)
-- [x] XR Simulation enabled (Editor)
-
-### Tags/Layers
-- [ ] Tylko defaultowe (Default, TransparentFX, Ignore Raycast, Water, UI)
-- [ ] Brak custom layers -- dodac gdy potrzebne (np. Player, Enemy, Interactable, Ground)
-
-### Packages (manifest.json)
-- [x] com.unity.xr.openxr 1.14.0
-- [x] com.unity.xr.meta-openxr 2.4.0
-- [x] com.meta.xr.sdk.core 81.0.0
-- [x] com.meta.xr.sdk.interaction 81.0.0
-- [x] com.meta.xr.sdk.interaction.ovr 81.0.0
-- [x] com.meta.xr.sdk.audio 81.0.0
-- [x] com.unity.render-pipelines.universal 17.3.0
-
-### Editor Tools (Assets/Editor/)
-- [x] MetaQuestSetup.cs -- auto-setup SDK on editor open
-- [x] SDKVersionChecker.cs -- check installed SDK versions
+Repo: cybernomad-pl/plaga44-unity | Unity 6000.3.7f1 | URP 17.3.0 | Meta XR SDK 81.0.0+
+Ostatnia aktualizacja: 2026-04-16
 
 ---
 
-## TODO -- PILNE (blokuje development)
+## STAN SYSTEMOW
 
-### URP Pipeline Fix
-- [ ] Mobile_RPAsset: HDR OFF
-- [ ] Mobile_RPAsset: MSAA = 4 (nie 1)
-- [ ] Mobile_RPAsset: Shadow Distance = 20 (nie 50)
-- [ ] Mobile_RPAsset: Additional Shadow Resolution = 512 (nie 2048)
+### Bootstrap (auto-setup sceny)
+- [x] Terrain (FloodedGrounds Scene_A)
+- [x] Skybox (BGR_Sky1)
+- [x] Directional Light (sun)
+- [x] Bounce Light (fill, rotation -90 = w gore, no shadows)
+- [x] OVRCameraRig (CC + Locomotion + SmoothTurn + PlayerAvatar)
+- [x] Haptic system (HapticManager na rig)
+- [x] Inventory (PlayerInventory + InventoryLoadout + OVRGrabber L/R)
+- [x] HamburgerMenu + SkyRotator (scene singletons)
+- [x] ObjectSpawner (Items/Revolver default)
+- [ ] AvatarRegistry -- EMPTY, import nie odpalil sie jeszcze
 
-### Branding / Identity
-- [ ] Ikona aplikacji (512x512 PNG, kwadratowa)
-- [ ] Android splash screen
-- [ ] Splash screen logo (Cybernomad + PLAGA '44)
-- [ ] m_ShowUnitySplashScreen = 0 (wymaga Pro licencji?)
+### Refactor
+- [x] Wszystkie klasy Editor (26 plikow) -- done
+- [x] Wszystkie klasy UI (4 pliki) -- done
+- [x] Wszystkie klasy Runtime/Locomotion/Feedback (10 plikow) -- done
+- [x] Wszystkie klasy Inventory (4 pliki) -- done
+- [ ] Code review z Borysem -- DISCUSSION_TRACKING.md, 0/44 omowione
+
+### Config API
+- [x] 26 edytorow konfiguracji (VRPipeline, PCPipeline, Volume, Quality, Physics, Oculus, etc.)
+- [x] Quest2Preset -- jeden przycisk
+- [x] CYBERNOMAD menu w edytorze
+
+---
+
+## TODO -- BLOKUJE TESTOWANIE
+
+### Fly / Stance system (LocomotionController) -- NOWE
+- [x] R thumbstick UP = fly z akceleracja (gravity suspended)
+- [x] R thumbstick DOWN short = toggle crouch
+- [x] R thumbstick DOWN long = prone
+- [x] Stance states: STAND -> CROUCH -> PRONE
+- [x] Stary jetpack usuniety
+- [ ] Przetestowac w Play Mode
+
+### Item Browser -- NOWY
+- [x] ItemBrowser.cs (singleton, auto-boot, Resources/Items/ loader)
+- [x] ITEMS section w SettingsRegistry + HamburgerMenu
+- [x] Spawn w dloni gracza (R/L hand anchor)
+- [x] PlayerPrefs persistence (item + hand selection)
+- [ ] Przetestowac w Play Mode
+
+### HamburgerMenu -- ZMIANY
+- [x] Transparent background (alpha=0)
+- [x] Text shadow (Outline + Shadow na title/footer)
+- [x] PRESETS sekcja usunieta
+- [x] Auto-save defaults przy kazdej zmianie wartosci
+- [x] Flush PlayerPrefs przy GoBack ze Settings
+- [ ] Przetestowac czytelnosc na przezroczystym tle
+
+### Avatar system
+- [x] Import 5 avatarow (FBX w Assets/PLAGA44/Avatars/)
+- [x] AvatarGallery preview fix -- spawn przy menu (CenterEyeAnchor) nie na glowie
+- [x] useFileScale=true (fix PINEA gigantyczna)
+- [x] Skip unrigged models w imporcie
+- [x] PlayerAvatar persistence (restore z PlayerPrefs)
+- [ ] Zweryfikowac AvatarRegistry.asset po imporcie
+- [ ] Przetestowac w Play Mode
+
+### Object Spawner
+- [x] ObjectSpawner + ObjectSpawnerSetup (bootstrap)
+- [ ] Przetestowac spawn Revolvera w Play Mode
+
+### Bounce Light
+- [x] BounceLightSetup (bootstrap)
+- [ ] Przetestowac wizualnie
 
 ---
 
 ## TODO -- PRZED BUILDEM NA QUESTA
 
-- [ ] Scena TESTBED_V2 z OVRCameraRig (lub OVRPlayerController)
-- [ ] Przetestowac build + deploy przez ADB
-- [ ] Strip engine code: ON (juz jest)
+- [ ] Build Settings: TESTBED_V6.unity jako aktywna scena
+- [ ] Quest2Preset.Apply() -- upewnic sie ze URP ustawienia sa SAFE
+- [ ] Test build + deploy ADB
+- [ ] APK backup do C:\Users\boris\Desktop\PLAGA44\builds\
 
 ---
 
-## TODO -- FICZERY (wydzielac z reference-branch jeden po drugim)
+## TODO -- OTWARTE DECYZJE (Borys)
 
-- [ ] CameraRig setup (wstawianie OVRCameraRig/OVRPlayerController do sceny)
-- [ ] Locomotion (SmoothLocomotion, LocomotionManager, VRCrouch)
-- [ ] Hand Grab (HandGrabInteractor, GrabHandPose)
-- [ ] Haptic feedback (GripVibration, HapticManager)
-- [ ] UI system (VRMenuManager, hamburger menu)
-- [ ] NPC system (NPCStateController, NPCSpawner)
+- [!] Meta XR SDK: manifest.json ma 83.0.0, MetaQuestSetup.cs const = 81.0.0 -- update const albo downgrade?
+- [!] Unused packages: visualscripting, collab-proxy, modules.cloth, physics2d, tilemap -- usunac?
+- [!] Assembly Definitions (Plaga44.Core, .UI, .Editor) -- przyspieszy kompilacje 3-10x, wymaga sortowania deps
+- [!] PlayerAvatarImporter.cs -- potencjalny dead code (AvatarImport pokrywa Avatars/). Usunac?
+- [!] SkyboxSetup traktuje pierwszy directional light jako sun -- teraz pomija "Bounce" w nazwie, ale brak dedykowanego sun GO moze byc problem
+
+---
+
+## TODO -- FICZERY (nastepne kroki)
+
+### Tier 1 (core gameplay)
+- [ ] NPC system (NPCStateController, NPCSpawner) -- z reference-branch
 - [ ] Combat (HitDetector, ThrowableStone, M249)
-- [ ] Body tracking
-- [ ] Face tracking
-- [ ] Eye tracking
-- [ ] Mixed Reality (Passthrough)
-- [ ] Networking
 - [ ] Audio zones (SpatialAudioManager, AmbientZone)
-- [ ] Performance (PerformanceMonitor, QualityScaler, SpaceWarp)
-- [ ] Build scripts (BuildAPK, BuildQuest)
 
----
+### Tier 2 (immersion)
+- [ ] Body tracking (OculusConfig.SetBodyTracking)
+- [ ] Hand tracking (OculusConfig.SetHandTracking)
+- [ ] Face/Eye tracking
+- [ ] Mixed Reality Passthrough
 
-## TODO -- NICE TO HAVE
-
+### Tier 3 (polish)
+- [ ] Performance monitor (QualityScaler, SpaceWarp)
 - [ ] Custom layers: Player, Enemy, Interactable, Ground, Water, Projectile
 - [ ] Custom tags: Enemy, NPC, Weapon, Pickup, Trigger
-- [ ] Physics Timestep dostrojony do Quest refresh rate
-- [ ] DSP buffer 512 (mniej audio latency)
-- [ ] Texture streaming ON (dla duzych scen)
-- [ ] Async upload buffer 32-64MB (szybszy loading)
+- [ ] Networking
+
+---
+
+## TODO -- CONTENT
+
+### Avatary (w Assets/PLAGA44/Avatars/)
+- [x] Survivor_A_Lusth (Mixamo FBX, Humanoid)
+- [x] Swat (Mixamo FBX, Humanoid)
+- [x] Vanguard_By_T._Choonyung (Mixamo FBX, Humanoid)
+- [x] PINEA (rigged FBX + packed0 textures)
+- [x] PINEA-NEO (rigged FBX + packed0 textures)
+- [ ] OBJ characters need DAE/FBX conversion: Anglojanek, Charon, Klaszczur, Niedziadek, wodnik, Zakazny, Female1
+- [ ] Mixamo nonPBR characters (Ch11/20/32/35/36/48) -- do testow
+
+### Bronie
+- [x] Revolver (GameDevHQ FBX + prefab w Resources/Items/)
+- [ ] M249 (exports/weapon-m249/M249_low.fbx) -- do zaimportowania
+- [ ] Gun (exports/character-gun/Gun.fbx) -- do zaimportowania
+
+### Terrain
+- [ ] Reimport FloodedGrounds terrain layers -- dziury po usunietych materialach dirt/asfalt
+
+---
+
+## ZNANE BUGI
+
+- [ ] CharacterRetargeter spam "Failed to retarget source frame data!" -- znalezc GO z komponentem
+- [ ] LocomotionEventsConnection Handlers[0] null -- skonfigurowac albo usunac
+- [ ] Missing Prefab StylizedCharacterLocomotion (guid 286d7e20) -- znalezc w backup
+- [ ] CharacterController namespace warning -- broken script reference na prefabie?
 
 ---
 
 ## PLIKI REFERENCYJNE
 
-Stara pelna implementacja: branch `reference-branch`
-Stary bleeding-edge: branch `bleeding-edge` (na remote)
-
-## 2026-04-14 (wieczor) -- Locomotion / Haptic / Presets
-
-- [x] **Jetpack** -- R thumbstick click (hold) powoduje wzlot (flySpeed=3m/s, konfigurowalne w Inspector). LocomotionController.cs.
-- [x] **Grab vibration fix** -- ControllerModeHelper.IsControllerActive juz nie wymaga SampleRateHz>0 (blokowalo w Quest Link). SetControllerVibration dziala nawet w Link.
-- [x] **Auto-save biezacych ustawien** -- kazdy slider zapisuje do PlayerPrefs (flush przy Close menu/OnApplicationQuit/Pause). PRESETS + GAME STATE wyjete z persist.
-- [x] **PRESETS pierwsze w SYSTEM** -- kafelek na pierwszym miejscu.
-- [x] **Preset timestamp** -- sloty pokazuja "[14.04 15:30]" jesli zapisane, "[empty]" jesli puste.
-- [x] **Toast sukces/error** -- footer menu pokazuje "SAVED slot 1 (92 values)" na zielono / "SAVE FAILED: ..." na czerwono przez 3.5s po akcji.
-
-## 2026-04-14 -- Terrain / Avatar system
-
-- [ ] **Reimport FloodedGrounds terrain** -- usuniecie materialow dirt i asfalt stworzylo dziury w terenie, trzeba ponownie zaimportowac texture splats / terrain layers.
-- [ ] Rescan Avatars po zapisie fixa (SaveAssetIfDirty) -- upewnic sie ze Assets/PLAGA44/Resources/AvatarRegistry.asset fizycznie istnieje.
-- [ ] Meta XR Movement CharacterRetargeter spam "Failed to retarget source frame data!" -- sprawdzic ktory character ma komponent CharacterRetargeter, moze to StylizedCharacterLocomotion z missing prefab. Jesli tak -- wylacz komponent albo usun default rig.
-- [ ] Oculus Interaction LocomotionEventsConnection Handlers[0] null -- skonfigurowac albo usunac nieuzywany LocomotionOutput z sceny.
-- [ ] RevolverPrefabBuilder NullRef (OVRGrabbable.Awake + Rigidbody.get_mass) -- osobny issue, inventory builder.
-- [ ] Missing Prefab StylizedCharacterLocomotion guid 286d7e2005861d341a0a94d7f615675a -- znalezc w backup/testbed lub zrobic unpack.
-- [ ] _batch2/ (6 plikow alternatywnych wersji FBX) -- decyzja: zintegrowac jako _v2 avatary, czy wyrzucic.
-- [ ] CharacterController namespace warning -- szukac zrodla (nie ma pliku .cs, moze prefab z broken script reference).
-- [ ] Build Settings -- aktualnie TESTBED.unity (naprawione z dead guid TESTBED_V2.unity).
-
+- REFACTOR_PLAN.md -- szczegolowy log refactoru (zakonczony)
+- DISCUSSION_TRACKING.md -- checklist code review z Borysem (0/44)
+- CLAUDE.md -- CYBERNOMAD Config API reference
+- reference-branch -- stara pelna implementacja
+- bleeding-edge -- branch rozwojowy (remote)

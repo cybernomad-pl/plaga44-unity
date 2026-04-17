@@ -2,136 +2,107 @@
 // LocomotionController.cs
 // CYBERNOMAD -- Glowny kontroler lokomocji gracza w PLAGA '44.
 //
-// ARCHITEKTURA:
-// Ten skrypt odpowiada za RUCH GRACZA (lewy thumbstick) i GRAWITACJE.
-// NIE zajmuje sie obrotami (snap/smooth turn) -- to oddzielny system w Fazie 2.
-// Uzywa CharacterController.Move() zamiast transform.position +=, dzieki czemu:
-//   1. Kolizje z otoczeniem dzialaja automatycznie (sciany, podlogi, schody)
-//   2. isGrounded check dziala poprawnie
-//   3. Fizyka nie "teleportuje" gracza przez sciany
+// INPUT (lewy thumbstick = ruch, prawy thumbstick Y = fly/stance):
+//   L thumbstick: ruch head-relative (CharacterController.Move)
+//   R thumbstick UP: fly up (accelerating, gravity suspended)
+//   R thumbstick DOWN short: toggle CROUCH
+//   R thumbstick DOWN long hold: go to PRONE
+//   From crouch/prone, flick UP: stand up
+//   R thumbstick X: smooth turn (handled by SmoothTurnController, no conflict)
 //
-// INPUT:
-// W buildzie Quest (HAS_META_XR) czyta OVRInput z lewego kontrolera.
-// W edytorze bez SDK uzywa klawiatury WASD jako fallback.
-//
-// KIERUNEK RUCHU:
-// Ruch jest RELATYWNY DO KIERUNKU GLOWY (head-relative).
-// Dlaczego glowa a nie kontroler? Bo w VR gracz naturalnie patrzy tam
-// gdzie chce isc -- to najbardziej intuicyjny model lokomocji.
-// Wektor forward glowy jest rzutowany na plaszczyzne pozioma (y=0),
-// wiec patrzenie w gore/dol nie wplywa na kierunek ruchu.
-//
-// GRAWITACJA:
-// Czytamy Physics.gravity.y (domyslnie -9.81) zamiast hardcodowania wartosci.
-// Dzieki temu zmiana grawitacji w ustawieniach projektu (PhysicsConfig) automatycznie
-// wplywa na lokomocje -- np. misje na bagnach z inna fizyka.
-//
-// WYMAGANIA NA SCENIE:
-// - Ten komponent MUSI byc na tym samym GameObject co CharacterController.
-// - Standardowo: na uzytkowniku VR rig root (np. OVRCameraRig parent).
-// - Pole _headTransform musi wskazywac na kamere (CenterEyeAnchor lub Camera.main).
-//
-// UZYWANE PRZEZ:
-// - LocomotionManager.cs -- wlacza/wylacza ten komponent w zaleznosci od trybu
-// - SprintModifier.cs -- modyfikuje moveSpeed podczas sprintu
-// - ComfortVignette.cs -- czyta NormalisedSpeed do efektu winiety
+// STANCE: STAND -> CROUCH -> PRONE
+//   CC height + center change for collisions.
+//   TrackingSpace Y offset for visual camera drop (VR camera follows headset,
+//   so we must push the tracking origin DOWN to simulate crouching).
 // =============================================================================
 
 using UnityEngine;
 
 namespace Plaga44.Locomotion
 {
-    /// <summary>
-    /// Kontroler lokomocji oparty na CharacterController.
-    /// Lewy thumbstick = ruch relatywny do kierunku glowy.
-    /// Obsluguje grawitacje i isGrounded check.
-    /// </summary>
+    public enum Stance { Stand, Crouch, Prone }
+
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CharacterController))]
     public class LocomotionController : MonoBehaviour
     {
         // =====================================================================
-        // Pola ustawiane w inspektorze
+        // Inspector fields
         // =====================================================================
 
-        [Header("Predkosc ruchu")]
-        [Tooltip("Predkosc chodzenia w metrach na sekunde. Modyfikowana runtime przez SprintModifier.")]
+        [Header("Movement")]
         public float moveSpeed = 2.5f;
 
-        [Tooltip("Mnoznik predkosci strafe'u (ruch na boki). 0.8 = 80% predkosci do przodu. " +
-                 "Nizszy strafe jest bardziej realistyczny -- biegniecie bokiem jest wolniejsze.")]
         [Range(0.1f, 1f)]
         public float strafeFactor = 0.8f;
 
-        [Header("Referencja glowy")]
-        [Tooltip("Transform kamery VR (CenterEyeAnchor). Jesli puste -- szuka automatycznie.")]
+        [Header("Head Reference")]
         [SerializeField] private Transform _headTransform;
 
-        [Header("Latanie (jetpack)")]
-        [Tooltip("Wznoszenie w m/s gdy prawy thumbstick jest wcisniety (click down). Rozgladanie dziala normalnie.")]
-        public float flySpeed = 3f;
+        [Header("Fly (R thumbstick UP)")]
+        [Tooltip("Fly acceleration (m/s^2). Speed increases while held.")]
+        public float flyAcceleration = 5f;
 
-        [Tooltip("Wlacz/wylacz jetpack mode. Mozna wylaczyc dla konkretnych misji.")]
-        public bool jetpackEnabled = true;
+        [Tooltip("Max fly speed cap (m/s).")]
+        public float flyMaxSpeed = 8f;
+
+        [Header("Stance (R thumbstick DOWN)")]
+        [Tooltip("CC height when standing (captured from CC at Awake).")]
+        public float standHeight = 1.8f;
+
+        [Tooltip("CC height when crouching.")]
+        public float crouchHeight = 1.0f;
+
+        [Tooltip("CC height when prone.")]
+        public float proneHeight = 0.5f;
+
 
         // =====================================================================
-        // Stan runtime (prywatny)
+        // Runtime state
         // =====================================================================
 
-        /// <summary>
-        /// Referencja do CharacterController -- ustawiana w Awake().
-        /// CharacterController daje nam kolizje i isGrounded za darmo.
-        /// </summary>
         private CharacterController _cc;
-
-        /// <summary>
-        /// Aktualna predkosc pionowa (oś Y). Modyfikowana przez grawitację i skoki.
-        /// Dodatnia = w gore (skok), ujemna = w dol (spadanie).
-        /// SprintModifier ustawia ta wartosc na jumpForce zeby zainicjowac skok.
-        /// </summary>
+        private Transform _trackingSpace; // OVRCameraRig/TrackingSpace -- offset for visual crouch
         private float _verticalVelocity;
+        private float _trackingSpaceBaseY; // original TrackingSpace local Y
 
-        // Stala ciagniaca gracza w dol gdy stoi na ziemi -- zeby CC.isGrounded
-        // konsekwentnie zwracal true nawet na pochylych powierzchniach.
+        // Fly state
+        private enum FlyState { Grounded, Ascending, Hovering }
+        private FlyState _flyState = FlyState.Grounded;
+        private float _flySpeed;
+        private float _hoverDrift;      // current hover vertical drift
+        private float _hoverDriftTarget; // target drift (random, changes periodically)
+        private float _hoverNextDriftChange;
+
+        // Stance state
+        private Stance _currentStance = Stance.Stand;
+
+        // Thresholds
+        private const float StickDownThreshold = 0.3f;
+        private const float StickUpThreshold = 0.25f;
         private const float GroundedPullDown = -2f;
         private const float InputDeadZoneSqr = 0.01f;
         private const float GroundedLogThrottleSec = 0.5f;
 
         // =====================================================================
-        // Property publiczne (read-only z zewnatrz)
+        // Public properties
         // =====================================================================
 
-        /// <summary>
-        /// Znormalizowana predkosc ruchu (0 = stoi, 1 = pelna predkosc).
-        /// Uzywana przez ComfortVignette do skalowania efektu winiety --
-        /// im szybciej gracz sie rusza, tym mocniejsza winieta (zapobiega chorobie lokomocyjnej).
-        /// </summary>
         public float NormalisedSpeed { get; private set; }
 
-        /// <summary>
-        /// Aktualna predkosc pionowa. SprintModifier uzywa tego do sprawdzenia
-        /// czy gracz jest w powietrzu i do ustawiania sily skoku.
-        /// </summary>
         public float VerticalVelocity
         {
             get => _verticalVelocity;
             set => _verticalVelocity = value;
         }
 
-        /// <summary>
-        /// Czy gracz stoi na ziemi. Wrapper na CharacterController.isGrounded.
-        /// Uzywany przez SprintModifier do sprawdzenia czy skok jest mozliwy.
-        /// </summary>
         public bool IsGrounded => _cc != null && _cc.isGrounded;
-
-        /// <summary>
-        /// Referencja do CharacterController na tym obiekcie.
-        /// SprintModifier uzywa jej do wywoływania Move() przy skoku.
-        /// </summary>
+        public bool IsFlying => _flyState != FlyState.Grounded;
+        public Stance CurrentStance => _currentStance;
         public CharacterController CharController => _cc;
 
         // =====================================================================
-        // Unity lifecycle
+        // Lifecycle
         // =====================================================================
 
         private const string LOG = "[PLAGA44][Locomotion]";
@@ -139,17 +110,36 @@ namespace Plaga44.Locomotion
         private void Awake()
         {
             _cc = GetComponent<CharacterController>();
-            Debug.Log($"{LOG} Awake: CC found={_cc != null}, height={_cc?.height}, radius={_cc?.radius}");
+            if (_cc != null) standHeight = _cc.height;
 
             if (_headTransform == null)
                 _headTransform = ResolveHeadTransform();
 
-            Debug.Log($"{LOG} Awake: headTransform={_headTransform?.name ?? "NULL"}, pos={transform.position}");
+            // Cache TrackingSpace for visual crouch offset
+            _trackingSpace = transform.Find("TrackingSpace");
+            _trackingSpaceBaseY = _trackingSpace != null ? _trackingSpace.localPosition.y : 0f;
+
+            Debug.Log($"{LOG} Awake: CC={_cc != null} h={_cc?.height} head={_headTransform?.name ?? "NULL"} tracking={_trackingSpace != null}");
+        }
+
+        private void Start()
+        {
+            // Force CC back to standHeight -- PlayerPrefs might have persisted a modified value
+            // from CHAR CTRL slider. Stance system manages CC height, not the slider.
+            if (_cc != null)
+            {
+                _cc.height = standHeight;
+                _cc.center = new Vector3(_cc.center.x, standHeight * 0.5f, _cc.center.z);
+            }
+            _currentStance = Stance.Stand;
+            _targetCCHeight = standHeight;
+            _targetTrackingY = _trackingSpaceBaseY;
+            Debug.Log($"{LOG} Start: CC reset to standHeight={standHeight}");
         }
 
         private void OnEnable()
         {
-            Debug.Log($"{LOG} OnEnable: speed={moveSpeed}, strafe={strafeFactor}");
+            Debug.Log($"{LOG} OnEnable: speed={moveSpeed} strafe={strafeFactor} stance={_currentStance}");
         }
 
         private void OnDisable()
@@ -160,158 +150,288 @@ namespace Plaga44.Locomotion
         private bool _wasGrounded = true;
         private float _lastGroundedLogTime = -1f;
 
+        private float _dt; // cached per frame
+
         private void Update()
         {
             if (!GameState.CanMove) return;
             if (_headTransform == null) return;
+            _dt = Time.deltaTime;
 
             Vector2 moveInput = GetMoveInput();
-            Vector3 horizontalMove = CalculateHeadRelativeMovement(moveInput);
-            UpdateVerticalVelocity();
-            ApplyMove(horizontalMove);
+            // Prone blocks horizontal movement -- must stand up first
+            Vector3 horizontalMove = _currentStance == Stance.Prone
+                ? Vector3.zero
+                : CalculateHeadRelativeMovement(moveInput);
 
+            float rightY = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch).y;
+            UpdateFly(rightY);
+            UpdateStance(rightY);
+            if (_flyState == FlyState.Grounded) ApplyGravity();
+
+            ApplyMove(horizontalMove);
             NormalisedSpeed = Mathf.Clamp01(moveInput.magnitude);
             LogGroundedChangesThrottled();
         }
 
-        private void UpdateVerticalVelocity()
+        // =====================================================================
+        // Fly system (R thumbstick UP = ascend, release = hover, DOWN = drop)
+        //
+        //  GROUNDED --[stick UP]--> ASCENDING --[release]--> HOVERING
+        //  HOVERING --[stick DOWN]--> GROUNDED (gravity returns)
+        //  HOVERING --[stick UP]--> ASCENDING (boost again)
+        //  ASCENDING/HOVERING --[land on ground]--> GROUNDED
+        // =====================================================================
+
+        private const float HoverDriftMin = -0.3f;  // gentle sink
+        private const float HoverDriftMax = 0.3f;   // gentle rise
+        private const float HoverDriftChangeMin = 1f;
+        private const float HoverDriftChangeMax = 3f;
+        private const float HoverDriftLerp = 2f;
+
+        private void UpdateFly(float rightY)
         {
-            if (IsJetpackActive()) _verticalVelocity = flySpeed;
-            else ApplyGravity();
+            switch (_flyState)
+            {
+                case FlyState.Grounded:
+                    if (rightY > StickUpThreshold && _currentStance == Stance.Stand)
+                    {
+                        _flyState = FlyState.Ascending;
+                        _flySpeed = 0f;
+                        Debug.Log($"{LOG} Fly: ASCENDING");
+                    }
+                    break;
+
+                case FlyState.Ascending:
+                    if (rightY > StickUpThreshold)
+                    {
+                        // Accelerating upward
+                        _flySpeed += flyAcceleration * _dt;
+                        _flySpeed = Mathf.Min(_flySpeed, flyMaxSpeed);
+                        _verticalVelocity = _flySpeed;
+                    }
+                    else
+                    {
+                        // Released stick -- transition to hover
+                        _flyState = FlyState.Hovering;
+                        _flySpeed = 0f;
+                        _hoverDrift = 0f;
+                        _hoverDriftTarget = Random.Range(HoverDriftMin, HoverDriftMax);
+                        _hoverNextDriftChange = Time.unscaledTime + Random.Range(HoverDriftChangeMin, HoverDriftChangeMax);
+                        _verticalVelocity = 0f;
+                        Debug.Log($"{LOG} Fly: HOVERING");
+                    }
+                    // Landing check
+                    if (IsGrounded) { EndFlight(); break; }
+                    break;
+
+                case FlyState.Hovering:
+                    if (rightY > StickUpThreshold)
+                    {
+                        // Boost again
+                        _flyState = FlyState.Ascending;
+                        _flySpeed = 1f; // start with some speed
+                        Debug.Log($"{LOG} Fly: ASCENDING (from hover)");
+                    }
+                    else if (rightY < -StickDownThreshold)
+                    {
+                        // Stick DOWN -- drop, gravity returns
+                        EndFlight();
+                        Debug.Log($"{LOG} Fly: DROPPING");
+                    }
+                    else
+                    {
+                        // Floating -- gentle random drift
+                        UpdateHoverDrift();
+                        _verticalVelocity = _hoverDrift;
+                    }
+                    // Landing check
+                    if (IsGrounded) { EndFlight(); break; }
+                    break;
+            }
         }
 
-        private bool IsJetpackActive()
-            => jetpackEnabled && OVRInput.Get(OVRInput.Button.SecondaryThumbstick);
+        private void UpdateHoverDrift()
+        {
+            if (Time.unscaledTime >= _hoverNextDriftChange)
+            {
+                _hoverDriftTarget = Random.Range(HoverDriftMin, HoverDriftMax);
+                _hoverNextDriftChange = Time.unscaledTime + Random.Range(HoverDriftChangeMin, HoverDriftChangeMax);
+            }
+            _hoverDrift = Mathf.Lerp(_hoverDrift, _hoverDriftTarget, HoverDriftLerp * _dt);
+        }
+
+        private void EndFlight()
+        {
+            _flyState = FlyState.Grounded;
+            _flySpeed = 0f;
+            _hoverDrift = 0f;
+            _verticalVelocity = 0f;
+        }
+
+        // =====================================================================
+        // Stance system (R thumbstick DOWN = cycle down, UP = cycle up)
+        //   STAND -> CROUCH -> PRONE (stick DOWN, one tap per step)
+        //   PRONE -> CROUCH -> STAND (stick UP, one tap per step)
+        //   Transitions are SMOOTH (lerp CC height + TrackingSpace)
+        //   Prone BLOCKS movement (must stand to move)
+        // =====================================================================
+
+        [Tooltip("Stance transition speed (height lerp per second).")]
+        public float stanceTransitionSpeed = 3f;
+
+        private float _targetCCHeight;
+        private float _targetTrackingY;
+        private bool _stanceDownPressed;
+        private bool _stanceUpPressed;
+
+        private void UpdateStance(float rightY)
+        {
+            if (_flyState != FlyState.Grounded) return;
+
+            // Edge detection -- trigger ONCE per stick push
+            bool downNow = rightY < -StickDownThreshold;
+            bool upNow = rightY > StickUpThreshold;
+
+            if (downNow && !_stanceDownPressed)
+            {
+                // Cycle DOWN: Stand -> Crouch -> Prone
+                if (_currentStance == Stance.Stand) SetStance(Stance.Crouch);
+                else if (_currentStance == Stance.Crouch) SetStance(Stance.Prone);
+            }
+            if (upNow && !_stanceUpPressed)
+            {
+                // Cycle UP: Prone -> Crouch -> Stand
+                if (_currentStance == Stance.Prone) SetStance(Stance.Crouch);
+                else if (_currentStance == Stance.Crouch) SetStance(Stance.Stand);
+            }
+            _stanceDownPressed = downNow;
+            _stanceUpPressed = upNow;
+
+            // Smooth transition
+            LerpStance();
+        }
+
+        public void SetStance(Stance stance)
+        {
+            if (_currentStance == stance) return;
+            var prev = _currentStance;
+            _currentStance = stance;
+
+            _targetCCHeight = stance switch
+            {
+                Stance.Crouch => crouchHeight,
+                Stance.Prone => proneHeight,
+                _ => standHeight
+            };
+
+            float heightDiff = standHeight - _targetCCHeight;
+            _targetTrackingY = _trackingSpaceBaseY - heightDiff;
+
+            Debug.Log($"{LOG} Stance: {prev} -> {stance}, targetH={_targetCCHeight}");
+        }
+
+        private void LerpStance()
+        {
+            if (_cc == null) return;
+
+            float speed = stanceTransitionSpeed * _dt;
+
+            // Lerp CC height
+            float currentH = _cc.height;
+            if (!Mathf.Approximately(currentH, _targetCCHeight))
+            {
+                float newH = Mathf.MoveTowards(currentH, _targetCCHeight, speed);
+                _cc.height = newH;
+                _cc.center = new Vector3(_cc.center.x, newH * 0.5f, _cc.center.z);
+            }
+
+            // Lerp TrackingSpace Y
+            if (_trackingSpace != null)
+            {
+                Vector3 pos = _trackingSpace.localPosition;
+                if (!Mathf.Approximately(pos.y, _targetTrackingY))
+                {
+                    pos.y = Mathf.MoveTowards(pos.y, _targetTrackingY, speed);
+                    _trackingSpace.localPosition = pos;
+                }
+            }
+        }
+
+        // =====================================================================
+        // Movement
+        // =====================================================================
 
         private void ApplyMove(Vector3 horizontalMove)
         {
-            Vector3 finalMove = horizontalMove + (Vector3.up * _verticalVelocity * Time.deltaTime);
+            Vector3 finalMove = horizontalMove + (Vector3.up * _verticalVelocity * _dt);
             _cc.Move(finalMove);
         }
 
-        private void LogGroundedChangesThrottled()
-        {
-            if (_cc.isGrounded == _wasGrounded) return;
-            if (Time.time - _lastGroundedLogTime > GroundedLogThrottleSec)
-            {
-                Debug.Log($"{LOG} Grounded: {_wasGrounded} -> {_cc.isGrounded}, pos={transform.position}, vVel={_verticalVelocity:F2}");
-                _lastGroundedLogTime = Time.time;
-            }
-            _wasGrounded = _cc.isGrounded;
-        }
-
-        // =====================================================================
-        // Odczyt inputu
-        // =====================================================================
-
-        /// <summary>
-        /// Zwraca wektor 2D inputu ruchu.
-        /// X = lewo/prawo (strafe), Y = przod/tyl.
-        /// Lewy thumbstick Quest.
-        /// </summary>
         private Vector2 GetMoveInput()
         {
             return OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
         }
 
-        // =====================================================================
-        // Obliczanie ruchu relatywnego do glowy
-        // =====================================================================
-
-        /// <summary>
-        /// Przeksztalca 2D input thumbsticka na 3D wektor ruchu w przestrzeni swiata,
-        /// relatywny do kierunku patrzenia (head-relative).
-        /// </summary>
-        /// <param name="input">Raw input z thumbsticka (x = strafe, y = przod/tyl).</param>
-        /// <returns>Wektor ruchu w przestrzeni swiata, juz pomnozony przez predkosc i deltaTime.</returns>
         private Vector3 CalculateHeadRelativeMovement(Vector2 input)
         {
-            // sqrMagnitude tanszy niz magnitude (bez sqrt)
-            if (input.sqrMagnitude < InputDeadZoneSqr)
-                return Vector3.zero;
+            if (input.sqrMagnitude < InputDeadZoneSqr) return Vector3.zero;
 
-            // --- Rzutowanie kierunku glowy na plaszczyzne pozioma ---
-            // Bierzemy forward i right kamery VR, ale zerujemy skladowa Y,
-            // bo nie chcemy zeby patrzenie w gore/dol wplywalo na kierunek ruchu.
-            // Bez tego: patrzenie w dol + push do przodu = gracz wchodzi w ziemie.
             Vector3 fwd = _headTransform.forward;
-            fwd.y = 0f;
-            fwd.Normalize();
-
+            fwd.y = 0f; fwd.Normalize();
             Vector3 right = _headTransform.right;
-            right.y = 0f;
-            right.Normalize();
+            right.y = 0f; right.Normalize();
 
-            // --- Skladanie wektora ruchu ---
-            // input.y = przod/tyl (pelna predkosc)
-            // input.x = strafe (zredukowana predkosc przez strafeFactor)
             Vector3 move = (fwd * input.y) + (right * input.x * strafeFactor);
-
-            // Mnożymy przez predkosc i deltaTime.
-            // deltaTime sprawia ze ruch jest niezalezny od framerate.
-            move *= moveSpeed * Time.deltaTime;
-
+            move *= moveSpeed * _dt;
             return move;
         }
 
         // =====================================================================
-        // Grawitacja
+        // Gravity
         // =====================================================================
 
-        /// <summary>
-        /// Aplikuje grawitacje do predkosci pionowej.
-        /// Jesli gracz stoi na ziemi, ustawia mala wartosc ciagnaca w dol
-        /// (zeby isGrounded dzialalo stabilnie).
-        /// Jesli gracz jest w powietrzu, przyspiesza w dol zgodnie z Physics.gravity.
-        /// </summary>
         private void ApplyGravity()
         {
             if (_cc.isGrounded && _verticalVelocity < 0f)
-            {
-                // Gracz jest na ziemi i nie skacze.
-                // Ustawiamy mala ujemna wartosc zamiast 0, zeby CharacterController
-                // konsekwentnie raportował isGrounded = true.
-                // Bez tego: na nierównym terenie gracz "skacze" miedzy stanami.
                 _verticalVelocity = GroundedPullDown;
-            }
             else
-            {
-                // Gracz jest w powietrzu (skacze lub spada).
-                // Czytamy grawitacje z ustawien fizyki projektu (PhysicsConfig.SetGravity).
-                // NIGDY nie hardcodujemy -9.81 -- grawitacja moze byc inna
-                // (np. misje pod woda, niska grawitacja na bagnach, itp.).
-                _verticalVelocity += Physics.gravity.y * Time.deltaTime;
-            }
+                _verticalVelocity += Physics.gravity.y * _dt;
         }
 
         // =====================================================================
-        // Automatyczne znajdowanie kamery
+        // Logging
         // =====================================================================
 
-        /// <summary>
-        /// Szuka transform kamery VR. Kolejnosc:
-        /// 1. Meta XR: TrackingSpace/CenterEyeAnchor (standardowa hierarchia OVRCameraRig)
-        /// 2. Fallback: Camera.main
-        /// Jesli nic nie znajdzie, loguje warning -- trzeba ustawic recznie w inspektorze.
-        /// </summary>
+        private void LogGroundedChangesThrottled()
+        {
+            if (_cc.isGrounded == _wasGrounded) return;
+            if (Time.unscaledTime - _lastGroundedLogTime > GroundedLogThrottleSec)
+            {
+                Debug.Log($"{LOG} Grounded: {_wasGrounded} -> {_cc.isGrounded}, vVel={_verticalVelocity:F2}, stance={_currentStance}");
+                _lastGroundedLogTime = Time.unscaledTime;
+            }
+            _wasGrounded = _cc.isGrounded;
+        }
+
+        // =====================================================================
+        // Head transform resolution
+        // =====================================================================
+
         private Transform ResolveHeadTransform()
         {
-            // OVRCameraRig: TrackingSpace/CenterEyeAnchor
             var tracking = transform.Find("TrackingSpace");
             if (tracking != null)
             {
                 var eye = tracking.Find("CenterEyeAnchor");
                 if (eye != null) return eye;
             }
-
-            // Fallback -- Camera.main dziala zarowno w edytorze jak i na urzadzeniu.
             if (Camera.main != null)
             {
                 Debug.Log($"{LOG} ResolveHead: fallback Camera.main ({Camera.main.name})");
                 return Camera.main.transform;
             }
-
-            Debug.LogError($"{LOG} ResolveHead: BRAK KAMERY! Ustaw _headTransform w inspektorze.");
+            Debug.LogError($"{LOG} ResolveHead: BRAK KAMERY!");
             return null;
         }
     }

@@ -214,13 +214,13 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Volume/Apply INITIAL (all off)", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/Volume/Apply INITIAL (all off)", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/Volume/Apply CINEMATIC", false, 2)]
+        [MenuItem("CYBERNOMAD/Config/Volume/Apply CINEMATIC", false, 2)]
         static void MenuCinematic() => Apply(CINEMATIC);
 
-        [MenuItem("CYBERNOMAD/Volume/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/Volume/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

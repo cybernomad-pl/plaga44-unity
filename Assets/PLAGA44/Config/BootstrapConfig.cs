@@ -45,12 +45,25 @@ namespace Plaga44
         public float skyRotationSpeed = 0.5f;
 
         [Header("Player Spawn")]
-        public float spawnAboveTerrain = 1000f;
-        [Tooltip("Gracz spawnuje 1km nad terenem i opada w Play Mode. Wylacz jesli chcesz testowac bez skoku.")]
-        public bool stratoJump = true;
+        [Tooltip("Player spawns at last saved position. No more StratoJump.")]
+        public bool savePlayerPosition = true;
 
         [Header("Grab Volume")]
         public float grabVolumeRadius = 0.08f;
+
+        [Header("Bounce Light")]
+        [Tooltip("Fill light pointing straight up (ground bounce simulation).")]
+        public Color bounceLightColor = new Color(0.6f, 0.65f, 0.75f);
+        public float bounceLightIntensity = 0.35f;
+        [Tooltip("Rotation X=-90 = straight up. Adjust for angle.")]
+        public Vector3 bounceLightRotation = new Vector3(-90f, 0f, 0f);
+        public LightShadows bounceLightShadows = LightShadows.None;
+
+        [Header("Object Spawner")]
+        [Tooltip("Spawn offset relative to player rig (x=right, y=up, z=forward).")]
+        public Vector3 spawnerOffset = new Vector3(0.8f, 0f, 1.5f);
+        [Tooltip("Default item Resources path for spawner.")]
+        public string defaultSpawnItem = "Items/Revolver";
 
         [Header("Avatar Registry")]
         public string avatarRegistryPath = "Assets/PLAGA44/Resources/AvatarRegistry.asset";

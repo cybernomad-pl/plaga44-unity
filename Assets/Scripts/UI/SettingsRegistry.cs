@@ -37,7 +37,7 @@ namespace Plaga44.UI
 
         // Sekcje ktorych aktualnych wartosci NIE trwalimy (akcje, stan gry, read-only)
         private static readonly HashSet<string> NON_PERSISTENT_SECTIONS =
-            new HashSet<string> { "PRESETS", "GAME STATE" };
+            new HashSet<string> { "GAME STATE" };
 
         /// <summary>PlayerPrefs keys -- single source of truth, koniec z literal strings w kodzie.</summary>
         private static class PrefsKeys
@@ -116,6 +116,9 @@ namespace Plaga44.UI
                     if (prefKey != null)
                     {
                         PlayerPrefs.SetFloat(prefKey, v);
+                        // Auto-update default so next session starts with this value
+                        string defKey = PrefsKeys.Default(sectionCapture, n);
+                        PlayerPrefs.SetFloat(defKey, v);
                         PendingSave = true;
                     }
                 }
@@ -330,7 +333,7 @@ namespace Plaga44.UI
             // CHARACTER CTRL
             // =============================================================
             if (cc != null) Sec("CHAR CTRL", s => {
-                s.Add(S("Height", "CharacterController height", () => cc.height, v => cc.height=v, 0.5f, 3, 0.1f));
+                s.Add(S("Height", "CharacterController height", () => cc.height, v => { cc.height=v; cc.center=new Vector3(cc.center.x,v*0.5f,cc.center.z); }, 0.5f, 3, 0.1f));
                 s.Add(S("Radius", "Player collision radius", () => cc.radius, v => cc.radius=v, 0.1f, 1, 0.05f, "F2"));
                 s.Add(S("Skin Width", "Collision penetration tolerance", () => cc.skinWidth, v => cc.skinWidth=v, 0.01f, 0.2f, 0.01f, "F2"));
                 s.Add(S("Step Offset", "Max step height", () => cc.stepOffset, v => cc.stepOffset=v, 0, 1, 0.05f, "F2"));
@@ -354,9 +357,26 @@ namespace Plaga44.UI
                 string modeDesc = maxMode > 1
                     ? $"0=None(robot), 1..{maxMode}=Avatar z Gallery"
                     : "0=None(robot), 1=Survivor (legacy)";
-                s.Add(S("Mode", modeDesc, () => playerAvatar.avatarMode, v => playerAvatar.SetAvatarMode((int)v), 0, maxMode, 1, "F0"));
+                s.Add(S("Mode", modeDesc, () => playerAvatar.avatarMode, v => playerAvatar.PreviewAvatarMode((int)v), 0, maxMode, 1, "F0"));
                 s.Add(S("Hide Head", "Hide head+neck to avoid camera clipping (player avatars)", () => playerAvatar.hideHead?1:0, v => playerAvatar.hideHead=v>0.5f, 0, 1, 1, "F0"));
                 s.Add(S("Y Offset", "Avatar feet offset from rig base", () => playerAvatar.yOffset, v => playerAvatar.yOffset=v, -1f, 1f, 0.05f, "F2"));
+            });
+
+            // =============================================================
+            // ITEMS -- item browser (like AVATAR but for held items)
+            // =============================================================
+            // ITEMS -- max jest dynamiczny bo ItemBrowser.LoadItems() moze jeszcze nie odpalic
+            Sec("ITEMS", s => {
+                s.Add(new SettingDef("Item", "0=None, 1..N=Item",
+                    () => {
+                        var ib = Plaga44.ItemBrowser.Instance;
+                        return ib != null ? ib.SelectedItem : 0;
+                    },
+                    v => {
+                        var ib = Plaga44.ItemBrowser.Instance;
+                        if (ib != null) ib.SetItem((int)v);
+                    },
+                    0, 10, 1, "F0")); // max=10 jako bufor, SetItem clampuje do MaxItem
             });
 
             // =============================================================
@@ -369,6 +389,8 @@ namespace Plaga44.UI
                 s.Add(S("Max Delta", "Prevents teleport after lag spike", () => Time.maximumDeltaTime, v => Time.maximumDeltaTime=v, 0.01f, 0.5f, 0.01f, "F2"));
                 s.Add(S("Shader LOD", "Max shader LOD (lower=simpler)", () => Shader.globalMaximumLOD, v => Shader.globalMaximumLOD=(int)v, 100, 600, 100, "F0"));
                 s.Add(S("Post FX", "Post-processing on/off", () => (vol!=null&&vol.enabled)?1:0, v => { if(vol) vol.enabled=v>0.5f; }, 0, 1, 1, "F0"));
+                s.Add(S("RESET ALL", "Reset all settings to saved defaults", () => 0, v => { if(v>0.5f) ResetToDefaults(); }, 0, 1, 1, "F0"));
+                s.Add(S("LOG ALL", "Print all settings to console", () => 0, v => { if(v>0.5f) LogAll(); }, 0, 1, 1, "F0"));
             });
 
             // =============================================================
@@ -614,19 +636,19 @@ namespace Plaga44.UI
             });
 
             // =============================================================
-            // PRESETS (save/load as "settings")
+            // EXIT
             // =============================================================
-            Sec("PRESETS", s => {
-                for (int slot = 1; slot <= 3; slot++)
-                {
-                    int sl = slot; // capture for lambda
-                    string slotName = GetSlotName(sl);
-                    s.Add(S($"SAVE {sl}:{slotName}", $"Save all settings to slot {sl}", () => 0, v => { if(v>0.5f) SavePreset(sl); }, 0, 1, 1, "F0"));
-                    s.Add(S($"LOAD {sl}:{slotName}", $"Load settings from slot {sl}", () => 0, v => { if(v>0.5f) LoadPreset(sl); }, 0, 1, 1, "F0"));
-                }
-                s.Add(S("SET DEFAULTS", "Save current values as new defaults (RESET will restore these)", () => 0, v => { if(v>0.5f) SaveCurrentAsDefaults(); }, 0, 1, 1, "F0"));
-                s.Add(S("RESET ALL", "Reset all settings to saved defaults", () => 0, v => { if(v>0.5f) ResetToDefaults(); }, 0, 1, 1, "F0"));
-                s.Add(S("LOG ALL", "Print all settings to console", () => 0, v => { if(v>0.5f) LogAll(); }, 0, 1, 1, "F0"));
+            Sec("EXIT", s => {
+                s.Add(S("QUIT GAME", "Exit application", () => 0, v => {
+                    if (v > 0.5f)
+                    {
+#if UNITY_EDITOR
+                        UnityEditor.EditorApplication.isPlaying = false;
+#else
+                        Application.Quit();
+#endif
+                    }
+                }, 0, 1, 1, "F0"));
             });
 
             FinalizeBuild();
@@ -636,8 +658,8 @@ namespace Plaga44.UI
         {
             CollectFlatSettingsList();
             if (_defaults == null) CaptureDefaults(); // musi byc PRZED RestorePersistedValues
+            _built = true; // PRZED restore -- blokuje reentrant Build() z action setterow (LOG ALL etc)
             int restored = RestorePersistedValues();
-            _built = true;
             Debug.Log($"[PLAGA44][Settings] Built: {_sec.Count} sections, {_allSettings.Count} saveable settings, {restored} restored from PlayerPrefs");
         }
 
@@ -652,6 +674,11 @@ namespace Plaga44.UI
                         _allSettings.Add(setting);
         }
 
+        // Action-type settings (getter always returns 0, setter fires action on >0.5).
+        // These must NOT be restored from PlayerPrefs -- restoring 1.0 would re-trigger the action.
+        private static readonly HashSet<string> ACTION_SETTINGS =
+            new HashSet<string> { "RESET ALL", "LOG ALL", "SET DEFAULTS", "QUIT GAME" };
+
         private static int RestorePersistedValues()
         {
             int restored = 0;
@@ -661,6 +688,7 @@ namespace Plaga44.UI
                 foreach (var setting in kv.Value)
                 {
                     if (setting.step <= 0) continue;
+                    if (ACTION_SETTINGS.Contains(setting.name)) continue; // skip action buttons
                     string key = PrefsKeys.Current(kv.Key, setting.name);
                     if (!PlayerPrefs.HasKey(key)) continue;
                     setting.set(Mathf.Clamp(PlayerPrefs.GetFloat(key), setting.min, setting.max));

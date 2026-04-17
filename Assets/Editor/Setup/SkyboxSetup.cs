@@ -42,7 +42,8 @@ namespace Plaga44.Editor.Setup
         {
             foreach (var light in Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
             {
-                if (light.type == LightType.Directional)
+                if (light.type == LightType.Directional
+                    && !light.gameObject.name.Contains("Bounce"))
                 {
                     Debug.Log($"{LOG} [OK] Directional Light: {light.name}");
                     return false;

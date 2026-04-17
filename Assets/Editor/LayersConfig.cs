@@ -152,10 +152,10 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Layers & Tags/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/Layers & Tags/Apply INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/Layers & Tags/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/Layers & Tags/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

@@ -147,7 +147,7 @@ namespace Plaga44
                                           Current == GamePhase.Inventory ||
                                           Current == GamePhase.Dead;
 
-        /// <summary>True gdy lokomocja jest dozwolona -- kluczowy guard dla LocomotionController.</summary>
+        /// <summary>True gdy lokomocja jest dozwolona. Menu BLOKUJE ruch i rozgladanie.</summary>
         public static bool CanMove => Current == GamePhase.Playing;
 
         /// <summary>True gdy bron i interakcje powinny dzialac.</summary>

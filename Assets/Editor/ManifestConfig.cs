@@ -158,7 +158,7 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Manifest/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/Manifest/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------
