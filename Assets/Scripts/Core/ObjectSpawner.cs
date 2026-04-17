@@ -90,9 +90,29 @@ namespace Plaga44
             if (Instance == this) Instance = null;
         }
 
+        private bool _spawnTriggered;
+
         private void Start()
         {
-            if (spawnOnStart) SpawnAll();
+            // Defer spawn to Update -- wait for player to land on terrain so spawn
+            // position (relative to rig) is at ground level, not 42m up in the air.
+        }
+
+        private void Update()
+        {
+            if (_spawnTriggered || !spawnOnStart) return;
+            if (!IsPlayerGrounded()) return;
+            _spawnTriggered = true;
+            SpawnAll();
+        }
+
+        private static bool IsPlayerGrounded()
+        {
+            var rig = GameObject.Find(OvrRigName);
+            if (rig == null) return true;
+            var cc = rig.GetComponent<CharacterController>();
+            if (cc == null) return true;
+            return cc.isGrounded;
         }
 
         // -----------------------------------------------------------------

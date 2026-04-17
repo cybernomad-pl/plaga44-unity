@@ -31,8 +31,31 @@ namespace Plaga44.Editor.Setup
             changed |= SetupLocomotion(rig, cfg);
             changed |= SetupSmoothTurn(rig, cfg);
             changed |= SetupPlayerAvatar(rig);
-            // StratoJump removed -- no spawn repositioning.
+            changed |= SnapRigToGround(rig);
             return changed;
+        }
+
+        // Snap rig to terrain ground level so player doesn't spawn 42m up in the air.
+        // Uses Terrain.SampleHeight at current XZ position. Player ends standing on terrain.
+        private static bool SnapRigToGround(GameObject rig)
+        {
+            var terrain = Object.FindFirstObjectByType<Terrain>();
+            if (terrain == null) return false;
+
+            Vector3 pos = rig.transform.position;
+            float groundY = terrain.SampleHeight(pos) + terrain.transform.position.y;
+            float targetY = groundY; // CC.center.y handles standing height
+
+            if (Mathf.Abs(pos.y - targetY) < 0.01f)
+            {
+                Debug.Log($"{LOG} [OK] Rig already at ground level (y={pos.y:F2})");
+                return false;
+            }
+
+            Undo.RecordObject(rig.transform, "PlayerRigSetup snap to ground");
+            rig.transform.position = new Vector3(pos.x, targetY, pos.z);
+            Debug.Log($"{LOG} [FIX] Snapped rig to ground: y={pos.y:F2} -> {targetY:F2}");
+            return true;
         }
 
         private static bool SetupCharacterController(GameObject rig, BootstrapConfig cfg)

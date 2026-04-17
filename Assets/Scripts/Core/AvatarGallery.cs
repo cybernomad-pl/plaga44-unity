@@ -105,9 +105,19 @@ namespace Plaga44
             if (Instance == this) Instance = null;
         }
 
+        private bool _spawned;
+
         private void Start()
         {
             if (!TryLoadRegistry()) return;
+            // Spawn deferred to Update -- wait for player to land on terrain so
+            // origin (relative to CenterEyeAnchor) is at ground level, not 42m up.
+        }
+
+        private void Update()
+        {
+            if (_spawned || _instances == null || _instances.Length == 0) return;
+            if (!IsPlayerGrounded()) return;
 
             ResolveOrigin(out Vector3 origin, out Vector3 rowRight);
             Vector3 dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : rowRight;
@@ -117,7 +127,17 @@ namespace Plaga44
             if (skipped > 0) Debug.LogWarning($"{LOG} Total broken skipped: {skipped}/{_instances.Length}");
 
             ApplyInitialLazyState();
-            Debug.Log($"{LOG} Spawned {spawned}/{_instances.Length} avatars at {origin} (lazy={lazyDisplay}, active={_activeIndex})");
+            _spawned = true;
+            Debug.Log($"{LOG} Spawned {spawned}/{_instances.Length} avatars at {origin} (lazy={lazyDisplay}, active={_activeIndex}) [deferred until grounded]");
+        }
+
+        private static bool IsPlayerGrounded()
+        {
+            var rig = GameObject.Find(OvrRigName);
+            if (rig == null) return true; // no rig -- spawn immediately at fallback origin
+            var cc = rig.GetComponent<CharacterController>();
+            if (cc == null) return true;
+            return cc.isGrounded;
         }
 
         // =====================================================================
