@@ -31,7 +31,7 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} MemorySettings: use Inspector for full view (complex nested structure)");
         }
 
-        [MenuItem("CYBERNOMAD/Memory/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/Memory/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         static SerializedObject LoadAsset()

@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.XR;
+using UnityEngine.AI;
 
 namespace Plaga44.UI
 {
@@ -28,16 +29,184 @@ namespace Plaga44.UI
         private static string[] _names;
         private static bool _built;
         private static List<SettingDef> _allSettings; // flat list for save/load
+        private static float _activeProfile = 0;
 
         public static List<SettingDef> GetSettings(string s) { if (!_built) Build(); return _sec.TryGetValue(s, out var l) ? l : new List<SettingDef>(); }
         public static string[] GetSectionNames() { if (!_built) Build(); return _names; }
         public static void Rebuild() { _built = false; _sec = null; }
 
+        // Sekcje ktorych aktualnych wartosci NIE trwalimy (akcje, stan gry, read-only)
+        private static readonly HashSet<string> NON_PERSISTENT_SECTIONS =
+            new HashSet<string> { "GAME STATE" };
+
+        /// <summary>PlayerPrefs keys -- single source of truth, koniec z literal strings w kodzie.</summary>
+        private static class PrefsKeys
+        {
+            private const string CurrentPrefix = "Plaga44_Current_";
+            private const string DefaultPrefix = "Plaga44_Default_";
+            private const string PresetPrefix = "Plaga44_Preset";
+            private const string CountSuffix = "__count";
+            private const string SavedAtSuffix = "__savedAt";
+
+            public static string Current(string section, string name) => $"{CurrentPrefix}{section}_{name}";
+            public static string Default(string section, string name) => $"{DefaultPrefix}{section}_{name}";
+            public static string PresetValue(int slot, string name) => $"{PresetPrefix}{slot}_{name}";
+            public static string PresetCount(int slot) => $"{PresetPrefix}{slot}_{CountSuffix}";
+            public static string PresetSavedAt(int slot) => $"{PresetPrefix}{slot}_{SavedAtSuffix}";
+        }
+
+        private static string DefaultsDictKey(string section, string name) => $"{section}_{name}";
+
+        /// <summary>Nazwy slotow presetów.</summary>
+        private static string GetSlotName(int slot) => slot switch
+        {
+            1 => "HI-END",
+            2 => "CUSTOM",
+            3 => "SAFE",
+            _ => $"SLOT{slot}"
+        };
+
+        // Last action info -- HamburgerMenu pokazuje jako toast przez kilka sekund
+        public static string LastActionMessage { get; private set; } = "";
+        public static float LastActionTime { get; private set; } = -999f;
+        public static bool LastActionSuccess { get; private set; } = true;
+
+        /// <summary>Event invokowany po kazdej akcji (save/load/reset/error).
+        /// MenuNotifier subskrybuje, pokazuje banner w canvas menu.</summary>
+        public static event System.Action<string, bool> OnAction;
+
+        static void SetAction(string msg, bool success = true)
+        {
+            LastActionMessage = msg;
+            LastActionTime = Time.unscaledTime;
+            LastActionSuccess = success;
+            Debug.Log($"[PLAGA44][Settings] {msg}");
+            OnAction?.Invoke(msg, success);
+        }
+
+        // Current section name (set by Sec, captured by S for log context).
+        private static string _currentSection = "?";
+
+        // Flag ze zapis do PlayerPrefs jest pending (faktyczny flush w HamburgerMenu.Close / OnApplicationQuit)
+        public static bool PendingSave { get; private set; }
+
+        /// <summary>Flush PlayerPrefs do dysku. Wywolywane przy zamknieciu menu / aplikacji.</summary>
+        public static void FlushPlayerPrefs()
+        {
+            if (!PendingSave) return;
+            PlayerPrefs.Save();
+            PendingSave = false;
+        }
+
         static SettingDef S(string n, string d, Func<float> g, Action<float> s, float mn, float mx, float st, string f="F1")
-            => new SettingDef(n,d,g,s,mn,mx,st,f);
+        {
+            string sectionCapture = _currentSection;
+            bool persistent = st > 0 && !NON_PERSISTENT_SECTIONS.Contains(sectionCapture);
+            string prefKey = persistent ? PrefsKeys.Current(sectionCapture, n) : null;
+
+            Action<float> wrappedSetter = (v) =>
+            {
+                float oldVal = g();
+                s(v);
+                if (!Mathf.Approximately(oldVal, v))
+                {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                    SettingsLogger.Log(n, oldVal, v, sectionCapture);
+#endif
+                    if (prefKey != null)
+                    {
+                        PlayerPrefs.SetFloat(prefKey, v);
+                        // Auto-update default so next session starts with this value
+                        string defKey = PrefsKeys.Default(sectionCapture, n);
+                        PlayerPrefs.SetFloat(defKey, v);
+                        PendingSave = true;
+                    }
+                }
+            };
+            return new SettingDef(n, d, g, wrappedSetter, mn, mx, st, f);
+        }
 
         static void Sec(string name, Action<List<SettingDef>> b)
-        { var l = new List<SettingDef>(); b(l); if (l.Count > 0) _sec[name] = l; }
+        {
+            _currentSection = name;
+            try
+            {
+                var l = new List<SettingDef>();
+                b(l);
+                if (l.Count > 0) _sec[name] = l;
+            }
+            finally { _currentSection = "?"; }
+        }
+
+        // =====================================================================
+        // Defaults snapshot -- captured on first Build()
+        // =====================================================================
+
+        private static Dictionary<string, float> _defaults;
+
+        private static void CaptureDefaults()
+        {
+            _defaults = new Dictionary<string, float>();
+            foreach (var kv in _sec)
+            {
+                if (NON_PERSISTENT_SECTIONS.Contains(kv.Key)) continue;
+                foreach (var s in kv.Value)
+                {
+                    if (s.step <= 0) continue; // skip read-only / actions
+                    string dictKey = DefaultsDictKey(kv.Key, s.name);
+                    // Prefer persisted defaults (from SaveCurrentAsDefaults) over live scene value
+                    string prefKey = PrefsKeys.Default(kv.Key, s.name);
+                    _defaults[dictKey] = PlayerPrefs.HasKey(prefKey)
+                        ? PlayerPrefs.GetFloat(prefKey)
+                        : s.get();
+                }
+            }
+            Debug.Log($"[PLAGA44][Settings] Captured {_defaults.Count} default values");
+        }
+
+        public static void ResetToDefaults()
+        {
+            if (_defaults == null) { SetAction("RESET FAILED -- no defaults captured", false); return; }
+            int count = 0;
+            foreach (var kv in _sec)
+            {
+                if (NON_PERSISTENT_SECTIONS.Contains(kv.Key)) continue;
+                foreach (var s in kv.Value)
+                {
+                    if (s.step <= 0) continue;
+                    string dictKey = DefaultsDictKey(kv.Key, s.name);
+                    if (_defaults.TryGetValue(dictKey, out float val))
+                    {
+                        s.set(Mathf.Clamp(val, s.min, s.max));
+                        count++;
+                    }
+                }
+            }
+            SetAction($"RESET {count} values to defaults", true);
+        }
+
+        /// <summary>Zapisuje biezace wartosci jako nowe domyslne.
+        /// Po tej operacji RESET ALL przywroci do stanu z tego momentu, nie ze startu aplikacji.</summary>
+        public static void SaveCurrentAsDefaults()
+        {
+            if (!_built) Build();
+            int count = 0;
+            foreach (var kv in _sec)
+            {
+                if (NON_PERSISTENT_SECTIONS.Contains(kv.Key)) continue;
+                foreach (var s in kv.Value)
+                {
+                    if (s.step <= 0) continue;
+                    float val = s.get();
+                    PlayerPrefs.SetFloat(PrefsKeys.Default(kv.Key, s.name), val);
+                    _defaults[DefaultsDictKey(kv.Key, s.name)] = val;
+                    count++;
+                }
+            }
+            PlayerPrefs.Save();
+            PendingSave = false;
+            SetAction($"DEFAULTS SET ({count} values saved)", true);
+        }
 
         // =====================================================================
         // Save / Load presets to PlayerPrefs
@@ -46,39 +215,61 @@ namespace Plaga44.UI
         public static void SavePreset(int slot)
         {
             if (!_built) Build();
-            string prefix = $"Plaga44_Preset{slot}_";
-            foreach (var s in _allSettings)
+            try
             {
-                float val = s.get();
-                PlayerPrefs.SetFloat(prefix + s.name, val);
+                foreach (var s in _allSettings)
+                    PlayerPrefs.SetFloat(PrefsKeys.PresetValue(slot, s.name), s.get());
+                PlayerPrefs.SetInt(PrefsKeys.PresetCount(slot), _allSettings.Count);
+                PlayerPrefs.SetString(PrefsKeys.PresetSavedAt(slot), System.DateTime.Now.ToString("dd.MM HH:mm"));
+                PlayerPrefs.Save();
+                SetAction($"SAVED slot {slot} ({_allSettings.Count} values)", true);
             }
-            PlayerPrefs.SetInt(prefix + "__count", _allSettings.Count);
-            PlayerPrefs.Save();
-            Debug.Log($"[PLAGA44][Settings] SAVED preset {slot} ({_allSettings.Count} values)");
+            catch (System.Exception e)
+            {
+                SetAction($"SAVE slot {slot} FAILED: {e.Message}", false);
+            }
         }
 
         public static void LoadPreset(int slot)
         {
             if (!_built) Build();
-            string prefix = $"Plaga44_Preset{slot}_";
-            if (!PlayerPrefs.HasKey(prefix + "__count"))
+            if (!PlayerPrefs.HasKey(PrefsKeys.PresetCount(slot)))
             {
-                Debug.LogWarning($"[PLAGA44][Settings] Preset {slot} not found");
+                SetAction($"LOAD slot {slot} -- empty, cannot load", false);
                 return;
             }
+            try
+            {
+                int loaded = LoadPresetValues(slot);
+                SetAction($"LOADED slot {slot} ({loaded} values)", true);
+            }
+            catch (System.Exception e)
+            {
+                SetAction($"LOAD slot {slot} FAILED: {e.Message}", false);
+            }
+        }
+
+        private static int LoadPresetValues(int slot)
+        {
             int loaded = 0;
             foreach (var s in _allSettings)
             {
-                string key = prefix + s.name;
-                if (PlayerPrefs.HasKey(key))
-                {
-                    float val = PlayerPrefs.GetFloat(key);
-                    val = Mathf.Clamp(val, s.min, s.max);
-                    s.set(val);
-                    loaded++;
-                }
+                string key = PrefsKeys.PresetValue(slot, s.name);
+                if (!PlayerPrefs.HasKey(key)) continue;
+                s.set(Mathf.Clamp(PlayerPrefs.GetFloat(key), s.min, s.max));
+                loaded++;
             }
-            Debug.Log($"[PLAGA44][Settings] LOADED preset {slot} ({loaded} values)");
+            return loaded;
+        }
+
+        /// <summary>True jesli slot ma zapisane dane. Uzywane przez HamburgerMenu do stanu.</summary>
+        public static bool IsPresetSaved(int slot) => PlayerPrefs.HasKey(PrefsKeys.PresetCount(slot));
+
+        /// <summary>Sformatowana data zapisu slotu, albo null jesli pusty.</summary>
+        public static string GetPresetTimestamp(int slot)
+        {
+            string key = PrefsKeys.PresetSavedAt(slot);
+            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : null;
         }
 
         public static void LogAll()
@@ -142,7 +333,7 @@ namespace Plaga44.UI
             // CHARACTER CTRL
             // =============================================================
             if (cc != null) Sec("CHAR CTRL", s => {
-                s.Add(S("Height", "CharacterController height", () => cc.height, v => cc.height=v, 0.5f, 3, 0.1f));
+                s.Add(S("Height", "CharacterController height", () => cc.height, v => { cc.height=v; cc.center=new Vector3(cc.center.x,v*0.5f,cc.center.z); }, 0.5f, 3, 0.1f));
                 s.Add(S("Radius", "Player collision radius", () => cc.radius, v => cc.radius=v, 0.1f, 1, 0.05f, "F2"));
                 s.Add(S("Skin Width", "Collision penetration tolerance", () => cc.skinWidth, v => cc.skinWidth=v, 0.01f, 0.2f, 0.01f, "F2"));
                 s.Add(S("Step Offset", "Max step height", () => cc.stepOffset, v => cc.stepOffset=v, 0, 1, 0.05f, "F2"));
@@ -158,6 +349,37 @@ namespace Plaga44.UI
             });
 
             // =============================================================
+            // AVATAR -- dynamiczny max z AvatarGallery (fallback=1 jesli brak)
+            // =============================================================
+            var playerAvatar = UnityEngine.Object.FindAnyObjectByType<Plaga44.PlayerAvatar>();
+            if (playerAvatar != null) Sec("AVATAR", s => {
+                int maxMode = Mathf.Max(1, playerAvatar.MaxMode);
+                string modeDesc = maxMode > 1
+                    ? $"0=None(robot), 1..{maxMode}=Avatar z Gallery"
+                    : "0=None(robot), 1=Survivor (legacy)";
+                s.Add(S("Mode", modeDesc, () => playerAvatar.avatarMode, v => playerAvatar.PreviewAvatarMode((int)v), 0, maxMode, 1, "F0"));
+                s.Add(S("Hide Head", "Hide head+neck to avoid camera clipping (player avatars)", () => playerAvatar.hideHead?1:0, v => playerAvatar.hideHead=v>0.5f, 0, 1, 1, "F0"));
+                s.Add(S("Y Offset", "Avatar feet offset from rig base", () => playerAvatar.yOffset, v => playerAvatar.yOffset=v, -1f, 1f, 0.05f, "F2"));
+            });
+
+            // =============================================================
+            // ITEMS -- item browser (like AVATAR but for held items)
+            // =============================================================
+            // ITEMS -- max jest dynamiczny bo ItemBrowser.LoadItems() moze jeszcze nie odpalic
+            Sec("ITEMS", s => {
+                s.Add(new SettingDef("Item", "0=None, 1..N=Item",
+                    () => {
+                        var ib = Plaga44.ItemBrowser.Instance;
+                        return ib != null ? ib.SelectedItem : 0;
+                    },
+                    v => {
+                        var ib = Plaga44.ItemBrowser.Instance;
+                        if (ib != null) ib.SetItem((int)v);
+                    },
+                    0, 10, 1, "F0")); // max=10 jako bufor, SetItem clampuje do MaxItem
+            });
+
+            // =============================================================
             // MISC
             // =============================================================
             Sec("MISC", s => {
@@ -167,6 +389,8 @@ namespace Plaga44.UI
                 s.Add(S("Max Delta", "Prevents teleport after lag spike", () => Time.maximumDeltaTime, v => Time.maximumDeltaTime=v, 0.01f, 0.5f, 0.01f, "F2"));
                 s.Add(S("Shader LOD", "Max shader LOD (lower=simpler)", () => Shader.globalMaximumLOD, v => Shader.globalMaximumLOD=(int)v, 100, 600, 100, "F0"));
                 s.Add(S("Post FX", "Post-processing on/off", () => (vol!=null&&vol.enabled)?1:0, v => { if(vol) vol.enabled=v>0.5f; }, 0, 1, 1, "F0"));
+                s.Add(S("RESET ALL", "Reset all settings to saved defaults", () => 0, v => { if(v>0.5f) ResetToDefaults(); }, 0, 1, 1, "F0"));
+                s.Add(S("LOG ALL", "Print all settings to console", () => 0, v => { if(v>0.5f) LogAll(); }, 0, 1, 1, "F0"));
             });
 
             // =============================================================
@@ -288,8 +512,15 @@ namespace Plaga44.UI
                     s.Add(S("Tint B", "Sky tint B", () => sky.GetColor("_Tint").b, v => { var c=sky.GetColor("_Tint"); c.b=v; sky.SetColor("_Tint",c); }, 0, 2, 0.02f, "F2"));
                 }
                 if (sky.HasFloat("_Exposure")) s.Add(S("Exposure", "Sky brightness", () => sky.GetFloat("_Exposure"), v => sky.SetFloat("_Exposure",v), 0, 8, 0.1f));
-                if (sky.HasFloat("_Rotation")) s.Add(S("Rotation", "Skybox rotation (deg)", () => sky.GetFloat("_Rotation"), v => sky.SetFloat("_Rotation",v), 0, 360, 5, "F0"));
-                // _RotSpeed shader property pominieta -- SkyRotator skrypt ogarnia rotacje
+                if (sky.HasFloat("_Rotation")) s.Add(S("Rotation", "Skybox static rotation (degrees)", () => sky.GetFloat("_Rotation"), v => sky.SetFloat("_Rotation",v), 0, 360, 5, "F0"));
+                if (sky.HasFloat("_CloudBoost")) s.Add(S("Cloud Bright", "Cloud brightness multiplier (1=normal)", () => sky.GetFloat("_CloudBoost"), v => sky.SetFloat("_CloudBoost",v), 0, 5, 0.1f));
+                if (sky.HasFloat("_CloudThreshold")) s.Add(S("Cloud Thresh", "Luminance threshold for cloud effect (lower=more clouds)", () => sky.GetFloat("_CloudThreshold"), v => sky.SetFloat("_CloudThreshold",v), 0, 1, 0.01f, "F2"));
+                if (sky.HasFloat("_CloudOpacity")) s.Add(S("Cloud Alpha", "Cloud layer opacity (0=hidden, 1=full)", () => sky.GetFloat("_CloudOpacity"), v => sky.SetFloat("_CloudOpacity",v), 0, 2, 0.05f, "F2"));
+                if (sky.HasColor("_CloudTint")) {
+                    s.Add(S("Cloud R", "Cloud tint red", () => sky.GetColor("_CloudTint").r, v => { var c=sky.GetColor("_CloudTint"); c.r=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
+                    s.Add(S("Cloud G", "Cloud tint green", () => sky.GetColor("_CloudTint").g, v => { var c=sky.GetColor("_CloudTint"); c.g=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
+                    s.Add(S("Cloud B", "Cloud tint blue", () => sky.GetColor("_CloudTint").b, v => { var c=sky.GetColor("_CloudTint"); c.b=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
+                }
                 if (sky.HasColor("_GroundColor")) {
                     s.Add(S("Ground R", "Ground/horizon color R", () => sky.GetColor("_GroundColor").r, v => { var c=sky.GetColor("_GroundColor"); c.r=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
                     s.Add(S("Ground G", "Ground/horizon color G", () => sky.GetColor("_GroundColor").g, v => { var c=sky.GetColor("_GroundColor"); c.g=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
@@ -297,15 +528,10 @@ namespace Plaga44.UI
                 }
                 if (sky.HasFloat("_GroundBlend")) s.Add(S("Ground Blend", "Horizon height (-0.5..0.5)", () => sky.GetFloat("_GroundBlend"), v => sky.SetFloat("_GroundBlend",v), -0.5f, 0.5f, 0.01f, "F2"));
                 if (sky.HasFloat("_GroundFade")) s.Add(S("Ground Fade", "Sky-ground transition softness", () => sky.GetFloat("_GroundFade"), v => sky.SetFloat("_GroundFade",v), 0.01f, 1, 0.02f, "F2"));
-                if (sky.HasFloat("_CloudOpacity")) s.Add(S("Cloud Alpha", "Cloud visibility (0-2)", () => sky.GetFloat("_CloudOpacity"), v => sky.SetFloat("_CloudOpacity",v), 0, 2, 0.05f, "F2"));
-                if (sky.HasColor("_CloudTint")) {
-                    s.Add(S("Cloud R", "Cloud color R", () => sky.GetColor("_CloudTint").r, v => { var c=sky.GetColor("_CloudTint"); c.r=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
-                    s.Add(S("Cloud G", "Cloud color G", () => sky.GetColor("_CloudTint").g, v => { var c=sky.GetColor("_CloudTint"); c.g=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
-                    s.Add(S("Cloud B", "Cloud color B", () => sky.GetColor("_CloudTint").b, v => { var c=sky.GetColor("_CloudTint"); c.b=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
-                }
+                if (sky.HasFloat("_RotSpeed")) s.Add(S("Shader Rot Speed", "Built-in shader sky rotation (deg/s)", () => sky.GetFloat("_RotSpeed"), v => sky.SetFloat("_RotSpeed",v), 0, 30, 0.5f));
                 // SkyRotator script speed
                 if (skyRot != null)
-                    s.Add(S("Rot Speed", "Predkosc auto-rotacji nieba (skrypt)", () => skyRot.rotationSpeed, v => skyRot.rotationSpeed=v, 0, 5, 0.1f));
+                    s.Add(S("Rot Speed", "SkyRotator script speed (deg/s)", () => skyRot.rotationSpeed, v => skyRot.rotationSpeed=v, 0, 5, 0.1f));
             });
 
             // =============================================================
@@ -381,21 +607,64 @@ namespace Plaga44.UI
             });
 
             // =============================================================
-            // PRESETS (save/load as "settings")
+            // PROFILE -- runtime preset switcher
             // =============================================================
-            Sec("PRESETS", s => {
-                // Slot 1-3: value 0=none, 1=save, 2=load
-                for (int slot = 1; slot <= 3; slot++)
-                {
-                    int sl = slot; // capture
-                    string slotName = slot == 1 ? "HI-END" : slot == 2 ? "CUSTOM" : "SAFE";
-                    s.Add(S($"SAVE {sl}:{slotName}", $"Save all settings to slot {sl}", () => 0, v => { if(v>0.5f) SavePreset(sl); }, 0, 1, 1, "F0"));
-                    s.Add(S($"LOAD {sl}:{slotName}", $"Load settings from slot {sl}", () => 0, v => { if(v>0.5f) LoadPreset(sl); }, 0, 1, 1, "F0"));
-                }
-                s.Add(S("LOG ALL", "Print all settings to console", () => 0, v => { if(v>0.5f) LogAll(); }, 0, 1, 1, "F0"));
+            Sec("PROFILE", s => {
+                // 0=Quest, 1=PCVR -- applies a batch of settings
+                s.Add(S("Target", "0=Quest 1=PCVR -- applies preset", () => _activeProfile, v => { ApplyProfile((int)v); }, 0, 1, 1, "F0"));
             });
 
-            // --- build index + flat list ---
+            // =============================================================
+            // URP -- additional pipeline info
+            // =============================================================
+            if (urp != null) Sec("URP", s => {
+                s.Add(S("HDR", "High dynamic range (1=on)", () => urp.supportsHDR?1:0, v => {}, 0, 1, 0, "F0")); // read-only at runtime
+                s.Add(S("Depth Tex", "Camera depth texture (1=on)", () => urp.supportsCameraDepthTexture?1:0, v => {}, 0, 1, 0, "F0")); // RO
+                s.Add(S("Opaque Tex", "Camera opaque texture (1=on)", () => urp.supportsCameraOpaqueTexture?1:0, v => {}, 0, 1, 0, "F0")); // RO
+                s.Add(S("SH Mode", "Spherical harmonics eval mode", () => (float)urp.shEvalMode, v => {}, 0, 2, 0, "F0")); // RO
+            });
+
+            // =============================================================
+            // NAVMESH -- agent settings if present
+            // =============================================================
+            var agent = UnityEngine.Object.FindAnyObjectByType<NavMeshAgent>();
+            if (agent != null) Sec("NAVMESH", s => {
+                s.Add(S("Agent Speed", "NavMesh agent speed", () => agent.speed, v => agent.speed=v, 0, 20, 0.5f));
+                s.Add(S("Agent Accel", "NavMesh agent acceleration", () => agent.acceleration, v => agent.acceleration=v, 0, 50, 1, "F0"));
+                s.Add(S("Agent Radius", "NavMesh agent radius", () => agent.radius, v => agent.radius=v, 0.1f, 2, 0.05f, "F2"));
+                s.Add(S("Stop Dist", "NavMesh stopping distance", () => agent.stoppingDistance, v => agent.stoppingDistance=v, 0, 10, 0.1f));
+            });
+
+            // =============================================================
+            // EXIT
+            // =============================================================
+            Sec("EXIT", s => {
+                s.Add(S("QUIT GAME", "Exit application", () => 0, v => {
+                    if (v > 0.5f)
+                    {
+#if UNITY_EDITOR
+                        UnityEditor.EditorApplication.isPlaying = false;
+#else
+                        Application.Quit();
+#endif
+                    }
+                }, 0, 1, 1, "F0"));
+            });
+
+            FinalizeBuild();
+        }
+
+        private static void FinalizeBuild()
+        {
+            CollectFlatSettingsList();
+            if (_defaults == null) CaptureDefaults(); // musi byc PRZED RestorePersistedValues
+            _built = true; // PRZED restore -- blokuje reentrant Build() z action setterow (LOG ALL etc)
+            int restored = RestorePersistedValues();
+            Debug.Log($"[PLAGA44][Settings] Built: {_sec.Count} sections, {_allSettings.Count} saveable settings, {restored} restored from PlayerPrefs");
+        }
+
+        private static void CollectFlatSettingsList()
+        {
             _names = new string[_sec.Count];
             _sec.Keys.CopyTo(_names, 0);
             _allSettings.Clear();
@@ -403,9 +672,62 @@ namespace Plaga44.UI
                 foreach (var setting in kv.Value)
                     if (setting.step > 0) // skip read-only and actions
                         _allSettings.Add(setting);
+        }
 
-            _built = true;
-            Debug.Log($"[PLAGA44][Settings] Built: {_sec.Count} sections, {_allSettings.Count} saveable settings");
+        // Action-type settings (getter always returns 0, setter fires action on >0.5).
+        // These must NOT be restored from PlayerPrefs -- restoring 1.0 would re-trigger the action.
+        private static readonly HashSet<string> ACTION_SETTINGS =
+            new HashSet<string> { "RESET ALL", "LOG ALL", "SET DEFAULTS", "QUIT GAME" };
+
+        private static int RestorePersistedValues()
+        {
+            int restored = 0;
+            foreach (var kv in _sec)
+            {
+                if (NON_PERSISTENT_SECTIONS.Contains(kv.Key)) continue;
+                foreach (var setting in kv.Value)
+                {
+                    if (setting.step <= 0) continue;
+                    if (ACTION_SETTINGS.Contains(setting.name)) continue; // skip action buttons
+                    string key = PrefsKeys.Current(kv.Key, setting.name);
+                    if (!PlayerPrefs.HasKey(key)) continue;
+                    setting.set(Mathf.Clamp(PlayerPrefs.GetFloat(key), setting.min, setting.max));
+                    restored++;
+                }
+            }
+            return restored;
+        }
+
+        static void ApplyProfile(int profile)
+        {
+            var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
+            var ter = UnityEngine.Object.FindAnyObjectByType<Terrain>();
+            string label = profile == 0 ? "Quest" : "PCVR";
+
+            if (profile == 0)
+            {
+                // Quest profile -- low settings for mobile VR
+                if (urp != null) { urp.renderScale = 0.8f; urp.shadowDistance = 20f; urp.msaaSampleCount = 4; }
+                QualitySettings.lodBias = 0.7f;
+                if (ter != null) { ter.detailObjectDistance = 80f; ter.treeDistance = 500f; }
+                XRSettings.eyeTextureResolutionScale = 0.8f;
+                try { OVRManager.foveatedRenderingLevel = (OVRManager.FoveatedRenderingLevel)3; } catch {}
+                Application.targetFrameRate = 72;
+            }
+            else
+            {
+                // PCVR profile -- high quality for desktop VR
+                if (urp != null) { urp.renderScale = 1.2f; urp.shadowDistance = 80f; urp.msaaSampleCount = 4; }
+                QualitySettings.lodBias = 1.5f;
+                if (ter != null) { ter.detailObjectDistance = 250f; ter.treeDistance = 2000f; }
+                XRSettings.eyeTextureResolutionScale = 1.2f;
+                try { OVRManager.foveatedRenderingLevel = (OVRManager.FoveatedRenderingLevel)0; } catch {}
+                Application.targetFrameRate = -1;
+            }
+
+            _activeProfile = profile;
+            Rebuild();
+            Debug.Log($"[PLAGA44][Settings] Applied profile: {label}");
         }
 
         static Light FindSun()

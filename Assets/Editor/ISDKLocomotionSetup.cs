@@ -12,7 +12,7 @@ namespace Plaga44.Editor
     {
         private const string LOG = "[PLAGA44][Loco]";
 
-        [MenuItem("CYBERNOMAD/Locomotion/Add Smooth Turn to Rig", false, 60)]
+        [MenuItem("CYBERNOMAD/Config/Locomotion/Add Smooth Turn to Rig", false, 60)]
         public static void Setup()
         {
             var rig = Object.FindFirstObjectByType<OVRCameraRig>();

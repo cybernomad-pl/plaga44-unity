@@ -1,0 +1,156 @@
+PLAGA '44 TESTBED V6 -- Session 2026-04-16/17
+==============================================
+
+NEW FILES (6):
+  Scripts/Core/RetargeterGuard.cs ..... try-catch for SDK CharacterRetargeter bug
+  Scripts/Core/ItemBrowser.cs ......... item browser + spawn in front of player
+  Scripts/Core/ObjectSpawner.cs ....... runtime item spawner with auto-wire
+  Editor/Setup/BounceLightSetup.cs .... fill light pointing up
+  Editor/Setup/ObjectSpawnerSetup.cs .. bootstrap spawner setup
+  Editor/AvatarBrowserWindow.cs ....... PLAGA44 Content Editor (3D preview + materials)
+
+DELETED (3):
+  Scripts/Core/SDKPatcher.cs .......... removed (was disabling SDK components)
+  Scripts/Core/SDKLogFilter.cs ........ removed (was hiding errors)
+  Editor/PlayerAvatarImporter.cs ...... removed (legacy Survivor importer)
+
+
+LOCOMOTION (LocomotionController.cs -- REWRITE)
+================================================
+
+  R THUMBSTICK Y-AXIS:
+
+    GROUNDED ──[stick UP]──> ASCENDING
+      _flySpeed += flyAcceleration * _dt
+      _verticalVelocity = _flySpeed (accelerating upward)
+      gravity OFF
+
+    ASCENDING ──[release]──> HOVERING
+      _verticalVelocity = _hoverDrift (gentle random +-0.3 m/s)
+      drift target changes every 1-3 sec, smooth lerp
+      gravity OFF -- player floats
+
+    HOVERING ──[stick UP]──> ASCENDING (boost again)
+    HOVERING ──[stick DOWN]──> GROUNDED (gravity returns, fall)
+    any ──[land]──> GROUNDED
+
+  STANCE (on ground only):
+
+    DOWN short tap: STAND <-> CROUCH
+    DOWN long hold (>0.6s): -> PRONE
+    UP flick from crouch/prone: -> STAND
+
+    CC height:        1.8 / 1.0 / 0.5
+    CC center.y:      h * 0.5
+    TrackingSpace.y:  baseY - (standHeight - targetHeight)
+                      ^^^ camera drops visually in VR
+
+
+PAUSE MOVEMENT (GameState.cs)
+==============================
+
+  GameState.CanMove = Playing || Paused
+  GameState.PlayerDeltaTime:
+    Playing -> Time.deltaTime
+    Paused  -> Time.unscaledDeltaTime
+
+  LocomotionController: _dt = GameState.PlayerDeltaTime
+  SmoothTurnController: GameState.PlayerDeltaTime
+
+  EFFECT: player moves during pause, world frozen (timeScale=0)
+
+
+AVATAR SYSTEM
+==============
+
+  PREVIEW + SWAP flow:
+    Slider -> PreviewAvatarMode() -> gallery highlight only
+    GoBack -> ConfirmPreview() -> SetAvatarMode() -> spawn on player
+
+  SCALE: NormalizeToHeight(inst, 1.8f)
+    Measures bounds.size.y, scales to 1.8m
+    Works regardless of source model scale
+
+  Gallery preview: T-pose (AnimatorController disabled)
+  Import: AnimatorController auto-assigned (LocomotionController.controller)
+  Import: URP material upgrade (Standard -> URP/Lit for Mixamo FBX)
+
+  Avatars: PINEA only (rigged FBX + packed0 textures)
+
+
+ITEM BROWSER (ItemBrowser.cs)
+==============================
+
+  Resources/Items/ -> sorted prefab list
+  SetItem(index):
+    spawn 1.2m in front of player, -0.5m below eyes
+    useGravity=false (floats in place)
+    player grabs with OVRGrabber
+
+  SettingsRegistry: dynamic getter (ItemBrowser.Instance)
+  PlayerPrefs persist
+
+
+HAMBURGER MENU
+===============
+
+  BG: transparent (alpha=0), text shadows (Outline+Shadow)
+  TEXT_GREY: 0.9 (was 0.55)
+  GROUPS: GAMEPLAY +ITEMS, SYSTEM -PRESETS +EXIT
+  PRESETS section: REMOVED entirely (dead code cleaned)
+  GoBack: OnLeaveSection -> ConfirmPreview for AVATAR
+  Auto-save: every value change saves Current + Default to PlayerPrefs
+
+
+SETTINGS PERSISTENCE
+=====================
+
+  wrappedSetter: saves both Current and Default PlayerPrefs keys
+  ACTION_SETTINGS skip: RESET ALL, LOG ALL, SET DEFAULTS, QUIT GAME
+  _built = true BEFORE RestorePersistedValues (anti-StackOverflow)
+  CHAR CTRL Height: syncs cc.center.y = v * 0.5
+  LocomotionController.Start(): forces CC to standHeight (override PlayerPrefs)
+
+
+RETARGETER GUARD (RetargeterGuard.cs)
+=======================================
+
+  [RuntimeInitializeOnLoadMethod] finds CharacterRetargeter
+  Disables original Update, calls it manually via reflection
+  Catches ObjectDisposedException (SDK NativeArray bug)
+  Logs first 3 catches, then silent
+
+
+EDITOR MENU
+=============
+
+  CYBERNOMAD/
+  ├── Bootstrap
+  ├── PLAGA44 Content Editor    <-- NEW (3D preview, material foldouts)
+  ├── Build/
+  ├── Config/                   <-- 20 config categories moved here
+  ├── Import/
+  ├── Inventory/
+  └── Meta SDK Setup/
+
+  StratoJump Toggle: REMOVED
+
+
+BOOTSTRAP
+==========
+
+  SceneSingletonsSetup: +_AvatarGallery, +_ItemBrowser
+  +BounceLightSetup, +ObjectSpawnerSetup
+  -StratoJump, -SpawnAboveTerrain
+
+  Revolver prefab: linearDamping 0.5->0 (was falling slower than player)
+
+
+PLAGA44 CONTENT EDITOR (AvatarBrowserWindow.cs)
+=================================================
+
+  Layout: [List 170px] [3D Preview expand] [Materials 220px]
+  Tabs: Avatars / Items
+  3D preview: auto-fit zoom, drag rotate, scroll zoom
+  Materials: accordion foldouts with URP/Lit sliders
+  Info overlay: name, rig type, vertex count, material count

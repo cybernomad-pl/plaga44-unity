@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Plaga44.Editor
 {
-    public struct GraphicsSettings_
+    public struct GraphicsPreset
     {
         public int transparencySortMode;    // 0=Default, 1=Perspective, 2=Orthographic, 3=CustomAxis
         public int lightmapStripping;       // 0=Automatic, 1=Custom
@@ -32,7 +32,7 @@ namespace Plaga44.Editor
         // Presety
         // ---------------------------------------------------------------------
 
-        public static readonly GraphicsSettings_ INITIAL = new GraphicsSettings_
+        public static readonly GraphicsPreset INITIAL = new GraphicsPreset
         {
             transparencySortMode       = 0,     // Default
             lightmapStripping          = 0,     // Automatic
@@ -43,7 +43,7 @@ namespace Plaga44.Editor
             preloadShadersBatchTimeLimit = 50,   // 50ms limit (default -1 = stall)
         };
 
-        public static readonly GraphicsSettings_ DEFAULT = new GraphicsSettings_
+        public static readonly GraphicsPreset DEFAULT = new GraphicsPreset
         {
             transparencySortMode       = 0,
             lightmapStripping          = 0,
@@ -58,7 +58,7 @@ namespace Plaga44.Editor
         // Apply
         // ---------------------------------------------------------------------
 
-        public static void Apply(GraphicsSettings_ s)
+        public static void Apply(GraphicsPreset s)
         {
             var so = LoadAsset();
             if (so == null) return;
@@ -106,9 +106,9 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Graphics/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/Graphics/Apply INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
-        [MenuItem("CYBERNOMAD/Graphics/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/Graphics/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

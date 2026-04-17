@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Plaga44.Editor
 {
-    public struct EditorSettings_
+    public struct EditorPreset
     {
         public int serializationMode;       // 0=Mixed, 1=ForceBinary, 2=ForceText
         public int externalVersionControl;  // "Visible Meta Files" etc (string via API)
@@ -31,7 +31,7 @@ namespace Plaga44.Editor
         // Presety
         // ---------------------------------------------------------------------
 
-        public static readonly EditorSettings_ INITIAL = new EditorSettings_
+        public static readonly EditorPreset INITIAL = new EditorPreset
         {
             serializationMode        = 2,       // ForceText (git-friendly)
             spritePackerMode         = 0,       // Disabled (VR nie uzywa sprite atlas)
@@ -44,7 +44,7 @@ namespace Plaga44.Editor
         // Apply
         // ---------------------------------------------------------------------
 
-        public static void Apply(EditorSettings_ s)
+        public static void Apply(EditorPreset s)
         {
             EditorSettings.serializationMode = (SerializationMode)s.serializationMode;
             EditorSettings.spritePackerMode = (SpritePackerMode)s.spritePackerMode;
@@ -102,9 +102,9 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Editor/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/Editor/Apply INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
-        [MenuItem("CYBERNOMAD/Editor/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/Editor/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

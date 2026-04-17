@@ -52,9 +52,9 @@ namespace Plaga44.Editor
         public static void SetDepthPriming(int v) => RendererCore.Tweak(ASSET_PATH, "m_DepthPrimingMode", v, LOG);
         public static void SetShadowTransparent(bool v) => RendererCore.Tweak(ASSET_PATH, "m_ShadowTransparentReceive", v, LOG);
 
-        [MenuItem("CYBERNOMAD/VR Renderer/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/VR Renderer/Apply INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
-        [MenuItem("CYBERNOMAD/VR Renderer/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/VR Renderer/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
     }
 
@@ -95,11 +95,11 @@ namespace Plaga44.Editor
         public static void SetDepthPriming(int v) => RendererCore.Tweak(ASSET_PATH, "m_DepthPrimingMode", v, LOG);
         public static void SetShadowTransparent(bool v) => RendererCore.Tweak(ASSET_PATH, "m_ShadowTransparentReceive", v, LOG);
 
-        [MenuItem("CYBERNOMAD/PC Renderer/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/PC Renderer/Apply INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
-        [MenuItem("CYBERNOMAD/PC Renderer/Apply HIEND", false, 2)]
+        [MenuItem("CYBERNOMAD/Config/PC Renderer/Apply HIEND", false, 2)]
         static void MenuHiEnd() => Apply(HIEND);
-        [MenuItem("CYBERNOMAD/PC Renderer/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/PC Renderer/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
     }
 

@@ -17,7 +17,7 @@ using UnityEngine;
 
 namespace Plaga44.Editor
 {
-    public struct QualitySettings_
+    public struct QualityPreset
     {
         public int skinWeights;             // 1=OneBone, 2=TwoBones, 4=FourBones
         public int anisotropicTextures;     // 0=Disabled, 1=PerTexture, 2=ForcedOn
@@ -46,7 +46,7 @@ namespace Plaga44.Editor
         // Presety
         // ---------------------------------------------------------------------
 
-        public static readonly QualitySettings_ INITIAL = new QualitySettings_
+        public static readonly QualityPreset INITIAL = new QualityPreset
         {
             skinWeights             = 2,        // TwoBones (Quest oszczednosc)
             anisotropicTextures     = 1,        // PerTexture
@@ -65,7 +65,7 @@ namespace Plaga44.Editor
             terrainTreeDistance      = 2000,     // 2000m (default 5000)
         };
 
-        public static readonly QualitySettings_ DEFAULT = new QualitySettings_
+        public static readonly QualityPreset DEFAULT = new QualityPreset
         {
             skinWeights             = 2,
             anisotropicTextures     = 1,
@@ -88,7 +88,7 @@ namespace Plaga44.Editor
         // Apply all (do Mobile quality level)
         // ---------------------------------------------------------------------
 
-        public static void Apply(QualitySettings_ s)
+        public static void Apply(QualityPreset s)
         {
             var so = LoadAsset();
             if (so == null) return;
@@ -160,10 +160,10 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Quality/Apply INITIAL", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/Quality/Apply INITIAL", false, 1)]
         static void MenuInitial() => Apply(INITIAL);
 
-        [MenuItem("CYBERNOMAD/Quality/Show Current", false, 100)]
+        [MenuItem("CYBERNOMAD/Config/Quality/Show Current", false, 100)]
         static void MenuShow() => LogCurrent();
 
         // ---------------------------------------------------------------------

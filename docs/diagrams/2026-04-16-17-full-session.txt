@@ -1,0 +1,223 @@
+PLAGA '44 TESTBED V6 -- FULL SESSION DIAGRAM 2026-04-16/17
+============================================================
+
+FILES CREATED (6):
+  Scripts/Core/RetargeterGuard.cs ....... SDK error log filter
+  Scripts/Core/ItemBrowser.cs ........... item browser + spawn
+  Scripts/Core/ObjectSpawner.cs ......... runtime item spawner
+  Editor/Setup/BounceLightSetup.cs ...... fill light setup
+  Editor/Setup/ObjectSpawnerSetup.cs .... bootstrap spawner
+  Editor/AvatarBrowserWindow.cs ......... PLAGA44 Content Editor
+
+FILES DELETED (3):
+  Scripts/Core/SDKPatcher.cs ............ removed
+  Scripts/Core/SDKLogFilter.cs .......... removed
+  Editor/PlayerAvatarImporter.cs ........ removed (legacy)
+
+FILES MODIFIED (13):
+  Scripts/Locomotion/LocomotionController.cs .. REWRITE
+  Scripts/Locomotion/SmoothTurnController.cs .. minor
+  Scripts/Core/PlayerAvatar.cs ................ preview+swap+scale
+  Scripts/Core/AvatarGallery.cs ............... scale+preview
+  Scripts/Core/GameState.cs ................... CanMove
+  Scripts/UI/HamburgerMenu.cs ................. transparent+items+exit
+  Scripts/UI/SettingsRegistry.cs .............. items+presets gone+autosave
+  Scripts/Inventory/PlagaGrabbable.cs ......... crash fix
+  Editor/Bootstrap.cs ......................... +bounce+spawner-stratojump
+  Editor/Setup/SceneSingletonsSetup.cs ........ +gallery+itembrowser
+  Editor/Setup/SkyboxSetup.cs ................. skip bounce lights
+  Editor/Setup/PlayerRigSetup.cs .............. -stratojump
+  Editor/AvatarImport.cs ...................... URP upgrade+anim+rig check
+  Editor/RevolverPrefabBuilder.cs ............. damping+null fix
+  PLAGA44/Config/BootstrapConfig.cs ........... +bounce+spawner-stratojump
+  20x Editor/Config/*.cs ...................... menu under Config/
+
+
+======================================================================
+                          LOCOMOTION
+======================================================================
+
+  L THUMBSTICK = head-relative movement
+    Blocked in: Paused (menu), Prone stance
+
+  R THUMBSTICK Y-AXIS:
+
+    GROUNDED + STAND:
+      ┌─────────────────────────────────────────────┐
+      │  UP held = ASCENDING (accelerating flight)  │
+      │  DOWN tap = cycle: STAND -> CROUCH -> PRONE │
+      │  UP tap (from crouch/prone) = cycle up      │
+      └─────────────────────────────────────────────┘
+
+    FLY STATE MACHINE:
+      GROUNDED ──[stick UP + Stand]──> ASCENDING
+        _flySpeed += flyAcceleration * dt (increasing)
+        _verticalVelocity = _flySpeed
+        gravity OFF
+
+      ASCENDING ──[release]──> HOVERING
+        _verticalVelocity = hoverDrift (random +-0.3 m/s)
+        drift target changes every 1-3 sec, smooth lerp
+        gravity OFF, player floats
+
+      HOVERING ──[stick UP]──> ASCENDING (boost)
+      HOVERING ──[stick DOWN]──> GROUNDED (drop, gravity ON)
+      any ──[land]──> GROUNDED
+
+    STANCE (ground only, not flying):
+      DOWN tap: STAND -> CROUCH -> PRONE (cycle)
+      UP tap:   PRONE -> CROUCH -> STAND (cycle)
+      Edge detection: one trigger per stick push
+
+      SMOOTH TRANSITIONS (no snap, no VR sickness):
+        CC.height     = MoveTowards(current, target, speed*dt)
+        CC.center.y   = h * 0.5
+        TrackingSpace.y = MoveTowards(current, target, speed*dt)
+        stanceTransitionSpeed = 3 m/s
+
+      Heights:  STAND=1.8  CROUCH=1.0  PRONE=0.5
+      PRONE blocks horizontal movement
+
+    MENU (Paused):
+      CanMove = false
+      No movement, no turning, no fly, no stance change
+      Player can only use menu controls
+
+
+======================================================================
+                        AVATAR SYSTEM
+======================================================================
+
+  IMPORT PIPELINE (AvatarImport.cs):
+    FBX in Assets/PLAGA44/Avatars/<Name>/
+      -> Humanoid rig, useFileScale=true
+      -> IsModelRigged() check (skip unrigged)
+      -> URP material upgrade (Standard -> URP/Lit)
+      -> AnimatorController assigned (LocomotionController.controller)
+      -> prefab + AvatarRegistry.asset
+
+  RUNTIME (PlayerAvatar.cs + AvatarGallery.cs):
+    Slider -> PreviewAvatarMode() -> gallery highlight (T-pose)
+    GoBack -> ConfirmPreview() -> SetAvatarMode() -> spawn on player
+
+    NormalizeToHeight(inst, 1.8f):
+      measures bounds.size.y
+      scales to 1.8m regardless of source
+
+    PlayerPrefs persist (Plaga44_Current_AVATAR_Mode)
+
+  CONTENT: PINEA only (rigged FBX + packed0 textures)
+
+
+======================================================================
+                        ITEM SYSTEM
+======================================================================
+
+  ItemBrowser.cs:
+    Resources/Items/ -> sorted prefab list
+    SetItem(index):
+      spawn 1.2m in front of player, -0.5m below eyes
+      useGravity=false (floats, player grabs with OVRGrabber)
+    PlayerPrefs persist
+
+  SettingsRegistry ITEMS section:
+    dynamic getter (ItemBrowser.Instance) -- not frozen at Build()
+
+  Revolver prefab:
+    linearDamping=0, angularDamping=0.05 (was 0.5/0.8)
+    Rigidbody null-check fixed (Unity ?? operator bug)
+
+
+======================================================================
+                      HAMBURGER MENU
+======================================================================
+
+  BG: transparent (alpha=0)
+  TEXT_GREY: 0.9 (readable on transparent)
+  Outline + Shadow on title/footer
+
+  GROUPS:
+    GAMEPLAY: LOCOMOTION, SMOOTH TURN, CHAR CTRL, AVATAR, ITEMS, GAME STATE, NAVMESH
+    VISUAL:   SHADOWS, SUN, FOG, AMBIENT, SKYBOX, BLOOM, COLOR, COMFORT, LGG, URP
+    SYSTEM:   PROFILE, MISC, AUDIO, PHYSICS, QUALITY, CAMERA, OCULUS, TERRAIN, EXIT
+
+  PRESETS: REMOVED (dead code cleaned)
+  EXIT: Application.Quit / EditorApplication.isPlaying=false
+
+  Auto-save: every value change -> PlayerPrefs Current + Default
+  GoBack: FlushPlayerPrefs + ConfirmPreview (AVATAR)
+
+  PAUSED STATE:
+    CanMove=false, no locomotion, no turning
+    Only menu interaction
+
+
+======================================================================
+                    SETTINGS PERSISTENCE
+======================================================================
+
+  wrappedSetter: saves Current + Default PlayerPrefs on every change
+  ACTION_SETTINGS skip: RESET ALL, LOG ALL, SET DEFAULTS, QUIT GAME
+  _built=true BEFORE RestorePersistedValues (anti-StackOverflow)
+  CHAR CTRL Height: syncs cc.center.y
+  LocomotionController.Start(): forces CC to standHeight
+
+
+======================================================================
+                        SDK ERROR HANDLING
+======================================================================
+
+  RetargeterGuard.cs:
+    Custom ILogHandler (BeforeSceneLoad)
+    Filters 4 known SDK error patterns:
+      NativeArray[Meta.XR.Movement
+      Failed to retarget source frame data
+      LocomotionEventsConnection
+      AssertCollectionItems
+    Does NOT disable any SDK components
+    Errors suppressed from console, SDK runs normally
+
+
+======================================================================
+                      EDITOR / BOOTSTRAP
+======================================================================
+
+  CYBERNOMAD MENU:
+    Bootstrap                    (top level)
+    PLAGA44 Content Editor       (3D preview, material foldouts)
+    Build/
+    Config/                      (20 categories moved here)
+    Import/
+    Inventory/
+    Meta SDK Setup/
+
+  BOOTSTRAP CREATES:
+    Terrain, Directional Light, Bounce Light
+    OVRCameraRig + CC + Loco + Turn + Avatar
+    Haptic + Inventory + Grabbers
+    _HamburgerMenu, _SkyRotator
+    _AvatarGallery, _ItemBrowser    (was runtime-only)
+    _ObjectSpawner
+
+  REMOVED: StratoJump (player spawns at scene position)
+
+  CONTENT EDITOR (AvatarBrowserWindow.cs):
+    [List 170px] [3D Preview expand] [Materials 220px]
+    Tabs: Avatars / Items
+    Auto-fit zoom, drag rotate, scroll zoom
+    Material accordion foldouts with URP/Lit sliders
+
+
+======================================================================
+                         TOOLING
+======================================================================
+
+  Lamka (ollama model):
+    3 roles: validation, doc summarization, factual
+    temperature 0.3, EN only, always background
+
+  KLAUDIA.JA: updated with work cycle, Lamka rules, diagram rules
+
+  GitHub issues: #133, #134, #135
+
+  TODO.md: rewritten for V6 state

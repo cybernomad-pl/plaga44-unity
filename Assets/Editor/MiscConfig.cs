@@ -119,16 +119,16 @@ namespace Plaga44.Editor
         // Menu -- szybki podglad
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Misc/Log VFXManager", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/Misc/Log VFXManager", false, 1)]
         static void MenuVFX() => LogAsset("ProjectSettings/VFXManager.asset");
 
-        [MenuItem("CYBERNOMAD/Misc/Log Physics2D", false, 2)]
+        [MenuItem("CYBERNOMAD/Config/Misc/Log Physics2D", false, 2)]
         static void MenuPhys2D() => LogAsset("ProjectSettings/Physics2DSettings.asset");
 
-        [MenuItem("CYBERNOMAD/Misc/Log XRSettings", false, 3)]
+        [MenuItem("CYBERNOMAD/Config/Misc/Log XRSettings", false, 3)]
         static void MenuXR() => LogAsset("ProjectSettings/XRSettings.asset");
 
-        [MenuItem("CYBERNOMAD/Misc/Log ShaderGraph", false, 4)]
+        [MenuItem("CYBERNOMAD/Config/Misc/Log ShaderGraph", false, 4)]
         static void MenuShaderGraph() => LogAsset("ProjectSettings/ShaderGraphSettings.asset");
 
         // ---------------------------------------------------------------------

@@ -148,10 +148,10 @@ namespace Plaga44.Editor
         // Menu
         // ---------------------------------------------------------------------
 
-        [MenuItem("CYBERNOMAD/Packages/Show All", false, 1)]
+        [MenuItem("CYBERNOMAD/Config/Packages/Show All", false, 1)]
         static void MenuShowAll() => LogCurrent();
 
-        [MenuItem("CYBERNOMAD/Packages/Show Meta XR", false, 2)]
+        [MenuItem("CYBERNOMAD/Config/Packages/Show Meta XR", false, 2)]
         static void MenuShowMeta() => LogMetaXR();
 
         // ---------------------------------------------------------------------
