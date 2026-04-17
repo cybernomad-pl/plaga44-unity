@@ -44,6 +44,13 @@ namespace Plaga44.Locomotion
         [Tooltip("True if sprint toggle is currently active. Public for UI.")]
         public bool sprintActive = false;
 
+        [Tooltip("Sprint ramp speed (1/speed = seconds to reach full sprint). 2.0 = 0.5s. Issue #143.")]
+        public float sprintRampSpeed = 2f;
+
+        // Current sprint amount 0..1 (lerped towards sprintActive target for momentum feel).
+        private float _sprintAmount;
+        public float SprintAmount => _sprintAmount;
+
         [Header("Head Reference")]
         [SerializeField] private Transform _headTransform;
 
@@ -190,6 +197,10 @@ namespace Plaga44.Locomotion
                 Debug.Log($"{LOG} Sprint: {(sprintActive ? "ON" : "OFF")}");
             }
 
+            // Sprint ramp (Issue #143) -- lerp _sprintAmount toward target for momentum feel
+            float sprintTarget = sprintActive ? 1f : 0f;
+            _sprintAmount = Mathf.MoveTowards(_sprintAmount, sprintTarget, sprintRampSpeed * _dt);
+
             Vector2 moveInput = GetMoveInput();
             // Prone blocks horizontal movement -- must stand up first
             bool movementBlocked = (_currentStance == Stance.Prone);
@@ -236,8 +247,8 @@ namespace Plaga44.Locomotion
                 inputDir = (fwd * input.y) + (right * input.x * strafeFactor);
             }
 
-            // Accelerate toward input direction
-            float speedMul = sprintActive ? sprintMultiplier : 1f;
+            // Accelerate toward input direction (sprint ramp applies, issue #143)
+            float speedMul = Mathf.Lerp(1f, sprintMultiplier, _sprintAmount);
             _airVelocity += inputDir * airAcceleration * speedMul * _dt;
 
             // Clamp to max speed
@@ -468,8 +479,8 @@ namespace Plaga44.Locomotion
             right.y = 0f; right.Normalize();
 
             Vector3 move = (fwd * input.y) + (right * input.x * strafeFactor);
-            // Sprint multiplier applies when sprintActive AND player actually moving (issue #142)
-            float speedMul = sprintActive ? sprintMultiplier : 1f;
+            // Sprint multiplier ramps 1.0 -> sprintMultiplier over sprintRampSpeed (issue #143)
+            float speedMul = Mathf.Lerp(1f, sprintMultiplier, _sprintAmount);
             move *= moveSpeed * speedMul * _dt;
             return move;
         }

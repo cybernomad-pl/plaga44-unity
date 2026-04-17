@@ -240,7 +240,9 @@ namespace Plaga44.UI
                 s.Add(S("Move Speed", "Walk speed m/s", () => loco.moveSpeed, v => loco.moveSpeed=v, 0.5f, 10, 0.5f));
                 s.Add(S("Strafe", "Strafe speed multiplier (0.8=80%)", () => loco.strafeFactor, v => loco.strafeFactor=v, 0.1f, 1, 0.05f, "F2"));
                 s.Add(S("Sprint Mul", "Sprint speed multiplier (L stick click toggles sprint)", () => loco.sprintMultiplier, v => loco.sprintMultiplier=v, 1f, 5f, 0.1f, "F1"));
-                s.Add(S("Sprint (RO)", "Sprint toggle state (1=ON, 0=OFF). L thumbstick click toggles.", () => loco.sprintActive?1:0, v => {}, 0, 1, 0, "F0"));
+                s.Add(S("Sprint Ramp", "Sprint ramp speed (1/v = seconds to reach full sprint)", () => loco.sprintRampSpeed, v => loco.sprintRampSpeed=v, 0.5f, 10f, 0.5f, "F1"));
+                s.Add(S("Sprint (RO)", "Sprint toggle state (1=ON, 0=OFF).", () => loco.sprintActive?1:0, v => {}, 0, 1, 0, "F0"));
+                s.Add(S("Sprint Amt (RO)", "Sprint amount 0..1 (lerped, shows ramp).", () => loco.SprintAmount, v => {}, 0, 1, 0, "F2"));
                 s.Add(S("Fly Accel", "Fly acceleration m/s^2 while R stick UP held", () => loco.flyAcceleration, v => loco.flyAcceleration=v, 1f, 50f, 1f, "F0"));
                 s.Add(S("Fly Max Speed", "Max fly speed cap m/s", () => loco.flyMaxSpeed, v => loco.flyMaxSpeed=v, 5f, 50f, 1f, "F0"));
                 s.Add(S("Air Accel", "Horizontal accel while flying (ice skating feel)", () => loco.airAcceleration, v => loco.airAcceleration=v, 1f, 30f, 1f, "F0"));
