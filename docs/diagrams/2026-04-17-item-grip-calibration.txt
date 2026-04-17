@@ -1,0 +1,245 @@
+PLAGA '44 TESTBED V7 -- ITEM GRIP CALIBRATION 2026-04-17
+==========================================================
+
+Branch: feat/item-grip-calibration (base: fix/restore-working-state)
+Target PR: do main
+
+═══════════════════════════════════════════════════════════════════
+  CEL TOŻ FICZERA
+═══════════════════════════════════════════════════════════════════
+
+  1. Per-item grip offset calibration: gracz w VR chwyta item,
+     otwiera menu, dopasowuje pozycję/rotację/skale suwakami.
+     SAVE -> PlayerPrefs per-item name.
+     Następny grab tego itemu -> auto-applied offset.
+
+  2. Freeze finger animation: gdy ręka trzyma item, palce SDK
+     przestają się animować. Lock w aktualnej pozycji (current pose
+     z hand tracking). Po puszczeniu -> unfreeze, normalne tracking.
+
+
+═══════════════════════════════════════════════════════════════════
+  ARCHITEKTURA (3 nowe pliki + 5 zmodyfikowanych)
+═══════════════════════════════════════════════════════════════════
+
+  [NEW] Scripts/Inventory/ItemGripConfig.cs
+    struct { offsetPos, offsetRotEuler, scale }
+    Load(name) / Save(name, cfg) / Clear(name) -- PlayerPrefs
+    Key prefix: "Plaga44_ItemGrip_<itemName>_"
+
+  [NEW] Scripts/Inventory/HandFingerFreezer.cs
+    Singleton na SDK char (defaultRig)
+    [DefaultExecutionOrder(10000)] -- LateUpdate PO SDK retargeter
+    Freeze(ctrl, fistPose:false) -- capture current finger localRotations
+    LateUpdate: re-apply frozen rotations (SDK rewrites them -> we overwrite)
+    Unfreeze(ctrl) -- clear frozen dict
+
+  [NEW] Assets/Inventory/ItemGripConfig.cs.meta (Unity auto)
+
+  [MOD] Scripts/Inventory/PlagaGrabbable.cs
+    + _gripConfig field + GripConfig property (live-tune)
+    + BaseName getter (strips "(Clone)" + "ItemPreview_")
+    + ApplyGripConfig(cfg) -- sets localPos/Rot (if grabbed) + localScale
+    + GrabBegin: ApplyGripConfig(Load(BaseName)) + HandFingerFreezer.Freeze
+    + GrabEnd: HandFingerFreezer.Unfreeze
+
+  [MOD] Scripts/Core/ItemBrowser.cs
+    + CurrentSpawned property (expose _spawnedPreview for tuning)
+
+  [MOD] Scripts/UI/SettingsRegistry.cs
+    + Sec("ITEM GRIP") 9 entries: Pos X/Y/Z, Rot X/Y/Z, Scale,
+      SAVE GRIP, RESET GRIP
+    + findTarget lambda -- ItemBrowser.CurrentSpawned OR any isGrabbed
+    + ACTION_SETTINGS += { SAVE GRIP, RESET GRIP }
+
+  [MOD] Scripts/UI/HamburgerMenu.cs
+    + "ITEM GRIP" in GAMEPLAY group tiles
+
+  [MOD] Editor/Setup/PlayerRigSetup.cs
+    + SetupFingerFreezer: adds HandFingerFreezer on defaultRig
+
+
+═══════════════════════════════════════════════════════════════════
+  FLOW -- USER STORY
+═══════════════════════════════════════════════════════════════════
+
+  Gracz otwiera menu -> GAMEPLAY -> ITEMS -> slider -> wybiera Revolver
+     ↓
+  ItemBrowser.SetItem(1) -> SpawnPreview
+     ItemPreview_Revolver pojawia sie 1.2m przed graczem na stole
+     [eye level offset y=-0.5m]
+     ↓
+  Gracz chwyta grabem (L lub R grip) -> PlagaGrabber.GrabBegin (toggle)
+     ↓
+  PlagaGrabbable.GrabBegin(hand):
+     _holdingController = L/RTouch
+     ItemGripConfig.Load("Revolver")  -- z PlayerPrefs lub Default
+     ApplyGripConfig:
+       transform.localPosition = cfg.offsetPos
+       transform.localRotation = Quaternion.Euler(cfg.offsetRotEuler)
+       transform.localScale = _originalScale * cfg.scale
+     HandFingerFreezer.Freeze(ctrl, fistPose:false):
+       cache Transform -> localRotation dla 15 finger bones
+       LateUpdate applies them every frame after SDK retargeter
+     ↓
+  Gracz otwiera menu -> GAMEPLAY -> ITEM GRIP
+     ↓
+  Ruch suwakiem "Pos X" -> SettingsRegistry setter:
+     c = findTarget.GripConfig (struct copy)
+     c.offsetPos.x = v
+     write(c) -> target.GripConfig = c
+       -> setter -> ApplyGripConfig(c)
+       -> transform.localPosition updated LIVE in hand
+     ↓
+  Gracz widzi zmiany realtime. Dopasowuje -> klik "SAVE GRIP":
+     ItemGripConfig.Save("Revolver", currentCfg)
+     -> PlayerPrefs zapisane (posX/Y/Z, rotX/Y/Z, scale)
+     -> SetAction: "ITEM GRIP SAVED for 'Revolver'" (banner)
+     ↓
+  Gracz puszcza grab (grip toggle):
+     PlagaGrabbable.GrabEnd:
+       HandFingerFreezer.Unfreeze(ctrl) -- palce wracaja do SDK tracking
+       base.GrabEnd -- normal physics drop
+     ↓
+  Next session: gracz bierze Revolver -> GrabBegin -> Load("Revolver")
+     -> saved offset applied automatycznie
+
+
+═══════════════════════════════════════════════════════════════════
+  DIAGRAM DANYCH
+═══════════════════════════════════════════════════════════════════
+
+  ItemGripConfig (struct)
+  ├── offsetPos    Vector3  (local m, -0.3..0.3 default 0)
+  ├── offsetRotEuler Vector3 (deg, -180..180 default 0)
+  └── scale        float    (0.1..5.0 default 1.0)
+
+  PlayerPrefs keys per item name ("Revolver", "M249", etc.):
+  Plaga44_ItemGrip_Revolver_posX   (float)
+  Plaga44_ItemGrip_Revolver_posY
+  Plaga44_ItemGrip_Revolver_posZ
+  Plaga44_ItemGrip_Revolver_rotX
+  Plaga44_ItemGrip_Revolver_rotY
+  Plaga44_ItemGrip_Revolver_rotZ
+  Plaga44_ItemGrip_Revolver_scale
+
+
+═══════════════════════════════════════════════════════════════════
+  DIAGRAM KLASOWY
+═══════════════════════════════════════════════════════════════════
+
+  ┌────────────────────────────┐       ┌──────────────────────┐
+  │  ItemBrowser               │       │  ItemGripConfig      │
+  │  + CurrentSpawned          │       │  struct              │
+  │  - _spawnedPreview         │       │  + Load(name)        │
+  │  + SetItem(i): spawn table │       │  + Save(name, cfg)   │
+  └─────────┬──────────────────┘       │  + Clear(name)       │
+            │                          │  + Default           │
+            │ spawns                   └──────────────────────┘
+            v                                     ▲
+  ┌────────────────────────────┐                  │ Load/Save
+  │  PlagaGrabbable            │                  │
+  │  + GripConfig {get;set}    │──────────────────┘
+  │  + BaseName                │
+  │  + ApplyGripConfig(cfg)    │──── applies to transform
+  │  + GrabBegin:              │
+  │      Load → Apply          │
+  │      Freezer.Freeze        │─────┐
+  │  + GrabEnd:                │     │ triggers
+  │      Freezer.Unfreeze      │     │
+  └────────────────────────────┘     v
+                              ┌──────────────────────────────┐
+                              │  HandFingerFreezer           │
+                              │  [ExecutionOrder 10000]      │
+                              │  - _frozenLeftBones (Dict)   │
+                              │  - _frozenRightBones         │
+                              │  + Freeze(ctrl, fistPose)    │
+                              │  + Unfreeze(ctrl)            │
+                              │  LateUpdate: apply frozen    │
+                              │  (overrides SDK retargeter)  │
+                              └──────────────────────────────┘
+                                              │
+                                              │ captures/writes
+                                              v
+                              ┌──────────────────────────────┐
+                              │  Animator (SDK StylizedChar) │
+                              │  15 left finger bones        │
+                              │  15 right finger bones       │
+                              │  Proximal/Intermediate/Distal│
+                              │  × Thumb/Index/Middle/Ring/  │
+                              │    Little × L/R = 30 total   │
+                              └──────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════
+  MENU FLOW (HamburgerMenu)
+═══════════════════════════════════════════════════════════════════
+
+  TOP tiles: GAMEPLAY | VISUAL | SYSTEM
+     ↓
+  GAMEPLAY group: LOCOMOTION | SMOOTH TURN | CHAR CTRL | AVATAR
+                  ITEMS | [ITEM GRIP]   ← NEW
+                  GAME STATE | NAVMESH
+     ↓
+  ITEM GRIP settings list:
+    Pos X   (-0.3..0.3, step 0.005, F3)
+    Pos Y
+    Pos Z
+    Rot X   (-180..180, step 5, F0)
+    Rot Y
+    Rot Z
+    Scale   (0.1..5.0, step 0.05, F2)
+    SAVE GRIP   [action]
+    RESET GRIP  [action]
+
+
+═══════════════════════════════════════════════════════════════════
+  REVIEW RUNDA 1 (znalezione):
+═══════════════════════════════════════════════════════════════════
+
+  [A] Dead code: `setCfg` lambda w SettingsRegistry
+      -- nigdy nie wołane, tylko `write` używane
+      FIXED: usunięte
+
+  [B] Scale apply zawsze (nie tylko gdy grabbed)
+      -- preview w menu ma zmieniony scale nawet bez grabba
+      DECISION: intended -- widać zmiany scale w preview
+
+  [C] Find* performance: FindObjectsByType(PlagaGrabbable) each slider move
+      -- O(scene size) per slider tick
+      DECISION: acceptable -- menu blokuje gameplay, 1 slider ruch ~60/s
+
+═══════════════════════════════════════════════════════════════════
+  REVIEW RUNDA 2 (znalezione):
+═══════════════════════════════════════════════════════════════════
+
+  [D] Freeze fistPose=true default -- ZAWSZE force fist
+      -- ale Borys chce "palce przestaly sie animować", nie force-fist
+      FIXED: Freeze(ctrl, fistPose:false) -- captures current pose
+
+  [E] _originalScale caching -- done only once per PlagaGrabbable lifetime
+      -- jeśli prefab miał nienaturalną scale, cache'uje to
+      DECISION: OK -- grip scale jest MULTIPLIER (*1.0 = original)
+
+  [F] HandFingerFreezer GetComponentInChildren<Animator>(true)
+      -- StylizedCharacterLocomotion ma Animator bezpośrednio
+      -- FreezerComponent też na tym GO -> Include self -> OK
+
+  [G] BaseName stripping -- "(Clone)" i "ItemPreview_"
+      -- jeśli spawn bezpośredni bez prefix, stripping return name
+      -- jeśli podwójny Clone "Revolver (Clone) (Clone)", IndexOf bierze pierwszy
+      FIXED: OK (stripowanie OK)
+
+
+═══════════════════════════════════════════════════════════════════
+  COMPILE: PASS (po 2 rundach)
+  BRANCH: feat/item-grip-calibration
+  BASE:   fix/restore-working-state
+  PR TARGET: main (po merged fix/restore-working-state)
+
+  NASTĘPNE KROKI:
+    1. Test na Queście: chwyć Revolver, odśwież menu → ITEM GRIP
+    2. Rusz suwakiem Pos Z, sprawdź czy Revolver przesuwa się w ręce
+    3. SAVE GRIP, stop/start, chwyć ponownie → pozycja zachowana
+    4. Sprawdź że palce zamrażają się przy grab, odblokowują po
+═══════════════════════════════════════════════════════════════════

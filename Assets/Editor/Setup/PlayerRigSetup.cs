@@ -33,7 +33,29 @@ namespace Plaga44.Editor.Setup
             changed |= SetupPlayerAvatar(rig);
             changed |= SetupPositionPersistence(rig, cfg);
             changed |= PositionRig(rig, cfg);
+            changed |= SetupFingerFreezer(rig);
             return changed;
+        }
+
+        // HandFingerFreezer -- added to SDK char (same GO as Animator).
+        // Locks finger bones while PlagaGrabbable held -- stops "flapping fingers".
+        private static bool SetupFingerFreezer(GameObject rig)
+        {
+            var avatar = rig.GetComponent<PlayerAvatar>();
+            if (avatar == null || avatar.defaultRig == null)
+            {
+                Debug.LogWarning($"{LOG} [SKIP] HandFingerFreezer: no defaultRig");
+                return false;
+            }
+            var sdkChar = avatar.defaultRig;
+            if (sdkChar.GetComponent<Plaga44.Inventory.HandFingerFreezer>() != null)
+            {
+                Debug.Log($"{LOG} [OK] HandFingerFreezer (on {sdkChar.name})");
+                return false;
+            }
+            Undo.AddComponent<Plaga44.Inventory.HandFingerFreezer>(sdkChar);
+            Debug.Log($"{LOG} [ADDED] HandFingerFreezer on {sdkChar.name}");
+            return true;
         }
 
         // PlayerPositionPersistence: restore last session position.

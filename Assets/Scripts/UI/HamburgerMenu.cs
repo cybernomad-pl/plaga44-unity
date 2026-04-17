@@ -82,7 +82,7 @@ namespace Plaga44.UI
         // ---- Groups (TOP-level) --------------------------------------------
         private static readonly (string name, string[] sections)[] GROUPS = new[]
         {
-            ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "AVATAR", "ITEMS", "GAME STATE", "NAVMESH" }),
+            ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "AVATAR", "ITEMS", "ITEM GRIP", "GAME STATE", "NAVMESH" }),
             ("VISUAL",   new[] { "SHADOWS", "SUN", "FOG", "AMBIENT", "SKYBOX", "BLOOM", "COLOR", "COMFORT", "LGG", "URP" }),
             ("SYSTEM",   new[] { "PROFILE", "MISC", "AUDIO", "PHYSICS", "QUALITY", "CAMERA", "OCULUS", "TERRAIN", "EXIT" }),
         };
