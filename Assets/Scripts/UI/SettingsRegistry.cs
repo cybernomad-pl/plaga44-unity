@@ -239,6 +239,8 @@ namespace Plaga44.UI
             if (loco != null) Sec("LOCOMOTION", s => {
                 s.Add(S("Move Speed", "Walk speed m/s", () => loco.moveSpeed, v => loco.moveSpeed=v, 0.5f, 10, 0.5f));
                 s.Add(S("Strafe", "Strafe speed multiplier (0.8=80%)", () => loco.strafeFactor, v => loco.strafeFactor=v, 0.1f, 1, 0.05f, "F2"));
+                s.Add(S("Sprint Mul", "Sprint speed multiplier (L stick click toggles sprint)", () => loco.sprintMultiplier, v => loco.sprintMultiplier=v, 1f, 5f, 0.1f, "F1"));
+                s.Add(S("Sprint (RO)", "Sprint toggle state (1=ON, 0=OFF). L thumbstick click toggles.", () => loco.sprintActive?1:0, v => {}, 0, 1, 0, "F0"));
                 s.Add(S("Fly Accel", "Fly acceleration m/s^2 while R stick UP held", () => loco.flyAcceleration, v => loco.flyAcceleration=v, 1f, 50f, 1f, "F0"));
                 s.Add(S("Fly Max Speed", "Max fly speed cap m/s", () => loco.flyMaxSpeed, v => loco.flyMaxSpeed=v, 5f, 50f, 1f, "F0"));
                 s.Add(S("Speed (RO)", "Current normalised speed (0-1)", () => loco.NormalisedSpeed, v => {}, 0, 1, 0, "F2"));
