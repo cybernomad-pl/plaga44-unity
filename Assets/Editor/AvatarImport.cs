@@ -479,12 +479,17 @@ namespace Plaga44.Editor
                 var combined = MergeRgbAndRedToAlpha(spec, glossMatched);
                 File.WriteAllBytes(outPath, combined.EncodeToPNG());
 
+                // Cache dimensions BEFORE destroy -- reading Texture.width/height
+                // after DestroyImmediate throws UnityException (issue #147).
+                int w = combined.width;
+                int h = combined.height;
+
                 UnityEngine.Object.DestroyImmediate(spec);
                 if (glossMatched != gloss) UnityEngine.Object.DestroyImmediate(gloss);
                 UnityEngine.Object.DestroyImmediate(glossMatched);
                 UnityEngine.Object.DestroyImmediate(combined);
 
-                Debug.Log($"{LOG} SpecGloss combined: {combined.width}x{combined.height} -> {outPath}");
+                Debug.Log($"{LOG} SpecGloss combined: {w}x{h} -> {outPath}");
             }
             catch (Exception e)
             {
