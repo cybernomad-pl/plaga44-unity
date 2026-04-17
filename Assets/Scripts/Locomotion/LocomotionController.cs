@@ -193,11 +193,13 @@ namespace Plaga44.Locomotion
         //  ASCENDING/HOVERING --[land on ground]--> GROUNDED
         // =====================================================================
 
-        private const float HoverDriftMin = -0.3f;  // gentle sink
-        private const float HoverDriftMax = 0.3f;   // gentle rise
-        private const float HoverDriftChangeMin = 1f;
-        private const float HoverDriftChangeMax = 3f;
-        private const float HoverDriftLerp = 2f;
+        // Issue #140: Borys reports 'dryftu hovera naprawdę w ogóle nie czuć'.
+        // Bumped amplitude 5x (was ±0.3, now ±1.5 m/s). Faster target changes for livelier feel.
+        private const float HoverDriftMin = -1.5f;  // pronounced sink
+        private const float HoverDriftMax = 1.5f;   // pronounced rise
+        private const float HoverDriftChangeMin = 0.5f;
+        private const float HoverDriftChangeMax = 2f;
+        private const float HoverDriftLerp = 2.5f;
 
         private void UpdateFly(float rightY)
         {
