@@ -1,7 +1,7 @@
 // =============================================================================
 // AvatarRegistrySetup.cs
-// Sprawdza stan AvatarRegistry -- read only, nie modyfikuje.
-// Wywolywany przez Bootstrap.
+// Validates AvatarRegistry. If missing or empty, triggers a full rescan
+// (build prefabs from DAE/FBX + rebuild registry). Called by Bootstrap.
 // =============================================================================
 #if UNITY_EDITOR
 using UnityEditor;
@@ -16,16 +16,25 @@ namespace Plaga44.Editor.Setup
         public static void Run(BootstrapConfig cfg)
         {
             var reg = AssetDatabase.LoadAssetAtPath<AvatarRegistry>(cfg.avatarRegistryPath);
-            if (reg == null)
+
+            // --- Auto-rescan when registry is missing or empty ---------------
+            if (reg == null || reg.Count == 0)
             {
-                Debug.LogWarning($"{LOG} [MISSING] AvatarRegistry not found at {cfg.avatarRegistryPath}. Run CYBERNOMAD > Import > Rescan Avatars.");
-                return;
+                string reason = reg == null ? "MISSING" : "EMPTY";
+                Debug.Log($"{LOG} [{reason}] Triggering full avatar rescan...");
+                AvatarAutoImport.ScanAllForce();
+
+                // Reload after rescan
+                reg = AssetDatabase.LoadAssetAtPath<AvatarRegistry>(cfg.avatarRegistryPath);
+                if (reg == null || reg.Count == 0)
+                {
+                    Debug.LogWarning($"{LOG} [FAIL] Rescan finished but registry still {reason}. "
+                        + "Check that DAE/FBX files exist in Assets/PLAGA44/Avatars/<Name>/ subfolders.");
+                    return;
+                }
             }
-            if (reg.Count == 0)
-            {
-                Debug.LogWarning($"{LOG} [EMPTY] 0 avatars. Drop DAE into Assets/PLAGA44/Avatars/<Name>/ and rescan.");
-                return;
-            }
+
+            // --- Report results -----------------------------------------------
             Debug.Log($"{LOG} [OK] {reg.Count} avatars");
             for (int i = 0; i < reg.Count; i++)
             {

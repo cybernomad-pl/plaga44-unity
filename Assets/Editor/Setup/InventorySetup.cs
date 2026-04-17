@@ -62,19 +62,42 @@ namespace Plaga44.Editor.Setup
                 Debug.LogWarning($"{LOG} [MISSING] {anchorName} -- grabber skipped");
                 return false;
             }
-            if (anchor.GetComponent<OVRGrabber>() != null)
+            // Accept PlagaGrabber or OVRGrabber -- PlagaGrabber extends OVRGrabber
+            var existingGrabber = anchor.GetComponent<OVRGrabber>();
+            if (existingGrabber != null)
             {
-                Debug.Log($"{LOG} [OK] OVRGrabber on {anchorName}");
-                return false;
+                if (existingGrabber.GetType() == typeof(OVRGrabber))
+                {
+                    // Upgrade plain OVRGrabber to PlagaGrabber
+                    Debug.Log($"{LOG} [UPGRADE] Replacing OVRGrabber with PlagaGrabber on {anchorName}");
+                    UnityEngine.Object.DestroyImmediate(existingGrabber);
+                    // Fall through to add PlagaGrabber below (reuse existing GrabVolume + Rigidbody)
+                }
+                else
+                {
+                    Debug.Log($"{LOG} [OK] {existingGrabber.GetType().Name} on {anchorName}");
+                    return false;
+                }
             }
 
-            var volume = CreateGrabVolume(anchor, cfg.grabVolumeRadius);
+            // Reuse existing GrabVolume if present (from prior OVRGrabber setup)
+            var existingVolumeT = anchor.Find(GrabVolumeName);
+            Collider volume;
+            if (existingVolumeT != null)
+            {
+                volume = existingVolumeT.GetComponent<Collider>();
+                if (volume == null) volume = CreateGrabVolume(anchor, cfg.grabVolumeRadius);
+            }
+            else
+            {
+                volume = CreateGrabVolume(anchor, cfg.grabVolumeRadius);
+            }
             EnsureKinematicRigidbody(anchor.gameObject);
-            var grabber = anchor.gameObject.AddComponent<OVRGrabber>();
+            var grabber = anchor.gameObject.AddComponent<PlagaGrabber>();
 
             if (!ConfigureGrabber(grabber, anchor, volume, ctrl))
             {
-                Debug.LogError($"{LOG} [SDK BREAK] OVRGrabber on {anchorName} not configured -- removing. Check field names.");
+                Debug.LogError($"{LOG} [SDK BREAK] PlagaGrabber on {anchorName} not configured -- removing. Check field names.");
                 UnityEngine.Object.DestroyImmediate(grabber);
                 UnityEngine.Object.DestroyImmediate(volume.gameObject);
                 var rb = anchor.GetComponent<Rigidbody>();
@@ -82,8 +105,9 @@ namespace Plaga44.Editor.Setup
                 return false;
             }
 
-            Undo.RegisterCreatedObjectUndo(volume.gameObject, $"Bootstrap: GrabVolume {anchorName}");
-            Debug.Log($"{LOG} [ADDED] OVRGrabber on {anchorName} ({ctrl})");
+            if (existingVolumeT == null)
+                Undo.RegisterCreatedObjectUndo(volume.gameObject, $"Bootstrap: GrabVolume {anchorName}");
+            Debug.Log($"{LOG} [ADDED] PlagaGrabber on {anchorName} ({ctrl})");
             return true;
         }
 

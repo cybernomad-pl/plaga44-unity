@@ -10,17 +10,18 @@
 //   From crouch/prone, flick UP: stand up
 //   R thumbstick X: smooth turn (handled by SmoothTurnController, no conflict)
 //
-// STANCE: STAND -> CROUCH -> PRONE
+// STANCE: STAND -> CROUCH -> PRONE | FLOATING (auto-set while flying)
 //   CC height + center change for collisions.
 //   TrackingSpace Y offset for visual camera drop (VR camera follows headset,
 //   so we must push the tracking origin DOWN to simulate crouching).
+//   FLOATING is set automatically when entering flight and cleared on landing.
 // =============================================================================
 
 using UnityEngine;
 
 namespace Plaga44.Locomotion
 {
-    public enum Stance { Stand, Crouch, Prone }
+    public enum Stance { Stand, Crouch, Prone, Floating }
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CharacterController))]
@@ -167,6 +168,11 @@ namespace Plaga44.Locomotion
             float rightY = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch).y;
             UpdateFly(rightY);
             UpdateStance(rightY);
+
+            // Safety: force FLOATING if flying with wrong stance
+            if (_flyState != FlyState.Grounded && _currentStance != Stance.Floating)
+                SetStance(Stance.Floating);
+
             if (_flyState == FlyState.Grounded) ApplyGravity();
 
             ApplyMove(horizontalMove);
@@ -198,6 +204,7 @@ namespace Plaga44.Locomotion
                     {
                         _flyState = FlyState.Ascending;
                         _flySpeed = 0f;
+                        SetStance(Stance.Floating);
                         Debug.Log($"{LOG} Fly: ASCENDING");
                     }
                     break;
@@ -267,6 +274,7 @@ namespace Plaga44.Locomotion
             _flySpeed = 0f;
             _hoverDrift = 0f;
             _verticalVelocity = 0f;
+            SetStance(Stance.Stand);
         }
 
         // =====================================================================
@@ -322,6 +330,7 @@ namespace Plaga44.Locomotion
             {
                 Stance.Crouch => crouchHeight,
                 Stance.Prone => proneHeight,
+                Stance.Floating => standHeight,
                 _ => standHeight
             };
 

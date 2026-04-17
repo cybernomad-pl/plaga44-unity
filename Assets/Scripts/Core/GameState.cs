@@ -13,7 +13,7 @@
 //   MainMenu  -- menu glowne, UI aktywne, gameplay wylaczony
 //   Loading   -- ladowanie sceny, wszystko nieaktywne
 //   Playing   -- rozgrywka, wszystkie systemy aktywne
-//   Paused    -- pauza, UI aktywne, czas zamrozony (timeScale = 0)
+//   Paused    -- pauza, UI aktywne, gameplay zablokowany (CanMove=false)
 //   Dead      -- ekran smierci, ograniczony input
 //
 // UZYCIE:
@@ -23,8 +23,8 @@
 //   if (GameState.CanMove) { ... }      // sprawdz czy lokomocja dozwolona
 //   GameState.OnStateChanged += (o,n) => Debug.Log($"{o} -> {n}");
 //
-// UWAGA: SetState() automatycznie zarzadza Time.timeScale.
-// W stanie Paused/MainMenu/Dead timeScale = 0, w Playing = 1.
+// UWAGA: timeScale ZAWSZE = 1. SDK CharacterRetargeter potrzebuje Animatora
+// do hand-tracking. Gameplay blokowany przez CanMove/IsPlaying checks.
 // =============================================================================
 
 using System;
@@ -94,7 +94,7 @@ namespace Plaga44
 
         /// <summary>
         /// Zmienia stan gry na podany. Ignoruje jesli juz jestesmy w tym stanie.
-        /// Automatycznie zarzadza Time.timeScale (0 dla pauzy/menu/smierci, 1 dla gry).
+        /// Gameplay blokowany przez CanMove/IsPlaying -- timeScale nie jest modyfikowany.
         /// </summary>
         /// <param name="newState">Nowy stan gry.</param>
         public static void SetState(GamePhase newState)
@@ -107,26 +107,9 @@ namespace Plaga44
 
             Debug.Log($"{LOG} {Previous} -> {Current} (timeScale={Time.timeScale})");
 
-            // Zarzadzanie Time.timeScale:
-            // W stanach "zamrozonych" (pauza, menu, smierc) ustawiamy timeScale na 0,
-            // co zatrzymuje fizyke, animacje i wszelkie Time.deltaTime-zależne systemy.
-            // W stanie Playing przywracamy timeScale do 1.
-            switch (newState)
-            {
-                case GamePhase.Playing:
-                    Time.timeScale = 1f;
-                    break;
-                case GamePhase.Inventory:
-                    // Inventory: czas plynie (animacje obracania modelu), ale gameplay zamrozony.
-                    Time.timeScale = 1f;
-                    break;
-                case GamePhase.Paused:
-                case GamePhase.MainMenu:
-                case GamePhase.Dead:
-                    Time.timeScale = 0f;
-                    break;
-                // Splash i Loading nie zmieniaja timeScale -- zostawiamy jak jest.
-            }
+            // timeScale stays 1 -- SDK CharacterRetargeter needs Animator running
+            // for hand tracking. Gameplay blocked by CanMove/IsPlaying checks.
+            // SkyRotator, Inventory model spin etc. keep working -- harmless.
 
             // Powiadomienie subskrybentow o zmianie stanu.
             OnStateChanged?.Invoke(Previous, newState);
@@ -166,7 +149,7 @@ namespace Plaga44
         /// <summary>Rozpocznij rozgrywke.</summary>
         public static void Play() => SetState(GamePhase.Playing);
 
-        /// <summary>Pauzuj gre (zamraza czas).</summary>
+        /// <summary>Pauzuj gre (blokuje gameplay, czas plynie).</summary>
         public static void Pause() => SetState(GamePhase.Paused);
 
         /// <summary>Wznow gre po pauzie.</summary>
