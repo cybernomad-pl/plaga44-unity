@@ -50,6 +50,9 @@ namespace Plaga44
         public int MaxItem => (_itemPrefabs != null) ? _itemPrefabs.Length : 0;
         public int SelectedItem => _selectedIndex;
 
+        /// <summary>Currently spawned preview item (or null). Target for ITEM GRIP live tuning.</summary>
+        public GameObject CurrentSpawned => _spawnedPreview;
+
         public string CurrentLabel
         {
             get

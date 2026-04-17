@@ -303,6 +303,76 @@ namespace Plaga44.UI
             });
 
             // =============================================================
+            // ITEM GRIP -- per-item grip calibration (pos/rot/scale)
+            // Live tuning of the currently spawned/held item. SAVE persists
+            // in PlayerPrefs keyed by item name. Applied automatically on next grab.
+            // =============================================================
+            Sec("ITEM GRIP", s => {
+                // Helpers -- operate on currently spawned ItemBrowser preview OR currently held item
+                System.Func<Plaga44.Inventory.PlagaGrabbable> findTarget = () =>
+                {
+                    var ib = Plaga44.ItemBrowser.Instance;
+                    if (ib != null && ib.CurrentSpawned != null)
+                    {
+                        var pg = ib.CurrentSpawned.GetComponent<Plaga44.Inventory.PlagaGrabbable>();
+                        if (pg != null) return pg;
+                    }
+                    // Fallback: any currently grabbed PlagaGrabbable in scene
+                    foreach (var g in UnityEngine.Object.FindObjectsByType<Plaga44.Inventory.PlagaGrabbable>(FindObjectsSortMode.None))
+                        if (g.isGrabbed) return g;
+                    return null;
+                };
+                System.Func<Plaga44.Inventory.ItemGripConfig> getCfg = () =>
+                {
+                    var t = findTarget();
+                    return t != null ? t.GripConfig : Plaga44.Inventory.ItemGripConfig.Default;
+                };
+                // Write mutated config back via property setter (triggers ApplyGripConfig live)
+                System.Action<Plaga44.Inventory.ItemGripConfig> write = (newCfg) =>
+                {
+                    var t = findTarget();
+                    if (t != null) t.GripConfig = newCfg;
+                };
+
+                s.Add(S("Pos X",  "Local X offset relative to hand grip (m)",
+                    () => getCfg().offsetPos.x,
+                    v => { var c = getCfg(); c.offsetPos.x = v; write(c); }, -0.3f, 0.3f, 0.005f, "F3"));
+                s.Add(S("Pos Y",  "Local Y offset (m)",
+                    () => getCfg().offsetPos.y,
+                    v => { var c = getCfg(); c.offsetPos.y = v; write(c); }, -0.3f, 0.3f, 0.005f, "F3"));
+                s.Add(S("Pos Z",  "Local Z offset (m)",
+                    () => getCfg().offsetPos.z,
+                    v => { var c = getCfg(); c.offsetPos.z = v; write(c); }, -0.3f, 0.3f, 0.005f, "F3"));
+                s.Add(S("Rot X",  "Local X rotation (deg)",
+                    () => getCfg().offsetRotEuler.x,
+                    v => { var c = getCfg(); c.offsetRotEuler.x = v; write(c); }, -180f, 180f, 5f, "F0"));
+                s.Add(S("Rot Y",  "Local Y rotation (deg)",
+                    () => getCfg().offsetRotEuler.y,
+                    v => { var c = getCfg(); c.offsetRotEuler.y = v; write(c); }, -180f, 180f, 5f, "F0"));
+                s.Add(S("Rot Z",  "Local Z rotation (deg)",
+                    () => getCfg().offsetRotEuler.z,
+                    v => { var c = getCfg(); c.offsetRotEuler.z = v; write(c); }, -180f, 180f, 5f, "F0"));
+                s.Add(S("Scale",  "Uniform scale multiplier (1.0 = original prefab size)",
+                    () => getCfg().scale,
+                    v => { var c = getCfg(); c.scale = v; write(c); }, 0.1f, 5f, 0.05f, "F2"));
+                s.Add(S("SAVE GRIP", "Save current grip offset to PlayerPrefs (per item name)", () => 0,
+                    v => { if (v > 0.5f) {
+                        var t = findTarget();
+                        if (t != null) { Plaga44.Inventory.ItemGripConfig.Save(t.BaseName, t.GripConfig); SetAction($"ITEM GRIP SAVED for '{t.BaseName}'", true); }
+                        else SetAction("ITEM GRIP: no active item", false);
+                    } }, 0, 1, 1, "F0"));
+                s.Add(S("RESET GRIP", "Clear saved grip (reset to prefab defaults)", () => 0,
+                    v => { if (v > 0.5f) {
+                        var t = findTarget();
+                        if (t != null) {
+                            Plaga44.Inventory.ItemGripConfig.Clear(t.BaseName);
+                            t.GripConfig = Plaga44.Inventory.ItemGripConfig.Default;
+                            SetAction($"ITEM GRIP RESET for '{t.BaseName}'", true);
+                        } else SetAction("ITEM GRIP: no active item", false);
+                    } }, 0, 1, 1, "F0"));
+            });
+
+            // =============================================================
             // MISC
             // =============================================================
             Sec("MISC", s => {
@@ -600,7 +670,7 @@ namespace Plaga44.UI
         // Action-type settings (getter always returns 0, setter fires action on >0.5).
         // These must NOT be restored from PlayerPrefs -- restoring 1.0 would re-trigger the action.
         private static readonly HashSet<string> ACTION_SETTINGS =
-            new HashSet<string> { "RESET ALL", "LOG ALL", "QUIT GAME" };
+            new HashSet<string> { "RESET ALL", "LOG ALL", "QUIT GAME", "SAVE GRIP", "RESET GRIP" };
 
         private static int RestorePersistedValues()
         {

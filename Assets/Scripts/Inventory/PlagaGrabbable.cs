@@ -33,6 +33,52 @@ namespace Plaga44.Inventory
         private bool _gripHeldLastFrame;
         private OVRInput.Controller _holdingController = OVRInput.Controller.None;
 
+        // Per-item grip calibration (loaded on GrabBegin, applied to transform)
+        private ItemGripConfig _gripConfig = ItemGripConfig.Default;
+        private Vector3 _originalScale;
+        private bool _originalScaleCached;
+
+        /// <summary>Base item name (prefab name without "(Clone)" suffix) -- key for ItemGripConfig.</summary>
+        public string BaseName
+        {
+            get
+            {
+                string n = name;
+                int paren = n.IndexOf(" (Clone)", System.StringComparison.Ordinal);
+                if (paren >= 0) n = n.Substring(0, paren);
+                // Strip "ItemPreview_" prefix from ItemBrowser spawn
+                if (n.StartsWith("ItemPreview_", System.StringComparison.Ordinal))
+                    n = n.Substring("ItemPreview_".Length);
+                return n;
+            }
+        }
+
+        /// <summary>Current grip config (live-tunable via SettingsRegistry).</summary>
+        public ItemGripConfig GripConfig
+        {
+            get => _gripConfig;
+            set { _gripConfig = value; ApplyGripConfig(_gripConfig); }
+        }
+
+        /// <summary>Apply grip offset + scale to this item's transform LOCAL values
+        /// (relative to hand anchor parent after OVRGrabbable parented it).</summary>
+        private void ApplyGripConfig(ItemGripConfig cfg)
+        {
+            if (!_originalScaleCached)
+            {
+                _originalScale = transform.localScale;
+                _originalScaleCached = true;
+            }
+            // Only apply position/rotation when parented to hand (isGrabbed)
+            if (isGrabbed)
+            {
+                transform.localPosition = cfg.offsetPos;
+                transform.localRotation = Quaternion.Euler(cfg.offsetRotEuler);
+            }
+            transform.localScale = _originalScale * cfg.scale;
+            _gripConfig = cfg;
+        }
+
         protected override void Start()
         {
             base.Start();
@@ -100,8 +146,15 @@ namespace Plaga44.Inventory
             base.GrabBegin(hand, grabPoint);
             _holdingController = ResolveController(hand);
             _gripHeldLastFrame = false;
-            Debug.Log($"{LOG} GrabBegin: {name} by {_holdingController}");
+            Debug.Log($"{LOG} GrabBegin: {name} by {_holdingController} (base={BaseName})");
             if (_haptic != null) _haptic.OnGrab(_holdingController);
+
+            // Load + apply saved grip offset (per-item PlayerPrefs)
+            ApplyGripConfig(ItemGripConfig.Load(BaseName));
+
+            // Freeze SDK hand fingers while holding -- lock at CURRENT pose (natural grip
+            // from hand tracking at moment of grab). No artificial fist -- just stop animating.
+            HandFingerFreezer.Freeze(_holdingController, fistPose: false);
 
             // Remove from holster if attached
             if (homeHolster != null && homeHolster.ContainedItem == gameObject)
@@ -119,6 +172,10 @@ namespace Plaga44.Inventory
             // Stop any ongoing grip haptic
             StopGripHaptic();
             _gripHeldLastFrame = false;
+
+            // Release SDK hand fingers -- back to normal tracking
+            HandFingerFreezer.Unfreeze(_holdingController);
+
             _holdingController = OVRInput.Controller.None;
 
             if (_haptic != null) _haptic.OnRelease(controller);
