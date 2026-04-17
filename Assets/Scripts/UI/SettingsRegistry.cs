@@ -508,12 +508,7 @@ namespace Plaga44.UI
                 if (sky.HasFloat("_Rotation")) s.Add(S("Rotation", "Skybox static rotation (degrees)", () => sky.GetFloat("_Rotation"), v => sky.SetFloat("_Rotation",v), 0, 360, 5, "F0"));
                 if (sky.HasFloat("_CloudBoost")) s.Add(S("Cloud Bright", "Cloud brightness multiplier (1=normal)", () => sky.GetFloat("_CloudBoost"), v => sky.SetFloat("_CloudBoost",v), 0, 5, 0.1f));
                 if (sky.HasFloat("_CloudThreshold")) s.Add(S("Cloud Thresh", "Luminance threshold for cloud effect (lower=more clouds)", () => sky.GetFloat("_CloudThreshold"), v => sky.SetFloat("_CloudThreshold",v), 0, 1, 0.01f, "F2"));
-                if (sky.HasFloat("_CloudOpacity")) s.Add(S("Cloud Alpha", "Cloud layer opacity (0=hidden, 1=full)", () => sky.GetFloat("_CloudOpacity"), v => sky.SetFloat("_CloudOpacity",v), 0, 2, 0.05f, "F2"));
-                if (sky.HasColor("_CloudTint")) {
-                    s.Add(S("Cloud R", "Cloud tint red", () => sky.GetColor("_CloudTint").r, v => { var c=sky.GetColor("_CloudTint"); c.r=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
-                    s.Add(S("Cloud G", "Cloud tint green", () => sky.GetColor("_CloudTint").g, v => { var c=sky.GetColor("_CloudTint"); c.g=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
-                    s.Add(S("Cloud B", "Cloud tint blue", () => sky.GetColor("_CloudTint").b, v => { var c=sky.GetColor("_CloudTint"); c.b=v; sky.SetColor("_CloudTint",c); }, 0, 2, 0.02f, "F2"));
-                }
+                // Cloud Alpha + Cloud R/G/B removed per issue #144 -- clutter without value.
                 if (sky.HasColor("_GroundColor")) {
                     s.Add(S("Ground R", "Ground/horizon color R", () => sky.GetColor("_GroundColor").r, v => { var c=sky.GetColor("_GroundColor"); c.r=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
                     s.Add(S("Ground G", "Ground/horizon color G", () => sky.GetColor("_GroundColor").g, v => { var c=sky.GetColor("_GroundColor"); c.g=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
