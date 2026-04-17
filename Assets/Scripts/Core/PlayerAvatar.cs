@@ -72,8 +72,16 @@ namespace Plaga44
         private void Start()
         {
             // Restore persisted avatar mode (SettingsRegistry may not be built yet)
-            if (PlayerPrefs.HasKey(AvatarPrefsKey))
+            int initialMode = avatarMode;
+            bool hadPersisted = PlayerPrefs.HasKey(AvatarPrefsKey);
+            if (hadPersisted)
                 avatarMode = (int)PlayerPrefs.GetFloat(AvatarPrefsKey, 0f);
+
+            Debug.Log($"{LOG} Start: inspectorMode={initialMode}, persistedMode={(hadPersisted ? avatarMode.ToString() : "(none)")}, "
+                + $"defaultRig={(defaultRig != null ? defaultRig.name : "<NULL>")}, "
+                + $"galleryAvailable={AvatarGallery.Instance != null}, "
+                + $"maxMode={MaxMode}");
+
             SetAvatarMode(avatarMode);
         }
 
@@ -95,8 +103,10 @@ namespace Plaga44
         /// </summary>
         public void SetAvatarMode(int mode)
         {
+            int requestedMode = mode;
             mode = Mathf.Clamp(mode, 0, MaxMode);
             avatarMode = mode;
+            Debug.Log($"{LOG} SetAvatarMode: requested={requestedMode}, clamped={mode}, label='{CurrentLabel}'");
 
             if (mode == 0) ShowDefaultRigOnly();
             else { ShowDefaultRig(false); SpawnAvatar(mode); }
@@ -124,8 +134,18 @@ namespace Plaga44
 
         private void ShowDefaultRig(bool visible)
         {
-            if (defaultRig == null) return;
-            if (defaultRig.activeSelf != visible) defaultRig.SetActive(visible);
+            if (defaultRig == null)
+            {
+                Debug.LogError($"{LOG} ShowDefaultRig({visible}) -- defaultRig is NULL! "
+                    + "PlayerRigSetup.cs must wire StylizedCharacterLocomotion. "
+                    + "Robot body will NOT be visible.");
+                return;
+            }
+            if (defaultRig.activeSelf != visible)
+            {
+                defaultRig.SetActive(visible);
+                Debug.Log($"{LOG} defaultRig '{defaultRig.name}' -> {(visible ? "ACTIVE" : "INACTIVE")}");
+            }
         }
 
         /// <summary>True jesli aktualnie wybrany mode wskazuje na broken entry w registry.

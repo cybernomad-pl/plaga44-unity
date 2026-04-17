@@ -140,6 +140,13 @@ namespace Plaga44
                 return false;
             }
             _instances = new GameObject[_registry.Count];
+            // Debug: list all registry entries with their state
+            for (int i = 0; i < _registry.Count; i++)
+            {
+                var e = _registry.Get(i);
+                string state = e == null ? "<null>" : (e.broken ? $"BROKEN({e.errorMessage})" : (e.prefab != null ? "OK" : "no-prefab"));
+                Debug.Log($"{LOG}   Registry[{i}] = '{e?.name ?? "?"}' -- {state}");
+            }
             return true;
         }
 

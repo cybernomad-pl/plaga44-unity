@@ -1,0 +1,212 @@
+PLAGA '44 TESTBED V6 -- PEŁNA LOGIKA URUCHAMIANIA 2026-04-17
+==============================================================
+
+EDITOR START
+═════════════
+  Unity loads project
+  ↓
+  [InitializeOnLoad] static constructors fire:
+    - AvatarAutoImport()  -> EditorApplication.delayCall += ScanAllSilent
+    - Bootstrap()         -> EditorApplication.update += WaitForReady
+  ↓
+  Editor "ready" (compile done, no updating)
+  ↓
+  WaitForReady() detects ready state -- unhooks itself
+  Logs: "Auto-run: loading scene and validating... (waited N ticks)"
+  ↓
+  Bootstrap.Run()
+
+
+BOOTSTRAP.RUN()
+════════════════
+  ↓
+  LoadConfig() -- "Assets/PLAGA44/Config/BootstrapConfig_Quest.asset"
+    ScriptableObject z polami: scenePath, ccHeight, moveSpeed,
+    bounceLightColor, spawnerOffset, avatarRegistryPath, ...
+  ↓
+  OpenScene(cfg) -- jeśli scena już otwarta = skip, jak inna = OpenScene
+    Logs: "Opened: Assets/PLAGA44/TESTBED_V6.unity"
+  ↓
+  EditorApplication.delayCall += RunSetup(cfg)
+    (delayCall fires next editor tick)
+
+
+BOOTSTRAP.RUNSETUP() -- 8 KROKÓW
+═════════════════════════════════
+  Logs: "=== Setup START === scene=TESTBED_V6, cfg=BootstrapConfig_Quest"
+
+  1. TerrainSetup.Run()           [CHANGED|OK] (Xms)
+     - Find/create Terrain
+     - Set TerrainAsset, TerrainData, layers
+
+  2. SkyboxSetup.Run()             [CHANGED|OK]
+     - RenderSettings.skybox = BGR_Sky1.mat
+     - Find Directional Light (skip "Bounce")
+
+  3. BounceLightSetup.Run()        [CHANGED|OK]
+     - Create/find Bounce Light GO
+     - Rotation (-90,0,0), no shadows
+
+  4. PlayerRigSetup.Run()          [CHANGED|OK]   <-- KLUCZOWY
+     ├── SetupCharacterController -- h=1.8, r=0.3
+     ├── SetupLocomotion           -- moveSpeed, strafe
+     ├── SetupSmoothTurn            -- turnSpeed=120
+     └── SetupPlayerAvatar
+          ├── avatarMode → 0 (forced)
+          ├── PlayerPrefs.DeleteKey("Plaga44_Current_AVATAR_Mode")
+          │     "Cleared persisted AVATAR_Mode PlayerPrefs"
+          ├── ALWAYS find "StylizedCharacterLocomotion" in scene
+          │     Logs: "[FIX] defaultRig -> X (path=OVRCameraRig/TrackingSpace/X)"
+          │     OR    "[OK] defaultRig already wired to X"
+          │     OR    "[MISSING] defaultRig not found -- SDK char prefab missing!"
+          └── Activate defaultRig if inactive
+
+  5. InventorySetup.Run()          [CHANGED|OK]
+     - HapticManager, PlayerInventory, InventoryLoadout
+     - PlagaGrabber on RightHandAnchor + LeftHandAnchor
+     - Auto-upgrade OVRGrabber → PlagaGrabber
+
+  6. SceneSingletonsSetup.Run()    [CHANGED|OK]
+     - _HamburgerMenu, _SkyRotator
+     - _AvatarGallery, _ItemBrowser
+
+  7. ObjectSpawnerSetup.Run()      [CHANGED|OK]
+     - _ObjectSpawner with default Revolver SpawnEntry
+
+  8. AvatarRegistrySetup.Run()     [DONE]        <-- KLUCZOWY
+     ├── Load Resources/AvatarRegistry.asset
+     ├── if MISSING/EMPTY/BROKEN:
+     │     ForceReimportAvatarModels()
+     │       AssetDatabase.ImportAsset(*.dae|*.fbx, ForceUpdate)
+     │       Logs: "Reimported N avatar models with ForceUpdate"
+     │     AvatarAutoImport.ScanAllForce()
+     │       Iterate Avatars/<Name>/ folders
+     │       AvatarBuilder.Build(folder):
+     │         IsModelRigged() -- requires animator.avatar valid
+     │         BuildDaeMaterial() -- combine spec+gloss
+     │         CreateOrUpdatePrefab() -- if newer than model
+     │           AssignAnimatorController() -- LocomotionController
+     │           SavePrefabInstance()
+     │       AvatarRegistryBuilder.Rebuild()
+     │         BuildEntry per folder (load existing prefab)
+     │         ValidateRig:
+     │           no Animator      → broken
+     │           Animator.avatar=null → broken
+     │           !avatar.isValid     → broken
+     │           no SkinnedMesh     → broken
+     │     Logs: "Registry rebuilt -- X avatars (broken=Y)"
+     └── Report: each avatar with status
+
+  if (any changed): MarkSceneDirty + SaveOpenScenes
+  Logs: "=== Setup DONE, scene SAVED === (Xms)"
+  ↓
+  FocusTerrain() -- select terrain in scene view
+
+
+SCENE LOAD / PLAY MODE
+═══════════════════════
+  Unity instantiates scene GameObjects
+
+  AvatarGallery.Awake() -- Instance = this
+  AvatarGallery.Start():
+    TryLoadRegistry()
+      Resources.Load<AvatarRegistry>
+      Logs: "Registry[i] = 'PINEA_YNG5' -- OK|BROKEN(reason)"
+    SpawnAllPreviews() -- iterate registry entries
+      IsSpawnable check (skip null/broken)
+      Instantiate prefab in row before player
+      NormalizeToHeight(1.8m)
+      Animator.runtimeAnimatorController = null  (T-pose preview)
+    SetActiveIndex(-1) -- all disabled (lazy display)
+
+  PlayerAvatar.Awake() -- cache static instance
+  PlayerAvatar.Start():
+    Logs: "Start: inspectorMode=X, persistedMode=(none|N),
+           defaultRig='StylizedCharacterLocomotion'|<NULL>,
+           galleryAvailable=true|false, maxMode=N"
+    SetAvatarMode(avatarMode)
+      if mode=0:
+        ShowDefaultRigOnly()
+          DespawnAvatar()
+          ShowDefaultRig(true)
+            if (defaultRig == null):
+              LogError "defaultRig is NULL! Robot body will NOT be visible"
+            else:
+              defaultRig.SetActive(true)
+              Logs: "defaultRig 'X' -> ACTIVE"
+          DeactivateGalleryPreviews()  (gallery.SetActiveIndex(-1))
+      else:  (mode >= 1)
+        ShowDefaultRig(false)  (robot OFF)
+        SpawnAvatar(mode)
+          ResolvePrefabForMode -> gallery.GetPrefab(mode-1)
+          Instantiate, NormalizeToHeight, hideHead
+
+
+RUNTIME LOOP
+═════════════
+  GameState.Current = Playing (default)
+  CanMove = true, IsPlaying = true
+
+  LocomotionController.Update():
+    if !GameState.CanMove return
+    Read L thumbstick → head-relative move
+    Read R thumbstick Y:
+      → UpdateFly: state machine (Grounded↔Ascending↔Hovering)
+        Entry to Ascending: SetStance(Floating)
+        Exit (EndFlight): SetStance(Stand)
+      → UpdateStance: cycle Stand/Crouch/Prone (only when Grounded)
+      Safety: if flying && stance != Floating → force Floating
+    if Grounded: ApplyGravity
+    CC.Move(horizontal + vertical)
+
+  SmoothTurnController.Update():
+    if !GameState.CanMove return
+    R thumbstick X → rotate rig Y
+
+  HamburgerMenu.Update():
+    Start button → toggle Pause/Resume
+    Menu open: GameState.Pause()
+      timeScale stays 1 (SDK hands keep animating!)
+      CanMove = false, IsPlaying = false
+      → Locomotion + SmoothTurn block themselves
+
+  PlagaGrabbable.Update():  (per item, only when grabbed)
+    grip flex >= 0.55 → StartGripHold (continuous buzz)
+    trigger pressed → PlayTriggerPull (sharp pulse)
+
+  PlagaGrabber.GrabBegin (override):
+    if holding → release (toggle)
+    else → grab nearest
+
+
+WHAT TO LOOK FOR IN LOGS
+══════════════════════════
+  EXPECTED AFTER BOOTSTRAP:
+  [PLAGA44][Bootstrap] === Setup START ===
+  [PLAGA44][PlayerRigSetup] [FIX] defaultRig -> StylizedCharacterLocomotion
+  [PLAGA44][PlayerRigSetup] [FIX] Cleared persisted AVATAR_Mode PlayerPrefs
+  [PLAGA44][AvatarRegistrySetup] Reimported X models with ForceUpdate
+  [PLAGA44][AvatarImport] Assigned AnimatorController to PINEA_YNG5
+  [PLAGA44][AvatarImport] Registry rebuilt -- 1 avatars (broken=0)
+  [PLAGA44][Bootstrap] === Setup DONE, scene SAVED ===
+
+  EXPECTED ON PLAY:
+  [PLAGA44][Gallery] Registry[0] = 'PINEA_YNG5' -- OK
+  [PLAGA44][Gallery] Spawned 1/1 avatars
+  [PLAGA44][Avatar] Start: inspectorMode=0, persistedMode=(none),
+                          defaultRig='StylizedCharacterLocomotion',
+                          galleryAvailable=true, maxMode=1
+  [PLAGA44][Avatar] SetAvatarMode: requested=0, clamped=0, label='None'
+  [PLAGA44][Avatar] defaultRig 'StylizedCharacterLocomotion' -> ACTIVE
+  [PLAGA44][Avatar] Mode=None -- default rig visible
+
+  RED FLAGS (something's broken):
+  [PLAGA44][Avatar] ShowDefaultRig(true) -- defaultRig is NULL!
+  [PLAGA44][PlayerRigSetup] [MISSING] defaultRig not found
+  [PLAGA44][Gallery] Registry[0] = 'PINEA_YNG5' -- BROKEN(reason)
+  [PLAGA44][AvatarImport] SKIPPED 'PINEA_YNG5' -- no valid rig
+  [PLAGA44][Bootstrap] [FAIL] X threw NullReferenceException
+
+
+COMPILE: PASS
+COMMIT: pending

@@ -34,16 +34,28 @@ namespace Plaga44.Editor
         // EditorApplication.update fires every editor tick -- we unhook after first call.
         static Bootstrap() => EditorApplication.update += WaitForReady;
 
+        private static int _waitTicks;
+
         private static void WaitForReady()
         {
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating) return;
+            _waitTicks++;
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+            {
+                if (_waitTicks % 300 == 0) // co ~5s log status (assuming ~60 ticks/s)
+                    Debug.Log($"{LOG} WaitForReady: still waiting (compiling={EditorApplication.isCompiling}, updating={EditorApplication.isUpdating})");
+                return;
+            }
 
             EditorApplication.update -= WaitForReady;
 
-            if (SessionState.GetBool(SessionKey, false)) return;
+            if (SessionState.GetBool(SessionKey, false))
+            {
+                Debug.Log($"{LOG} Auto-run SKIPPED -- already ran this session (key={SessionKey}). Use CYBERNOMAD/Bootstrap to re-run.");
+                return;
+            }
             SessionState.SetBool(SessionKey, true);
 
-            Debug.Log($"{LOG} Auto-run: loading scene and validating...");
+            Debug.Log($"{LOG} Auto-run: loading scene and validating... (waited {_waitTicks} ticks)");
             Run();
         }
 
@@ -105,30 +117,61 @@ namespace Plaga44.Editor
 
         private static void RunSetup(BootstrapConfig cfg)
         {
-            Debug.Log($"{LOG} === Setup start ===");
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            Debug.Log($"{LOG} === Setup START === scene={SceneManager.GetActiveScene().name}, cfg={cfg.name}");
             bool changed = false;
 
-            changed |= TerrainSetup.Run(cfg);
-            changed |= SkyboxSetup.Run(cfg);
-            changed |= BounceLightSetup.Run(cfg);
-            changed |= PlayerRigSetup.Run(cfg);
-            changed |= InventorySetup.Run(cfg);
-            changed |= SceneSingletonsSetup.Run(cfg);
-            changed |= ObjectSpawnerSetup.Run(cfg);
-            AvatarRegistrySetup.Run(cfg);
+            changed |= LogStep("TerrainSetup",        () => TerrainSetup.Run(cfg));
+            changed |= LogStep("SkyboxSetup",         () => SkyboxSetup.Run(cfg));
+            changed |= LogStep("BounceLightSetup",    () => BounceLightSetup.Run(cfg));
+            changed |= LogStep("PlayerRigSetup",      () => PlayerRigSetup.Run(cfg));
+            changed |= LogStep("InventorySetup",      () => InventorySetup.Run(cfg));
+            changed |= LogStep("SceneSingletonsSetup",() => SceneSingletonsSetup.Run(cfg));
+            changed |= LogStep("ObjectSpawnerSetup",  () => ObjectSpawnerSetup.Run(cfg));
+            LogStepVoid("AvatarRegistrySetup",        () => AvatarRegistrySetup.Run(cfg));
 
             if (changed)
             {
                 EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
                 EditorSceneManager.SaveOpenScenes();
-                Debug.Log($"{LOG} === Setup done, scene saved ===");
+                Debug.Log($"{LOG} === Setup DONE, scene SAVED === ({sw.ElapsedMilliseconds}ms)");
             }
             else
             {
-                Debug.Log($"{LOG} === Setup OK, nothing changed ===");
+                Debug.Log($"{LOG} === Setup OK, no changes === ({sw.ElapsedMilliseconds}ms)");
             }
 
             FocusTerrain();
+        }
+
+        private static bool LogStep(string name, System.Func<bool> step)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                bool result = step();
+                Debug.Log($"{LOG}   [{(result ? "CHANGED" : "OK")}] {name} ({sw.ElapsedMilliseconds}ms)");
+                return result;
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"{LOG}   [FAIL] {name} threw {e.GetType().Name}: {e.Message}\n{e.StackTrace}");
+                return false;
+            }
+        }
+
+        private static void LogStepVoid(string name, System.Action step)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            try
+            {
+                step();
+                Debug.Log($"{LOG}   [DONE] {name} ({sw.ElapsedMilliseconds}ms)");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"{LOG}   [FAIL] {name} threw {e.GetType().Name}: {e.Message}\n{e.StackTrace}");
+            }
         }
 
         private static void FocusTerrain()
