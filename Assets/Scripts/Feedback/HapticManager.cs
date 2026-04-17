@@ -10,8 +10,6 @@
 
 using System.Collections;
 using UnityEngine;
-using Plaga44.Core;
-
 namespace Plaga44.Feedback
 {
     [System.Serializable]

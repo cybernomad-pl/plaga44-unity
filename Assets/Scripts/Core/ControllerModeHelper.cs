@@ -9,7 +9,7 @@
 
 using UnityEngine;
 
-namespace Plaga44.Core
+namespace Plaga44
 {
     public static class ControllerModeHelper
     {

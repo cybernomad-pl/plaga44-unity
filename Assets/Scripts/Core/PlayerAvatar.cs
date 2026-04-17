@@ -2,21 +2,19 @@
 // PlayerAvatar.cs
 // CYBERNOMAD -- kontroler avatara gracza na OVRCameraRig.
 // Deleguje liste avatarow do AvatarGallery (single source of truth).
-// Mode=0 -> default rig (robot). Mode>=1 -> avatar z Gallery (indeks - 1).
-// Fallback: jesli Gallery brak, laduje stare Survivor_A_Lusth z Resources/.
+// Mode=0 -> default rig (SDK StylizedCharacterLocomotion). Mode>=1 -> avatar z Gallery (indeks - 1).
 // =============================================================================
 using UnityEngine;
 
 namespace Plaga44
 {
     /// <summary>
-    /// Player avatar controller. Default state = NO avatar (skeleton/robot rig visible).
+    /// Player avatar controller. Default state = SDK rig visible (StylizedCharacterLocomotion).
     /// Avatar is optional, selected from HamburgerMenu > AVATAR tile.
     ///
     /// Modes:
-    ///   0             -- None (default rig visible)
+    ///   0             -- None (default rig visible, SDK body with hand tracking)
     ///   1..N          -- avatar z AvatarGallery.Instance (index = mode - 1)
-    ///   (legacy)      -- jesli Gallery niedostepna, mode=1 ladue "Survivor_A_Lusth" z Resources
     ///
     /// Player-compatible avatars must hide head + face (prevents camera clipping from inside).
     /// </summary>
@@ -24,9 +22,6 @@ namespace Plaga44
     public class PlayerAvatar : MonoBehaviour
     {
         private const string LOG = "[PLAGA44][Avatar]";
-        // Legacy fallback removed -- all avatars go through AvatarGallery now.
-
-        public enum Mode { None = 0 } // legacy enum zostawione dla kompatybilnosci inspektora
 
         [Header("Mode")]
         [Tooltip("0=None (default rig). 1..N = avatar z AvatarGallery (index = mode-1). Max dynamicznie z Gallery.Count+1.")]
@@ -154,7 +149,7 @@ namespace Plaga44
             {
                 if (avatarMode == 0) return "None";
                 var g = AvatarGallery.Instance;
-                if (g == null || g.Count == 0) return "Survivor (legacy)";
+                if (g == null || g.Count == 0) return "?";
                 int idx = avatarMode - 1;
                 if (idx < 0 || idx >= g.Count) return "?";
                 if (g.IsBroken(idx)) return "AVATAR_ERROR";
