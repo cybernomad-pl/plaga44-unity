@@ -243,6 +243,9 @@ namespace Plaga44.UI
                 s.Add(S("Sprint (RO)", "Sprint toggle state (1=ON, 0=OFF). L thumbstick click toggles.", () => loco.sprintActive?1:0, v => {}, 0, 1, 0, "F0"));
                 s.Add(S("Fly Accel", "Fly acceleration m/s^2 while R stick UP held", () => loco.flyAcceleration, v => loco.flyAcceleration=v, 1f, 50f, 1f, "F0"));
                 s.Add(S("Fly Max Speed", "Max fly speed cap m/s", () => loco.flyMaxSpeed, v => loco.flyMaxSpeed=v, 5f, 50f, 1f, "F0"));
+                s.Add(S("Air Accel", "Horizontal accel while flying (ice skating feel)", () => loco.airAcceleration, v => loco.airAcceleration=v, 1f, 30f, 1f, "F0"));
+                s.Add(S("Air Max Speed", "Max horizontal speed while flying", () => loco.airMaxSpeed, v => loco.airMaxSpeed=v, 1f, 30f, 1f, "F0"));
+                s.Add(S("Air Drag", "Air drag (higher=stops faster, lower=more ice)", () => loco.airDrag, v => loco.airDrag=v, 0f, 3f, 0.1f, "F1"));
                 s.Add(S("Speed (RO)", "Current normalised speed (0-1)", () => loco.NormalisedSpeed, v => {}, 0, 1, 0, "F2"));
                 s.Add(S("VVel (RO)", "Vertical velocity (fall/jump)", () => loco.VerticalVelocity, v => {}, -100, 100, 0, "F1"));
                 s.Add(S("Grounded", "Is player grounded (RO)", () => loco.IsGrounded?1:0, v => {}, 0, 1, 0, "F0"));

@@ -74,6 +74,19 @@ namespace Plaga44.Locomotion
         private float _verticalVelocity;
         private float _trackingSpaceBaseY; // original TrackingSpace local Y
 
+        // Air momentum (issue #141): horizontal velocity persists between frames.
+        // In air: input accelerates, air drag decays (ice-skating feel).
+        // On ground: instant snap (direct CC.Move).
+        private Vector3 _airVelocity;
+
+        [Header("Air momentum (issue #141)")]
+        [Tooltip("Air acceleration (m/s^2) when input held while flying.")]
+        public float airAcceleration = 6f;
+        [Tooltip("Max horizontal speed while flying (m/s).")]
+        public float airMaxSpeed = 8f;
+        [Tooltip("Air drag coefficient (higher = stops faster). 0.5 = gentle ice skating.")]
+        public float airDrag = 0.5f;
+
         // Fly state
         private enum FlyState { Grounded, Ascending, Hovering }
         private FlyState _flyState = FlyState.Grounded;
@@ -179,9 +192,7 @@ namespace Plaga44.Locomotion
 
             Vector2 moveInput = GetMoveInput();
             // Prone blocks horizontal movement -- must stand up first
-            Vector3 horizontalMove = _currentStance == Stance.Prone
-                ? Vector3.zero
-                : CalculateHeadRelativeMovement(moveInput);
+            bool movementBlocked = (_currentStance == Stance.Prone);
 
             float rightY = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch).y;
             UpdateFly(rightY);
@@ -193,9 +204,51 @@ namespace Plaga44.Locomotion
 
             if (_flyState == FlyState.Grounded) ApplyGravity();
 
+            Vector3 horizontalMove;
+            if (_flyState == FlyState.Grounded)
+            {
+                // Ground: instant movement (no momentum)
+                horizontalMove = movementBlocked ? Vector3.zero : CalculateHeadRelativeMovement(moveInput);
+                _airVelocity = Vector3.zero; // reset momentum on ground
+            }
+            else
+            {
+                // Air: momentum/lodowisko (issue #141)
+                horizontalMove = UpdateAirMomentum(moveInput, movementBlocked);
+            }
+
             ApplyMove(horizontalMove);
             NormalisedSpeed = Mathf.Clamp01(moveInput.magnitude);
             LogGroundedChangesThrottled();
+        }
+
+        // Ice-skating horizontal movement in air (issue #141)
+        // Input adds acceleration to _airVelocity. Drag decays velocity.
+        // Returns displacement this frame.
+        private Vector3 UpdateAirMomentum(Vector2 input, bool inputBlocked)
+        {
+            // Compute world-space direction vector from input (head-relative)
+            Vector3 inputDir = Vector3.zero;
+            if (!inputBlocked && input.sqrMagnitude >= InputDeadZoneSqr)
+            {
+                Vector3 fwd = _headTransform.forward; fwd.y = 0f; fwd.Normalize();
+                Vector3 right = _headTransform.right; right.y = 0f; right.Normalize();
+                inputDir = (fwd * input.y) + (right * input.x * strafeFactor);
+            }
+
+            // Accelerate toward input direction
+            float speedMul = sprintActive ? sprintMultiplier : 1f;
+            _airVelocity += inputDir * airAcceleration * speedMul * _dt;
+
+            // Clamp to max speed
+            float max = airMaxSpeed * speedMul;
+            if (_airVelocity.sqrMagnitude > max * max)
+                _airVelocity = _airVelocity.normalized * max;
+
+            // Apply air drag (exponential decay)
+            _airVelocity = Vector3.Lerp(_airVelocity, Vector3.zero, airDrag * _dt);
+
+            return _airVelocity * _dt;
         }
 
         // =====================================================================
