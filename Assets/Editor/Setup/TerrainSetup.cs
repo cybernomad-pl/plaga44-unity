@@ -34,7 +34,42 @@ namespace Plaga44.Editor.Setup
             changed |= SetupMaterial(terrain, cfg);
             changed |= SetupTerrainLayers(terrain, cfg);
             changed |= SetupTerrainScale(terrain, cfg);
+            changed |= SetupTreePrototypes(terrain, cfg);
             return changed;
+        }
+
+        // Assigns tree prefabs to terrain treePrototypes (fixes 'Tree prefab at index X missing' spam).
+        // Uses TreePrefabBuilder to ensure 3 placeholder prefabs exist (Birch, Oak, Pine).
+        private static bool SetupTreePrototypes(Terrain terrain, BootstrapConfig cfg)
+        {
+            var data = terrain.terrainData;
+
+            bool hasBroken = false;
+            if (data.treePrototypes != null)
+                foreach (var p in data.treePrototypes)
+                    if (p == null || p.prefab == null) { hasBroken = true; break; }
+
+            bool needsInit = data.treePrototypes == null || data.treePrototypes.Length == 0 || hasBroken;
+            if (!needsInit)
+            {
+                Debug.Log($"{LOG} [OK] Tree prototypes: {data.treePrototypes.Length} (all valid)");
+                return false;
+            }
+
+            var treePrefabs = TreePrefabBuilder.EnsurePrefabs(force: false);
+            if (treePrefabs == null || treePrefabs.Length == 0)
+            {
+                Debug.LogWarning($"{LOG} [FAIL] No tree prefabs available -- clearing broken prototypes");
+                data.treePrototypes = new TreePrototype[0];
+                return true;
+            }
+
+            var protos = new TreePrototype[treePrefabs.Length];
+            for (int i = 0; i < treePrefabs.Length; i++)
+                protos[i] = new TreePrototype { prefab = treePrefabs[i], bendFactor = 0f };
+            data.treePrototypes = protos;
+            Debug.Log($"{LOG} [FIX] Assigned {protos.Length} tree prototypes (Birch, Oak, Pine)");
+            return true;
         }
 
         // Scales terrain horizontally (X,Z) by cfg.terrainHorizontalScale.
