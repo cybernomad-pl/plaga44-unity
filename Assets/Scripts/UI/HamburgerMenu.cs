@@ -207,6 +207,13 @@ namespace Plaga44.UI
             if (GameState.Current == GamePhase.Paused) GameState.Resume();
             // Flush biezacych ustawien na dysk -- slidery juz zapisaly PlayerPrefs.SetFloat, brakuje Save().
             SettingsRegistry.FlushPlayerPrefs();
+
+            // Issue #158: clean up preview objects so they don't linger in the world.
+            var gallery = Plaga44.AvatarGallery.Instance;
+            if (gallery != null) gallery.HideAllPreviews();
+            var items = Plaga44.ItemBrowser.Instance;
+            if (items != null) items.DespawnPreview();
+
             Debug.Log($"{LOG} CLOSE");
         }
 

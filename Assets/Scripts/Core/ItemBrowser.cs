@@ -168,7 +168,8 @@ namespace Plaga44
             }
         }
 
-        private void DespawnPreview()
+        /// <summary>Destroy current preview item. Public for HamburgerMenu.Close (issue #158).</summary>
+        public void DespawnPreview()
         {
             if (_spawnedPreview == null) return;
             Destroy(_spawnedPreview);
