@@ -105,9 +105,19 @@ namespace Plaga44
             if (Instance == this) Instance = null;
         }
 
+        private bool _spawned;
+
         private void Start()
         {
             if (!TryLoadRegistry()) return;
+            // Spawn deferred to Update -- wait for player to land on terrain so
+            // origin (relative to CenterEyeAnchor) is at ground level, not 42m up.
+        }
+
+        private void Update()
+        {
+            if (_spawned || _instances == null || _instances.Length == 0) return;
+            if (!IsPlayerGrounded()) return;
 
             ResolveOrigin(out Vector3 origin, out Vector3 rowRight);
             Vector3 dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : rowRight;
@@ -117,7 +127,17 @@ namespace Plaga44
             if (skipped > 0) Debug.LogWarning($"{LOG} Total broken skipped: {skipped}/{_instances.Length}");
 
             ApplyInitialLazyState();
-            Debug.Log($"{LOG} Spawned {spawned}/{_instances.Length} avatars at {origin} (lazy={lazyDisplay}, active={_activeIndex})");
+            _spawned = true;
+            Debug.Log($"{LOG} Spawned {spawned}/{_instances.Length} avatars at {origin} (lazy={lazyDisplay}, active={_activeIndex}) [deferred until grounded]");
+        }
+
+        private static bool IsPlayerGrounded()
+        {
+            var rig = GameObject.Find(OvrRigName);
+            if (rig == null) return true; // no rig -- spawn immediately at fallback origin
+            var cc = rig.GetComponent<CharacterController>();
+            if (cc == null) return true;
+            return cc.isGrounded;
         }
 
         // =====================================================================
@@ -140,6 +160,13 @@ namespace Plaga44
                 return false;
             }
             _instances = new GameObject[_registry.Count];
+            // Debug: list all registry entries with their state
+            for (int i = 0; i < _registry.Count; i++)
+            {
+                var e = _registry.Get(i);
+                string state = e == null ? "<null>" : (e.broken ? $"BROKEN({e.errorMessage})" : (e.prefab != null ? "OK" : "no-prefab"));
+                Debug.Log($"{LOG}   Registry[{i}] = '{e?.name ?? "?"}' -- {state}");
+            }
             return true;
         }
 
@@ -196,22 +223,58 @@ namespace Plaga44
         {
             int spawned = 0;
             int skipped = 0;
+            Debug.Log($"{LOG} SpawnAllPreviews START: origin={origin:F2} dir={dir:F2} count={_registry.Count}");
             for (int i = 0; i < _registry.Count; i++)
             {
                 var entry = _registry.Get(i);
-                if (!IsSpawnable(entry, i, ref skipped)) continue;
+                if (!IsSpawnable(entry, i, ref skipped))
+                {
+                    Debug.LogWarning($"{LOG}   [{i}] '{entry?.name ?? "<null>"}' SKIPPED (not spawnable)");
+                    continue;
+                }
 
                 Vector3 pos = origin + dir * spacing * i;
+                Debug.Log($"{LOG}   [{i}] '{entry.name}' instantiating at {pos:F2} (rot.y={rot.eulerAngles.y:F0})");
                 var inst = Instantiate(entry.prefab, pos, rot, transform);
                 inst.name = $"Preview_{entry.name}";
+
+                // Diagnose prefab structure
+                var renderers = inst.GetComponentsInChildren<Renderer>(true);
+                var skinned = inst.GetComponentsInChildren<SkinnedMeshRenderer>(true);
+                var animator = inst.GetComponentInChildren<Animator>(true);
+                Debug.Log($"{LOG}   [{i}] '{entry.name}' components: renderers={renderers.Length} "
+                    + $"skinned={skinned.Length} animator={(animator != null ? "yes" : "NO")} "
+                    + $"avatar={(animator?.avatar != null ? animator.avatar.name : "NULL")} "
+                    + $"valid={(animator?.avatar?.isValid ?? false)}");
+
+                // Diagnose materials (pink check)
+                int pinkMatCount = 0;
+                foreach (var r in renderers)
+                {
+                    foreach (var m in r.sharedMaterials)
+                    {
+                        if (m == null || m.shader == null || m.shader.name == "Hidden/InternalErrorShader")
+                        {
+                            pinkMatCount++;
+                            Debug.LogWarning($"{LOG}   [{i}] '{entry.name}' renderer '{r.name}' has BROKEN material (shader={m?.shader?.name ?? "<null mat>"})");
+                        }
+                    }
+                }
+                if (pinkMatCount > 0)
+                    Debug.LogError($"{LOG}   [{i}] '{entry.name}' has {pinkMatCount} BROKEN materials -- will appear PINK!");
+
                 NormalizeToHeight(inst, targetAvatarHeight);
 
                 // Preview in T-pose -- disable AnimatorController so skeleton stays in bind pose
-                var animator = inst.GetComponentInChildren<Animator>(true);
-                if (animator != null) animator.runtimeAnimatorController = null;
+                if (animator != null)
+                {
+                    animator.runtimeAnimatorController = null;
+                    Debug.Log($"{LOG}   [{i}] '{entry.name}' AnimatorController nulled (T-pose preview)");
+                }
                 _instances[i] = inst;
                 spawned++;
             }
+            Debug.Log($"{LOG} SpawnAllPreviews DONE: spawned={spawned} skipped={skipped}");
             return (spawned, skipped);
         }
 

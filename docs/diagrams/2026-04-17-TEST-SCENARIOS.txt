@@ -1,0 +1,256 @@
+PLAGA '44 TESTBED V6 -- TEST SCENARIOS vs LOGI 2026-04-17
+============================================================
+
+Co OCZEKUJEMY w danej sytuacji vs co WIDAĆ w logach.
+
+═══════════════════════════════════════════════════════════════════
+  ODKRYTE: savePlayerPosition NIE BYŁ IMPLEMENTOWANY
+═══════════════════════════════════════════════════════════════════
+
+  BootstrapConfig.cs:49
+    public bool savePlayerPosition = true;
+    -- pole istniało ale ŻADEN kod tego nie czytał
+
+  Czemu gracz spadał z 42m?
+    Scena TESTBED_V6.unity ma OVRCameraRig.transform.position = (0,0,0)
+    Bootstrap.PlayerRigSetup.SnapRigToGround:
+      terrain.SampleHeight((0,0,0)) -> ~32m (terrain mountain at origin?)
+      rig.position.y = 32 + terrain.position.y (np. +10) = 42m
+
+    Gracz spawnuje na vertex top of terrain mesh.
+    CC.height = 1.8, ale CC.center.y = 0.9, więc base CC = rig.y + 0
+    rig.y = 42 ale CC.foot ~= 42 -- nie jest na ziemi (ground = 32)
+    -> gracz spada z 10m -> vVel = -22 m/s przy uderzeniu
+
+  FIX zaimplementowany teraz:
+    PlayerPositionPersistence.cs (NEW):
+      Start(): jeśli PlayerPrefs ma saved pos -> restore
+      OnApplicationQuit + OnDisable: save current pos
+      Per-scene key: "Plaga44_PlayerPos_<sceneName>_x/y/z/yaw"
+
+    PlayerRigSetup.SetupPositionPersistence():
+      Adds PlayerPositionPersistence component if cfg.savePlayerPosition
+
+
+═══════════════════════════════════════════════════════════════════
+  TEST SCENARIO 1: COLD START (pierwsza sesja)
+═══════════════════════════════════════════════════════════════════
+
+  EXPECTED FLOW:
+    Bootstrap.Run()
+    PlayerRigSetup:
+      [ADDED] PlayerPositionPersistence
+      [FIX] Snapped rig to ground: y=0.00 -> 32.00
+    PLAY MODE:
+    PlayerPositionPersistence.Start()
+      -> "No saved position for scene 'TESTBED_V6'"
+      (rig zostaje na 32m -- ground)
+    LocomotionController.Start()
+      -> "CC reset to standHeight=1.8"
+    AvatarGallery.Start() -> defer
+    AvatarGallery.Update():
+      cc.isGrounded? -> czeka frames kilka
+      gdy true: SpawnAllPreviews
+        [0] 'PINEA_YNG5' instantiating at (X, ground+0, Z+2)
+        [0] 'PINEA_YNG5' components: renderers=4 skinned=4 animator=yes
+            avatar='PINEA_YNG5Avatar' valid=True
+        [0] 'PINEA_YNG5' AnimatorController nulled (T-pose preview)
+    PlayerAvatar.Start():
+      Start: inspectorMode=0, persistedMode=(none),
+             defaultRig='StylizedCharacterLocomotion',
+             galleryAvailable=True, maxMode=1
+      SetAvatarMode(0) -> ShowDefaultRigOnly
+      ShowDefaultRig(true) -> "StylizedCharacterLocomotion -> ACTIVE"
+    ObjectSpawner.Update() -> grounded -> SpawnAll
+      [Spawned] 'Revolver' at (rig+(0.8,0,1.5))
+    ItemBrowser.Start():
+      Loaded 1 items: Revolver
+      SetItem(0) -> Item: None
+
+  ON QUIT:
+    PlayerPositionPersistence.OnApplicationQuit()
+    -> "SAVED position via OnApplicationQuit: pos=(X, 32, Z)"
+
+═══════════════════════════════════════════════════════════════════
+  TEST SCENARIO 2: WARM RESTART (drugie odpalenie po fly)
+═══════════════════════════════════════════════════════════════════
+
+  CONTEXT: gracz wcześniej latał, ostatnia pozycja Y=80m, X=200, Z=300
+
+  EXPECTED FLOW:
+    Bootstrap.Run()
+    PlayerRigSetup:
+      [OK] PlayerPositionPersistence (already present)
+      [FIX] Snapped rig to ground: y=0.00 -> 32.00
+        (snap działa ALE Persistence później to zmieni)
+    PLAY MODE:
+    PlayerPositionPersistence.Start()
+      -> "RESTORED position from PlayerPrefs:
+           old=(0, 32, 0) -> new=(200, 80, 300) yaw=45.0"
+    LocomotionController.Start() -- CC reset
+    AvatarGallery.Update() -- waits for grounded
+      Y=80m, gracz spada
+      vVel po landing: -39 m/s (z 80m -> 0m / -9.81 m/s²)
+      Po landing -> SpawnAllPreviews przed graczem na ziemi (po landing)
+    PlayerAvatar.Start() -- mode 0/1 z PlayerPrefs
+
+  PROBLEM Z TYM SCENARIUSZEM:
+    Restore przed landing -- gracz spada z dużej wysokości.
+    FIX (opcjonalny): Persistence sprawdza czy saved Y jest "powietrze"
+    (np. >5m nad terrain) i wtedy snap to ground zamiast restore Y.
+
+═══════════════════════════════════════════════════════════════════
+  TEST SCENARIO 3: PINEA AVATAR SWITCH
+═══════════════════════════════════════════════════════════════════
+
+  CONTEXT: gracz w Play, otwiera menu, wybiera PINEA, GoBack
+
+  EXPECTED LOGI:
+    [Menu] OPEN
+    [GameState] Playing -> Paused (timeScale=1)
+    [Menu] -> Group: GAMEPLAY
+    [Menu] -> Settings: AVATAR (3)
+
+    User klika slider, mode 0 -> 1:
+    [Settings] [AVATAR] Mode: 0.000 -> 1.000
+    [Avatar] Preview mode=1 (PINEA_YNG5)
+    [Gallery] SetActiveIndex(0) lazy=True
+      -- jeden z gallery preview enabled (PINEA pojawia się przed graczem)
+
+    User klika GoBack z AVATAR section:
+    [Avatar] Confirmed avatar mode=1 (PINEA_YNG5)
+    [Avatar] SetAvatarMode: requested=1, clamped=1, label='PINEA_YNG5'
+    [Avatar] defaultRig 'StylizedCharacterLocomotion' -> INACTIVE
+    [Avatar] Spawned 'Avatar_PINEA_YNG5' mode=1 (humanoid=True)
+
+    [Menu] CLOSE
+    [GameState] Paused -> Playing
+
+  W LOGACH BORYSA (poprzedni run):
+    [Avatar] Preview mode=1 (PINEA_YNG5)  ✓
+    [Gallery] SetActiveIndex(0) lazy=True ✓
+    Brak "Confirmed avatar mode=1" -- BORYS NIE POTWIERDZIŁ wyboru
+    -- klikał slider 0<->1 ale nie zrobił GoBack
+
+  WNIOSEK: PINEA pink którego widział to GALLERY PREVIEW
+  spawn position: (0, 42.08, 2) z poprzedniego runa
+
+═══════════════════════════════════════════════════════════════════
+  TEST SCENARIO 4: TOGGLE GRAB
+═══════════════════════════════════════════════════════════════════
+
+  EXPECTED LOGI:
+    User chwyta gripem:
+    [PlagaGrabber] Toggle GRAB via LTouch
+    [Grabbable] GrabBegin: Revolver by LTouch
+
+    User trzyma grip (bez puszczenia):
+    [Haptic] gripHold START | ctrl=LTouch amp=0.15 freq=0.30
+
+    User puszcza grip (object zostaje):
+    [Haptic] gripHold STOP | ctrl=LTouch
+    -- object NIE jest released bo grabEnd=-1
+
+    User klika trigger trzymając obiekt:
+    [Haptic] PlayTriggerPull | ctrl=LTouch amp=0.70 dur=0.08s
+
+    User chwyta gripem znowu (toggle release):
+    [PlagaGrabber] Toggle RELEASE: Revolver from LTouch
+    [Grabbable] GrabEnd: Revolver released, vel=0.00m/s
+
+  BORYS WIDZIAŁ:
+    [PlagaGrabber] Toggle GRAB via LTouch ✓
+    -- ale potem revolver "zniknął" (Borys mówi "nie spawnuje")
+
+  PRAWDOPODOBNE: Revolver spawnowany na rig+(0.8, 0, 1.5)
+    Rig.y = 42, więc Revolver na Y=42
+    Gracz spadał -- Revolver leciał z nim?
+    Nie, ResolveSpawnPosition użył rig.position w MOMENCIE spawn
+    -> Revolver spawnowany na 42m. Gracz wylądował na 32m.
+    -- Revolver wisi 10m nad graczem, nie widzi.
+
+  FIX (już zrobiony):
+    ObjectSpawner defer to Update() until isGrounded.
+
+═══════════════════════════════════════════════════════════════════
+  TEST SCENARIO 5: FLY + STANCE
+═══════════════════════════════════════════════════════════════════
+
+  EXPECTED LOGI:
+    Standing, gracz pull R thumbstick UP:
+    [Locomotion] Stance: Stand -> Floating, targetH=1.8
+    [Locomotion] Fly: ASCENDING
+
+    Release thumbstick:
+    [Locomotion] Fly: HOVERING
+    -- stance LOCKED na Floating, nie da się crouch/prone
+
+    User push DOWN żeby crouch (NIE POWINNO DZIAŁAĆ w locie):
+    -- log brak (UpdateStance early return: if (_flyState != Grounded) return)
+
+    User push DOWN żeby drop:
+    [Locomotion] Fly: DROPPING
+    [Locomotion] Stance: Floating -> Stand, targetH=1.8
+
+    Standing, push DOWN żeby crouch:
+    [Locomotion] Stance: Stand -> Crouch, targetH=1.0
+
+═══════════════════════════════════════════════════════════════════
+  TEST SCENARIO 6: HAMBURGER MENU + HAND ANIMATION
+═══════════════════════════════════════════════════════════════════
+
+  CONTEXT: Borys chce widzieć ręce SDK animowane W MENU (pause)
+
+  EXPECTED LOGI:
+    User klika Start (pause):
+    [GameState] Playing -> Paused (timeScale=1)
+    [Menu] OPEN
+    -- timeScale STAYS 1 (nasz fix)
+    -- SDK CharacterRetargeter Animator dalej dostaje deltaTime > 0
+    -- Hands animują się normalnie
+
+  TEST: czy ręce SDK się animują w menu?
+    Logi nie pokażą tego (SDK retargeter nie loguje).
+    Wymaga obserwacji wizualnej w VR.
+
+═══════════════════════════════════════════════════════════════════
+  TEST SCENARIO 7: TRZECIA SESJA -- co gracz widzi
+═══════════════════════════════════════════════════════════════════
+
+  Z NASZYMI FIXAMI:
+    1. Bootstrap setup gallery + spawn deferred
+    2. PlayerPositionPersistence restoruje pos lub leaves default
+    3. SnapRigToGround robi rig.y = ground (jeśli pos default)
+    4. AvatarGallery + ObjectSpawner spawn after grounded
+    5. Wszystko PRZED graczem na ground level
+    6. Robot body widoczny (defaultRig wired)
+
+  NIEPEWNE:
+    PINEA pink shader -- diagnostyka w nowych logach pokaże:
+      "renderer 'X' has BROKEN material (shader=...)"
+      "PINEA_YNG5 has N BROKEN materials -- will appear PINK!"
+
+═══════════════════════════════════════════════════════════════════
+  DODANE LOGI W TYM COMMICIE:
+═══════════════════════════════════════════════════════════════════
+
+  AvatarGallery.SpawnAllPreviews() -- per-instance:
+    "  [i] 'NAME' instantiating at POS"
+    "  [i] 'NAME' components: renderers=N skinned=N animator=yes/NO
+         avatar='NAME' valid=True/False"
+    "  [i] 'NAME' renderer 'X' has BROKEN material (shader=...)"
+    "  [i] 'NAME' has N BROKEN materials -- will appear PINK!"
+    "  [i] 'NAME' AnimatorController nulled (T-pose preview)"
+
+  PlayerPositionPersistence (NEW class):
+    "RESTORED position from PlayerPrefs: scene='X' old=POS -> new=POS yaw=Y"
+    "No saved position for scene 'X'"
+    "SAVED position via TRIGGER: pos=POS yaw=Y"
+    "CLEARED saved position for 'X'"
+
+  PlayerRigSetup.SetupPositionPersistence:
+    "[ADDED] PlayerPositionPersistence"
+    "[OK] PlayerPositionPersistence (already present)"
+    "[REMOVED] PlayerPositionPersistence (cfg.savePlayerPosition=false)"
+
+═══════════════════════════════════════════════════════════════════

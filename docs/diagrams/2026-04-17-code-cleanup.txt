@@ -1,0 +1,56 @@
+PLAGA '44 TESTBED V6 -- CODE CLEANUP 2026-04-17
+=================================================
+
+CHANGES (code review fixes):
+
+  1. SDK Samples RESTORED to Assets/ + scene refs intact
+     Assets/Samples/Meta XR Movement SDK/83.0.0/Advanced Samples/
+     StylizedCharacterLocomotion.prefab (guid: 286d7e2005861d34...)
+     LocomotionController.controller (for AvatarImport)
+     138 files from Package Cache -> Assets/Samples/
+     MUST BE COMMITTED TO GIT (was cause of original problem)
+
+  2. SettingsRegistry.cs -- dead preset code REMOVED
+     REMOVED: SavePreset(), LoadPreset(), LoadPresetValues()
+     REMOVED: IsPresetSaved(), GetPresetTimestamp()
+     REMOVED: PrefsKeys.PresetValue/PresetCount/PresetSavedAt
+     REMOVED: GetSlotName() (slot naming helper)
+     ~60 lines of dead code cleaned
+
+  3. SettingsRegistry.FindSun() -- Bounce Light filter ADDED
+     WAS:  first Directional light found (could be Bounce)
+     NOW:  skips lights with "Bounce" in name
+     Matches SkyboxSetup.cs behavior
+
+  4. ACTION_SETTINGS -- removed phantom "SET DEFAULTS"
+     WAS:  { "RESET ALL", "LOG ALL", "SET DEFAULTS", "QUIT GAME" }
+     NOW:  { "RESET ALL", "LOG ALL", "QUIT GAME" }
+     "SET DEFAULTS" was never exposed in menu
+
+  5. ControllerModeHelper.cs -- namespace fix
+     WAS:  namespace Plaga44.Core (only file using this)
+     NOW:  namespace Plaga44 (consistent with other Core scripts)
+     UPDATED: HapticManager.cs, HapticOnGrab.cs (removed using)
+
+  6. PlayerAvatar.cs -- dead legacy references cleaned
+     REMOVED: "Survivor_A_Lusth" references in comments
+     REMOVED: "legacy fallback" documentation
+     UPDATED: Mode=0 description -> "SDK rig" not "robot"
+     UPDATED: CurrentLabel fallback -> "?" not "Survivor (legacy)"
+
+  7. SettingsRegistry.cs AVATAR section
+     UPDATED: mode desc "0=None(SDK rig)" not "0=None(robot)"
+     REMOVED: "Survivor (legacy)" fallback text
+
+FILES MODIFIED (7):
+  Scripts/UI/SettingsRegistry.cs ........ -60 lines dead code, FindSun fix
+  Scripts/Core/ControllerModeHelper.cs .. namespace Plaga44
+  Scripts/Core/PlayerAvatar.cs .......... comments + labels cleaned
+  Scripts/Feedback/HapticManager.cs ..... removed using Plaga44.Core
+  Scripts/Feedback/HapticOnGrab.cs ...... removed using Plaga44.Core
+
+FILES ADDED (138):
+  Assets/Samples/Meta XR Movement SDK/83.0.0/Advanced Samples/
+    (restored from Library/PackageCache/)
+
+COMPILE: PASS x4 (after each fix round)

@@ -31,8 +31,75 @@ namespace Plaga44.Editor.Setup
             changed |= SetupLocomotion(rig, cfg);
             changed |= SetupSmoothTurn(rig, cfg);
             changed |= SetupPlayerAvatar(rig);
-            // StratoJump removed -- no spawn repositioning.
+            changed |= SetupPositionPersistence(rig, cfg);
+            changed |= PositionRig(rig, cfg);
             return changed;
+        }
+
+        // PlayerPositionPersistence: restore last session position.
+        // Disabled if stratoJumpHeight > 0 (we want StratoJump each session).
+        private static bool SetupPositionPersistence(GameObject rig, BootstrapConfig cfg)
+        {
+            bool shouldHave = cfg.savePlayerPosition && cfg.stratoJumpHeight <= 0f;
+            var existing = rig.GetComponent<PlayerPositionPersistence>();
+
+            if (shouldHave)
+            {
+                if (existing != null)
+                {
+                    Debug.Log($"{LOG} [OK] PlayerPositionPersistence (already present)");
+                    return false;
+                }
+                Undo.AddComponent<PlayerPositionPersistence>(rig);
+                Debug.Log($"{LOG} [ADDED] PlayerPositionPersistence (savePlayerPosition=true)");
+                return true;
+            }
+            else if (existing != null)
+            {
+                Undo.DestroyObjectImmediate(existing);
+                Debug.Log($"{LOG} [REMOVED] PlayerPositionPersistence (StratoJump mode OR savePlayerPosition=false)");
+                return true;
+            }
+            return false;
+        }
+
+        // Position rig: StratoJump (spawn 1km above ground) OR snap to ground.
+        // Controlled by cfg.stratoJumpHeight:
+        //   > 0: spawn at terrain ground + stratoJumpHeight (fun free-fall)
+        //   = 0: snap to terrain ground (instant landing)
+        private static bool PositionRig(GameObject rig, BootstrapConfig cfg)
+        {
+            var terrain = Object.FindFirstObjectByType<Terrain>();
+            if (terrain == null)
+            {
+                Debug.LogWarning($"{LOG} [SKIP] No terrain -- cannot position rig");
+                return false;
+            }
+
+            Vector3 pos = rig.transform.position;
+            // Center rig on terrain if at origin (0,0,0)
+            if (Mathf.Approximately(pos.x, 0f) && Mathf.Approximately(pos.z, 0f))
+            {
+                var terrainData = terrain.terrainData;
+                pos.x = terrain.transform.position.x + terrainData.size.x * 0.5f;
+                pos.z = terrain.transform.position.z + terrainData.size.z * 0.5f;
+                Debug.Log($"{LOG} [FIX] Centering rig on terrain: x={pos.x:F0} z={pos.z:F0}");
+            }
+
+            float groundY = terrain.SampleHeight(pos) + terrain.transform.position.y;
+            float targetY = groundY + cfg.stratoJumpHeight;
+            string mode = cfg.stratoJumpHeight > 0f ? $"StratoJump +{cfg.stratoJumpHeight:F0}m" : "Ground snap";
+
+            if (Mathf.Abs(pos.y - targetY) < 0.01f)
+            {
+                Debug.Log($"{LOG} [OK] Rig already at target y={pos.y:F2} ({mode})");
+                return false;
+            }
+
+            Undo.RecordObject(rig.transform, "PlayerRigSetup position rig");
+            rig.transform.position = new Vector3(pos.x, targetY, pos.z);
+            Debug.Log($"{LOG} [FIX] Positioned rig: y={pos.y:F2} -> {targetY:F2} ground={groundY:F2} mode={mode}");
+            return true;
         }
 
         private static bool SetupCharacterController(GameObject rig, BootstrapConfig cfg)
@@ -100,36 +167,67 @@ namespace Plaga44.Editor.Setup
                 changed = true;
                 Debug.Log($"{LOG} [FIX] avatarMode -> 0");
             }
+
+            // Clear persisted PlayerPrefs avatarMode -- otherwise PlayerAvatar.Start()
+            // will restore old broken mode (e.g. PINEA when its rig is broken).
+            // Bootstrap = fresh start, runtime persistence kicks in after first menu change.
+            const string AvatarPrefsKey = "Plaga44_Current_AVATAR_Mode";
+            if (PlayerPrefs.HasKey(AvatarPrefsKey))
+            {
+                PlayerPrefs.DeleteKey(AvatarPrefsKey);
+                PlayerPrefs.Save();
+                Debug.Log($"{LOG} [FIX] Cleared persisted AVATAR_Mode PlayerPrefs (fresh Bootstrap)");
+            }
             if (avatar.avatarPrefab != null)
             {
                 avatar.avatarPrefab = null;
                 changed = true;
                 Debug.Log($"{LOG} [FIX] cleared legacy avatarPrefab");
             }
-            if (avatar.defaultRig == null)
+            // ALWAYS re-resolve defaultRig from scene -- old reference may be stale after scene reload
+            var foundRig = GameObject.Find(DefaultRigName)
+                ?? FindChildContaining(rig.transform, DefaultRigPartial);
+            if (foundRig != null)
             {
-                var found = GameObject.Find(DefaultRigName)
-                    ?? FindChildContaining(rig.transform, DefaultRigPartial);
-                if (found != null)
+                if (avatar.defaultRig != foundRig)
                 {
-                    avatar.defaultRig = found;
+                    avatar.defaultRig = foundRig;
                     changed = true;
-                    Debug.Log($"{LOG} [FIX] defaultRig -> {found.name}");
+                    Debug.Log($"{LOG} [FIX] defaultRig -> {foundRig.name} (path={GetGameObjectPath(foundRig)})");
                 }
                 else
                 {
-                    Debug.LogWarning($"{LOG} [WARN] defaultRig not found -- assign manually");
+                    Debug.Log($"{LOG} [OK] defaultRig already wired to {foundRig.name}");
+                }
+                if (!foundRig.activeSelf)
+                {
+                    foundRig.SetActive(true);
+                    changed = true;
+                    Debug.Log($"{LOG} [FIX] defaultRig activated (was inactive)");
                 }
             }
-            if (avatar.defaultRig != null && !avatar.defaultRig.activeSelf)
+            else
             {
-                avatar.defaultRig.SetActive(true);
-                changed = true;
-                Debug.Log($"{LOG} [FIX] defaultRig activated");
+                Debug.LogError($"{LOG} [MISSING] defaultRig '{DefaultRigName}' not found in scene -- "
+                    + "SDK char prefab missing or scene corrupted");
             }
 
             if (!changed) Debug.Log($"{LOG} [OK] PlayerAvatar");
             return changed;
+        }
+
+        // Walk parents to print full hierarchy path -- useful for debugging defaultRig resolution
+        private static string GetGameObjectPath(GameObject go)
+        {
+            if (go == null) return "<null>";
+            string path = go.name;
+            var t = go.transform.parent;
+            while (t != null)
+            {
+                path = t.name + "/" + path;
+                t = t.parent;
+            }
+            return path;
         }
 
         // StratoJump removed -- player spawns at scene position (saved or default).

@@ -44,27 +44,12 @@ namespace Plaga44.UI
         {
             private const string CurrentPrefix = "Plaga44_Current_";
             private const string DefaultPrefix = "Plaga44_Default_";
-            private const string PresetPrefix = "Plaga44_Preset";
-            private const string CountSuffix = "__count";
-            private const string SavedAtSuffix = "__savedAt";
 
             public static string Current(string section, string name) => $"{CurrentPrefix}{section}_{name}";
             public static string Default(string section, string name) => $"{DefaultPrefix}{section}_{name}";
-            public static string PresetValue(int slot, string name) => $"{PresetPrefix}{slot}_{name}";
-            public static string PresetCount(int slot) => $"{PresetPrefix}{slot}_{CountSuffix}";
-            public static string PresetSavedAt(int slot) => $"{PresetPrefix}{slot}_{SavedAtSuffix}";
         }
 
         private static string DefaultsDictKey(string section, string name) => $"{section}_{name}";
-
-        /// <summary>Nazwy slotow presetów.</summary>
-        private static string GetSlotName(int slot) => slot switch
-        {
-            1 => "HI-END",
-            2 => "CUSTOM",
-            3 => "SAFE",
-            _ => $"SLOT{slot}"
-        };
 
         // Last action info -- HamburgerMenu pokazuje jako toast przez kilka sekund
         public static string LastActionMessage { get; private set; } = "";
@@ -208,69 +193,7 @@ namespace Plaga44.UI
             SetAction($"DEFAULTS SET ({count} values saved)", true);
         }
 
-        // =====================================================================
-        // Save / Load presets to PlayerPrefs
-        // =====================================================================
-
-        public static void SavePreset(int slot)
-        {
-            if (!_built) Build();
-            try
-            {
-                foreach (var s in _allSettings)
-                    PlayerPrefs.SetFloat(PrefsKeys.PresetValue(slot, s.name), s.get());
-                PlayerPrefs.SetInt(PrefsKeys.PresetCount(slot), _allSettings.Count);
-                PlayerPrefs.SetString(PrefsKeys.PresetSavedAt(slot), System.DateTime.Now.ToString("dd.MM HH:mm"));
-                PlayerPrefs.Save();
-                SetAction($"SAVED slot {slot} ({_allSettings.Count} values)", true);
-            }
-            catch (System.Exception e)
-            {
-                SetAction($"SAVE slot {slot} FAILED: {e.Message}", false);
-            }
-        }
-
-        public static void LoadPreset(int slot)
-        {
-            if (!_built) Build();
-            if (!PlayerPrefs.HasKey(PrefsKeys.PresetCount(slot)))
-            {
-                SetAction($"LOAD slot {slot} -- empty, cannot load", false);
-                return;
-            }
-            try
-            {
-                int loaded = LoadPresetValues(slot);
-                SetAction($"LOADED slot {slot} ({loaded} values)", true);
-            }
-            catch (System.Exception e)
-            {
-                SetAction($"LOAD slot {slot} FAILED: {e.Message}", false);
-            }
-        }
-
-        private static int LoadPresetValues(int slot)
-        {
-            int loaded = 0;
-            foreach (var s in _allSettings)
-            {
-                string key = PrefsKeys.PresetValue(slot, s.name);
-                if (!PlayerPrefs.HasKey(key)) continue;
-                s.set(Mathf.Clamp(PlayerPrefs.GetFloat(key), s.min, s.max));
-                loaded++;
-            }
-            return loaded;
-        }
-
-        /// <summary>True jesli slot ma zapisane dane. Uzywane przez HamburgerMenu do stanu.</summary>
-        public static bool IsPresetSaved(int slot) => PlayerPrefs.HasKey(PrefsKeys.PresetCount(slot));
-
-        /// <summary>Sformatowana data zapisu slotu, albo null jesli pusty.</summary>
-        public static string GetPresetTimestamp(int slot)
-        {
-            string key = PrefsKeys.PresetSavedAt(slot);
-            return PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : null;
-        }
+        // Presets removed -- auto-save on every change replaces manual preset slots.
 
         public static void LogAll()
         {
@@ -355,8 +278,8 @@ namespace Plaga44.UI
             if (playerAvatar != null) Sec("AVATAR", s => {
                 int maxMode = Mathf.Max(1, playerAvatar.MaxMode);
                 string modeDesc = maxMode > 1
-                    ? $"0=None(robot), 1..{maxMode}=Avatar z Gallery"
-                    : "0=None(robot), 1=Survivor (legacy)";
+                    ? $"0=None(SDK rig), 1..{maxMode}=Avatar z Gallery"
+                    : "0=None(SDK rig)";
                 s.Add(S("Mode", modeDesc, () => playerAvatar.avatarMode, v => playerAvatar.PreviewAvatarMode((int)v), 0, maxMode, 1, "F0"));
                 s.Add(S("Hide Head", "Hide head+neck to avoid camera clipping (player avatars)", () => playerAvatar.hideHead?1:0, v => playerAvatar.hideHead=v>0.5f, 0, 1, 1, "F0"));
                 s.Add(S("Y Offset", "Avatar feet offset from rig base", () => playerAvatar.yOffset, v => playerAvatar.yOffset=v, -1f, 1f, 0.05f, "F2"));
@@ -677,7 +600,7 @@ namespace Plaga44.UI
         // Action-type settings (getter always returns 0, setter fires action on >0.5).
         // These must NOT be restored from PlayerPrefs -- restoring 1.0 would re-trigger the action.
         private static readonly HashSet<string> ACTION_SETTINGS =
-            new HashSet<string> { "RESET ALL", "LOG ALL", "SET DEFAULTS", "QUIT GAME" };
+            new HashSet<string> { "RESET ALL", "LOG ALL", "QUIT GAME" };
 
         private static int RestorePersistedValues()
         {
@@ -733,7 +656,7 @@ namespace Plaga44.UI
         static Light FindSun()
         {
             foreach (var l in UnityEngine.Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
-                if (l.type == LightType.Directional) return l;
+                if (l.type == LightType.Directional && !l.name.Contains("Bounce")) return l;
             return null;
         }
     }

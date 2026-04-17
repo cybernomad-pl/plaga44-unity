@@ -1,0 +1,92 @@
+PLAGA '44 TESTBED V6 -- BATCH FIXES 2026-04-17
+=================================================
+
+FIX 1: FLY/STANCE STATE MACHINE
+────────────────────────────────
+  LocomotionController.cs
+
+  NEW: Stance.Floating (added to enum)
+
+  GROUNDED + STAND ──[R stick UP]--> ASCENDING + FLOATING
+    _flySpeed accelerates, CC height stays standHeight
+    UpdateStance() BLOCKED (returns early when !Grounded)
+    Safety guard: if flying && stance != Floating -> force Floating
+
+  ASCENDING ──[release]--> HOVERING + FLOATING
+    random drift +-0.3 m/s, still FLOATING
+
+  HOVERING ──[stick DOWN]--> GROUNDED + STAND (EndFlight)
+  any fly ──[land]--> GROUNDED + STAND (EndFlight)
+
+  Floating CC height = standHeight (no camera pop)
+  Floating BLOCKS all stance transitions (can't crouch while flying)
+
+FIX 2: AVATAR REGISTRY FROM BOOTSTRAP
+──────────────────────────────────────
+  AvatarRegistrySetup.cs
+
+  WAS: read-only validator (log warning if empty)
+  NOW: if registry null OR empty -> AvatarAutoImport.ScanAllForce()
+       scans Assets/PLAGA44/Avatars/ -> builds prefabs -> registry
+
+  PINEA_YNG5 content copied from _avatars_backup:
+    PINEA_YNG5.dae + textures/ + material + prefab + animations
+
+  Bootstrap flow:
+    RunSetup -> AvatarRegistrySetup.Run(cfg)
+      -> registry empty? -> ScanAllForce()
+        -> iterate Avatars/ subfolders
+        -> build DAE/FBX -> prefab -> registry entry
+      -> validate result
+
+FIX 3: PAUSE WITHOUT TIMESCALE FREEZE
+──────────────────────────────────────
+  GameState.cs
+
+  WAS: Paused/MainMenu/Dead -> Time.timeScale = 0
+       (froze SDK CharacterRetargeter hand animations)
+  NOW: Time.timeScale stays 1 in ALL states
+       Gameplay blocked by CanMove/IsPlaying checks
+       SDK hand tracking + Animator keep running in menu
+
+  Already guarded:
+    LocomotionController.Update(): if !CanMove return
+    SmoothTurnController.Update(): if !CanMove return
+
+FIX 4: TOGGLE GRAB + HAPTIC SYSTEM
+───────────────────────────────────
+  NEW: PlagaGrabber.cs (extends OVRGrabber)
+    grabEnd = -1 (disables hold-to-release)
+    GrabBegin() override: if holding -> release (toggle)
+    Press grip = grab, press again = release
+
+  MODIFIED: PlagaGrabbable.cs
+    +Update(): continuous haptic polling
+      grip flex >= 0.55 + grabbed -> StartGripHold() (gentle buzz)
+      grip released -> StopGripHold() (object stays, toggle)
+      trigger pressed + grabbed -> PlayTriggerPull() (sharp pulse)
+
+  MODIFIED: HapticManager.cs
+    +gripHold event (amp=0.15, freq=0.3, continuous)
+    +triggerPull event (amp=0.7, freq=0.6, dur=0.08s)
+    +StartGripHold(ctrl) -- raw SetControllerVibration, persistent
+    +StopGripHold(ctrl)  -- zero vibration
+    +PlayTriggerPull(ctrl) -- one-shot pulse
+
+  MODIFIED: InventorySetup.cs
+    OVRGrabber -> PlagaGrabber on hand anchors
+    Auto-upgrade existing OVRGrabber to PlagaGrabber
+
+FILES CHANGED (6 modified + 1 new):
+  Scripts/Locomotion/LocomotionController.cs .. +Floating stance
+  Scripts/Core/GameState.cs .................. timeScale fix
+  Scripts/Inventory/PlagaGrabber.cs .......... NEW toggle grab
+  Scripts/Inventory/PlagaGrabbable.cs ........ +haptic Update()
+  Scripts/Feedback/HapticManager.cs .......... +grip/trigger haptic
+  Editor/Setup/AvatarRegistrySetup.cs ........ auto-rescan
+  Editor/Setup/InventorySetup.cs ............. PlagaGrabber wiring
+
+CONTENT ADDED:
+  Assets/PLAGA44/Avatars/PINEA_YNG5/ (DAE + textures + prefab)
+
+COMPILE: PASS (return code 0)

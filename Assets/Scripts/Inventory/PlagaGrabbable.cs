@@ -6,6 +6,10 @@
 // When grabbed: plays grab haptic (modulated by mass).
 // When released outside a holster: normal physics drop + release haptic.
 // When released inside a holster volume: snaps back to holster anchor.
+//
+// Continuous haptics while grabbed:
+//   - Grip held down: gentle continuous buzz (feel the object weight)
+//   - Trigger pressed: sharp pulse (interact/use feedback)
 // =============================================================================
 
 using UnityEngine;
@@ -25,6 +29,10 @@ namespace Plaga44.Inventory
 
         private HapticOnGrab _haptic;
 
+        // Continuous haptic state
+        private bool _gripHeldLastFrame;
+        private OVRInput.Controller _holdingController = OVRInput.Controller.None;
+
         protected override void Start()
         {
             base.Start();
@@ -33,12 +41,67 @@ namespace Plaga44.Inventory
                 Debug.LogWarning($"{LOG} {name} missing HapticOnGrab component -- no haptic feedback.");
         }
 
+        private void Update()
+        {
+            if (!isGrabbed || m_grabbedBy == null)
+            {
+                // Stop any lingering grip haptic
+                if (_gripHeldLastFrame)
+                {
+                    StopGripHaptic();
+                    _gripHeldLastFrame = false;
+                }
+                _holdingController = OVRInput.Controller.None;
+                return;
+            }
+
+            // Resolve which controller is holding us
+            if (_holdingController == OVRInput.Controller.None)
+                _holdingController = ResolveController(m_grabbedBy);
+
+            var ctrl = _holdingController;
+            if (ctrl == OVRInput.Controller.None) return;
+
+            var mgr = HapticManager.Instance;
+            if (mgr == null) return;
+
+            // --- Continuous grip haptic: buzz while grip physically held ---
+            float gripFlex = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger, ctrl);
+            bool gripHeld = gripFlex >= 0.55f;
+
+            if (gripHeld && !_gripHeldLastFrame)
+            {
+                // Started holding grip
+                mgr.StartGripHold(ctrl);
+            }
+            else if (!gripHeld && _gripHeldLastFrame)
+            {
+                // Released grip (but still holding object due to toggle)
+                StopGripHaptic();
+            }
+            _gripHeldLastFrame = gripHeld;
+
+            // --- Trigger haptic: pulse on trigger press ---
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, ctrl))
+            {
+                mgr.PlayTriggerPull(ctrl);
+            }
+        }
+
+        private void StopGripHaptic()
+        {
+            var mgr = HapticManager.Instance;
+            if (mgr != null && _holdingController != OVRInput.Controller.None)
+                mgr.StopGripHold(_holdingController);
+        }
+
         public override void GrabBegin(OVRGrabber hand, Collider grabPoint)
         {
             base.GrabBegin(hand, grabPoint);
-            var controller = ResolveController(hand);
-            Debug.Log($"{LOG} GrabBegin: {name} by {controller}");
-            if (_haptic != null) _haptic.OnGrab(controller);
+            _holdingController = ResolveController(hand);
+            _gripHeldLastFrame = false;
+            Debug.Log($"{LOG} GrabBegin: {name} by {_holdingController}");
+            if (_haptic != null) _haptic.OnGrab(_holdingController);
 
             // Remove from holster if attached
             if (homeHolster != null && homeHolster.ContainedItem == gameObject)
@@ -47,8 +110,17 @@ namespace Plaga44.Inventory
 
         public override void GrabEnd(Vector3 linearVelocity, Vector3 angularVelocity)
         {
-            var controller = ResolveController(m_grabbedBy);
+            var controller = _holdingController != OVRInput.Controller.None
+                ? _holdingController
+                : ResolveController(m_grabbedBy);
+
             Debug.Log($"{LOG} GrabEnd: {name} released, vel={linearVelocity.magnitude:F2}m/s");
+
+            // Stop any ongoing grip haptic
+            StopGripHaptic();
+            _gripHeldLastFrame = false;
+            _holdingController = OVRInput.Controller.None;
+
             if (_haptic != null) _haptic.OnRelease(controller);
 
             try

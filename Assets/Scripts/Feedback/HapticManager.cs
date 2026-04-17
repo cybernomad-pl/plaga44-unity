@@ -10,8 +10,6 @@
 
 using System.Collections;
 using UnityEngine;
-using Plaga44.Core;
-
 namespace Plaga44.Feedback
 {
     [System.Serializable]
@@ -73,10 +71,22 @@ namespace Plaga44.Feedback
         public float heartbeatOuterGap = 0.55f;
         public int   heartbeatCycles   = 3;
 
+        [Header("Grip Hold (continuous while grip pressed)")]
+        [Tooltip("Gentle buzz while physically holding grip on a grabbed object.")]
+        public HapticEvent gripHold = new HapticEvent { amplitude = 0.15f, frequency = 0.3f, duration = 0f };
+
+        [Header("Trigger Pull")]
+        [Tooltip("Sharp pulse when trigger pressed while holding an object.")]
+        public HapticEvent triggerPull = new HapticEvent { amplitude = 0.7f, frequency = 0.6f, duration = 0.08f };
+
         [Header("Warning")]
         public HapticEvent warning = new HapticEvent { amplitude = 0.8f, frequency = 0.7f, duration = 0.15f };
         public int   warningPulses   = 3;
         public float warningPulseGap = 0.18f;
+
+        // Track which controllers have active grip-hold vibration
+        private bool _gripHoldActiveLeft;
+        private bool _gripHoldActiveRight;
 
         // --- Unity --------------------------------------------------------------
         private void Awake()
@@ -132,6 +142,31 @@ namespace Plaga44.Feedback
         public void PlayHeartbeat(OVRInput.Controller controller) => StartCoroutine(HeartbeatCoroutine(controller));
         public void PlayWarning(OVRInput.Controller controller)   => StartCoroutine(WarningCoroutine(controller));
 
+        /// <summary>Start continuous grip-hold vibration. Call once when grip is pressed.
+        /// Vibration persists until StopGripHold is called -- no coroutine, raw SetControllerVibration.</summary>
+        public void StartGripHold(OVRInput.Controller controller)
+        {
+            if (!ControllerModeHelper.IsControllerActive(controller)) return;
+            if (verboseLogs)
+                Debug.Log($"{LOG} gripHold START | ctrl={controller} amp={gripHold.amplitude:F2} freq={gripHold.frequency:F2}");
+            OVRInput.SetControllerVibration(gripHold.frequency, gripHold.amplitude, controller);
+            SetGripHoldFlag(controller, true);
+        }
+
+        /// <summary>Stop continuous grip-hold vibration.</summary>
+        public void StopGripHold(OVRInput.Controller controller)
+        {
+            if (!GetGripHoldFlag(controller)) return;
+            if (verboseLogs)
+                Debug.Log($"{LOG} gripHold STOP | ctrl={controller}");
+            OVRInput.SetControllerVibration(0f, 0f, controller);
+            SetGripHoldFlag(controller, false);
+        }
+
+        /// <summary>Sharp pulse on trigger press while holding an object.</summary>
+        public void PlayTriggerPull(OVRInput.Controller controller)
+            => PlayOnce(controller, triggerPull, "triggerPull");
+
         /// <summary>Low-level: play arbitrary event with custom amplitude. Used by HapticOnGrab.</summary>
         public void PlayCustom(OVRInput.Controller controller, float amplitude, float frequency, float duration, string tag)
             => PlayVibration(controller, amplitude, frequency, duration, tag);
@@ -178,6 +213,20 @@ namespace Plaga44.Feedback
                     warning.amplitude, warning.frequency, warning.duration));
                 if (i < warningPulses - 1) yield return new WaitForSeconds(warningPulseGap);
             }
+        }
+
+        // --- Grip hold flag helpers ------------------------------------------------
+        private void SetGripHoldFlag(OVRInput.Controller ctrl, bool value)
+        {
+            if (ctrl == OVRInput.Controller.LTouch) _gripHoldActiveLeft = value;
+            else if (ctrl == OVRInput.Controller.RTouch) _gripHoldActiveRight = value;
+        }
+
+        private bool GetGripHoldFlag(OVRInput.Controller ctrl)
+        {
+            if (ctrl == OVRInput.Controller.LTouch) return _gripHoldActiveLeft;
+            if (ctrl == OVRInput.Controller.RTouch) return _gripHoldActiveRight;
+            return false;
         }
     }
 }

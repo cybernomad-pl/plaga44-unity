@@ -9,8 +9,6 @@
 // =============================================================================
 
 using UnityEngine;
-using Plaga44.Core;
-
 namespace Plaga44.Feedback
 {
     [RequireComponent(typeof(Rigidbody))]

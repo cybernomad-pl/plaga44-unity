@@ -34,8 +34,8 @@ namespace Plaga44
             [Tooltip("Resources path (e.g. 'Items/Revolver').")]
             public string resourcePath = "Items/Revolver";
 
-            [Tooltip("Spawn position offset relative to rig (or world if no rig).")]
-            public Vector3 offset = new Vector3(0.8f, 0f, 1.5f);
+            [Tooltip("Spawn offset relative to head (eye level). x=right, y=up from eyes (negative=table level), z=forward.")]
+            public Vector3 offset = new Vector3(0f, -0.5f, 1.2f);
 
             [Tooltip("Auto-add Rigidbody if missing on prefab.")]
             public bool autoRigidbody = true;
@@ -90,9 +90,29 @@ namespace Plaga44
             if (Instance == this) Instance = null;
         }
 
+        private bool _spawnTriggered;
+
         private void Start()
         {
-            if (spawnOnStart) SpawnAll();
+            // Defer spawn to Update -- wait for player to land on terrain so spawn
+            // position (relative to rig) is at ground level, not 42m up in the air.
+        }
+
+        private void Update()
+        {
+            if (_spawnTriggered || !spawnOnStart) return;
+            if (!IsPlayerGrounded()) return;
+            _spawnTriggered = true;
+            SpawnAll();
+        }
+
+        private static bool IsPlayerGrounded()
+        {
+            var rig = GameObject.Find(OvrRigName);
+            if (rig == null) return true;
+            var cc = rig.GetComponent<CharacterController>();
+            if (cc == null) return true;
+            return cc.isGrounded;
         }
 
         // -----------------------------------------------------------------
@@ -171,18 +191,23 @@ namespace Plaga44
             return instance;
         }
 
+        // Spawn head-relative (eye level) -- creates "virtual table" in front of player.
+        // offset.y is relative to eye height (negative = below eyes, like a tabletop).
         private static Vector3 ResolveSpawnPosition(Vector3 offset)
         {
             var rig = GameObject.Find(OvrRigName);
             if (rig == null) return offset;
 
-            Transform t = rig.transform;
-            Vector3 fwd = t.forward; fwd.y = 0f;
+            // Prefer head (CenterEyeAnchor) -- spawn appears on "table" at eye level.
+            Transform head = rig.transform.Find("TrackingSpace/CenterEyeAnchor");
+            Transform source = head != null ? head : rig.transform;
+
+            Vector3 fwd = source.forward; fwd.y = 0f;
             if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
             fwd.Normalize();
             Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
 
-            return t.position + right * offset.x + Vector3.up * offset.y + fwd * offset.z;
+            return source.position + right * offset.x + Vector3.up * offset.y + fwd * offset.z;
         }
 
         private static void WireComponents(GameObject instance, SpawnEntry entry)

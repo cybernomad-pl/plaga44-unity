@@ -1,0 +1,71 @@
+PLAGA '44 TESTBED V6 -- SDK PREFAB RESTORE 2026-04-17
+======================================================
+
+PROBLEM:
+  Missing Prefab: StylizedCharacterLocomotion
+  guid: 286d7e2005861d341a0a94d7f615675a
+  Source: Meta XR Movement SDK Samples (not in git)
+
+  Bootstrap.OpenScene() triggered error on load:
+    "Prefab instance problem. Missing Prefab Asset"
+
+  This prefab provided:
+    - CharacterRetargeter (hand/body tracking -> skeleton)
+    - Animator (locomotion animations)
+    - SkinnedMeshRenderer (visible player body)
+    - WORKING HANDS via Meta SDK retargeting
+
+ROOT CAUSE:
+  Commit f9c6db0 deleted Assets/Samples/Meta XR Movement SDK/
+  (249 files) including StylizedCharacterLocomotion.prefab.
+  Scene TESTBED_V6.unity still referenced it as child of
+  OVRCameraRig/TrackingSpace -> Missing Prefab error.
+
+  Initial wrong fix: removed scene references (my error).
+  Correct fix: RESTORE the prefab from Package Cache.
+
+FIX (APPLIED):
+  1. Copied SDK Samples from Package Cache back to Assets:
+     FROM: Library/PackageCache/com.meta.xr.sdk.movement@.../Samples~/
+     TO:   Assets/Samples/Meta XR Movement SDK/83.0.0/Advanced Samples/
+
+  2. Restored scene files from git HEAD:
+     git checkout HEAD -- Assets/PLAGA44/TESTBED_V6.unity
+     git checkout HEAD -- Assets/PLAGA44/TESTBED.unity
+     (PrefabInstance references intact, GUID matches restored prefab)
+
+  3. AnimatorController also restored:
+     Assets/Samples/.../ISDKLocomotion/Animations/LocomotionController.controller
+     (used by AvatarImport.cs for avatar imports)
+
+DEPENDENCY CHAIN -- WHAT THIS PREFAB FEEDS:
+  StylizedCharacterLocomotion (restored)
+    |
+    +-> PlayerAvatar.defaultRig (mode=0 = visible body)
+    |     Was: NULL -> Now: auto-wired by PlayerRigSetup.cs
+    |
+    +-> CharacterRetargeter (hand tracking -> skeleton)
+    |     RetargeterGuard.cs filters known SDK errors -> OK
+    |
+    +-> AvatarImport.cs DefaultAnimatorController path
+    |     Was: MISSING -> Now: restored
+    |
+    +-> PlayerRigSetup.cs auto-wire
+          Searches "StylizedCharacterLocomotion" -> FOUND
+
+UNCHANGED (no impact):
+  LocomotionController.cs  -- thumbstick movement
+  SmoothTurnController.cs  -- smooth turn
+  GameState.cs             -- game state machine
+  ItemBrowser.cs           -- item system
+  PlagaGrabbable.cs        -- grab system
+  HamburgerMenu.cs         -- menu UI
+  SettingsRegistry.cs      -- settings persistence
+  AvatarGallery.cs         -- custom avatar preview
+
+NON-CRITICAL WARNINGS (from other SDK samples, NOT in our scenes):
+  RealisticCharacterClient (guid: e286cc5182a3ab44bb98141d30170f2e)
+  RealisticCharacterHost   (guid: 8f60065df164ffa40b77cad3c7dc805e)
+  These are Prefab Variant parents from SDK samples we don't use.
+
+COMPILE: PASS (return code 0)

@@ -1,0 +1,88 @@
+PLAGA '44 TESTBED V6 -- AVATAR DEBUG SESSION 2026-04-17
+=========================================================
+
+OBSERVED PROBLEMS:
+  - PINEA visible as PINK floating mesh (no rig, broken material)
+  - StylizedCharacterLocomotion (robot body) NOT visible
+
+ROOT CAUSE TRACE:
+
+  STEP 1: PINEA_YNG5.dae META settings
+    animationType: 2 (Generic)         OK
+    avatarSetup:   0 (NoAvatar)        BUG -> animator.avatar = null
+
+  STEP 2: AvatarBuilder.IsModelRigged()
+    requires: animator != null AND animator.avatar != null AND isValid
+    result: FALSE (no avatar) -> SKIPPED 'PINEA_YNG5'
+    -> NO new prefab built from DAE
+
+  STEP 3: AvatarRegistryBuilder.ValidateRig()
+    BUG: if (animator == null) { if (Renderer) RETURN (NOT broken) }
+    Old prefab from backup has Renderer but no Animator
+    -> Entry added to registry as "OK" despite broken
+
+  STEP 4: AvatarGallery.SpawnAllPreviews()
+    Loads broken prefab from registry, instantiates
+    -> Pink mesh (material OK but no rig animation -> static T-pose)
+    -> Floating in air at registry-defined position
+
+  STEP 5: PlayerAvatar.Start()
+    Reads PlayerPrefs "Plaga44_Current_AVATAR_Mode"
+    From previous session: mode=1 (PINEA)
+    -> SetAvatarMode(1) -> ShowDefaultRig(false)
+    -> Robot body DEACTIVATED
+    -> SpawnAvatar(1) -> broken pink PINEA on player
+
+FIXES APPLIED:
+
+  FIX A: AvatarImport.ConfigureDae()
+    +mi.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel
+    Now Generic rig also gets avatar generated
+
+  FIX B: PINEA_YNG5.dae.meta
+    avatarSetup: 0 -> 1 (manual sync with new preprocessor)
+
+  FIX C: AvatarRegistryBuilder.ValidateRig()
+    if (animator == null) -> ALWAYS broken
+    "no Animator (model imported without rig)"
+
+  FIX D: AvatarRegistrySetup.Run()
+    +ForceReimportAvatarModels() via AssetDatabase.ImportAsset
+      with ImportAssetOptions.ForceUpdate
+    Meta changes don't trigger reimport on their own.
+    Now triggers full reimport before Build/Rebuild.
+
+  FIX E: AvatarRegistrySetup.Run()
+    Also rescan when registry has BROKEN entries (not just empty)
+
+  FIX F: PlayerRigSetup.SetupPlayerAvatar()
+    ALWAYS re-resolve defaultRig from scene (was: only if null)
+    Log full hierarchy path on resolve
+    LogError if SDK char prefab missing in scene
+
+  FIX G: PlayerRigSetup.SetupPlayerAvatar()
+    Clear PlayerPrefs "Plaga44_Current_AVATAR_Mode" on Bootstrap
+    Prevents PINEA mode=1 restoring with broken rig
+    Runtime persistence kicks in after first menu change
+
+VERIFICATION:
+  Batch run: -executeMethod AvatarAutoImport.ScanAllForce
+  Result:
+    [PLAGA44][AvatarImport] Assigned AnimatorController to PINEA_YNG5
+    [PLAGA44][AvatarImport] prefab saved
+    [PLAGA44][AvatarImport] Registry rebuilt -- 1 avatars (broken=0)
+    Rescan done. Avatars processed: 1
+
+  PINEA_YNG5.prefab now: 3663 bytes (was 3433, fresh rebuild)
+  Animator inherited from DAE source (with valid avatar from CreateFromThisModel)
+
+NEXT BOOTSTRAP RUN should:
+  - Force reimport DAE -> create avatar
+  - Build PINEA prefab fresh from rigged DAE -> Animator + AnimatorController
+  - Registry validates -> broken=false
+  - PlayerRigSetup wires defaultRig -> StylizedCharacterLocomotion
+  - PlayerRigSetup clears PlayerPrefs avatarMode -> mode=0 (SDK rig)
+  - Result: visible robot body + PINEA available in menu
+
+COMPILE: PASS (return code 0)
+COMMIT: 034472c (pushed to fix/restore-working-state)
