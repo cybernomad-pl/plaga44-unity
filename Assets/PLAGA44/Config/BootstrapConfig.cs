@@ -64,8 +64,8 @@ namespace Plaga44
         public LightShadows bounceLightShadows = LightShadows.None;
 
         [Header("Object Spawner")]
-        [Tooltip("Spawn offset relative to player rig (x=right, y=up, z=forward).")]
-        public Vector3 spawnerOffset = new Vector3(0.8f, 0f, 1.5f);
+        [Tooltip("Spawn offset relative to HEAD (eye level). x=right, y=up from eyes (negative=table level), z=forward.")]
+        public Vector3 spawnerOffset = new Vector3(0f, -0.5f, 1.2f);
         [Tooltip("Default item Resources path for spawner.")]
         public string defaultSpawnItem = "Items/Revolver";
 
