@@ -328,9 +328,13 @@ namespace Plaga44.Locomotion
                     if (rightY > StickUpThreshold && _currentStance == Stance.Stand)
                     {
                         _flyState = FlyState.Ascending;
-                        _flySpeed = 0f;
+                        // Issue #187: initial upward kick to leave ground immediately.
+                        // Otherwise CC.isGrounded stays true first frame and EndFlight
+                        // fires, aborting the takeoff when L stick is also active.
+                        _flySpeed = 3f;
+                        _verticalVelocity = _flySpeed;
                         SetStance(Stance.Floating);
-                        Debug.Log($"{LOG} Fly: ASCENDING");
+                        Debug.Log($"{LOG} Fly: ASCENDING (initial kick {_flySpeed} m/s)");
                     }
                     break;
 
@@ -355,8 +359,8 @@ namespace Plaga44.Locomotion
                         _verticalVelocity = 0f;
                         Debug.Log($"{LOG} Fly: HOVERING");
                     }
-                    // Landing check
-                    if (IsGrounded) { EndFlight(); break; }
+                    // Landing check -- only when descending/low speed to avoid aborting takeoff (issue #187).
+                    if (IsGrounded && _flySpeed < 0.5f) { EndFlight(); break; }
                     break;
 
                 case FlyState.Hovering:
