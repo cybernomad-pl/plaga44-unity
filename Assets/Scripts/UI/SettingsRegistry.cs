@@ -582,9 +582,13 @@ namespace Plaga44.UI
                 s.Add(S("Contrast", "Contrast", () => ca.contrast.value, v => ca.contrast.Override(v), -100, 100, 5, "F0"));
                 s.Add(S("Saturation", "Saturation (-100=B&W)", () => ca.saturation.value, v => ca.saturation.Override(v), -100, 100, 5, "F0"));
                 s.Add(S("Hue Shift", "Hue rotation (-180..180)", () => ca.hueShift.value, v => ca.hueShift.Override(v), -180, 180, 5, "F0"));
-                s.Add(S("Filter R", "Color filter R", () => ca.colorFilter.value.r, v => { var c=ca.colorFilter.value; c.r=v; ca.colorFilter.Override(c); }, 0, 1, 0.02f, "F2"));
-                s.Add(S("Filter G", "Color filter G", () => ca.colorFilter.value.g, v => { var c=ca.colorFilter.value; c.g=v; ca.colorFilter.Override(c); }, 0, 1, 0.02f, "F2"));
-                s.Add(S("Filter B", "Color filter B", () => ca.colorFilter.value.b, v => { var c=ca.colorFilter.value; c.b=v; ca.colorFilter.Override(c); }, 0, 1, 0.02f, "F2"));
+                // Issue #186: GLOBAL channel multipliers (post-FX Color Adjustments Filter).
+                // Affects EVERYTHING rendered (fog, sun, ambient, geometry). Range extended to 2.0
+                // so you can push a channel ABOVE neutral, not just dim it.
+                // 'Reduce blue globally' = move Filter B slider down to ~0.5.
+                s.Add(S("Filter R", "GLOBAL red strength (post-FX). 1=neutral, <1=dim, >1=boost", () => ca.colorFilter.value.r, v => { var c=ca.colorFilter.value; c.r=v; ca.colorFilter.Override(c); }, 0, 2, 0.02f, "F2"));
+                s.Add(S("Filter G", "GLOBAL green strength (post-FX). 1=neutral", () => ca.colorFilter.value.g, v => { var c=ca.colorFilter.value; c.g=v; ca.colorFilter.Override(c); }, 0, 2, 0.02f, "F2"));
+                s.Add(S("Filter B", "GLOBAL blue strength (post-FX). 1=neutral. Borys: lower to kill blue tint.", () => ca.colorFilter.value.b, v => { var c=ca.colorFilter.value; c.b=v; ca.colorFilter.Override(c); }, 0, 2, 0.02f, "F2"));
             });
 
             // =============================================================
