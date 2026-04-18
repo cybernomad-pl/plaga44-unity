@@ -123,35 +123,6 @@ namespace Plaga44.UI
             finally { _currentSection = "?"; }
         }
 
-        // Issue #183: HSV sliders for Color properties.
-        // Adds 3 entries (H/S/V) that read getter -> convert RGB->HSV -> mutate one channel ->
-        // HSV->RGB -> setter. More intuitive than raw R/G/B.
-        //   H: 0..360 (hue in degrees)
-        //   S: 0..1   (saturation)
-        //   V: 0..1   (value/brightness)
-        static void AddHsv(List<SettingDef> list, string labelPrefix, Func<Color> get, Action<Color> set)
-        {
-            // Helper: read current, convert to HSV, mutate channel i, write back.
-            Action<int, float> mutate = (channel, newVal) =>
-            {
-                Color.RGBToHSV(get(), out float h, out float s, out float v);
-                if (channel == 0) h = newVal / 360f;
-                else if (channel == 1) s = newVal;
-                else v = newVal;
-                Color result = Color.HSVToRGB(Mathf.Clamp01(h), Mathf.Clamp01(s), Mathf.Clamp01(v));
-                result.a = get().a;
-                set(result);
-            };
-            Func<int, float> read = (channel) =>
-            {
-                Color.RGBToHSV(get(), out float h, out float s, out float v);
-                return channel == 0 ? h * 360f : channel == 1 ? s : v;
-            };
-            list.Add(S(labelPrefix + " H", "Hue 0..360 (issue #183)", () => read(0), v => mutate(0, v), 0f, 360f, 1f, "F0"));
-            list.Add(S(labelPrefix + " S", "Saturation 0..1",          () => read(1), v => mutate(1, v), 0f, 1f, 0.02f, "F2"));
-            list.Add(S(labelPrefix + " V", "Value/brightness 0..1",    () => read(2), v => mutate(2, v), 0f, 1f, 0.02f, "F2"));
-        }
-
         // =====================================================================
         // Defaults snapshot -- captured on first Build()
         // =====================================================================
@@ -464,8 +435,9 @@ namespace Plaga44.UI
             // =============================================================
             if (sun != null) Sec("SUN", s => {
                 s.Add(S("Intensity", "Sun brightness", () => sun.intensity, v => sun.intensity=v, 0, 5, 0.1f));
-                // Issue #183: HSV instead of R/G/B for Sun color.
-                AddHsv(s, "Color", () => sun.color, c => sun.color = c);
+                s.Add(S("R", "Sun color red", () => sun.color.r, v => { var c=sun.color; c.r=v; sun.color=c; }, 0, 1, 0.02f, "F2"));
+                s.Add(S("G", "Sun color green", () => sun.color.g, v => { var c=sun.color; c.g=v; sun.color=c; }, 0, 1, 0.02f, "F2"));
+                s.Add(S("B", "Sun color blue", () => sun.color.b, v => { var c=sun.color; c.b=v; sun.color=c; }, 0, 1, 0.02f, "F2"));
                 s.Add(S("Indirect", "Bounce light multiplier", () => sun.bounceIntensity, v => sun.bounceIntensity=v, 0, 5, 0.1f));
                 s.Add(S("Rot X", "Sun angle X (elevation)", () => sun.transform.eulerAngles.x, v => sun.transform.eulerAngles=new Vector3(v,sun.transform.eulerAngles.y,0), 0, 90, 1, "F0"));
                 s.Add(S("Rot Y", "Sun angle Y (azimuth)", () => sun.transform.eulerAngles.y, v => sun.transform.eulerAngles=new Vector3(sun.transform.eulerAngles.x,v,0), 0, 360, 5, "F0"));
@@ -491,8 +463,9 @@ namespace Plaga44.UI
                     }, 0, 0.1f, 0.002f, "F3"));
                 s.Add(S("Start", "Start distance (Linear mode only)", () => RenderSettings.fogStartDistance, v => RenderSettings.fogStartDistance=v, 0, 200, 5, "F0"));
                 s.Add(S("End", "Full fog distance (Linear mode only)", () => RenderSettings.fogEndDistance, v => RenderSettings.fogEndDistance=v, 10, 500, 10, "F0"));
-                // Issue #183: HSV sliders instead of R/G/B for Fog color.
-                AddHsv(s, "Color", () => RenderSettings.fogColor, c => RenderSettings.fogColor = c);
+                s.Add(S("R", "Fog color R", () => RenderSettings.fogColor.r, v => { var c=RenderSettings.fogColor; c.r=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
+                s.Add(S("G", "Fog color G", () => RenderSettings.fogColor.g, v => { var c=RenderSettings.fogColor; c.g=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
+                s.Add(S("B", "Fog color B", () => RenderSettings.fogColor.b, v => { var c=RenderSettings.fogColor; c.b=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
             });
 
             // =============================================================
@@ -500,8 +473,9 @@ namespace Plaga44.UI
             // =============================================================
             Sec("AMBIENT", s => {
                 s.Add(S("Intensity", "Ambient brightness", () => RenderSettings.ambientIntensity, v => RenderSettings.ambientIntensity=v, 0, 3, 0.1f));
-                // Issue #183: HSV instead of R/G/B for Ambient color.
-                AddHsv(s, "Color", () => RenderSettings.ambientLight, c => RenderSettings.ambientLight = c);
+                s.Add(S("R", "Ambient R", () => RenderSettings.ambientLight.r, v => { var c=RenderSettings.ambientLight; c.r=v; RenderSettings.ambientLight=c; }, 0, 1, 0.05f, "F2"));
+                s.Add(S("G", "Ambient G", () => RenderSettings.ambientLight.g, v => { var c=RenderSettings.ambientLight; c.g=v; RenderSettings.ambientLight=c; }, 0, 1, 0.05f, "F2"));
+                s.Add(S("B", "Ambient B", () => RenderSettings.ambientLight.b, v => { var c=RenderSettings.ambientLight; c.b=v; RenderSettings.ambientLight=c; }, 0, 1, 0.05f, "F2"));
                 s.Add(S("Reflection", "Reflection probe intensity", () => RenderSettings.reflectionIntensity, v => RenderSettings.reflectionIntensity=v, 0, 2, 0.1f));
             });
 
