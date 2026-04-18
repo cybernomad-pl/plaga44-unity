@@ -68,6 +68,9 @@ namespace Plaga44.Editor
         public const string KeywordNormalMap = "_NORMALMAP";
         public const string KeywordSpecGlossMap = "_SPECGLOSSMAP";
         public const string KeywordMetallicSpecGlossMap = "_METALLICSPECGLOSSMAP";
+        // Specular workflow routing -- URP/Lit requires this for spec color/map to render correctly.
+        // Without it shader falls back to metallic branch -> pink/broken look (issue #155).
+        public const string KeywordSpecularSetup = "_SPECULAR_SETUP";
 
         // Workflow: 0=Metallic, 1=Specular
         public const float WorkflowSpecular = 1f;
@@ -580,6 +583,9 @@ namespace Plaga44.Editor
             mat.SetFloat(UrpLit.BumpScale, 1f);
             mat.SetColor(UrpLit.BaseColor, Color.white);
             mat.SetColor(UrpLit.SpecColor, Color.white);
+            // Issue #155: URP/Lit needs _SPECULAR_SETUP to route to specular branch.
+            // Without it, shader uses metallic path and ignores _SpecColor/_SpecGlossMap -> pink/broken.
+            mat.EnableKeyword(UrpLit.KeywordSpecularSetup);
         }
 
         private static void BindTextures(Material mat, string tDiffuse, string tNormal, string tSpecGloss)
