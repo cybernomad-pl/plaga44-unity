@@ -44,12 +44,27 @@ namespace Plaga44.Locomotion
         [Tooltip("True if sprint toggle is currently active. Public for UI.")]
         public bool sprintActive = false;
 
-        [Tooltip("Sprint ramp speed (1/speed = seconds to reach full sprint). 2.0 = 0.5s. Issue #143.")]
-        public float sprintRampSpeed = 2f;
+        [Tooltip("Sprint ramp speed (1/speed = seconds to reach full sprint). 4.0 = 0.25s. Issue #189.")]
+        public float sprintRampSpeed = 4f;
 
         // Current sprint amount 0..1 (lerped towards sprintActive target for momentum feel).
         private float _sprintAmount;
         public float SprintAmount => _sprintAmount;
+
+        [Header("Stamina (issue #189)")]
+        [Tooltip("Current stamina 0..1. Drains while sprinting+moving, regens otherwise.")]
+        [Range(0f, 1f)] public float stamina = 1f;
+
+        [Tooltip("Stamina drain per second when sprinting AND moving.")]
+        public float staminaDrainRate = 0.2f;
+
+        [Tooltip("Stamina regen per second when not sprinting.")]
+        public float staminaRegenRate = 0.3f;
+
+        [Tooltip("Minimum stamina required to START sprinting (auto-disables below).")]
+        public float staminaMinToStart = 0.1f;
+
+        public float Stamina => stamina;
 
         [Header("Head Reference")]
         [SerializeField] private Transform _headTransform;
@@ -193,15 +208,40 @@ namespace Plaga44.Locomotion
             // Sprint toggle: L thumbstick click (Issue #142)
             if (OVRInput.GetDown(OVRInput.Button.PrimaryThumbstick))
             {
-                sprintActive = !sprintActive;
-                Debug.Log($"{LOG} Sprint: {(sprintActive ? "ON" : "OFF")}");
+                // Block sprint start if stamina too low (Issue #189)
+                if (!sprintActive && stamina < staminaMinToStart)
+                {
+                    Debug.Log($"{LOG} Sprint blocked (stamina={stamina:F2} < {staminaMinToStart:F2})");
+                }
+                else
+                {
+                    sprintActive = !sprintActive;
+                    Debug.Log($"{LOG} Sprint: {(sprintActive ? "ON" : "OFF")} (stamina={stamina:F2})");
+                }
+            }
+
+            Vector2 moveInput = GetMoveInput();
+            bool isMoving = moveInput.sqrMagnitude > InputDeadZoneSqr;
+
+            // Stamina drain/regen (Issue #189)
+            if (sprintActive && isMoving)
+            {
+                stamina -= staminaDrainRate * _dt;
+                if (stamina <= 0f)
+                {
+                    stamina = 0f;
+                    sprintActive = false;
+                    Debug.Log($"{LOG} Sprint auto-stop: stamina depleted");
+                }
+            }
+            else
+            {
+                stamina = Mathf.Min(1f, stamina + staminaRegenRate * _dt);
             }
 
             // Sprint ramp (Issue #143) -- lerp _sprintAmount toward target for momentum feel
             float sprintTarget = sprintActive ? 1f : 0f;
             _sprintAmount = Mathf.MoveTowards(_sprintAmount, sprintTarget, sprintRampSpeed * _dt);
-
-            Vector2 moveInput = GetMoveInput();
             // Prone blocks horizontal movement -- must stand up first
             bool movementBlocked = (_currentStance == Stance.Prone);
 
