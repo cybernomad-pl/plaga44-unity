@@ -43,15 +43,24 @@ namespace Plaga44.Editor.Setup
         private static bool ClearTreePrototypes(Terrain terrain)
         {
             var data = terrain.terrainData;
-            if (data.treePrototypes == null || data.treePrototypes.Length == 0)
+            bool hasPrototypes = data.treePrototypes != null && data.treePrototypes.Length > 0;
+            bool hasInstances = data.treeInstances != null && data.treeInstances.Length > 0;
+            if (!hasPrototypes && !hasInstances)
             {
-                Debug.Log($"{LOG} [OK] Tree prototypes: 0 (cleared)");
+                Debug.Log($"{LOG} [OK] Tree prototypes: 0, instances: 0 (clean)");
                 return false;
             }
+
+            Undo.RecordObject(data, "Bootstrap: Clear Tree Prototypes");
             data.treePrototypes = new TreePrototype[0];
-            // Also clear any placed tree instances to prevent 'no valid mesh renderer' warnings
             data.treeInstances = new TreeInstance[0];
-            Debug.Log($"{LOG} [FIX] Cleared all tree prototypes + instances (issue #178)");
+
+            // CRITICAL: persist to asset file -- Scene save alone doesn't save TerrainData asset.
+            // Without this, tree warnings reappear every scene reload (issue #178 hotfix).
+            EditorUtility.SetDirty(data);
+            AssetDatabase.SaveAssetIfDirty(data);
+
+            Debug.Log($"{LOG} [FIX] Cleared tree prototypes + instances + saved asset (issue #178)");
             return true;
         }
 
