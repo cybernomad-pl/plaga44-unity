@@ -407,6 +407,15 @@ namespace Plaga44.Locomotion
             _hoverDrift = 0f;
             _verticalVelocity = 0f;
             SetStance(Stance.Stand);
+
+            // Sync stance edge flags to CURRENT stick state.
+            // Otherwise stick still held DOWN after drop-landing triggers a
+            // false 'DOWN edge' -> auto-crouch, and UP triggers same loop.
+            // Issue: 'cały czas LATAM - nie da się zmienić stance'.
+            float rightY = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch).y;
+            _stanceDownPressed = rightY < -StickDownThreshold;
+            _stanceUpPressed   = rightY > StickUpThreshold;
+            Debug.Log($"{LOG} EndFlight: synced stance flags (downHeld={_stanceDownPressed} upHeld={_stanceUpPressed})");
         }
 
         // =====================================================================
