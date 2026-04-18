@@ -34,41 +34,24 @@ namespace Plaga44.Editor.Setup
             changed |= SetupMaterial(terrain, cfg);
             changed |= SetupTerrainLayers(terrain, cfg);
             changed |= SetupTerrainScale(terrain, cfg);
-            changed |= SetupTreePrototypes(terrain, cfg);
+            changed |= ClearTreePrototypes(terrain);
             return changed;
         }
 
-        // Assigns tree prefabs to terrain treePrototypes (fixes 'Tree prefab at index X missing' spam).
-        // Uses TreePrefabBuilder to ensure 3 placeholder prefabs exist (Birch, Oak, Pine).
-        private static bool SetupTreePrototypes(Terrain terrain, BootstrapConfig cfg)
+        // Issue #178: trees deprecated -- clear broken/placeholder treePrototypes.
+        // Borys will plant trees manually via Terrain tools if needed later.
+        private static bool ClearTreePrototypes(Terrain terrain)
         {
             var data = terrain.terrainData;
-
-            bool hasBroken = false;
-            if (data.treePrototypes != null)
-                foreach (var p in data.treePrototypes)
-                    if (p == null || p.prefab == null) { hasBroken = true; break; }
-
-            bool needsInit = data.treePrototypes == null || data.treePrototypes.Length == 0 || hasBroken;
-            if (!needsInit)
+            if (data.treePrototypes == null || data.treePrototypes.Length == 0)
             {
-                Debug.Log($"{LOG} [OK] Tree prototypes: {data.treePrototypes.Length} (all valid)");
+                Debug.Log($"{LOG} [OK] Tree prototypes: 0 (cleared)");
                 return false;
             }
-
-            var treePrefabs = TreePrefabBuilder.EnsurePrefabs(force: false);
-            if (treePrefabs == null || treePrefabs.Length == 0)
-            {
-                Debug.LogWarning($"{LOG} [FAIL] No tree prefabs available -- clearing broken prototypes");
-                data.treePrototypes = new TreePrototype[0];
-                return true;
-            }
-
-            var protos = new TreePrototype[treePrefabs.Length];
-            for (int i = 0; i < treePrefabs.Length; i++)
-                protos[i] = new TreePrototype { prefab = treePrefabs[i], bendFactor = 0f };
-            data.treePrototypes = protos;
-            Debug.Log($"{LOG} [FIX] Assigned {protos.Length} tree prototypes (Birch, Oak, Pine)");
+            data.treePrototypes = new TreePrototype[0];
+            // Also clear any placed tree instances to prevent 'no valid mesh renderer' warnings
+            data.treeInstances = new TreeInstance[0];
+            Debug.Log($"{LOG} [FIX] Cleared all tree prototypes + instances (issue #178)");
             return true;
         }
 
