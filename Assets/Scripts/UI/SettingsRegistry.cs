@@ -243,6 +243,10 @@ namespace Plaga44.UI
                 s.Add(S("Sprint Ramp", "Sprint ramp speed (1/v = seconds to reach full sprint)", () => loco.sprintRampSpeed, v => loco.sprintRampSpeed=v, 0.5f, 10f, 0.5f, "F1"));
                 s.Add(S("Sprint (RO)", "Sprint toggle state (1=ON, 0=OFF).", () => loco.sprintActive?1:0, v => {}, 0, 1, 0, "F0"));
                 s.Add(S("Sprint Amt (RO)", "Sprint amount 0..1 (lerped, shows ramp).", () => loco.SprintAmount, v => {}, 0, 1, 0, "F2"));
+                // Issue #189: Stamina
+                s.Add(S("Stamina (RO)", "Current stamina 0..1. Drains sprinting, regens otherwise.", () => loco.Stamina, v => {}, 0, 1, 0, "F2"));
+                s.Add(S("Stamina Drain", "Stamina drain per second when sprinting+moving", () => loco.staminaDrainRate, v => loco.staminaDrainRate=v, 0f, 1f, 0.05f, "F2"));
+                s.Add(S("Stamina Regen", "Stamina regen per second when not sprinting", () => loco.staminaRegenRate, v => loco.staminaRegenRate=v, 0f, 2f, 0.05f, "F2"));
                 s.Add(S("Fly Accel", "Fly acceleration m/s^2 while R stick UP held", () => loco.flyAcceleration, v => loco.flyAcceleration=v, 1f, 50f, 1f, "F0"));
                 s.Add(S("Fly Max Speed", "Max fly speed cap m/s", () => loco.flyMaxSpeed, v => loco.flyMaxSpeed=v, 5f, 50f, 1f, "F0"));
                 s.Add(S("Air Accel", "Horizontal accel while flying (ice skating feel)", () => loco.airAcceleration, v => loco.airAcceleration=v, 1f, 30f, 1f, "F0"));
