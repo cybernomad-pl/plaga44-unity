@@ -275,8 +275,9 @@ namespace Plaga44.Locomotion
         // Bumped amplitude 5x (was ±0.3, now ±1.5 m/s). Faster target changes for livelier feel.
         private const float HoverDriftMin = -1.5f;  // pronounced sink
         private const float HoverDriftMax = 1.5f;   // pronounced rise
-        private const float HoverDriftChangeMin = 0.5f;
-        private const float HoverDriftChangeMax = 2f;
+        // Issue #188: faster direction changes = more chaotic/fun hover
+        private const float HoverDriftChangeMin = 0.15f;
+        private const float HoverDriftChangeMax = 0.8f;
         private const float HoverDriftLerp = 2.5f;
 
         private void UpdateFly(float rightY)
