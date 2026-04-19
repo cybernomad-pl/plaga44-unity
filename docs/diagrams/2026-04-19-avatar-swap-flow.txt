@@ -1,0 +1,76 @@
+=============================================================================
+ AVATAR SWAP FLOW -- jak ma dzialac "chce byc Exo Grayem"
+ 2026-04-19
+=============================================================================
+
+-----------------------------------------------------------------------------
+ BYLO (nie dziala z punktu widzenia Borysa)
+-----------------------------------------------------------------------------
+
+   +---------------+          +------------------+          +---------------+
+   | HamburgerMenu |  OPEN    | AvatarGallery    |          | Scene         |
+   |               |  ----->  | ForceSpawnNow()  |  ----->  | Row avatarow  |
+   |               |          |                  |          | przed graczem |
+   +---------------+          +------------------+          +---------------+
+
+   +---------------+          +------------------+          +---------------+
+   | AVATAR > Mode |  slide   | PreviewAvatarMode|          | Gallery       |
+   |  0 -> 1 -> 2  |  ----->  | (tylko preview   |  ----->  | SetActiveIdx  |
+   |  slider       |          |  w Gallery,      |          | (jeden widocz-|
+   |               |          |  NIE swap!)      |          |  ny, reszta   |
+   |               |          |                  |          |  ukryta)      |
+   +---------------+          +------------------+          +---------------+
+
+   +---------------+          +------------------+          +---------------+
+   | UZYTKOWNIK    |  back    | ConfirmPreview() |          | PlayerAvatar  |
+   | wychodzi z    |  button  | -> SetAvatarMode |  ----->  | SpawnAvatar   |
+   | AVATAR sekcji |          |                  |          | (FINALLY swap |
+   |               |          |                  |          |  na graczu!)  |
+   +---------------+          +------------------+          +---------------+
+
+  PROBLEM: Borys ruszal slider Mode, avatar preview w Gallery sie zmienial
+  (ale tego nie widzial bo moze Gallery spawnuje gdzie indziej), a slider
+  sam w sobie NIE ZAMIENIAL avatara na graczu. Zamiana byla przez
+  "back button" z sekcji AVATAR -- krok niepowiazany intuicyjnie.
+
+-----------------------------------------------------------------------------
+ CEL (Borys: "chce byc Exo Grayem i dupa")
+-----------------------------------------------------------------------------
+
+   +---------------+          +------------------+          +---------------+
+   | AVATAR > Mode |  slide   | SetAvatarMode()  |          | PlayerAvatar  |
+   |  0 -> 1       |  ----->  | (INSTANT swap    |  ----->  | SpawnAvatar   |
+   |  slider       |          |  avatara na      |          | na graczu.    |
+   |               |          |  graczu + sync   |          | Borys jest    |
+   |               |          |  Gallery preview)|          | Exo Grayem.   |
+   +---------------+          +------------------+          +---------------+
+
+  Slider = INSTANT swap. Zero back buttona, zero confirm.
+
+-----------------------------------------------------------------------------
+ PEWNE DZIALANIE (po fix)
+-----------------------------------------------------------------------------
+
+   Mode slider --> PlayerAvatar.SetAvatarMode(v) :
+     v == 0 -> ShowDefaultRigOnly (SDK StylizedCharacterLocomotion widoczny)
+     v >= 1 -> ShowDefaultRig(false) + SpawnAvatar(v)
+                    v=1 -> Exo_Gray prefab spawnowany na transform PlayerAvatar
+                    v=2 -> [next avatar gdy dodamy]
+                    ...
+              + SyncGalleryActiveIndex -> Gallery row pokazuje ten avatar
+
+  Persisted mode w PlayerPrefs (Plaga44_Current_AVATAR_Mode).
+  Restore na Start().
+
+-----------------------------------------------------------------------------
+ DIAGNOSTIC CHECKLIST (gdy slider nadal nie dziala po fix)
+-----------------------------------------------------------------------------
+
+  [ ] PlayerAvatar instance jest na OVRCameraRig (log "PlayerAvatar Start")
+  [ ] PlayerAvatar.defaultRig wskazuje na StylizedCharacterLocomotion
+      (PlayerRigSetup tego pilnuje)
+  [ ] AvatarGallery.Instance != null, Count > 0 (== 1 dla Exo_Gray)
+  [ ] AvatarRegistry ma entry PINEA/Exo_Gray NOT broken
+  [ ] Animator avatar valid (nie rozowy, nie rig error)
+
+=============================================================================
