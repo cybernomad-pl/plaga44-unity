@@ -20,6 +20,11 @@ namespace Plaga44.Inventory
     {
         private const string LOG = "[PLAGA44][PlagaGrabber]";
 
+        /// <summary>Currently held object (or null). For editor tools read-only display.</summary>
+        public OVRGrabbable CurrentGrabbed => m_grabbedObj;
+        /// <summary>Which controller owns this grabber (LTouch / RTouch).</summary>
+        public OVRInput.Controller OwnerController => m_controller;
+
         protected override void Awake()
         {
             base.Awake();
