@@ -3,10 +3,10 @@
 // Steruje: ProjectSettings/EditorBuildSettings.asset (build scenes)
 //
 // Public API:
-//   BuildScenesConfig.SetScenes(new[] { "Assets/TESTBED_V2.unity" });
+//   BuildScenesConfig.SetScenes(new[] { "Assets/TESTBED.unity" });
 //   BuildScenesConfig.AddScene("Assets/Scenes/Level1.unity");
 //   BuildScenesConfig.RemoveScene("Assets/Scenes/Old.unity");
-//   BuildScenesConfig.EnableScene("Assets/TESTBED_V2.unity", true);
+//   BuildScenesConfig.EnableScene("Assets/TESTBED.unity", true);
 //   BuildScenesConfig.LogCurrent();
 
 using System.Collections.Generic;

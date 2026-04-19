@@ -13,7 +13,7 @@ namespace Plaga44
     public class BootstrapConfig : ScriptableObject
     {
         [Header("Scene")]
-        public string scenePath = "Assets/PLAGA44/TESTBED_V6.unity";
+        public string scenePath = "Assets/PLAGA44/TESTBED.unity";
 
         [Header("Terrain")]
         public string terrainAssetPath = "Assets/PLAGA44/Terrain/Scene_A_Terrain.asset";
