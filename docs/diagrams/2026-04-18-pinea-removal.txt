@@ -1,0 +1,92 @@
+=============================================================================
+ PINEA REMOVAL -- swiezy testbed bez custom avatarow
+ 2026-04-18 (branch refactor/cleanup)
+=============================================================================
+
+CEL: swiezy klon testbedu startuje BEZ zadnych custom avatarow.
+     Zostaje tylko default SDK character (StylizedCharacterLocomotion)
+     zaciagniety przez PlayerRigSetup z Meta XR Movement SDK samples.
+
+-----------------------------------------------------------------------------
+ BYLO
+-----------------------------------------------------------------------------
+
+  Assets/PLAGA44/Avatars/
+    PINEA_YNG5/                 <-- broken pink mat (issue #155)
+      PINEA_YNG5.prefab
+      PINEA_YNG5.dae
+      PINEA_YNG5_Mat.mat        <-- brak _SPECULAR_SETUP keyword
+      textures/*.png
+
+  Assets/PLAGA44/Resources/
+    AvatarRegistry.asset
+      avatars:
+        - PINEA_YNG5 (broken=0 ale render pink)
+
+-----------------------------------------------------------------------------
+ TERAZ
+-----------------------------------------------------------------------------
+
+  Assets/PLAGA44/Avatars/       <-- pusty folder (zostaje, ale .meta usuniety)
+                                    AvatarAutoImport scan -> 0 avatars
+
+  Assets/PLAGA44/Resources/
+    AvatarRegistry.asset
+      avatars: []               <-- pusty rejestr
+
+-----------------------------------------------------------------------------
+ BOOTSTRAP FLOW (bez avatarow)
+-----------------------------------------------------------------------------
+
+   Bootstrap.Run()
+     |
+     |-- OpenScene (TESTBED.unity)
+     |-- delayCall -> RunSetup(freshCfg)   <-- fix z 2d9ee95
+     |                                       (LoadConfig ponownie zeby
+     |                                        uniknac destroyed ref)
+     |
+     |-- TerrainSetup
+     |-- SkyboxSetup
+     |-- BounceLightSetup
+     |-- PlayerRigSetup  <-- zachowany: StylizedCharacterLocomotion
+     |                      (SDK default) -- to jest "default avatar"
+     |-- InventorySetup   <-- Revolver EnsurePrefab wylaczone
+     |-- SceneSingletonsSetup
+     |-- ObjectSpawnerSetup
+     |-- AvatarRegistrySetup   <-- ALWAYS ScanAllForce
+     |     |                     skanuje Assets/PLAGA44/Avatars/ (pusty)
+     |     |                     -> AvatarRegistry: 0 entries
+     |     |-- Debug.LogWarning "Registry is empty after rescan"
+     |         (expected -- folder pusty celowo)
+     |-- LightingCleanup
+
+-----------------------------------------------------------------------------
+ CONTENT EDITOR z pustym rejestrem
+-----------------------------------------------------------------------------
+
+  Tab Avatars: HelpBox "No avatars. Rescan to import."
+  Tab Items:   Revolver usuniety -> HelpBox "No items."
+               (ITEM GRIP panel nadal w prawej kolumnie, ale nieaktywny
+                bo _selectedItem nie ma na czym operowac)
+
+-----------------------------------------------------------------------------
+ BRANCH STAN PO PUSHU
+-----------------------------------------------------------------------------
+
+  refactor/cleanup ahead of main:
+    1a806cf  core cleanup (ITEM GRIP panel, always rescan, scene rename)
+    f26cf0f  wywalone RobotAvatarSetup + wylaczony Revolver loadout
+    2d9ee95  fix Bootstrap MissingReferenceException
+    NEW      usuniecie PINEA -- swiezy testbed bez avatarow
+
+-----------------------------------------------------------------------------
+ NASTEPNY KROK (Borys)
+-----------------------------------------------------------------------------
+
+  Zajmujemy sie avatarami i itemami od nowa:
+    1. Wybrac strategie importu avatarow (Mixamo FBX / DAE / inny)
+    2. Zbudowac pipeline do Assets/PLAGA44/Avatars/
+    3. Rewolwer -- zdecydowac o zrodle modelu (nowy FBX albo procedural)
+    4. InventoryLoadout / ObjectSpawner - podpiac nowe assety
+
+=============================================================================
