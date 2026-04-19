@@ -293,10 +293,9 @@ namespace Plaga44.UI
                 string modeDesc = maxMode > 1
                     ? $"0=None(SDK rig), 1..{maxMode}=Avatar z Gallery"
                     : "0=None(SDK rig)";
-                // INSTANT swap -- slider -> SetAvatarMode (nie tylko preview w Gallery).
-                // Borys ma byc Exo Grayem zaraz po przesunieciu slidera, nie po
-                // wyjsciu z sekcji (back button -> ConfirmPreview).
-                s.Add(S("Mode", modeDesc, () => playerAvatar.avatarMode, v => playerAvatar.SetAvatarMode((int)v), 0, maxMode, 1, "F0"));
+                // Mode slider = PREVIEW only (Gallery spawn przed graczem).
+                // Potwierdzenie swap na graczu = przycisk A (kontroler) -> ConfirmPreview.
+                s.Add(S("Mode", modeDesc, () => playerAvatar.avatarMode, v => playerAvatar.PreviewAvatarMode((int)v), 0, maxMode, 1, "F0"));
                 s.Add(S("Hide Head", "Hide head+neck to avoid camera clipping (player avatars)", () => playerAvatar.hideHead?1:0, v => playerAvatar.hideHead=v>0.5f, 0, 1, 1, "F0"));
                 s.Add(S("Y Offset", "Avatar feet offset from rig base", () => playerAvatar.yOffset, v => playerAvatar.yOffset=v, -1f, 1f, 0.05f, "F2"));
             });

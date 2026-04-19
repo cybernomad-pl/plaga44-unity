@@ -158,6 +158,22 @@ namespace Plaga44.UI
             if (PressedBack()) { GoBack(); return; }
             if (PressedEnter() && _level != MenuLevel.Settings) { GoForward(); return; }
 
+            // A button w AVATAR sekcji = potwierdz preview (swap avatar na graczu)
+            if (_level == MenuLevel.Settings && OVRInput.GetDown(OVRInput.Button.One))
+            {
+                string section = _currentGroupSections[_groupIndex];
+                if (section == AvatarSection)
+                {
+                    var avatar = Plaga44.PlayerAvatar.FindCurrent();
+                    if (avatar != null)
+                    {
+                        avatar.ConfirmPreview();
+                        Debug.Log($"{LOG} [A] Avatar confirmed -> {avatar.CurrentLabel}");
+                    }
+                    return;
+                }
+            }
+
             HandleNavigation();
         }
 
