@@ -159,12 +159,15 @@ namespace Plaga44
             _spawnedPreview = Instantiate(prefab, pos, rot);
             _spawnedPreview.name = $"ItemPreview_{prefab.name}";
 
-            // Enable physics so player can grab it naturally with OVRGrabber
+            // Statyczny podglad -- kinematic = nie reaguje na fizyke, stoi w miejscu.
+            // OVRGrabber przejmie sterowanie przy GrabBegin (wylaczy kinematic sam).
             var rb = _spawnedPreview.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.isKinematic = false;
-                rb.useGravity = false; // float in place until grabbed
+                rb.isKinematic = true;
+                rb.useGravity = false;
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
             }
         }
 
