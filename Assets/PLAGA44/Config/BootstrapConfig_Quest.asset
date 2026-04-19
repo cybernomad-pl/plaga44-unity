@@ -12,11 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b09fab5a258714788565653f92441c, type: 3}
   m_Name: BootstrapConfig_Quest
   m_EditorClassIdentifier: Assembly-CSharp::Plaga44.BootstrapConfig
-  scenePath: Assets/PLAGA44/TESTBED_V6.unity
-  terrainAssetPath: Assets/Potok/Terrain/Scene_A_Terrain.asset
+  scenePath: Assets/PLAGA44/TESTBED.unity
+  terrainAssetPath: Assets/PLAGA44/Terrain/Scene_A_Terrain.asset
   terrainMaterialPath: Assets/PLAGA44/Materials/TerrainLit.mat
   terrainLayersFolder: Assets/PLAGA44/TerrainLayers
-  skyboxMatPath: Assets/Potok/Skybox/BGR_Sky1.mat
+  skyboxMatPath: Assets/PLAGA44/Skybox/BGR_Sky1.mat
+  fogEnabled: 1
+  fogMode: 3
+  fogColor: {r: 0.7, g: 0.8, b: 0.9, a: 1}
+  fogDensity: 0.01
+  fogStartDistance: 0
+  fogEndDistance: 300
+  ambientMode: 0
+  ambientIntensity: 1
+  ambientLight: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  ambientSkyColor: {r: 0.5, g: 0.7, b: 1, a: 1}
+  ambientEquatorColor: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+  ambientGroundColor: {r: 0.2, g: 0.2, b: 0.15, a: 1}
   sunColor: {r: 1, g: 0.95, b: 0.84, a: 1}
   sunIntensity: 1
   sunRotation: {x: 50, y: -30, z: 0}

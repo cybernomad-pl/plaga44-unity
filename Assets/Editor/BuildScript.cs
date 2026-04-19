@@ -35,7 +35,7 @@ namespace Plaga44.Editor
         }
 
         /// <summary>Batch mode entry point: -executeMethod Plaga44.Editor.BuildScript.Build</summary>
-        public static void Build() => BuildQuest(); // TextureOptimizer is bleeding-edge only -- skip na TESTBED_V6
+        public static void Build() => BuildQuest(); // TextureOptimizer is bleeding-edge only -- skip na TESTBED
 
         private static string[] ResolveBuildScenes()
         {
