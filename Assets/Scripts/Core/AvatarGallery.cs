@@ -105,7 +105,7 @@ namespace Plaga44
         // =====================================================================
 
         /// <summary>Switch preview do index (despawn current, spawn new przed graczem).
-        /// -1 = None (despawn only).</summary>
+        /// -1 = None -> spawn SDK default rig (StylizedCharacterLocomotion) jako preview T-pose.</summary>
         public void SetActiveIndex(int index)
         {
             if (_registry == null) TryLoadRegistry();
@@ -115,7 +115,12 @@ namespace Plaga44
             DespawnPreview();
             _activeIndex = clamped;
 
-            if (clamped < 0) { Debug.Log($"{LOG} SetActiveIndex: None (despawned)"); return; }
+            if (clamped < 0)
+            {
+                // None -- spawn SDK default rig (Borys: "chce zobaczyc default robota w T-pose")
+                SpawnSdkDefaultPreview();
+                return;
+            }
 
             var entry = _registry.Get(clamped);
             if (entry == null || entry.prefab == null)
@@ -132,12 +137,23 @@ namespace Plaga44
             SpawnPreviewAt(entry.prefab, entry.name);
         }
 
-        /// <summary>Force re-spawn current preview (HamburgerMenu on open).</summary>
+        /// <summary>Force re-spawn current preview (HamburgerMenu on open).
+        /// Zawsze -- nawet gdy activeIndex = -1 (None) -- zeby pokazac SDK default rig.</summary>
         public void ForceSpawnNow()
         {
-            if (_activeIndex < 0) return;
             if (_spawnedPreview != null) return;
             SetActiveIndex(_activeIndex);
+        }
+
+        private void SpawnSdkDefaultPreview()
+        {
+            var pa = PlayerAvatar.FindCurrent();
+            if (pa == null || pa.defaultRig == null)
+            {
+                Debug.LogWarning($"{LOG} SpawnSdkDefaultPreview: PlayerAvatar.defaultRig missing -- skip (no preview shown for None)");
+                return;
+            }
+            SpawnPreviewAt(pa.defaultRig, "SDKDefault");
         }
 
         /// <summary>Destroy current preview (HamburgerMenu on close).
