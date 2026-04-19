@@ -111,6 +111,7 @@ namespace Plaga44.Editor
         private void DrawToolbar()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            var prevTab = _tab;
             if (GUILayout.Toggle(_tab == Tab.Avatars, "Avatars", EditorStyles.toolbarButton)) _tab = Tab.Avatars;
             if (GUILayout.Toggle(_tab == Tab.Items, "Items", EditorStyles.toolbarButton)) _tab = Tab.Items;
             GUILayout.FlexibleSpace();
@@ -118,6 +119,23 @@ namespace Plaga44.Editor
             if (_tab == Tab.Avatars && GUILayout.Button("Rescan", EditorStyles.toolbarButton))
             { AvatarAutoImport.ScanAllForce(); RefreshData(); }
             EditorGUILayout.EndHorizontal();
+
+            // Tab changed -- switch preview to the currently selected item on new tab
+            if (prevTab != _tab)
+            {
+                DestroyPreviewInstance();
+                _selectedMaterials = new Material[0];
+                _matFoldouts = new bool[0];
+                if (_tab == Tab.Avatars && _registry != null && _selectedAvatar < _registry.Count)
+                {
+                    var e = _registry.Get(_selectedAvatar);
+                    if (e?.prefab != null) LoadPreview(e.prefab);
+                }
+                else if (_tab == Tab.Items && _itemPrefabs != null && _selectedItem < _itemPrefabs.Length)
+                {
+                    LoadPreview(_itemPrefabs[_selectedItem]);
+                }
+            }
         }
 
         // =====================================================================

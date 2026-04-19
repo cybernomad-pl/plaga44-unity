@@ -23,9 +23,12 @@ namespace Plaga44.Editor.Setup
 
         public static bool Run(BootstrapConfig cfg)
         {
-            // Revolver loadout DISABLED -- startujemy od ZERA bez custom itemow.
-            // Re-enable gdy Borys zdecyduje o zrodle modelu rewolwera.
+            // Revolver loadout DISABLED -- source FBX zaginiony.
             // RevolverPrefabBuilder.EnsurePrefab();
+
+            // Shotgun -- buduje prefab z Assets/PLAGA44/Items/Shotgun/FBX/Low.fbx
+            if (!ShotgunPrefabBuilder.EnsurePrefab())
+                Debug.LogWarning($"{LOG} [WARN] Shotgun prefab build failed");
 
             var rig = GameObject.Find(OvrRigName);
             if (rig == null)
