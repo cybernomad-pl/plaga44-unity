@@ -219,11 +219,22 @@ namespace Plaga44.Editor
             _preview.camera.transform.position = _previewCenter + camDir * _previewZoom;
             _preview.camera.transform.LookAt(_previewCenter);
 
+            // Dwa lights z przeciwstronnych stron + ambient -- obiekt oswietlony
+            // z kilku kierunkow, nie tylko "przodu". Rotacje w world space,
+            // niezalezne od kamery.
             if (_preview.lights.Length > 0)
             {
-                _preview.lights[0].intensity = 1.4f;
+                _preview.lights[0].intensity = 1.1f;
                 _preview.lights[0].transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+                _preview.lights[0].color = Color.white;
             }
+            if (_preview.lights.Length > 1)
+            {
+                _preview.lights[1].intensity = 0.6f;
+                _preview.lights[1].transform.rotation = Quaternion.Euler(30f, 150f, 0f);
+                _preview.lights[1].color = new Color(0.9f, 0.95f, 1f); // cool fill z tylu
+            }
+            _preview.ambientColor = new Color(0.35f, 0.35f, 0.4f);
 
             _preview.Render(true);
             GUI.DrawTexture(rect, _preview.EndPreview());
