@@ -1,0 +1,153 @@
+=============================================================================
+ TEST STATE TESTBED_V9 (main @ 60b2000)  2026-04-20
+=============================================================================
+
+-----------------------------------------------------------------------------
+ COMMITS W TEJ SESJI (main @ 60b2000, 10 ostatnich)
+-----------------------------------------------------------------------------
+
+  60b2000  feat: Meta OVRUnityHumanoidSkeletonRetargeter (zastap DIY)
+  1bcc127  revert: PlagaGrabber -- przywrocony toggle-grab
+  1e81482  fix: (POTEM REVERTED w 1bcc127) stratoJump off + None default preview
+  e1cd34e  fix: grab znika + velocity warning + avatar hips za nisko
+  1db4803  feat: AvatarRetargeter (DIY, USUNIETY w 60b2000)
+  dfea5e6  fix: HideAllPreviews brute-force cleanup
+  96b4e43  feat: ITEM A confirm + avatar deformed/idle fix
+  5df1493  fix: preview viewer 2 lights + ambient
+  2abe990  chore: Unity-generated po auto-pipeline
+  79bd01e  feat: avatar preview przed graczem + A confirm
+
+-----------------------------------------------------------------------------
+ AVATAR FLOW
+-----------------------------------------------------------------------------
+
+  OPEN Hamburger Menu  -->  Gallery.ForceSpawnNow
+                              -->  (_activeIndex = -1) SpawnSdkDefaultPreview
+                                     -> Instantiate(PlayerAvatar.defaultRig)
+                                        = StylizedCharacterLocomotion (T-pose)
+                                  przed graczem spawnDistance=2m
+
+  Mode slider 0->1    -->  PreviewAvatarMode(1)
+                              -->  Gallery.SetActiveIndex(0)
+                                    -> DespawnPreview
+                                    -> SpawnPreviewAt(Exo_Gray prefab)
+                                       (animator controller nulled -> T-pose)
+
+  Button A in AVATAR  -->  PlayerAvatar.ConfirmPreview
+                              -->  SetAvatarMode(1)
+                                    -> ShowDefaultRig(false)
+                                    -> SpawnAvatar(Exo_Gray):
+                                       * Instantiate child OVRCameraRig
+                                       * localPosition=(0, yOffset=0, 0)
+                                       * NormalizeToHeight 1.8m
+                                       * AnimatorController=null (static T-pose)
+                                       * AddComponent OVRUnityHumanoidSkeleton-
+                                         Retargeter (META retargeter)
+                                       * SyncGalleryActiveIndex(1)
+
+  CLOSE menu         -->  Gallery.HideAllPreviews (brute-force)
+                          Items.DespawnPreview (itemy zostaja po ConfirmSpawn)
+
+-----------------------------------------------------------------------------
+ RETARGETING (NOWY)
+-----------------------------------------------------------------------------
+
+  WYMAGANIA:
+    - Avatar prefab: Animator z Humanoid avatar (Exo_Gray: animationType=3)
+    - Scene: OVRBody komponent (body tracking source)
+    - OVRManager.requireUnityBodyTracking (Oculus Config)
+    - Quest 2/3 hardware dla pelnego body tracking
+
+  FLOW:
+    Exo_Gray instance ---> OVRUnityHumanoidSkeletonRetargeter (OVRSkeleton subclass)
+                             |
+                             v
+                           LateUpdate (sam robi, dziedziczenie OVRSkeleton)
+                             |
+                             v
+                           dataProvider (OVRBody) -> bones -> Humanoid target
+
+  JESLI body tracking brak (editor bez Quest, lub OVRBody missing):
+    -> retargeter moze logowac assert fail albo nic nie robic
+    -> avatar pozostaje w T-pose (to i tak lepsze niz DIY wykrzywione)
+
+  PALCE (todo): replikacja z StylizedCharacterLocomotion
+    -> OVRCustomSkeleton dla HandLeft / HandRight
+    -> Skeleton hand tracking -> mixamo finger bones
+
+-----------------------------------------------------------------------------
+ ITEM / GRAB FLOW
+-----------------------------------------------------------------------------
+
+  PlagaGrabber (toggle mode, d9e9795 oryginal):
+    Press grip -> GrabBegin
+      if (m_grabbedObj != null) GrabEnd   (toggle release)
+      else base.GrabBegin                 (toggle grab)
+
+  ItemBrowser:
+    Mode slider 0->N    -> SetItem -> SpawnPreview(kinematic, grav off, przed graczem)
+    Button A in ITEMS   -> ConfirmSpawn (rename Item_*, _spawnedPreview = null,
+                                         zostaje w swiecie po Close menu)
+
+  ITEM GRIP (ContentEditor, ReadOnly):
+    target = PlagaGrabber.CurrentGrabbed na RTouch (runtime, play mode)
+    slidery disabled -- edycja tylko przez HamburgerMenu > ITEM GRIP sekcja
+
+-----------------------------------------------------------------------------
+ BOOTSTRAP CONFIG AKTUALNY (BootstrapConfig_Quest.asset)
+-----------------------------------------------------------------------------
+
+  scenePath:        Assets/PLAGA44/TESTBED.unity
+  terrainAssetPath: Assets/PLAGA44/Terrain/Scene_A_Terrain.asset
+  skyboxMatPath:    Assets/PLAGA44/Skybox/BGR_Sky1.mat
+  stratoJumpHeight: 0               <- wylaczony
+  savePlayerPosition: 1             <- PlayerPositionPersistence active
+  fog:      enabled=1, mode=3 (ExpSquared), density=0.01, end=300
+  ambient:  Skybox mode, intensity=1
+  sun:      warm white, intensity=1, rot (50,-30,0), soft shadows
+  cc:       h=1.8, r=0.3, center y=0.9, skinWidth=0.08, stepOffset=0.5
+  loco:     moveSpeed=2.5, strafe=0.8, turn=120, deadZone=0.15
+  grab:     volumeRadius=0.08
+
+-----------------------------------------------------------------------------
+ KNOWN ISSUES do potwierdzenia w teście
+-----------------------------------------------------------------------------
+
+  [?] Meta retargeter: czy wymaga manual OVRBody dodanego do sceny?
+      -> jesli tak, dodac w PlayerRigSetup albo Bootstrap
+
+  [?] Palce: brak retargetu. Po potwierdzeniu ze body dziala,
+      dodac OVRCustomSkeleton (HandLeft/HandRight) -- replikacja z
+      StylizedCharacterLocomotion.
+
+  [?] Items persistent state on exit:
+      ConfirmSpawn unreferencuje -> item zostaje w scenie
+      ALE przy reload sceny (Bootstrap re-run) -- gubi sie
+      Todo: serializacja pozycji do PlayerPrefs/JSON + restore
+
+  [?] Preview avatar na None spawnuje StylizedCharacterLocomotion clone.
+      -> moze duplikować OVRBody refs jesli defaultRig ma juz komponent
+
+-----------------------------------------------------------------------------
+ SCENARIUSZ TESTU (kolejnosc)
+-----------------------------------------------------------------------------
+
+  1. Unity otworzony na main @ 60b2000
+  2. Bootstrap auto-run przy wczytaniu (SessionState guard)
+  3. Scene TESTBED.unity laduje, terrain + skybox + fog + sun
+  4. PlayerAvatar dodany do OVRCameraRig
+  5. Play Mode -> wejdz w HamburgerMenu (B button)
+  6. GAMEPLAY > AVATAR
+      - Mode=0 (None) -> widzisz StylizedCharacterLocomotion preview (T-pose)
+      - Mode=1 -> Exo_Gray preview (T-pose, nie powykrzywiony)
+      - A button -> swap na Exo_Gray jako twoje cialo FPP
+        (Meta retargeter powinien ruszac body z head/hands tracking)
+  7. GAMEPLAY > ITEMS
+      - Mode=0 -> None
+      - Mode=1 -> Shotgun preview przed Toba (statyczny, kinematic)
+      - A button -> Shotgun zostaje w swiecie
+      - Grip na RTouch -> grab (toggle, second grip = release)
+  8. Exit play mode -> position zapisana (savePlayerPosition=1)
+  9. Re-enter play mode -> position z zapisu
+
+=============================================================================
