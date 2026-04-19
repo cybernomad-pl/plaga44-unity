@@ -69,7 +69,18 @@ namespace Plaga44.Editor
             var cfg = LoadConfig();
             if (cfg == null) return;
             OpenScene(cfg);
-            EditorApplication.delayCall += () => RunSetup(cfg);
+            // Don't capture cfg reference -- OpenScene + asset reload can destroy
+            // the ScriptableObject; reload it fresh inside RunSetup.
+            EditorApplication.delayCall += () =>
+            {
+                var freshCfg = LoadConfig();
+                if (freshCfg == null)
+                {
+                    Debug.LogError($"{LOG} Config unavailable after delayCall -- abort");
+                    return;
+                }
+                RunSetup(freshCfg);
+            };
         }
 
         // StratoJump removed from menu -- player spawns at last saved position.
