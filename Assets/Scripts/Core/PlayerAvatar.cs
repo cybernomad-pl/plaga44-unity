@@ -46,6 +46,7 @@ namespace Plaga44
         private Animator _animator;
         private Transform _headBone;
         private Transform _neckBone;
+        private AvatarRetargeter _retargeter;
 
         public int CurrentMode => avatarMode;
 
@@ -250,6 +251,15 @@ namespace Plaga44
                 + $"scale={_instance.transform.localScale:F3} "
                 + $"parent={transform.name} parentPos={transform.position:F2}");
 
+            // Retargeting: DIY IK z Klaudia2 (OVRCameraRig anchors -> mixamo bones)
+            _retargeter = GetComponent<AvatarRetargeter>();
+            if (_retargeter == null) _retargeter = gameObject.AddComponent<AvatarRetargeter>();
+            var head      = transform.Find("TrackingSpace/CenterEyeAnchor");
+            var leftHand  = transform.Find("TrackingSpace/LeftHandAnchor");
+            var rightHand = transform.Find("TrackingSpace/RightHandAnchor");
+            _retargeter.Initialize(_instance, head, leftHand, rightHand);
+            Debug.Log($"{LOG} Retargeter initialized: head={(head != null)}, L={(leftHand != null)}, R={(rightHand != null)}, ok={_retargeter.IsInitialized}");
+
             _spawnedMode = mode;
         }
 
@@ -305,7 +315,15 @@ namespace Plaga44
 
         private void LateUpdate()
         {
-            if (_instance == null || !hideHead) return;
+            if (_instance == null) return;
+
+            // Retargeting PIERWSZE -- ustawia bones z VR anchors (head/hands).
+            // LateUpdate po PlayerAvatar ustawi scene, before camera render.
+            if (_retargeter != null && _retargeter.IsInitialized)
+                _retargeter.UpdateRetargeting();
+
+            // Hide head + neck bones POTEM (retargeter zreset localScale kosci)
+            if (!hideHead) return;
             if (_headBone != null) _headBone.localScale = Vector3.zero;
             if (_neckBone != null) _neckBone.localScale = Vector3.zero;
         }
