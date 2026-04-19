@@ -68,6 +68,19 @@ namespace Plaga44.Editor
             _preview = null;
         }
 
+        // Pelne odswiezenie (button "Refresh"):
+        //   1. Mixamo materials extract + URP conversion + Humanoid rig reset
+        //   2. Avatar rescan (builds prefabs, rebuilds AvatarRegistry)
+        //   3. Item prefabs ensure (Shotgun etc.)
+        //   4. Data reload
+        private void FullRefresh()
+        {
+            Plaga44.Editor.Setup.MixamoMaterialExtractor.ExtractAll();
+            AvatarAutoImport.ScanAllForce();
+            ShotgunPrefabBuilder.EnsurePrefab();
+            RefreshData();
+        }
+
         private void RefreshData()
         {
             _registry = AssetDatabase.LoadAssetAtPath<AvatarRegistry>(AvatarImportConfig.RegistryPath);
@@ -115,9 +128,7 @@ namespace Plaga44.Editor
             if (GUILayout.Toggle(_tab == Tab.Avatars, "Avatars", EditorStyles.toolbarButton)) _tab = Tab.Avatars;
             if (GUILayout.Toggle(_tab == Tab.Items, "Items", EditorStyles.toolbarButton)) _tab = Tab.Items;
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Refresh", EditorStyles.toolbarButton)) RefreshData();
-            if (_tab == Tab.Avatars && GUILayout.Button("Rescan", EditorStyles.toolbarButton))
-            { AvatarAutoImport.ScanAllForce(); RefreshData(); }
+            if (GUILayout.Button("Refresh", EditorStyles.toolbarButton)) FullRefresh();
             EditorGUILayout.EndHorizontal();
 
             // Tab changed -- switch preview to the currently selected item on new tab

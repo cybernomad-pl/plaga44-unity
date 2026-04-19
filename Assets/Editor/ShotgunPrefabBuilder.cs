@@ -31,11 +31,8 @@ namespace Plaga44.Editor
 
         private static readonly Vector3 FallbackBoundsSize = new Vector3(0.8f, 0.15f, 0.05f);
 
-        [MenuItem("CYBERNOMAD/Inventory/Rebuild Shotgun Prefab", false, 301)]
-        public static void RebuildMenu()
-        {
-            if (BuildPrefab()) Debug.Log($"{LOG} Prefab rebuilt: {PrefabPath}");
-        }
+        // Wywolywane automatycznie przez InventorySetup (polityka "wszystko automatycznie").
+        // Bez menu item. Rebuild = usun Assets/Resources/Items/Shotgun.prefab.
 
         /// <summary>Build prefab if missing. Returns true if prefab exists after.</summary>
         public static bool EnsurePrefab()
