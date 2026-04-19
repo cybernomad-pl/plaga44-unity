@@ -123,6 +123,8 @@ namespace Plaga44.Editor
 
             changed |= LogStep("TerrainSetup",        () => TerrainSetup.Run(cfg));
             changed |= LogStep("SkyboxSetup",         () => SkyboxSetup.Run(cfg));
+            changed |= LogStep("FogSetup",            () => FogSetup.Run(cfg));
+            changed |= LogStep("AmbientSetup",        () => AmbientSetup.Run(cfg));
             changed |= LogStep("BounceLightSetup",    () => BounceLightSetup.Run(cfg));
             changed |= LogStep("PlayerRigSetup",      () => PlayerRigSetup.Run(cfg));
             changed |= LogStep("InventorySetup",      () => InventorySetup.Run(cfg));

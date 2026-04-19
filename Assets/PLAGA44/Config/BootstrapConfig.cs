@@ -5,6 +5,7 @@
 // Tworz przez: Assets > Create > PLAGA44 > Bootstrap Config
 // =============================================================================
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Plaga44
 {
@@ -15,14 +16,33 @@ namespace Plaga44
         public string scenePath = "Assets/PLAGA44/TESTBED_V6.unity";
 
         [Header("Terrain")]
-        public string terrainAssetPath = "Assets/Potok/Terrain/Scene_A_Terrain.asset";
+        public string terrainAssetPath = "Assets/PLAGA44/Terrain/Scene_A_Terrain.asset";
         public string terrainMaterialPath = "Assets/PLAGA44/Materials/TerrainLit.mat";
         public string terrainLayersFolder = "Assets/PLAGA44/TerrainLayers";
         [Tooltip("Horizontal scale multiplier (X,Z) applied to terrain size. 1.0 = default. 2.0 = 2x wider in both directions.")]
         public float terrainHorizontalScale = 2.0f;
 
         [Header("Skybox")]
-        public string skyboxMatPath = "Assets/Potok/Skybox/BGR_Sky1.mat";
+        public string skyboxMatPath = "Assets/PLAGA44/Skybox/BGR_Sky1.mat";
+
+        [Header("Fog")]
+        public bool     fogEnabled       = true;
+        public FogMode  fogMode          = FogMode.ExponentialSquared;
+        public Color    fogColor         = new Color(0.7f, 0.8f, 0.9f, 1f);
+        public float    fogDensity       = 0.01f;
+        public float    fogStartDistance = 0f;
+        public float    fogEndDistance   = 300f;
+
+        [Header("Ambient")]
+        public AmbientMode ambientMode         = AmbientMode.Skybox;
+        [Tooltip("Tryb Skybox: ambientIntensity mnozy skybox IBL. Inne pola kolorow ignorowane.")]
+        public float       ambientIntensity    = 1f;
+        [Tooltip("Tryb Flat: jednolity kolor ambient.")]
+        public Color       ambientLight        = new Color(0.3f, 0.3f, 0.3f, 1f);
+        [Tooltip("Tryb Trilight: gradient sky/equator/ground.")]
+        public Color       ambientSkyColor     = new Color(0.5f, 0.7f, 1f, 1f);
+        public Color       ambientEquatorColor = new Color(0.4f, 0.4f, 0.4f, 1f);
+        public Color       ambientGroundColor  = new Color(0.2f, 0.2f, 0.15f, 1f);
 
         [Header("Directional Light")]
         public Color sunColor = new Color(1f, 0.95f, 0.84f);
