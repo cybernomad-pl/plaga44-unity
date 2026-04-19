@@ -1,7 +1,14 @@
 // =============================================================================
 // PlagaGrabber.cs
-// CYBERNOMAD -- OVRGrabber subclass. STANDARDOWY hold-to-release: press grip =
-// grab, release grip = drop. Zero toggle logic (fragile, double-fire issues).
+// CYBERNOMAD -- OVRGrabber subclass: TOGGLE grab (press grip to grab, press
+// again to release). Replaces default hold-to-grab behaviour.
+//
+// How it works:
+//   - grabEnd is set to -1 in Awake, making the base class release condition
+//     impossible (flex can never reach -1). This disables hold-to-release.
+//   - GrabBegin() override implements toggle: if already holding, release;
+//     if not holding, grab nearest candidate.
+//   - Grab volumes are re-enabled after toggle-release so next grab works.
 // =============================================================================
 
 using UnityEngine;
@@ -21,7 +28,28 @@ namespace Plaga44.Inventory
         protected override void Awake()
         {
             base.Awake();
-            Debug.Log($"{LOG} Standard hold-to-release mode (grabBegin={grabBegin}, grabEnd={grabEnd})");
+            // Disable hold-to-release: set grabEnd to impossible value.
+            // Base CheckForGrabOrRelease needs m_prevFlex <= grabEnd which
+            // can never happen when grabEnd is negative (flex range is 0..1).
+            grabEnd = -1f;
+            Debug.Log($"{LOG} Toggle-grab mode active (grabEnd=-1)");
+        }
+
+        protected override void GrabBegin()
+        {
+            if (m_grabbedObj != null)
+            {
+                // Already holding -- toggle release
+                Debug.Log($"{LOG} Toggle RELEASE: {m_grabbedObj.name} from {m_controller}");
+                GrabEnd();
+                // GrabEnd re-enables grab volumes, so candidates can be detected
+                // for next grab. No extra action needed.
+                return;
+            }
+
+            // Not holding -- grab nearest candidate
+            Debug.Log($"{LOG} Toggle GRAB via {m_controller}");
+            base.GrabBegin();
         }
     }
 }
