@@ -33,6 +33,10 @@ namespace Plaga44.Editor
         private bool[] _matFoldouts = new bool[0];
         private Material[] _selectedMaterials = new Material[0];
 
+        // ITEM GRIP -- per-item live edit (tab Items)
+        private Plaga44.Inventory.ItemGripConfig _gripCfg;
+        private string _gripItemName;
+
         // Data
         private AvatarRegistry _registry;
         private GameObject[] _itemPrefabs;
@@ -250,9 +254,17 @@ namespace Plaga44.Editor
         {
             EditorGUILayout.BeginVertical(GUILayout.Width(220));
 
+            // ITEM GRIP panel for Items tab -- materials moved to expandable section below
+            if (_tab == Tab.Items)
+            {
+                DrawItemGripPanel();
+                EditorGUILayout.Space(6);
+            }
+
             if (_selectedMaterials.Length == 0)
             {
-                EditorGUILayout.HelpBox("No materials", MessageType.None);
+                if (_tab == Tab.Avatars)
+                    EditorGUILayout.HelpBox("No materials", MessageType.None);
                 EditorGUILayout.EndVertical();
                 return;
             }
@@ -277,6 +289,58 @@ namespace Plaga44.Editor
 
             EditorGUILayout.EndScrollView();
             EditorGUILayout.EndVertical();
+        }
+
+        // =====================================================================
+        // ITEM GRIP panel -- per-item live grip calibration (Items tab only)
+        // =====================================================================
+
+        private void DrawItemGripPanel()
+        {
+            if (_itemPrefabs == null || _itemPrefabs.Length == 0) return;
+            if (_selectedItem < 0 || _selectedItem >= _itemPrefabs.Length) return;
+
+            string itemName = _itemPrefabs[_selectedItem].name;
+
+            // Reload when item changed
+            if (_gripItemName != itemName)
+            {
+                _gripItemName = itemName;
+                _gripCfg = Plaga44.Inventory.ItemGripConfig.Load(itemName);
+            }
+
+            EditorGUILayout.LabelField($"ITEM GRIP -- {itemName}", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Per-item offset (PlayerPrefs)", EditorStyles.miniLabel);
+            EditorGUILayout.Space(2);
+
+            // Position
+            EditorGUILayout.LabelField("Offset Position (m)", EditorStyles.miniBoldLabel);
+            _gripCfg.offsetPos.x = EditorGUILayout.Slider("X", _gripCfg.offsetPos.x, -0.2f, 0.2f);
+            _gripCfg.offsetPos.y = EditorGUILayout.Slider("Y", _gripCfg.offsetPos.y, -0.2f, 0.2f);
+            _gripCfg.offsetPos.z = EditorGUILayout.Slider("Z", _gripCfg.offsetPos.z, -0.2f, 0.2f);
+
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField("Offset Rotation (deg)", EditorStyles.miniBoldLabel);
+            _gripCfg.offsetRotEuler.x = EditorGUILayout.Slider("Pitch", _gripCfg.offsetRotEuler.x, -180f, 180f);
+            _gripCfg.offsetRotEuler.y = EditorGUILayout.Slider("Yaw",   _gripCfg.offsetRotEuler.y, -180f, 180f);
+            _gripCfg.offsetRotEuler.z = EditorGUILayout.Slider("Roll",  _gripCfg.offsetRotEuler.z, -180f, 180f);
+
+            EditorGUILayout.Space(4);
+            EditorGUILayout.LabelField("Uniform Scale", EditorStyles.miniBoldLabel);
+            _gripCfg.scale = EditorGUILayout.Slider("Scale", _gripCfg.scale, 0.1f, 3.0f);
+
+            EditorGUILayout.Space(6);
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Save"))
+                Plaga44.Inventory.ItemGripConfig.Save(itemName, _gripCfg);
+            if (GUILayout.Button("Reload"))
+                _gripCfg = Plaga44.Inventory.ItemGripConfig.Load(itemName);
+            if (GUILayout.Button("Reset"))
+            {
+                Plaga44.Inventory.ItemGripConfig.Clear(itemName);
+                _gripCfg = Plaga44.Inventory.ItemGripConfig.Default;
+            }
+            EditorGUILayout.EndHorizontal();
         }
 
         private void DrawMaterialSliders(Material mat)

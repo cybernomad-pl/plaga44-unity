@@ -15,29 +15,20 @@ namespace Plaga44.Editor.Setup
 
         public static void Run(BootstrapConfig cfg)
         {
+            // CYBERNOMAD: Bootstrap ZAWSZE wykonuje pelny rescan.
+            // Raz na sesje (Bootstrap sam ma SessionKey guard), wiec overhead akceptowalny.
+            // Gwarantuje: nowe avatary sa zauwazone, uszkodzone matt (np. missing _SPECULAR_SETUP)
+            // sa przebudowane, keywordy/workflow zgodne z ApplySpecularWorkflowDefaults.
+            Debug.Log($"{LOG} Triggering unconditional rescan (Bootstrap auto-reimport policy)...");
+            ForceReimportAvatarModels();
+            AvatarAutoImport.ScanAllForce();
+
             var reg = AssetDatabase.LoadAssetAtPath<AvatarRegistry>(cfg.avatarRegistryPath);
-
-            // --- Auto-rescan when registry is missing or empty OR has broken entries ---
-            bool hasBroken = reg != null && reg.Count > 0 && HasAnyBroken(reg);
-            if (reg == null || reg.Count == 0 || hasBroken)
+            if (reg == null || reg.Count == 0)
             {
-                string reason = reg == null ? "MISSING" : (reg.Count == 0 ? "EMPTY" : "BROKEN");
-                Debug.Log($"{LOG} [{reason}] Triggering full avatar rescan with force reimport...");
-
-                // Force reimport DAE/FBX models -- meta-only changes (e.g. avatarSetup) don't
-                // re-trigger import on their own; ImportAsset with ForceUpdate is required.
-                ForceReimportAvatarModels();
-
-                AvatarAutoImport.ScanAllForce();
-
-                // Reload after rescan
-                reg = AssetDatabase.LoadAssetAtPath<AvatarRegistry>(cfg.avatarRegistryPath);
-                if (reg == null || reg.Count == 0)
-                {
-                    Debug.LogWarning($"{LOG} [FAIL] Rescan finished but registry still {reason}. "
-                        + "Check that DAE/FBX files exist in Assets/PLAGA44/Avatars/<Name>/ subfolders.");
-                    return;
-                }
+                Debug.LogWarning($"{LOG} [FAIL] Registry is empty after rescan. "
+                    + "Check that DAE/FBX files exist in Assets/PLAGA44/Avatars/<Name>/ subfolders.");
+                return;
             }
 
             // --- Report results -----------------------------------------------
@@ -48,16 +39,6 @@ namespace Plaga44.Editor.Setup
                 string status = e?.broken == true ? $"BROKEN: {e.errorMessage}" : (e?.prefab != null ? "OK" : "MISSING");
                 Debug.Log($"{LOG}   [{i}] {(e?.name ?? "?")} -- {status}");
             }
-        }
-
-        private static bool HasAnyBroken(AvatarRegistry reg)
-        {
-            for (int i = 0; i < reg.Count; i++)
-            {
-                var e = reg.Get(i);
-                if (e == null || e.broken || e.prefab == null) return true;
-            }
-            return false;
         }
 
         // Forces ModelImporter to rebuild DAE/FBX assets so meta changes (avatarSetup, etc.)
