@@ -26,8 +26,9 @@ namespace Plaga44.Editor.Setup
             var reg = AssetDatabase.LoadAssetAtPath<AvatarRegistry>(cfg.avatarRegistryPath);
             if (reg == null || reg.Count == 0)
             {
-                Debug.LogWarning($"{LOG} [FAIL] Registry is empty after rescan. "
-                    + "Check that DAE/FBX files exist in Assets/PLAGA44/Avatars/<Name>/ subfolders.");
+                // Pusty registry = expected state gdy nie ma custom avatarow
+                // (domyslnym rig jest SDK StylizedCharacterLocomotion przez PlayerRigSetup).
+                Debug.Log($"{LOG} [OK] Registry is empty -- no custom avatars (SDK default rig active).");
                 return;
             }
 
