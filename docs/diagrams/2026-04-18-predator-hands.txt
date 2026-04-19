@@ -1,0 +1,134 @@
+=============================================================================
+ PredatorHands -- flow shadera + setup
+ 2026-04-18
+=============================================================================
+
+SCENA 1 (intro) -- ten element:
+  "przezroczyste rece - full translucent - zalamuja swiatlo jak pancerz
+   Predatora - gradient odbija sie w nich odpowiednio"
+
+-----------------------------------------------------------------------------
+  SHADER: Assets/PLAGA44/Shaders/PredatorHands.shader
+-----------------------------------------------------------------------------
+
+  FRAGMENT PIPELINE:
+
+           Vertex        +----------------+
+        (pos,nrm,uv)---->| GetVertexPos/  |--> positionWS, normalWS, uv
+                         | GetVertexNorm  |
+                         +----------------+
+
+                                    |
+                                    v
+                         +----------------------+
+                         |  normalize(N, V)     |
+                         +----------+-----------+
+                                    |
+                +-------------------+---------------------+
+                |                   |                     |
+                v                   v                     v
+         +------------+      +-------------+      +---------------+
+         | FRESNEL    |      | REFLECTION  |      | DISTORTION    |
+         |            |      |             |      |               |
+         | 1 - N.V    |      | R = reflect |      | sin/cos(uv*   |
+         | ^Power     |      |   (-V, N)   |      | freq + time)  |
+         +-----+------+      +------+------+      +------+--------+
+               |                    |                    |
+               |                    +--< wobble <--------+
+               |                    |  (R.xy += wobble)
+               |                    v
+               |             +-------------+
+               |             | SAMPLE CUBE |  unity_SpecCube0
+               |             | LOD = rough |  (skybox / probe)
+               |             +------+------+
+               |                    |
+               |                    v
+               |             +-------------+
+               |             | DecodeHDR   |--> reflColor
+               |             +------+------+
+               |                    |
+               v                    v
+         +--------------------------------+
+         | COMPOSE:                       |
+         |   rgb = tint                   |
+         |       + reflColor * ReflStr    |
+         |       + rimColor  * fresnel    |
+         |       * RimStr                 |
+         |                                |
+         |   alpha = BaseAlpha            |
+         |       + fresnel * tintA        |
+         |       + fresnel * rimA         |
+         +---------------+----------------+
+                         |
+                         v
+                +--------+--------+
+                | half4(rgb,alpha)|
+                +-----------------+
+
+-----------------------------------------------------------------------------
+  RENDER STATE:
+-----------------------------------------------------------------------------
+
+  Queue   = Transparent
+  Blend   = SrcAlpha OneMinusSrcAlpha     (standard transparent)
+  ZWrite  = Off                           (nie zaslania)
+  Cull    = Back                          (plecy niewidoczne; mozna wylaczyc
+                                           jesli chcemy widziec wnetrze dloni)
+
+-----------------------------------------------------------------------------
+  SETUP: Assets/Editor/Setup/PredatorHandsSetup.cs
+-----------------------------------------------------------------------------
+
+   +---------------------------+       +------------------------------+
+   | Menu:                     |       | Menu:                        |
+   | PLAGA44/Setup/            |       | PLAGA44/Setup/               |
+   | Apply Predator Hands      |       | Revert Predator Hands        |
+   +-------------+-------------+       +--------------+---------------+
+                 |                                    |
+                 v                                    v
+   +---------------------------+       +------------------------------+
+   | Apply():                  |       | Revert():                    |
+   |  1. ResolveMaterial()     |       |  1. Foreach hand renderer    |
+   |     -- podpina shader     |       |  2. Odczyt backup path       |
+   |        po nazwie jesli    |       |     z EditorPrefs            |
+   |        GUID missing       |       |  3. Przywroc material        |
+   |  2. FindHandRenderers()   |       +------------------------------+
+   |  3. Backup sharedMaterial |
+   |     do EditorPrefs        |
+   |  4. r.sharedMaterial=mat  |
+   +---------------------------+
+
+  FindHandRenderers():
+    for each Transform T in scene:
+      if T.name contains "StylizedCharacter":
+        for each Renderer R in T.children:
+          if R.name.ToLower() contains "hand":
+            yield R
+
+-----------------------------------------------------------------------------
+  PARAMETRY MATERIALU (domyslne wartosci w .mat):
+-----------------------------------------------------------------------------
+
+  TintColor        (1, 0.45, 0.1, 0.15)    -- pomaranczowy offset
+  BaseAlpha        0.05                     -- prawie niewidoczne w srodku
+  RimColor         (1, 0.7, 0.3, 1)         -- cieplejszy rim
+  FresnelPower     4.0                      -- krawedzie ostre
+  RimStrength      2.0
+  ReflStrength     1.0                      -- pelne odbicie skyboxa
+  ReflRoughness    1.0 (mip)                -- lekko rozmyte
+  DistortAmount    0.04
+  DistortSpeed     0.6                      -- falowanie jak Predator
+  DistortFreq      4.0
+
+=============================================================================
+  TODO (otwarte pytania do Borysa -- checklist w nastepnej wiadomosci):
+=============================================================================
+
+  [ ] czy osobna scena Intro (TESTBED_Intro.unity)?
+  [ ] czy rece maja byc widoczne na calym ciele (reszta sdkchar ukryta)?
+  [ ] glos -- AudioSource w scenie czy streaming?
+  [ ] dialog UI -- world-space canvas po L/P, raycast kontrolerem?
+  [ ] skybox gradient -- nowy material czy modyfikacja BGR_Sky1?
+  [ ] czy Bootstrap ma autowolac PredatorHandsSetup dla intro sceny?
+
+=============================================================================
