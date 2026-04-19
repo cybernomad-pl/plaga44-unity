@@ -25,6 +25,9 @@ namespace Plaga44.Inventory
         /// <summary>Which controller owns this grabber (LTouch / RTouch).</summary>
         public OVRInput.Controller OwnerController => m_controller;
 
+        private float _lastGrabBeginTime = -999f;
+        private const float GrabBeginCooldown = 0.5f; // s -- debounce toggle (bounce protection)
+
         protected override void Awake()
         {
             base.Awake();
@@ -32,11 +35,21 @@ namespace Plaga44.Inventory
             // Base CheckForGrabOrRelease needs m_prevFlex <= grabEnd which
             // can never happen when grabEnd is negative (flex range is 0..1).
             grabEnd = -1f;
-            Debug.Log($"{LOG} Toggle-grab mode active (grabEnd=-1)");
+            Debug.Log($"{LOG} Toggle-grab mode active (grabEnd=-1, cooldown={GrabBeginCooldown}s)");
         }
 
         protected override void GrabBegin()
         {
+            // Debounce -- OVRGrabber.CheckForGrabOrRelease moze odpalic GrabBegin
+            // wielokrotnie w ramach jednego press (bounce, double-update frame).
+            // Bez tego: GRAB na frame N, TOGGLE RELEASE na frame N+1, item znika.
+            if (Time.time - _lastGrabBeginTime < GrabBeginCooldown)
+            {
+                Debug.Log($"{LOG} GrabBegin SKIPPED (cooldown, dt={Time.time - _lastGrabBeginTime:F3}s)");
+                return;
+            }
+            _lastGrabBeginTime = Time.time;
+
             if (m_grabbedObj != null)
             {
                 // Already holding -- toggle release

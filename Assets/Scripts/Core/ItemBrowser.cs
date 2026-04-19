@@ -164,10 +164,15 @@ namespace Plaga44
             var rb = _spawnedPreview.GetComponent<Rigidbody>();
             if (rb != null)
             {
+                // Kolejnosc: zero velocities PRZED switchem na kinematic
+                // (kinematic rigidbody nie pozwala set velocity -- warning).
+                if (!rb.isKinematic)
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
                 rb.isKinematic = true;
                 rb.useGravity = false;
-                rb.linearVelocity = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
             }
         }
 

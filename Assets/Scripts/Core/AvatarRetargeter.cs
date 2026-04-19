@@ -68,8 +68,9 @@ namespace Plaga44
         // =====================================================================
 
         [Header("IK Settings")]
-        [Tooltip("Offset Y od glowy do hips (typ. 0.55-0.65 * height)")]
-        public float headToHipsRatio = 0.60f;
+        [Tooltip("HipsY = headY * (1 - ratio). Default 0.45 -> hips na ~55% wzrostu gracza "
+               + "(0.99m dla 1.8m). Wyzsza wartosc = cialo nizej.")]
+        public float headToHipsRatio = 0.45f;
 
         [Tooltip("Slerp factor dla spine interpolacji (0=hips rot, 1=head rot)")]
         [Range(0f, 1f)]
