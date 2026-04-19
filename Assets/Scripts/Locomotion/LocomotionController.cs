@@ -436,6 +436,12 @@ namespace Plaga44.Locomotion
 
         private void UpdateStance(float rightY)
         {
+            // DISABLED: Borys wymog -- tylko chodzenie i latanie, bez crouch/prone.
+            // Prawy thumbstick uzywany wylacznie do fly (UP = fly, DOWN = brak akcji).
+            // Re-enable gdy bedziemy potrzebowac stance system.
+            return;
+
+            #pragma warning disable CS0162 // unreachable code
             if (_flyState != FlyState.Grounded) return;
 
             // Edge detection -- trigger ONCE per stick push
@@ -459,6 +465,7 @@ namespace Plaga44.Locomotion
 
             // Smooth transition
             LerpStance();
+            #pragma warning restore CS0162
         }
 
         public void SetStance(Stance stance)
