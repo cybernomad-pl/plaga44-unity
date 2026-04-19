@@ -17,7 +17,8 @@ namespace Plaga44.Editor.Setup
     {
         private const string LOG = "[PLAGA44][TerrainTreeCleaner]";
 
-        [MenuItem("CYBERNOMAD/Fix/Remove Missing Tree Prototypes", false, 400)]
+        // Wywolywane automatycznie przez Bootstrap (po TerrainSetup).
+        // Bez menu item (polityka "wszystko automatycznie przy bootstrap").
         public static void CleanAll()
         {
             string[] guids = AssetDatabase.FindAssets("t:TerrainData");
@@ -44,9 +45,8 @@ namespace Plaga44.Editor.Setup
                 AssetDatabase.Refresh();
             }
 
-            string msg = $"TerrainTreeCleaner: {totalRemoved} missing prototype(s) removed across {cleaned} terrain(s).";
-            Debug.Log($"{LOG} {msg}");
-            EditorUtility.DisplayDialog("Tree Cleaner", msg, "OK");
+            if (totalRemoved > 0)
+                Debug.Log($"{LOG} {totalRemoved} missing prototype(s) removed across {cleaned} terrain(s).");
         }
 
         private static int Clean(TerrainData data, string path)

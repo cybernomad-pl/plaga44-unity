@@ -20,7 +20,9 @@ namespace Plaga44.Editor
         private const string LOG        = "[PLAGA44][SaveToConfig]";
         private const string ConfigPath = "Assets/PLAGA44/Config/BootstrapConfig_Quest.asset";
 
-        [MenuItem("CYBERNOMAD/Fix/Save Render Settings to Config", false, 410)]
+        // Bez menu item -- publiczna metoda dostepna z kodu (polityka "wszystko
+        // automatycznie"). Wywolanie z HamburgerMenu "Save" button (jesli Borys
+        // doda taka opcje) albo z editor script.
         public static void SaveMenu()
         {
             var cfg = AssetDatabase.LoadAssetAtPath<Plaga44.BootstrapConfig>(ConfigPath);

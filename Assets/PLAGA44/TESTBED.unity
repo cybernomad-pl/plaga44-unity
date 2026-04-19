@@ -1074,14 +1074,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bf0831bc36f1cd4394a420388d717f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plaga44.ObjectSpawner
-  spawnList:
-  - resourcePath: Items/Revolver
-    offset: {x: 0.8, y: 0, z: 1.5}
-    autoRigidbody: 1
-    autoCollider: 1
-    autoGrabbable: 1
-    mass: 1.1
-    enabled: 1
+  spawnList: []
   spawnOnStart: 1
 --- !u!4 &1324097044
 Transform:
@@ -1446,10 +1439,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7cf371bfffef46945abbe18c18310a69, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plaga44.Inventory.InventoryLoadout
-  startingItems:
-  - holsterId: RightHip
-    resourcePath: Items/Revolver
-    enabled: 1
+  startingItems: []
   enableLoadout: 0
 --- !u!114 &1530527701
 MonoBehaviour:

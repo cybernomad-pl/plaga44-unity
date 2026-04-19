@@ -133,6 +133,7 @@ namespace Plaga44.Editor
             bool changed = false;
 
             changed |= LogStep("TerrainSetup",        () => TerrainSetup.Run(cfg));
+            LogStepVoid("TerrainTreeCleaner",         () => TerrainTreeCleaner.CleanAll());
             changed |= LogStep("SkyboxSetup",         () => SkyboxSetup.Run(cfg));
             changed |= LogStep("FogSetup",            () => FogSetup.Run(cfg));
             changed |= LogStep("AmbientSetup",        () => AmbientSetup.Run(cfg));

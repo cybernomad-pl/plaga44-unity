@@ -12,4 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d40e787bc1413141aaf242f358ae31c, type: 3}
   m_Name: AvatarRegistry
   m_EditorClassIdentifier: Assembly-CSharp::Plaga44.AvatarRegistry
-  avatars: []
+  avatars:
+  - name: Exo_Gray
+    prefab: {fileID: 7636881000554272217, guid: 8190d789053feed499ca3fd20637eca2, type: 3}
+    broken: 0
+    errorMessage: 

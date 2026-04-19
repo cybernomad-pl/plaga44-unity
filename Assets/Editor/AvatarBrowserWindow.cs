@@ -68,6 +68,19 @@ namespace Plaga44.Editor
             _preview = null;
         }
 
+        // Pelne odswiezenie (button "Refresh"):
+        //   1. Mixamo materials extract + URP conversion + Humanoid rig reset
+        //   2. Avatar rescan (builds prefabs, rebuilds AvatarRegistry)
+        //   3. Item prefabs ensure (Shotgun etc.)
+        //   4. Data reload
+        private void FullRefresh()
+        {
+            Plaga44.Editor.Setup.MixamoMaterialExtractor.ExtractAll();
+            AvatarAutoImport.ScanAllForce();
+            ShotgunPrefabBuilder.EnsurePrefab();
+            RefreshData();
+        }
+
         private void RefreshData()
         {
             _registry = AssetDatabase.LoadAssetAtPath<AvatarRegistry>(AvatarImportConfig.RegistryPath);
@@ -111,13 +124,29 @@ namespace Plaga44.Editor
         private void DrawToolbar()
         {
             EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
+            var prevTab = _tab;
             if (GUILayout.Toggle(_tab == Tab.Avatars, "Avatars", EditorStyles.toolbarButton)) _tab = Tab.Avatars;
             if (GUILayout.Toggle(_tab == Tab.Items, "Items", EditorStyles.toolbarButton)) _tab = Tab.Items;
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Refresh", EditorStyles.toolbarButton)) RefreshData();
-            if (_tab == Tab.Avatars && GUILayout.Button("Rescan", EditorStyles.toolbarButton))
-            { AvatarAutoImport.ScanAllForce(); RefreshData(); }
+            if (GUILayout.Button("Refresh", EditorStyles.toolbarButton)) FullRefresh();
             EditorGUILayout.EndHorizontal();
+
+            // Tab changed -- switch preview to the currently selected item on new tab
+            if (prevTab != _tab)
+            {
+                DestroyPreviewInstance();
+                _selectedMaterials = new Material[0];
+                _matFoldouts = new bool[0];
+                if (_tab == Tab.Avatars && _registry != null && _selectedAvatar < _registry.Count)
+                {
+                    var e = _registry.Get(_selectedAvatar);
+                    if (e?.prefab != null) LoadPreview(e.prefab);
+                }
+                else if (_tab == Tab.Items && _itemPrefabs != null && _selectedItem < _itemPrefabs.Length)
+                {
+                    LoadPreview(_itemPrefabs[_selectedItem]);
+                }
+            }
         }
 
         // =====================================================================
@@ -190,11 +219,22 @@ namespace Plaga44.Editor
             _preview.camera.transform.position = _previewCenter + camDir * _previewZoom;
             _preview.camera.transform.LookAt(_previewCenter);
 
+            // Dwa lights z przeciwstronnych stron + ambient -- obiekt oswietlony
+            // z kilku kierunkow, nie tylko "przodu". Rotacje w world space,
+            // niezalezne od kamery.
             if (_preview.lights.Length > 0)
             {
-                _preview.lights[0].intensity = 1.4f;
+                _preview.lights[0].intensity = 1.1f;
                 _preview.lights[0].transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+                _preview.lights[0].color = Color.white;
             }
+            if (_preview.lights.Length > 1)
+            {
+                _preview.lights[1].intensity = 0.6f;
+                _preview.lights[1].transform.rotation = Quaternion.Euler(30f, 150f, 0f);
+                _preview.lights[1].color = new Color(0.9f, 0.95f, 1f); // cool fill z tylu
+            }
+            _preview.ambientColor = new Color(0.35f, 0.35f, 0.4f);
 
             _preview.Render(true);
             GUI.DrawTexture(rect, _preview.EndPreview());
@@ -295,12 +335,28 @@ namespace Plaga44.Editor
         // ITEM GRIP panel -- per-item live grip calibration (Items tab only)
         // =====================================================================
 
+        // ITEM GRIP panel -- READ-ONLY.
+        // Pokazuje config tego itemu ktory jest aktualnie trzymany prawa reka.
+        // Edycja tylko przez HamburgerMenu w play mode.
+        // W edit mode / gdy nic nie trzymane -- info placeholder.
         private void DrawItemGripPanel()
         {
-            if (_itemPrefabs == null || _itemPrefabs.Length == 0) return;
-            if (_selectedItem < 0 || _selectedItem >= _itemPrefabs.Length) return;
+            string itemName = TryGetRightHandItemName();
 
-            string itemName = _itemPrefabs[_selectedItem].name;
+            EditorGUILayout.LabelField("ITEM GRIP", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Read-only. Edycja: HamburgerMenu", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField("Target: item trzymany prawa reka", EditorStyles.miniLabel);
+            EditorGUILayout.Space(4);
+
+            if (string.IsNullOrEmpty(itemName))
+            {
+                EditorGUILayout.HelpBox(
+                    Application.isPlaying
+                        ? "Nic nie trzymasz prawa reka."
+                        : "Play mode wymagany -- brak runtime state.",
+                    MessageType.Info);
+                return;
+            }
 
             // Reload when item changed
             if (_gripItemName != itemName)
@@ -309,38 +365,45 @@ namespace Plaga44.Editor
                 _gripCfg = Plaga44.Inventory.ItemGripConfig.Load(itemName);
             }
 
-            EditorGUILayout.LabelField($"ITEM GRIP -- {itemName}", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Per-item offset (PlayerPrefs)", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField($"Item: {itemName}", EditorStyles.boldLabel);
             EditorGUILayout.Space(2);
 
-            // Position
+            EditorGUI.BeginDisabledGroup(true);
+
             EditorGUILayout.LabelField("Offset Position (m)", EditorStyles.miniBoldLabel);
-            _gripCfg.offsetPos.x = EditorGUILayout.Slider("X", _gripCfg.offsetPos.x, -0.2f, 0.2f);
-            _gripCfg.offsetPos.y = EditorGUILayout.Slider("Y", _gripCfg.offsetPos.y, -0.2f, 0.2f);
-            _gripCfg.offsetPos.z = EditorGUILayout.Slider("Z", _gripCfg.offsetPos.z, -0.2f, 0.2f);
+            EditorGUILayout.Slider("X", _gripCfg.offsetPos.x, -0.2f, 0.2f);
+            EditorGUILayout.Slider("Y", _gripCfg.offsetPos.y, -0.2f, 0.2f);
+            EditorGUILayout.Slider("Z", _gripCfg.offsetPos.z, -0.2f, 0.2f);
 
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("Offset Rotation (deg)", EditorStyles.miniBoldLabel);
-            _gripCfg.offsetRotEuler.x = EditorGUILayout.Slider("Pitch", _gripCfg.offsetRotEuler.x, -180f, 180f);
-            _gripCfg.offsetRotEuler.y = EditorGUILayout.Slider("Yaw",   _gripCfg.offsetRotEuler.y, -180f, 180f);
-            _gripCfg.offsetRotEuler.z = EditorGUILayout.Slider("Roll",  _gripCfg.offsetRotEuler.z, -180f, 180f);
+            EditorGUILayout.Slider("Pitch", _gripCfg.offsetRotEuler.x, -180f, 180f);
+            EditorGUILayout.Slider("Yaw",   _gripCfg.offsetRotEuler.y, -180f, 180f);
+            EditorGUILayout.Slider("Roll",  _gripCfg.offsetRotEuler.z, -180f, 180f);
 
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("Uniform Scale", EditorStyles.miniBoldLabel);
-            _gripCfg.scale = EditorGUILayout.Slider("Scale", _gripCfg.scale, 0.1f, 3.0f);
+            EditorGUILayout.Slider("Scale", _gripCfg.scale, 0.1f, 3.0f);
 
-            EditorGUILayout.Space(6);
-            EditorGUILayout.BeginHorizontal();
-            if (GUILayout.Button("Save"))
-                Plaga44.Inventory.ItemGripConfig.Save(itemName, _gripCfg);
-            if (GUILayout.Button("Reload"))
-                _gripCfg = Plaga44.Inventory.ItemGripConfig.Load(itemName);
-            if (GUILayout.Button("Reset"))
+            EditorGUI.EndDisabledGroup();
+        }
+
+        // Znajdz PlagaGrabber ktory nalezy do RTouch i ma currently held object.
+        // Zwraca BaseName of PlagaGrabbable, albo null.
+        private static string TryGetRightHandItemName()
+        {
+            if (!Application.isPlaying) return null;
+            var grabbers = Object.FindObjectsByType<Plaga44.Inventory.PlagaGrabber>(FindObjectsSortMode.None);
+            foreach (var g in grabbers)
             {
-                Plaga44.Inventory.ItemGripConfig.Clear(itemName);
-                _gripCfg = Plaga44.Inventory.ItemGripConfig.Default;
+                if (g.OwnerController != OVRInput.Controller.RTouch) continue;
+                var held = g.CurrentGrabbed;
+                if (held == null) continue;
+                var pg = held.GetComponent<Plaga44.Inventory.PlagaGrabbable>();
+                if (pg != null) return pg.BaseName;
+                return held.name;
             }
-            EditorGUILayout.EndHorizontal();
+            return null;
         }
 
         private void DrawMaterialSliders(Material mat)

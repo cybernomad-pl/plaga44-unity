@@ -20,6 +20,11 @@ namespace Plaga44.Editor.Setup
             // Gwarantuje: nowe avatary sa zauwazone, uszkodzone matt (np. missing _SPECULAR_SETUP)
             // sa przebudowane, keywordy/workflow zgodne z ApplySpecularWorkflowDefaults.
             Debug.Log($"{LOG} Triggering unconditional rescan (Bootstrap auto-reimport policy)...");
+
+            // Mixamo FBX: extract embedded textures + swap Autodesk/Standard shaders na URP/Lit.
+            // Bez tego avatary renderuja sie rozowo (missing shader binding).
+            MixamoMaterialExtractor.ExtractAll();
+
             ForceReimportAvatarModels();
             AvatarAutoImport.ScanAllForce();
 
