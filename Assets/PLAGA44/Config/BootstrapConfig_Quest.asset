@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e4b09fab5a258714788565653f92441c, type: 3}
   m_Name: BootstrapConfig_Quest
   m_EditorClassIdentifier: Assembly-CSharp::Plaga44.BootstrapConfig
-  scenePath: Assets/PLAGA44/TESTBED_V6.unity
+  scenePath: Assets/PLAGA44/TESTBED.unity
   terrainAssetPath: Assets/Potok/Terrain/Scene_A_Terrain.asset
   terrainMaterialPath: Assets/PLAGA44/Materials/TerrainLit.mat
   terrainLayersFolder: Assets/PLAGA44/TerrainLayers

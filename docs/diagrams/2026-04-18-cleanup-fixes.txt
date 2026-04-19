@@ -1,0 +1,218 @@
+=============================================================================
+ CLEANUP FIXES -- wszystko dziala z pustego klona (bez asset store)
+ 2026-04-18
+=============================================================================
+
+-----------------------------------------------------------------------------
+ 1) REVOLVER -- proceduralny, zero external FBX
+-----------------------------------------------------------------------------
+
+  BYLO: RevolverPrefabBuilder.cs z SourceFbx =
+        "Assets/GameDevHQ/FileBase/3D/Props/Weapons/Revolver/FBX/Revolver.fbx"
+        -> GameDevHQ nie w repo -> prefab nigdy nie powstawal na czystym klonie
+
+  TERAZ: RevolverPrefabBuilder.cs buduje z prymitywow Unity:
+
+        +--------------------------------+
+        | Revolver (root)                |
+        |  [Rigidbody][BoxCollider]      |
+        |  [PlagaGrabbable][HapticOnGrab]|
+        |                                |
+        |  +-- Barrel  (Cylinder, +X)    |
+        |  +-- Drum    (Cylinder, gruba) |
+        |  +-- Grip    (Cube, -18 deg)   |
+        |  +-- Trigger (Cube, maly)      |
+        +--------------------------------+
+        URP/Lit Revolver_Mat
+         (metallic 0.85, smooth 0.55,
+          gunmetal #1F1F24)
+
+  PATH:
+    Assets/Editor/RevolverPrefabBuilder.cs   -- kod (procedural)
+    Assets/PLAGA44/Materials/Revolver_Mat.mat -- tworzony auto
+    Assets/Resources/Items/Revolver.prefab    -- tworzony auto
+
+  INVOCATION: InventorySetup.Run() -> RevolverPrefabBuilder.EnsurePrefab()
+             -> wywolywane przy kazdym Bootstrap
+             -> File.Exists check -> buduje tylko jesli brak
+
+-----------------------------------------------------------------------------
+ 2) ROBOT avatar -- prefab variant StylizedCharacterLocomotion
+-----------------------------------------------------------------------------
+
+  CEL: "skeleton locomotion" avatar w Content Editor obok PINEA
+
+  FLOW:
+
+   +-------------------------------------+
+   | Bootstrap.Run()                     |
+   | -> RobotAvatarSetup.Run(cfg)  NEW   |
+   +----------+--------------------------+
+              |
+              v
+   +------------------------------------------------------------+
+   | RobotAvatarSetup:                                          |
+   |   1. Load src: Assets/Samples/Meta XR Movement SDK/83.0.0/ |
+   |      Advanced Samples/ISDKLocomotion/Prefabs/              |
+   |      StylizedCharacterLocomotion.prefab                    |
+   |   2. Ensure folder: Assets/PLAGA44/Avatars/ROBOT/          |
+   |   3. Instantiate + SaveAsPrefabAsset:                      |
+   |      Assets/PLAGA44/Avatars/ROBOT/ROBOT.prefab             |
+   +----------+-------------------------------------------------+
+              |
+              v
+   +------------------------------------------------------------+
+   | AvatarRegistrySetup.Run(cfg) -> AvatarAutoImport.ScanAll   |
+   |  -> AvatarRegistryBuilder.Rebuild:                         |
+   |      scan Assets/PLAGA44/Avatars/*/                        |
+   |      finds ROBOT/ROBOT.prefab -> adds to registry          |
+   +------------------------------------------------------------+
+              |
+              v
+   +------------------------------------------------------------+
+   | Content Editor (PLAGA44 Content Editor window)             |
+   |  Avatars tab pokazuje: PINEA_YNG5, ROBOT                   |
+   +------------------------------------------------------------+
+
+  IDEMPOTENT: jesli ROBOT.prefab istnieje, RobotAvatarSetup skip.
+  Jesli source SDK missing -> LogError + skip (nie-blocking).
+
+-----------------------------------------------------------------------------
+ 3) AVATAR RESCAN -- ZAWSZE przy bootstrap (Borys wymog)
+-----------------------------------------------------------------------------
+
+  BYLO: AvatarRegistrySetup wywolywal ScanAllForce TYLKO gdy registry
+        missing/empty/broken. Istniejacy mat z brakami (np. brak
+        _SPECULAR_SETUP keyword = pink) nigdy nie byl naprawiany.
+
+  TERAZ:
+
+     +------------------------+
+     | Bootstrap raz na sesje |
+     |  (SessionState guard)  |
+     +---------+--------------+
+               |
+               v
+     +------------------------+
+     | AvatarRegistrySetup    |
+     |  ZAWSZE:               |
+     |   ForceReimportModels  |
+     |   ScanAllForce         |
+     |   (rebuilds registry)  |
+     +---------+--------------+
+               |
+               v
+     +------------------------------------------+
+     | CreateOrUpdateMaterial(updateAll=true)   |
+     |  ApplySpecularWorkflowDefaults:          |
+     |   mat.EnableKeyword("_SPECULAR_SETUP")   |
+     |  -> PINEA auto-fix przy kazdym bootstrap |
+     +------------------------------------------+
+
+  OVERHEAD: rescan raz na sesje (nie co kompilacja). SessionKey guarda.
+
+-----------------------------------------------------------------------------
+ 4) ITEM GRIP w Content Editor -- prawa kolumna (Items tab)
+-----------------------------------------------------------------------------
+
+  BYLO: AvatarBrowserWindow prawa kolumna (220px) = tylko Materials
+
+  TERAZ (tab Items):
+
+  +----------+--------------------+------------------------+
+  | [Items]  |                    | ITEM GRIP -- Revolver  |
+  |          |   3D PREVIEW       | Per-item offset        |
+  | Revolver |                    |                        |
+  |          |    (revolver)      | Offset Position (m)    |
+  |          |                    |   X [=====|=====]      |
+  |          |                    |   Y [=====|=====]      |
+  |          |                    |   Z [=====|=====]      |
+  |          |                    |                        |
+  |          |                    | Offset Rotation (deg)  |
+  |          |                    |   Pitch [=====|=====]  |
+  |          |                    |   Yaw   [=====|=====]  |
+  |          |                    |   Roll  [=====|=====]  |
+  |          |                    |                        |
+  |          |                    | Uniform Scale          |
+  |          |                    |   Scale [=====|=====]  |
+  |          |                    |                        |
+  |          |                    | [Save] [Reload][Reset] |
+  |          |                    |                        |
+  |          |                    | Materials:             |
+  |          |                    |   > Revolver_Mat       |
+  +----------+--------------------+------------------------+
+
+  FLOW:
+    - Select item w liscie -> _selectedItem
+    - DrawItemGripPanel:
+        itemName = _itemPrefabs[_selectedItem].name
+        if _gripItemName != itemName:
+            _gripItemName = itemName
+            _gripCfg = ItemGripConfig.Load(itemName)  -- z PlayerPrefs
+
+    - Sliders modyfikuja _gripCfg live
+    - [Save] -> ItemGripConfig.Save(itemName, _gripCfg)
+    - [Reload] -> re-Load (discard unsaved)
+    - [Reset] -> Clear + Default
+
+  KEY SPACE (PlayerPrefs):
+    Plaga44_ItemGrip_{NAME}_{field}
+      field = posX|posY|posZ|rotX|rotY|rotZ|scale
+
+  INTEGRACJA z runtime:
+    PlagaGrabbable.GrabBegin -> ItemGripConfig.Load(BaseName)
+    Ten sam klucz -> zmiany w editor widoczne w runtime po ponownym grab
+
+  AVATARS tab: materials bez zmian (ITEM GRIP panel niewidoczny)
+
+-----------------------------------------------------------------------------
+ 5) RENAME TESTBED_V6 -> TESTBED (zero wersjonowania)
+-----------------------------------------------------------------------------
+
+  PLIKI ZAKTUALIZOWANE:
+    Assets/PLAGA44/Config/BootstrapConfig.cs:15       V6 -> TESTBED
+    Assets/PLAGA44/Config/BootstrapConfig_Quest.asset V6 -> TESTBED
+    Assets/Editor/BuildScript.cs:38 (komentarz)       V6 -> TESTBED
+
+  USUNIETE:
+    Assets/PLAGA44/TESTBED_V8.unity + .meta           (duplikat TESTBED.unity)
+
+  ZACHOWANE:
+    Assets/PLAGA44/TESTBED.unity    -- jedyna canonical scena
+
+-----------------------------------------------------------------------------
+ 6) PINEA_YNG5 pink FIX (auto, przez bootstrap)
+-----------------------------------------------------------------------------
+
+  1. Usuniety PINEA_YNG5_Mat.mat + .meta (broken -- brak _SPECULAR_SETUP)
+  2. Bootstrap -> AvatarRegistrySetup -> ScanAllForce (ZAWSZE)
+  3. AvatarAutoImport wykrywa brak mat -> CreateOrUpdateMaterial(created=true)
+  4. ApplySpecularWorkflowDefaults wlacza _SPECULAR_SETUP keyword
+  5. Mat zapisany z prawidlowym keyword -> render poprawny
+
+=============================================================================
+ BOOTSTRAP PIPELINE (NEW STATE)
+=============================================================================
+
+  Bootstrap.Run()
+    |-- OpenScene (cfg.scenePath = TESTBED.unity)
+    |-- RunSetup:
+    |     TerrainSetup
+    |     SkyboxSetup
+    |     BounceLightSetup
+    |     PlayerRigSetup
+    |     InventorySetup
+    |       |-- RevolverPrefabBuilder.EnsurePrefab    PROCEDURAL
+    |     SceneSingletonsSetup
+    |     ObjectSpawnerSetup
+    |     RobotAvatarSetup                            NEW -- ROBOT.prefab
+    |     AvatarRegistrySetup                         FORCE RESCAN ZAWSZE
+    |       |-- ForceReimportAvatarModels
+    |       |-- AvatarAutoImport.ScanAllForce
+    |            |-- BuildDaeMaterial (PINEA with _SPECULAR_SETUP)
+    |            |-- AvatarRegistryBuilder.Rebuild
+    |                 (pick up PINEA + ROBOT + future avatars)
+    |     LightingCleanup
+    |-- FocusTerrain
+
+=============================================================================

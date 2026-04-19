@@ -1,0 +1,187 @@
+=============================================================================
+ CLEANUP REVIEW -- scene/avatar/revolver/content-editor/robot/item-grip
+ 2026-04-18
+=============================================================================
+
+-----------------------------------------------------------------------------
+  1) SCENY -- rename do "TESTBED" (bez wersji) + INTROVERSE
+-----------------------------------------------------------------------------
+
+  OBECNIE:
+  +----------------------------------------+
+  | Assets/PLAGA44/                        |
+  |   TESTBED.unity       <- OK            |
+  |   TESTBED_V8.unity    <- DUPLIKAT      |   (diff pusty, 100% identyczne)
+  +----------------------------------------+
+  |  REFERENCJE W KODZIE:                  |
+  |  BootstrapConfig.cs:15       -> V6     |  <-- DEAD PATH (nie istnieje)
+  |  BootstrapConfig_Quest.asset -> V6     |  <-- DEAD PATH
+  |  BuildScript.cs:19           -> TESTBED|  <-- OK
+  |  BuildScript.cs:38 komentarz -> V6     |  (tylko komentarz)
+  |  BuildScenesConfig.cs        -> V2     |  (tylko komentarz)
+  +----------------------------------------+
+
+  CEL:
+  +----------------------------------------+
+  | Assets/PLAGA44/                        |
+  |   TESTBED.unity       <- jedyna scena  |
+  |   INTROVERSE.unity    <- NOWA (intro)  |
+  +----------------------------------------+
+  |  BootstrapConfig.scenePath = TESTBED   |
+  |  BootstrapConfig_Quest.asset = TESTBED |
+  |  BuildScript komentarze -> TESTBED     |
+  |  BuildScenes[0] = INTROVERSE.unity     |
+  |  BuildScenes[1] = TESTBED.unity        |
+  +----------------------------------------+
+
+  AKCJA:
+    - del Assets/PLAGA44/TESTBED_V8.unity (+meta)
+    - sed w kodzie: TESTBED_V6 -> TESTBED (3 pliki + asset)
+    - create Assets/PLAGA44/INTROVERSE.unity (pusta scena, bootstrap dopelni)
+    - feature/intro-scene branch: update plan -> INTROVERSE (nie TESTBED_Intro)
+
+-----------------------------------------------------------------------------
+  2) PINEA_YNG5 -- pink material (ROOT CAUSE ZNANY)
+-----------------------------------------------------------------------------
+
+  ISSUE #155 (komentarz w AvatarImport.cs:73):
+    "Without _SPECULAR_SETUP keyword -> shader falls back to metallic
+     branch -> pink/broken look"
+
+  CURRENT STATE (PINEA_YNG5_Mat.mat):
+  +----------------------------------------+
+  | m_Shader: URP/Lit (GUID 933532a4...)   |
+  | m_WorkflowMode: 1 (Specular)           |  <-- pole OK
+  | m_ValidKeywords:                       |
+  |   - _METALLICSPECGLOSSMAP              |
+  |   - _NORMALMAP                         |
+  |   - _SPECGLOSSMAP                      |
+  |   !!! BRAK _SPECULAR_SETUP !!!         |  <-- ROZOWE
+  +----------------------------------------+
+
+  PROPONOWANA AKCJA (opcja B -- respect importer):
+    1. del Assets/PLAGA44/Avatars/PINEA_YNG5/PINEA_YNG5_Mat.mat (+meta)
+    2. Trigger AvatarAutoImport (menu: Rescan w Content Editor)
+    3. Importer regeneruje mat z pelnymi keywords (w tym _SPECULAR_SETUP)
+
+  ALTERNATYWY:
+    A. patch YAML (dodac _SPECULAR_SETUP do m_ValidKeywords) -- szybkie
+       ale omija pipeline, przy nastepnym reimport moze zniknac znowu
+    C. usunac caly folder PINEA_YNG5 i reimportowac z _avatars_backup
+       -- nuclear, wiecej pracy
+
+-----------------------------------------------------------------------------
+  3) REVOLVER -- source FBX ZAGINAL (moj git clean -fd usunal GameDevHQ)
+-----------------------------------------------------------------------------
+
+  RevolverPrefabBuilder.cs:19
+    SourceFbx = "Assets/GameDevHQ/FileBase/3D/Props/Weapons/Revolver/FBX/Revolver.fbx"
+
+  STATUS:
+    - GameDevHQ = Unity Asset Store free pack (nie w repo origin/main)
+    - Revolver.prefab w Assets/Resources/Items/ jest (tracked), ale
+      mesh/material referencja do usunietego GameDevHQ = BROKEN
+
+  OPCJE:
+    A. Reimportowac GameDevHQ z Unity Asset Store (Borys robi w Unity Hub)
+       -> RevolverPrefabBuilder.EnsurePrefab() odbuduje prefab
+    B. Usunac stary prefab + zbudowac nowy z primitive mesh (placeholder)
+    C. Znalezc inny rewolwer w backupie lub pobrac free model
+
+  REKOMENDACJA: A (Borys dostaje komende do recznego reimportu z Asset Store)
+
+-----------------------------------------------------------------------------
+  4) CONTENT EDITOR -- "pusty" w avatarach/itemach
+-----------------------------------------------------------------------------
+
+  AvatarBrowserWindow.cs load:
+    - Avatary: AvatarRegistry.asset (ma 1 entry: PINEA_YNG5)
+    - Itemy:   Resources.LoadAll<GameObject>("Items") (1 entry: Revolver)
+
+  MOZLIWE PRZYCZYNY "pusty":
+    1. Reimport 4GB Library jeszcze trwa po clean -fd
+       -> Unity nie zaladowal prefab references -> lista pusta wizualnie
+    2. PINEA prefab = pink mat = wizualnie "nic"; item preview Revolver
+       = broken mesh (GameDevHQ) = czarny kwadrat
+    3. Cache window -- wymaga Refresh/Rescan
+
+  AKCJA (ZERO KODU):
+    1. Poczekac na koniec reimportu
+    2. Content Editor -> Rescan (avatary) + Refresh (items)
+    3. Jesli nadal pusto -> debug
+
+-----------------------------------------------------------------------------
+  5) ROBOT AVATAR -- dodac do Content Editora
+-----------------------------------------------------------------------------
+
+  _avatars_backup/Avatars/ ma 60+ Mixamo characters (Arissa, ChXX_nonPBR,
+  Paladin, Swat, Vanguard, ...) ale BRAK robota.
+
+  OPCJE (wymagaja decyzji Borysa):
+    A. Mixamo "Mech" / "Combat Robot" -- darmowe, FBX download
+    B. Unity Asset Store free robot (Kyle Robot, Unity-Chan Robot)
+    C. Borys ma wlasny model -- wskaze sciezke
+    D. Placeholder -- capsule + camera head (brzydkie ale wiadomo gdzie jest)
+
+  AvatarImport.cs pipeline:
+    - DAE -> URP/Lit Specular -> Prefab -> Registry (auto)
+    - FBX (Mixamo Humanoid) -> embedded materials
+    Model robota MUSI byc Humanoid rig (dla Meta Movement SDK retargeting)
+
+  Dobrze by bylo zeby robot byl HUMANOID (armored/mecha style)
+  a nie prawdziwy 4-nozny/quadruped robot -- bo PlayerAvatar expects humanoid.
+
+-----------------------------------------------------------------------------
+  6) ITEM GRIP PER-ITEM -- AUDYT (JUZ JEST, DZIALA)
+-----------------------------------------------------------------------------
+
+  FLOW (per-item):
+
+   +--------------------------+        +---------------------------+
+   | PlagaGrabbable:GrabBegin |        | Hamburger Menu -> ITEM    |
+   |                          |        | GRIP sekcja (SettingsReg) |
+   | ApplyGripConfig(         |        |                           |
+   |   ItemGripConfig.Load(   |        | t = ItemBrowser.          |
+   |     BaseName             |        |    _currentItem           |
+   |   )                      |        |                           |
+   | )                        |        | ItemGripConfig.Save(      |
+   +-----------+--------------+        |   t.BaseName,             |
+               ^                       |   t.GripConfig)           |
+               |                       +-------------+-------------+
+               |                                     |
+               |                                     v
+   +-----------+--------------------+ +--------------+-------------+
+   |  PlayerPrefs key space:        | |  Slider wartosci bind do    |
+   |  Plaga44_ItemGrip_{NAME}_posX  | |  t.GripConfig (target)      |
+   |  ..._posY ..._posZ             | |  -- live preview w grze     |
+   |  ..._rotX ..._rotY ..._rotZ    | +----------------------------+
+   |  ..._scale                     |
+   +--------------------------------+
+
+  STATUS: [PASS]
+    - Load per BaseName          -> ItemGripConfig.cs:35
+    - Save per BaseName          -> SettingsRegistry.cs:374
+    - Reset per BaseName         -> SettingsRegistry.cs:383
+    - Grab loads on BaseName     -> PlagaGrabbable.cs:153
+    - Hamburger "ITEM GRIP"      -> SettingsRegistry.cs:319
+
+  CO MOZE PSUC ZE STRONY USER-a:
+    - Dwa itemy o tym samym BaseName -> wspolne PlayerPrefs key -> shared
+    - Brak currently-held-item -> slidery pokazuja defaults, Save -> "no active item"
+
+  REKOMENDACJA: ZADNA zmiana kodu. Runtime test potwierdzi.
+
+=============================================================================
+  KOLEJNOSC DZIALANIA (wszystko na branchu refactor/cleanup)
+=============================================================================
+
+  [1] Rename TESTBED_V6 -> TESTBED w 3 plikach + asset  (3 min)
+  [2] del TESTBED_V8.unity duplikat                     (1 min)
+  [3] Utworz INTROVERSE.unity (pusta)                   (2 min)
+  [4] del PINEA_YNG5_Mat.mat -> reimport                (2 min)
+  [5] Borys reimportuje GameDevHQ (Asset Store)         (Borys, 5 min)
+  [6] RevolverPrefabBuilder rebuild                     (1 min)
+  [7] Runtime test: Content Editor Rescan, Item Grip    (Borys, 5 min)
+  [8] ROBOT -- decyzja zrodla (Borys input)             (? min)
+
+=============================================================================
