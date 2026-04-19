@@ -179,6 +179,25 @@ namespace Plaga44
             _spawnedPreview = null;
         }
 
+        /// <summary>Confirm preview -- spawned preview staje sie realnym itemem w swiecie.
+        /// ItemBrowser przestaje go sledzic (Close menu nie bedzie go niszczyl).
+        /// Przycisk A w ITEMS sekcji HamburgerMenu.</summary>
+        public bool ConfirmSpawn()
+        {
+            if (_spawnedPreview == null)
+            {
+                Debug.LogWarning($"{LOG} ConfirmSpawn: brak preview do potwierdzenia");
+                return false;
+            }
+            string prevName = _spawnedPreview.name;
+            _spawnedPreview.name = prevName.StartsWith("ItemPreview_")
+                ? "Item_" + prevName.Substring("ItemPreview_".Length)
+                : "Item_" + prevName;
+            Debug.Log($"{LOG} ConfirmSpawn: {_spawnedPreview.name} zostaje w swiecie (unreferenced)");
+            _spawnedPreview = null; // unreferencuj -- despawn nie tknie go
+            return true;
+        }
+
         private Vector3 GetSpawnPosition()
         {
             Transform head = FindHead();

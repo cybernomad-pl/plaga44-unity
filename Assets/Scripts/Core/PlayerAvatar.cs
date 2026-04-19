@@ -230,7 +230,26 @@ namespace Plaga44
             _instance = Instantiate(prefab, transform);
             _instance.name = "Avatar_" + prefab.name;
             _instance.transform.localPosition = new Vector3(0f, yOffset, 0f);
+            _instance.transform.localRotation = Quaternion.identity;
+            _instance.transform.localScale    = Vector3.one; // reset przed NormalizeToHeight (unika cieniutkiego stickmana gdy parent ma niestandardowy scale)
             NormalizeToHeight(_instance, TargetAvatarHeight);
+
+            // Wyłącz AnimatorController -- avatar statyczny (T-pose) dopoki nie dodamy
+            // Meta XR Movement Retargetera. Inaczej idle animation leci.
+            var anim = _instance.GetComponent<Animator>();
+            if (anim != null)
+            {
+                anim.runtimeAnimatorController = null;
+                Debug.Log($"{LOG} Animator controller nulled (T-pose, brak idle)");
+            }
+
+            // Debug pozycji -- zeby zdiagnozowac "stoi nade mna"
+            Debug.Log($"{LOG} Avatar '{_instance.name}' "
+                + $"worldPos={_instance.transform.position:F2} "
+                + $"localPos={_instance.transform.localPosition:F2} "
+                + $"scale={_instance.transform.localScale:F3} "
+                + $"parent={transform.name} parentPos={transform.position:F2}");
+
             _spawnedMode = mode;
         }
 

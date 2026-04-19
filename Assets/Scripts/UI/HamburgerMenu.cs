@@ -158,7 +158,7 @@ namespace Plaga44.UI
             if (PressedBack()) { GoBack(); return; }
             if (PressedEnter() && _level != MenuLevel.Settings) { GoForward(); return; }
 
-            // A button w AVATAR sekcji = potwierdz preview (swap avatar na graczu)
+            // A button w AVATAR / ITEMS sekcji = potwierdz preview (zostaje w swiecie)
             if (_level == MenuLevel.Settings && OVRInput.GetDown(OVRInput.Button.One))
             {
                 string section = _currentGroupSections[_groupIndex];
@@ -170,6 +170,13 @@ namespace Plaga44.UI
                         avatar.ConfirmPreview();
                         Debug.Log($"{LOG} [A] Avatar confirmed -> {avatar.CurrentLabel}");
                     }
+                    return;
+                }
+                if (section == "ITEMS")
+                {
+                    var ib = Plaga44.ItemBrowser.Instance;
+                    if (ib != null && ib.ConfirmSpawn())
+                        Debug.Log($"{LOG} [A] Item confirmed -> spawned w pozycji preview");
                     return;
                 }
             }
