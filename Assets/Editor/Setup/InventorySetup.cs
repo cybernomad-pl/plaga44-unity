@@ -23,8 +23,9 @@ namespace Plaga44.Editor.Setup
 
         public static bool Run(BootstrapConfig cfg)
         {
-            if (!RevolverPrefabBuilder.EnsurePrefab())
-                Debug.LogWarning($"{LOG} [WARN] Revolver prefab missing -- loadout will fail");
+            // Revolver loadout DISABLED -- source FBX (GameDevHQ) zaginiony.
+            // Re-enable gdy Borys zdecyduje o zrodle rewolwera i odbuduje prefab.
+            // RevolverPrefabBuilder.EnsurePrefab();
 
             var rig = GameObject.Find(OvrRigName);
             if (rig == null)

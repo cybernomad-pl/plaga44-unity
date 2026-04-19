@@ -128,7 +128,6 @@ namespace Plaga44.Editor
             changed |= LogStep("InventorySetup",      () => InventorySetup.Run(cfg));
             changed |= LogStep("SceneSingletonsSetup",() => SceneSingletonsSetup.Run(cfg));
             changed |= LogStep("ObjectSpawnerSetup",  () => ObjectSpawnerSetup.Run(cfg));
-            changed |= LogStep("RobotAvatarSetup",    () => RobotAvatarSetup.Run(cfg));
             LogStepVoid("AvatarRegistrySetup",        () => AvatarRegistrySetup.Run(cfg));
             changed |= LogStep("LightingCleanup",     () => LightingTools.AutoClearIfNeeded());
 
