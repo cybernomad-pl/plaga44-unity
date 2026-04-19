@@ -140,11 +140,25 @@ namespace Plaga44
             SetActiveIndex(_activeIndex);
         }
 
-        /// <summary>Destroy current preview (HamburgerMenu on close).</summary>
+        /// <summary>Destroy current preview (HamburgerMenu on close).
+        /// Brute-force cleanup: niszczy tracked _spawnedPreview PLUS szuka w scenie
+        /// orphaned AvatarPreview_* (jak zostaly przez reparent/referencje reset).</summary>
         public void HideAllPreviews()
         {
             DespawnPreview();
-            Debug.Log($"{LOG} HideAllPreviews: preview despawned (_activeIndex={_activeIndex} retained)");
+
+            // Brute-force -- usun kazdego orphaned preview w scenie
+            int orphanKilled = 0;
+            foreach (var t in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
+            {
+                if (t == null) continue;
+                if (t.name.StartsWith("AvatarPreview_"))
+                {
+                    Destroy(t.gameObject);
+                    orphanKilled++;
+                }
+            }
+            Debug.Log($"{LOG} HideAllPreviews: tracked preview=null, orphans killed={orphanKilled}, _activeIndex={_activeIndex} retained");
         }
 
         // =====================================================================
