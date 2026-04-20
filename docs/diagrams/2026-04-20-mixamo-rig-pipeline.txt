@@ -1,0 +1,155 @@
+=============================================================================
+ MIXAMO AVATAR RIG PIPELINE -- Meta XR Movement SDK retarget live
+ 2026-04-20
+=============================================================================
+
+  PROBLEM:
+    "Rig Error: Bone length in configuration does not match position in
+     animation file: mixamorig:LeftLeg : position error = 388 mm"
+    -- avatar animuje sie, ale z artefaktami (skala, proporcje)
+
+  PRZYCZYNA:
+    Mixamo FBX zawiera wbudowane AnimationClip-y (Idle, Jump, ...) z
+    zapisanymi ABSOLUTE bone positions z eksportu. CreateFromThisModel
+    regeneruje Avatar z AKTUALNEGO T-pose. Bone lengths sie roznia -->
+    Unity warn-uje + SDK retargeter czasem sypie bledami.
+
+  ROZWIAZANIE:
+    Wyłącz importAnimation -- klipy niepotrzebne (retargeting LIVE z Questa,
+    nie z preloaded klipow). Zero klipow = zero mismatch.
+
+-----------------------------------------------------------------------------
+ PIPELINE (auto przy Bootstrap rescan, bez klikania)
+-----------------------------------------------------------------------------
+
+   +------------------------------------------------------------+
+   | [1] IMPORT FBX                                             |
+   |     MixamoMaterialExtractor.ExtractOne(fbxPath)            |
+   |                                                            |
+   |     animationType           = Human                        |
+   |     avatarSetup             = CreateFromThisModel          |
+   |     importAnimation         = false  *** fix Rig Error     |
+   |     optimizeGameObjects     = false  *** SDK retarget req  |
+   |     isReadable              = false  *** VRAM optym Quest  |
+   |     materialLocation        = External                     |
+   |     ExtractTextures         -> Textures/                   |
+   +------------------------+-----------------------------------+
+                            |
+                            v
+   +------------------------------------------------------------+
+   | [2] AVATAR CONFIGURATION (Unity native, auto)              |
+   |                                                            |
+   |     - skanuje bones z prefixem "mixamorig:"                |
+   |     - mapuje na HumanBodyBones (15 required + 40 optional) |
+   |     - muscle limits z proporcji modelu                     |
+   |     - Avatar asset zapisany w FBX (embedded)               |
+   |                                                            |
+   |     REZULTAT: Animator.avatar != null, isHuman = true      |
+   +------------------------+-----------------------------------+
+                            |
+                            v
+   +------------------------------------------------------------+
+   | [3] MATERIAL POST-PROCESS (URP Lit)                        |
+   |     ConvertMaterialsToUrp:                                 |
+   |                                                            |
+   |     mat.shader = URP/Lit                                   |
+   |     _BaseMap        = diffuse texture  (z Textures/)       |
+   |     _BumpMap        = normal   (+ _NORMALMAP)              |
+   |     _MetallicGlossMap = spec   (+ _METALLICSPECGLOSSMAP)   |
+   |     workflow = Metallic (0), smoothness = 0.5              |
+   +------------------------+-----------------------------------+
+                            |
+                            v
+   +------------------------------------------------------------+
+   | [4] PREFAB BUILD (AvatarBuilder.CreateOrUpdatePrefab)      |
+   |                                                            |
+   |     - Instantiate FBX                                      |
+   |     - Animator.avatar = CreatedAvatar                      |
+   |     - AnimatorController = null  (retarget always live)    |
+   |     - Attach OVRUnityHumanoidSkeletonRetargeter (runtime)  |
+   |     - SaveAsPrefabAsset                                    |
+   +------------------------+-----------------------------------+
+                            |
+                            v
+   +------------------------------------------------------------+
+   | [5] VALIDATION (AvatarRegistryBuilder.ValidateRig)         |
+   |                                                            |
+   |     [x] Animator != null                                   |
+   |     [x] Animator.avatar != null                            |
+   |     [x] Animator.avatar.isValid                            |
+   |     [x] Animator.isHuman == true                           |
+   |     [x] SkinnedMeshRenderer exists                         |
+   |                                                            |
+   |     Jesli jakis [ ] == false -> broken = true, errorMsg    |
+   +------------------------+-----------------------------------+
+                            |
+                            v
+   +------------------------------------------------------------+
+   | [6] RUNTIME RETARGETING (Meta XR Movement SDK)             |
+   |                                                            |
+   |     OVRBody                                                |
+   |       (Quest body tracking)                                |
+   |       -> 70 joints / 3D positions                          |
+   |                            |                               |
+   |                            v                               |
+   |     OVRUnityHumanoidSkeletonRetargeter                     |
+   |       -> Quest joints mapped na HumanBodyBones             |
+   |       -> compute muscle values (Unity humanoid system)     |
+   |                            |                               |
+   |                            v                               |
+   |     Animator                                               |
+   |       -> apply muscle values to avatar.bones               |
+   |                            |                               |
+   |                            v                               |
+   |     SkinnedMeshRenderer                                    |
+   |       -> deform mesh (max 4 bones per vertex)              |
+   |                                                            |
+   |     WYNIK: avatar porusza sie dokladnie jak gracz Questa.  |
+   +------------------------------------------------------------+
+
+-----------------------------------------------------------------------------
+ KLUCZOWE DECYZJE (dla zrozumienia pipeline)
+-----------------------------------------------------------------------------
+
+  1. DLACZEGO importAnimation=false?
+     Meta XR SDK uzywa LIVE body tracking z Questa. Wbudowane klipy
+     (Idle.fbx, Jump.fbx) nie sa nigdy odpalane. Ich obecnosc tylko
+     generuje Rig Error warning.
+
+  2. DLACZEGO optimizeGameObjects=false?
+     Unity "optimize" zwija hierarchie bones do bind pose. SDK retargeter
+     potrzebuje dostepu do KAZDEGO bone transform (Animator.GetBoneTransform).
+     Zoptymalizowane = niektore bones niewidoczne.
+
+  3. DLACZEGO CreateFromThisModel?
+     Alternatywne: CopyFromOther (uzywa avatar innego modelu). Jesli modele
+     maja rozne proporcje -> muscle limits z "othera" nie pasuja do "thisa".
+     CreateFromThisModel dba o spojnosc.
+
+  4. DLACZEGO AnimatorController = null?
+     Live retarget nadpisuje transformy bones KAZDEJ klatki. Controller z
+     klipami walczylby z retargetem o te same transformy.
+
+  5. DLACZEGO Humanoid nie Generic?
+     Generic = rig-specific (bone names musza pasowac 1:1). Dodanie nowego
+     avatara z innymi bone names = zepsucie retargetu. Humanoid abstrahuje
+     bones przez muscle system = retarget dzialac bedzie z dowolnym
+     Humanoid avatarem.
+
+-----------------------------------------------------------------------------
+ SPOSOB TESTOWANIA (na PC bez Questa)
+-----------------------------------------------------------------------------
+
+  PC editor bez Quest:
+    - OVRBody nie dostaje joints -> retargeter spamuje "Global joint set
+      is invalid" -> RetargeterGuard filtruje
+    - Avatar stoi w T-pose (no muscle input)
+    - Preview w scenie widoczny, proporcje OK, materialy URP
+
+  Test PROPER retargetingu:
+    - Build APK, deploy na Quest 3
+    - Headset wlacza body tracking
+    - Avatar podmienia sie za gracza (OVRRig + PlayerAvatar)
+    - Movement gracza = movement avatara live
+
+=============================================================================

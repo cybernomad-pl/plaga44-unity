@@ -90,6 +90,29 @@ namespace Plaga44.Editor.Setup
                 importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
                 changed = true;
             }
+            // Retarget live z Questa -- klipy animacji z FBX niepotrzebne.
+            // Ich obecnosc powoduje "Rig Error: Bone length in configuration does
+            // not match position in animation file" bo klipy maja absolute positions
+            // z eksportu Mixamo, a avatar regenerowany (CreateFromThisModel) ma
+            // swieze bone lengths. Usunac klipy = usunac mismatch.
+            if (importer.importAnimation)
+            {
+                importer.importAnimation = false;
+                changed = true;
+            }
+            // Zachowaj pelna hierarchie bones -- retargeter SDK wymaga dostepu
+            // do transformow per-bone. Optimize zwija je do bind pose binding.
+            if (importer.optimizeGameObjects)
+            {
+                importer.optimizeGameObjects = false;
+                changed = true;
+            }
+            // VRAM optymalizacja Quest -- mesh nie musi byc CPU-readable.
+            if (importer.isReadable)
+            {
+                importer.isReadable = false;
+                changed = true;
+            }
             if (changed)
             {
                 importer.SaveAndReimport();
