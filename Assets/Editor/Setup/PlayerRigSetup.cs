@@ -34,7 +34,33 @@ namespace Plaga44.Editor.Setup
             changed |= SetupPositionPersistence(rig, cfg);
             changed |= PositionRig(rig, cfg);
             changed |= SetupFingerFreezer(rig);
+            changed |= SetupAnimationController(rig);
+            changed |= SetupFreefallCamera(rig);
             return changed;
+        }
+
+        // Animation bridge: LocomotionController -> PlayerAnimationController -> Animator on avatar.
+        private static bool SetupAnimationController(GameObject rig)
+        {
+            var existing = rig.GetComponent<Plaga44.Locomotion.PlayerAnimationController>();
+            if (existing != null) { Debug.Log($"{LOG} [OK] PlayerAnimationController"); return false; }
+            var comp = Undo.AddComponent<Plaga44.Locomotion.PlayerAnimationController>(rig);
+            comp.motionSourceBehaviour = rig.GetComponent<Plaga44.Locomotion.LocomotionController>();
+            Debug.Log($"{LOG} [ADDED] PlayerAnimationController");
+            return true;
+        }
+
+        // Freefall camera: pitch lookdown podczas spadania (start gry).
+        private static bool SetupFreefallCamera(GameObject rig)
+        {
+            var existing = rig.GetComponent<Plaga44.Locomotion.FreefallCameraController>();
+            if (existing != null) { Debug.Log($"{LOG} [OK] FreefallCameraController"); return false; }
+            var comp = Undo.AddComponent<Plaga44.Locomotion.FreefallCameraController>(rig);
+            comp.motionSourceBehaviour = rig.GetComponent<Plaga44.Locomotion.LocomotionController>();
+            var ts = rig.transform.Find("TrackingSpace");
+            if (ts != null) comp.trackingSpace = ts;
+            Debug.Log($"{LOG} [ADDED] FreefallCameraController");
+            return true;
         }
 
         // HandFingerFreezer -- added to SDK char (same GO as Animator).
