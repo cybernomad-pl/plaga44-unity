@@ -236,13 +236,28 @@ namespace Plaga44
             _instance.transform.localScale    = Vector3.one; // reset przed NormalizeToHeight (unika cieniutkiego stickmana gdy parent ma niestandardowy scale)
             NormalizeToHeight(_instance, TargetAvatarHeight);
 
-            // Wyłącz AnimatorController -- avatar statyczny (T-pose) dopoki nie dodamy
-            // Meta XR Movement Retargetera. Inaczej idle animation leci.
+            // AnimatorController fallback: gdy body tracking Questa nie dziala (editor,
+            // PC, Quest bez zgody na body tracking), retargeter nie dostaje danych.
+            // PLAGA44_PlayerAnimator (zbudowany przez PlayerAnimatorSetup) ma Idle +
+            // Locomotion blend (Run/Strafe). Retargeter ZAWSZE nadpisuje go gdy body
+            // tracking jest live -- fallback aktywny tylko gdy brak danych z Questa.
             var anim = _instance.GetComponent<Animator>();
             if (anim != null)
             {
-                anim.runtimeAnimatorController = null;
-                Debug.Log($"{LOG} Animator controller nulled (T-pose, brak idle)");
+                if (!anim.isHuman)
+                    Debug.LogWarning($"{LOG} [RIG] Avatar NIE jest humanoid -- Meta XR retargeter nie zadziala. avatar.isValid={anim.avatar?.isValid}");
+
+                var ctrl = Resources.Load<RuntimeAnimatorController>("PLAGA44_PlayerAnimator");
+                if (ctrl != null)
+                {
+                    anim.runtimeAnimatorController = ctrl;
+                    Debug.Log($"{LOG} AnimatorController = PLAGA44_PlayerAnimator (fallback + retarget override)");
+                }
+                else
+                {
+                    anim.runtimeAnimatorController = null;
+                    Debug.LogWarning($"{LOG} PLAGA44_PlayerAnimator.controller nie znaleziony w Resources/ -- T-pose fallback");
+                }
             }
 
             // Debug pozycji -- zeby zdiagnozowac "stoi nade mna"

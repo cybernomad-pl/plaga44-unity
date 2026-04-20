@@ -1,0 +1,223 @@
+=============================================================================
+ AVATAR RIG PIPELINE -- POPRAWNA animacja, nie "jakaś"
+ Research + plan dla Unity 6 + Meta XR Movement SDK 83 + Mixamo FBX + VR FPP
+ 2026-04-20
+=============================================================================
+
+-----------------------------------------------------------------------------
+ CEL: avatar na graczu (FPP VR) animuje sie SPOJNIE z body tracking Questa.
+-----------------------------------------------------------------------------
+
+  - Gracz porusza rece/tulow/nogi -> avatar odzwierciedla natychmiast
+  - Zero warning "Rig Error: Avatar Configuration mismatch"
+  - Zero "Global joint set is invalid" spam
+  - Idempotentny import: fresh clone -> Bootstrap -> dziala
+
+-----------------------------------------------------------------------------
+ ANATOMIA SYSTEMU (skad pochodzi ruch)
+-----------------------------------------------------------------------------
+
+   HARDWARE                      RUNTIME SDK               UNITY AVATAR
+   --------                      -----------               ------------
+
+   Quest Touch  --\              OVRCameraRig              Animator
+   controllers    \              (tracking space)          + Humanoid Avatar
+                   \                 |                     (mixamorig:* -> Unity bones)
+   Quest headset ---+-> OVR  -->  OVRBody ---\
+   (SLAM + imu)   /   Plugin    (body joints) \            SkinnedMeshRenderer
+                 /                              \          (mesh follows bones)
+   Hand tracking /                               \
+   (optional)  /                                  v
+                                             OVRUnity
+                                             Humanoid
+                                             Skeleton
+                                             Retargeter ------> Animator.avatar
+                                             (Meta XR              (per-bone
+                                              Movement SDK)         muscle drive)
+
+  KLUCZOWE: klipy Mixamo (Idle.fbx, Jump.fbx itd.) NIE SA UZYWANE.
+  Body tracking Questa nadaje klatki live, retargeter mapuje na avatar bones.
+  Import klipow tylko psuje (mismatch bone positions -> Rig Error warning).
+
+-----------------------------------------------------------------------------
+ DLACZEGO "Rig Error: bone length mismatch 388mm"?
+-----------------------------------------------------------------------------
+
+  Mixamo FBX zawiera:
+    a) Skeleton w T-pose (bind pose) -- Bone lengths A
+    b) AnimationClips (Idle, Jump...) -- kazdy ma zapisane bone positions
+       z oryginalnej capture, Bone lengths B (mogly byc inne przy eksporcie)
+
+  Unity Humanoid Avatar regenerowany z 'CreateFromThisModel' bierze A (T-pose).
+  Potem probuje zretargetowac klipy -> widzi B != A -> WARNING.
+
+  Fix: NIE IMPORTOWAC KLIPOW z Mixamo FBX. Uzywamy tylko skeleton + bind pose.
+  Body tracking live jest jedyna sciezka animacji w naszym workflow FPP VR.
+
+-----------------------------------------------------------------------------
+ IMPORT SETTINGS (Unity ModelImporter) -- per Mixamo FBX
+-----------------------------------------------------------------------------
+
+   PROPERTY                      VALUE          WHY
+   ----------------------------- -------------- -------------------------------
+   animationType                 Human          Humanoid rig (muscle space)
+   avatarSetup                   CreateFromThisModel
+                                                Regen avatar z aktualnego T-pose
+                                                (nie starego cache'owanego)
+   importAnimation               FALSE          Zero klipow -> zero mismatch
+   importConstraints             FALSE          Nie potrzeba
+   importBlendShapes             TRUE           Dla mimiki (opcjonalne)
+   optimizeGameObjects           FALSE          Retargeter potrzebuje GO-bones
+                                                jako Transform hierarchy.
+                                                Optimize zwija w skeleton cache,
+                                                nie da sie attachowac componentow.
+   materialLocation              External       .mat jako osobne assety
+                                                (pipeline URP)
+   useFileScale                  TRUE           Mixamo eksportuje w cm (0.01)
+                                                Unity auto-konwertuje
+   normalizeBlendShapeNames      TRUE           Porzadkuje nazwy
+   preserveHierarchy             TRUE (U6)      Stabilne per-bone refs
+
+  Implementacja: AssetPostprocessor.OnPreprocessModel (Editor).
+  Apply TYLKO dla FBX w Assets/PLAGA44/Avatars/ (path filter).
+
+-----------------------------------------------------------------------------
+ HUMAN DESCRIPTION (bone mapping mixamorig:* -> Unity HumanBodyBones)
+-----------------------------------------------------------------------------
+
+  Mixamo ma standard naming:
+    mixamorig:Hips, mixamorig:Spine, mixamorig:Head,
+    mixamorig:LeftArm, mixamorig:RightArm, mixamorig:LeftUpLeg, ...
+
+  Unity Humanoid auto-rozpoznaje te nazwy (built-in, po prefix "mixamorig:").
+  Efekt: avatar.isHuman = true, avatar.isValid = true, gotowy.
+
+  Weryfikacja (runtime):
+    animator.avatar != null  &&  animator.avatar.isValid  &&  animator.isHuman
+
+  Jesli isHuman == false -> mesh bez mixamorig:* prefix albo custom rig.
+  Fallback: manualny HumanDescription przez AvatarBuilder.BuildHumanAvatar()
+  (zaawansowane, dla PINEA-like custom rigow).
+
+-----------------------------------------------------------------------------
+ RUNTIME SETUP (player wciela sie w avatar)
+-----------------------------------------------------------------------------
+
+  PlayerAvatar.SpawnAvatar(prefab):
+    1. Instantiate prefab pod OVRCameraRig (transform = parent)
+    2. Animator + Humanoid avatar = gotowe z importu
+    3. Dodaj OVRUnityHumanoidSkeletonRetargeter component jesli brak
+       - Auto-subskrybuje OVRBody instance w scenie
+       - Mapuje body joints -> Humanoid avatar bones
+    4. Hide head+neck bones (camera clipping) - juz robimy
+    5. NormalizeToHeight(1.8m) - juz robimy
+    6. SetActive(true)
+
+  Wymagany runtime state:
+    - OVRCameraRig w scenie (Bootstrap.PlayerRigSetup)
+    - OVRBody component na OVRCameraRig z bodyJointSet=FullBody
+      (Meta XR SDK prefab StylizedCharacterLocomotion juz to ma)
+    - OpenXR + Meta XR Feature enabled w XR Settings
+
+-----------------------------------------------------------------------------
+ FALLBACK gdy brak Questa (editor play mode, PC build)
+-----------------------------------------------------------------------------
+
+  OVRBody nie dostaje danych -> retargeter loguje "Global joint set invalid".
+  Juz filtrowane w RetargeterGuard.
+
+  Option A: avatar stoi w T-pose (statyczny) -- OK dla edytora/testow.
+  Option B: AnimatorController z Idle clip (idle-only) -- wymaga importu
+            klipu z OSOBNEGO FBX (NIE z samego Mixamo FBX awatara).
+            Pipeline: klip z mixamo-packs/ kompatybilny z Humanoid avatar
+            = dziala na kazdej postaci.
+
+-----------------------------------------------------------------------------
+ PIPELINE FLOW (ASCII)
+-----------------------------------------------------------------------------
+
+      +-------------------------+
+      | Mixamo FBX w            |
+      | Assets/PLAGA44/Avatars/ |
+      +------------+------------+
+                   |
+                   v
+      +-------------------------+
+      | AssetPostprocessor      |        OnPreprocessModel:
+      | MixamoAvatarImporter    |  -->   Set import settings
+      |                         |        (Humanoid, no-anim, no-optimize)
+      +------------+------------+
+                   |
+                   v
+      +-------------------------+
+      | Unity imports:          |
+      |   - SkinnedMesh         |
+      |   - Humanoid Avatar     |
+      |   - External Materials  |
+      |   - Textures (extracted)|
+      +------------+------------+
+                   |
+                   v
+      +-------------------------+
+      | AvatarImport            |        AvatarRegistryBuilder.Rebuild:
+      | (registry builder)      |  -->   Scan folders, validate rig,
+      |                         |        add to AvatarRegistry.asset
+      +------------+------------+
+                   |
+                   v
+      +-------------------------+
+      | AvatarGallery           |        HamburgerMenu open:
+      | (preview spawner)       |  -->   SpawnPreviewAt(prefab, T-pose)
+      +-------------------------+        przed graczem
+                   |
+                   v (A button potwierdza)
+      +-------------------------+
+      | PlayerAvatar.SetMode    |        SpawnAvatar na OVRCameraRig
+      | (swap na graczu)        |  -->   + OVRUnityHumanoidSkeletonRetargeter
+      +------------+------------+
+                   |
+                   v
+      +-------------------------+
+      | Quest body tracking     |        Runtime frame:
+      | -> OVRBody joints       |  -->   Retargeter mapuje -> animator.avatar
+      | -> Retargeter           |        -> SkinnedMesh follows bones
+      +-------------------------+        = POPRAWNA animacja sync z graczem
+
+-----------------------------------------------------------------------------
+ KOD DO NAPISANIA
+-----------------------------------------------------------------------------
+
+  1. MixamoAvatarImporter.cs (NEW)
+     - AssetPostprocessor
+     - OnPreprocessModel: path filter + ustawienia (Human, no-anim, no-optimize)
+     - OnPostprocessModel: walidacja + log warning jesli isHuman==false
+
+  2. MixamoMaterialExtractor.cs (UPDATE)
+     - Usun wymuszanie animationType/avatarSetup (robi to postprocessor auto)
+     - Zostaw ExtractTextures + URP material conversion + Humanoid defaults
+
+  3. PlayerAvatar.cs (UPDATE)
+     - SpawnAvatar: auto-add OVRUnityHumanoidSkeletonRetargeter
+       (typ przez reflection -- nie chcemy hard dependency na SDK namespace)
+
+  4. AvatarImport.cs ValidateRig (UPDATE)
+     - Dodaj check animator.isHuman (nie tylko avatar.isValid)
+
+-----------------------------------------------------------------------------
+ EFEKT PO IMPLEMENTACJI
+-----------------------------------------------------------------------------
+
+  Swiezy clone repo:
+    git clone ... TESTBED_Vx
+    Open Unity
+    Import Library (4GB)
+    CYBERNOMAD/Bootstrap (auto)
+       -> MixamoAvatarImporter ustawia import settings dla kazdego FBX
+       -> Unity importuje z prawidlowymi settings -> Humanoid avatar valid
+       -> Zero "Rig Error" warning
+       -> AvatarRegistrySetup rescan -> rejestr
+    HamburgerMenu > AVATAR > Mode slider -> preview przed graczem (T-pose)
+    A button -> swap na graczu
+    Quest on -> body tracking -> avatar animuje sie sync z graczem
+
+=============================================================================
