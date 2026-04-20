@@ -18,6 +18,16 @@ namespace Plaga44
             "Failed to retarget source frame data",
             "LocomotionEventsConnection",
             "AssertCollectionItems",
+            // Editor-mode bez Questa -- OVRBody/OVRSkeleton nie maja source,
+            // retargeter spamuje co frame. Niegroźne, filter.
+            "Global joint set is invalid",
+            "OVRSkeleton and its subclasses requires OVRBody",
+            "[OVRBody] Failed to start body tracking",
+            "[OVRBody] Failed to set Body Tracking fidelity",
+            "XR_ERROR_ACTIONSET_NOT_ATTACHED",
+            "Unable to process a controller whose SampleRateHz is 0",
+            "XR: Error setting active audio output driver",
+            "Local Dimming feature is not supported",
         };
 
         private static ILogHandler _original;
@@ -40,7 +50,8 @@ namespace Plaga44
 
             public void LogFormat(LogType logType, Object context, string format, params object[] args)
             {
-                if (logType == LogType.Error || logType == LogType.Exception)
+                if (logType == LogType.Error || logType == LogType.Exception
+                 || logType == LogType.Warning)
                 {
                     string msg = args.Length > 0 ? string.Format(format, args) : format;
                     if (IsKnownSDKError(msg)) { _filtered++; return; }

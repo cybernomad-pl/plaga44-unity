@@ -132,6 +132,7 @@ namespace Plaga44.Editor
             Debug.Log($"{LOG} === Setup START === scene={SceneManager.GetActiveScene().name}, cfg={cfg.name}");
             bool changed = false;
 
+            LogStepVoid("MissingScriptCleaner",       () => MissingScriptCleaner.CleanActiveScene());
             changed |= LogStep("TerrainSetup",        () => TerrainSetup.Run(cfg));
             LogStepVoid("TerrainTreeCleaner",         () => TerrainTreeCleaner.CleanAll());
             changed |= LogStep("SkyboxSetup",         () => SkyboxSetup.Run(cfg));
