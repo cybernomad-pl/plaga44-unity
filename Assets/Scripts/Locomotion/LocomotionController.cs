@@ -25,7 +25,7 @@ namespace Plaga44.Locomotion
 
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CharacterController))]
-    public class LocomotionController : MonoBehaviour, IPlayerMotionSource
+    public class LocomotionController : MonoBehaviour
     {
         // =====================================================================
         // Inspector fields
@@ -147,37 +147,6 @@ namespace Plaga44.Locomotion
         public bool IsFlying => _flyState != FlyState.Grounded;
         public Stance CurrentStance => _currentStance;
         public CharacterController CharController => _cc;
-
-        // --- IPlayerMotionSource -----------------------------------------------
-        // Freefall: nie jestesmy na ziemi, nie lecimy aktywnie, spadamy w dol
-        // z wieksza predkoscia niz typowy maly skok (threshold -5 m/s).
-        private const float FreefallVerticalThreshold = -5f;
-        private const float LocomotionSpeedThreshold  = 0.1f;
-
-        public PlayerMotionState CurrentState
-        {
-            get
-            {
-                if (IsFlying) return PlayerMotionState.Fly;
-                if (!IsGrounded && _verticalVelocity < FreefallVerticalThreshold)
-                    return PlayerMotionState.Freefall;
-                if (NormalisedSpeed > LocomotionSpeedThreshold)
-                    return PlayerMotionState.Locomotion;
-                return PlayerMotionState.Idle;
-            }
-        }
-
-        /// <summary>Linear speed m/s -- dla Animator blend tree.</summary>
-        public float Speed => NormalisedSpeed
-            * (moveSpeed * (sprintActive ? Mathf.Lerp(1f, sprintMultiplier, _sprintAmount) : 1f));
-
-        /// <summary>Lateral axis -1..1 dla strafe blend.</summary>
-        public float StrafeX => _lastMoveInput.x;
-
-        /// <summary>Forward axis -1..1 (+1 forward, -1 backward).</summary>
-        public float ForwardZ => _lastMoveInput.y;
-
-        private Vector2 _lastMoveInput; // filled w Update()
 
         // =====================================================================
         // Lifecycle
@@ -301,7 +270,6 @@ namespace Plaga44.Locomotion
 
             ApplyMove(horizontalMove);
             NormalisedSpeed = Mathf.Clamp01(moveInput.magnitude);
-            _lastMoveInput = moveInput; // publish for IPlayerMotionSource
             LogGroundedChangesThrottled();
         }
 
