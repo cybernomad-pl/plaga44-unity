@@ -31,6 +31,9 @@ namespace Plaga44
         [Tooltip("Default rig GameObject w scenie (np. StylizedCharacterLocomotion). Widoczny przy mode=0.")]
         public GameObject defaultRig;
 
+        [Tooltip("Animator controller przypisany do kazdego spawnowanego avatara (eliminuje 'Animator is not playing' warning, ktory leci per frame z Meta LocomotionSkeletalProcessor.UpdatePose->SetFloat). Ustawiany przez editor setup StylizedCharacterLocomotionFixer przez SerializedObject.")]
+        public RuntimeAnimatorController locomotionController;
+
         [Header("Avatar spawn config")]
         [Tooltip("Override prefab -- jesli ustawiony, spawnuje to zamiast z Gallery (tylko dla mode>=1).")]
         public GameObject avatarPrefab;
@@ -235,13 +238,26 @@ namespace Plaga44
             _instance.transform.localScale    = Vector3.one; // reset przed NormalizeToHeight (unika cieniutkiego stickmana gdy parent ma niestandardowy scale)
             NormalizeToHeight(_instance, TargetAvatarHeight);
 
-            // Wyłącz AnimatorController -- avatar statyczny (T-pose) dopoki nie dodamy
-            // Meta XR Movement Retargetera. Inaczej idle animation leci.
+            // Przypisz LocomotionController do Animator spawnowanego avatara.
+            // Bez tego Meta LocomotionSkeletalProcessor.UpdatePose wywoluje
+            // Animator.SetFloat na pusty animator -> native Unity warning
+            // "Animator is not playing an AnimatorController" per frame (spam).
+            // Warning jest z native C++, ILogHandler filter nie lapie.
+            // Eliminujemy zrodlo przez forced assign.
             var anim = _instance.GetComponent<Animator>();
             if (anim != null)
             {
-                anim.runtimeAnimatorController = null;
-                Debug.Log($"{LOG} Animator controller nulled (T-pose, brak idle)");
+                if (locomotionController != null)
+                {
+                    anim.runtimeAnimatorController = locomotionController;
+                    Debug.Log($"{LOG} Animator.runtimeAnimatorController = LocomotionController");
+                }
+                else
+                {
+                    anim.runtimeAnimatorController = null;
+                    Debug.LogWarning($"{LOG} locomotionController NIE USTAWIONY na PlayerAvatar -- " +
+                        "StylizedCharacterLocomotionFixer powinien to ustawic. Animator warning bedzie lecial.");
+                }
             }
 
             // Debug pozycji -- zeby zdiagnozowac "stoi nade mna"

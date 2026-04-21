@@ -52,6 +52,10 @@ namespace Plaga44.Editor.Setup
                 return;
             }
 
+            // KROK 0 -- wypelnij PlayerAvatar.locomotionController referencja
+            // (runtime custom avatary dostaja controller -> eliminuje warning).
+            WirePlayerAvatarLocomotionController();
+
             // KROK 1 -- wymus LocomotionController na Animatorze (nie polegaj
             // na PrefabInstance override).
             EnsureAnimatorController(rigRoot);
@@ -138,6 +142,43 @@ namespace Plaga44.Editor.Setup
                 return true;
 
             return false;
+        }
+
+        // Wypelnia SerializeField PlayerAvatar.locomotionController referencja.
+        // Runtime PlayerAvatar.InstantiateAvatar uzywa tego do przypisania
+        // controllera KAZDEMU spawnowanemu avatarowi (nie tylko defaultRig).
+        private static void WirePlayerAvatarLocomotionController()
+        {
+            var avatar = Object.FindAnyObjectByType<Plaga44.PlayerAvatar>();
+            if (avatar == null)
+            {
+                Debug.LogWarning($"{LOG} PlayerAvatar not found in scene -- cannot wire locomotionController ref");
+                return;
+            }
+            var controller = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(LocomotionControllerPath);
+            if (controller == null)
+            {
+                Debug.LogError($"{LOG} LocomotionController not found: {LocomotionControllerPath}");
+                return;
+            }
+
+            if (avatar.locomotionController == controller)
+            {
+                Debug.Log($"{LOG} [OK] PlayerAvatar.locomotionController already = LocomotionController");
+                return;
+            }
+
+            var so = new SerializedObject(avatar);
+            var prop = so.FindProperty("locomotionController");
+            if (prop == null)
+            {
+                Debug.LogError($"{LOG} SerializedProperty 'locomotionController' not found on PlayerAvatar");
+                return;
+            }
+            prop.objectReferenceValue = controller;
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(avatar);
+            Debug.Log($"{LOG} [WIRED] PlayerAvatar.locomotionController = LocomotionController");
         }
 
         private static GameObject ResolveRig()
