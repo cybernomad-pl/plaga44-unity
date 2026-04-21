@@ -96,9 +96,13 @@ namespace Plaga44.Editor.Setup
             if (m == null || string.IsNullOrEmpty(m.propertyPath)) return false;
             string path = m.propertyPath;
 
-            // 1) m_Controller -- Meta samples nie uzywaja Animator controllera
-            //    dla locomotion. Prefab ma m_Controller=null i tak ma byc.
-            if (path == "m_Controller") return true;
+            // m_Controller -- NIE USUWAC. Meta LocomotionSkeletalProcessor
+            // wywoluje Animator.SetFloat(int, float) wewnetrznie -- WYMAGA
+            // AnimatorController przypisanego. Bez niego leci warning:
+            //   "Animator is not playing an AnimatorController"
+            // i locomotion/animacja chodzenia nie dziala (SetFloat na pusty
+            // animator = no-op). Zostawiamy override w scenie -- LocomotionController
+            // z ISDKLocomotion sample jest poprawnym wyborem.
 
             // Tylko modifications na processor arrays (nie ruszamy innych).
             bool isProcessor = path.StartsWith("_sourceProcessorContainers")

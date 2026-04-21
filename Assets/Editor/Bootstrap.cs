@@ -141,7 +141,9 @@ namespace Plaga44.Editor
             changed |= LogStep("BounceLightSetup",    () => BounceLightSetup.Run(cfg));
             changed |= LogStep("PlayerRigSetup",      () => PlayerRigSetup.Run(cfg));
             LogStepVoid("StylizedCharacterLocomotionFixer", () => StylizedCharacterLocomotionFixer.Run());
-            LogStepVoid("HandPhysicsSetup",           () => HandPhysicsSetup.Run());
+            // HandPhysicsSetup przeniesione do runtime (HandPhysicsEnabler.cs):
+            // OVRHandPrefab jest aktywowane dopiero w runtime przez SDK,
+            // editor-time "No OVRSkeleton in scene".
             LogStepVoid("BodyPhysicsSetup",           () => BodyPhysicsSetup.Run());
             changed |= LogStep("InventorySetup",      () => InventorySetup.Run(cfg));
             changed |= LogStep("SceneSingletonsSetup",() => SceneSingletonsSetup.Run(cfg));

@@ -179,15 +179,17 @@ namespace Plaga44
                 return null;
             }
 
-            // Jesli cos juz trzymane -- release + destroy (podmiana itemu w rece).
+            // Zachowaj referencje do poprzedniego itemu -- NIE destroy jeszcze.
+            // Destroy PRZED ForceGrab = OVRGrabber trzyma destroyed Collider ref,
+            // PlagaGrabber.GrabEnd wywoluje OVRGrabbable.ForceRelease na
+            // zniszczonym GO, leci Cannot set parent + MissingReferenceException
+            // na ClosestPointOnBounds w nastepnym GrabBegin.
+            GameObject prevToDestroy = null;
             if (grabber.CurrentGrabbed != null)
             {
-                var prev = grabber.CurrentGrabbed.gameObject;
-                Debug.Log($"{LOG} SpawnIntoHand: replacing {prev.name} in {hand}");
-                // ForceGrab zrobi GrabEnd jesli trzeba, ale musimy sami Destroy poprzedniego
-                // zeby nie zostal w swiecie po podmianie.
-                _spawned.Remove(prev);
-                Destroy(prev);
+                prevToDestroy = grabber.CurrentGrabbed.gameObject;
+                Debug.Log($"{LOG} SpawnIntoHand: replacing {prevToDestroy.name} in {hand} (destroy after ForceGrab)");
+                _spawned.Remove(prevToDestroy);
             }
 
             // Spawn w pozycji grabbera. OVRGrabbable.GrabBegin sparentuje do ground,
@@ -209,9 +211,12 @@ namespace Plaga44
             if (grabbable == null)
             {
                 Debug.LogWarning($"{LOG} SpawnIntoHand: {instance.name} missing OVRGrabbable after WireComponents -- cannot force grab");
+                if (prevToDestroy != null) Destroy(prevToDestroy);
                 return instance;
             }
 
+            // ForceGrab czysto zwalnia poprzedniego (GrabEnd) + czysci m_grabCandidates
+            // + chwyta nowy target. Dopiero potem bezpieczny Destroy(prev).
             if (!grabber.ForceGrab(grabbable))
             {
                 Debug.LogWarning($"{LOG} SpawnIntoHand: ForceGrab failed for {instance.name}");
@@ -220,6 +225,8 @@ namespace Plaga44
             {
                 Debug.Log($"{LOG} SpawnIntoHand: {instance.name} zlapany przez {hand}");
             }
+
+            if (prevToDestroy != null) Destroy(prevToDestroy);
             return instance;
         }
 
