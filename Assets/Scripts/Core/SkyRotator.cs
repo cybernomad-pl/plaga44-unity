@@ -15,7 +15,7 @@ namespace Plaga44
         private const float HalfRotationDeg = 180f;
 
         public float rotationSpeed = 0.5f; // stopnie na sekunde
-        public float logIntervalSec = 5f;  // co ile sekund logowac stan (0 = nigdy)
+        public float logIntervalSec = 0f;  // co ile sekund logowac stan (0 = nigdy). Borys: spam, OFF.
 
         private Material _skyMat;
         private float _lastLogTime;
