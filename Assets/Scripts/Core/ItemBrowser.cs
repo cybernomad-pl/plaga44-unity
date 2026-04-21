@@ -151,69 +151,46 @@ namespace Plaga44
         // Spawn / despawn -- item appears in front of player
         // =====================================================================
 
-        // Invisible physical stand spawnowany RAZEM z itemem -- trzyma go przed
-        // graczem (na poziomie menu), 1.5x1.5m cienka plyta zaraz pod itemem.
-        // Renderer.enabled=false -- niewidoczna. Collider static.
-        // Pojawia/znika z itemem (DespawnPreview/ConfirmSpawn).
-        private GameObject _spawnedStand;
-
-        private const float StandWidth   = 1.5f;  // 1.5x1.5m -- mieści każdy item
-        private const float StandHeight  = 0.02f; // cienka płyta
-        private const float StandGap     = 0.01f; // 1cm pod itemem
-
         private void SpawnPreview(GameObject prefab)
         {
-            // Pozycja DOKLADNIE przed graczem (jak przed moim zepsuciem --
-            // head-relative, poziom menu).
+            // Pozycja DOKLADNIE przed graczem (head-relative, poziom menu).
             Vector3 pos = GetSpawnPosition();
             Quaternion rot = GetSpawnRotation();
-
-            // Invisible stand 1cm pod item -- trzyma go na miejscu.
-            _spawnedStand = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            _spawnedStand.name = $"ItemStand_{prefab.name}";
-            _spawnedStand.transform.position = pos + Vector3.down * (StandGap + StandHeight * 0.5f);
-            _spawnedStand.transform.localScale = new Vector3(StandWidth, StandHeight, StandWidth);
-            var standRenderer = _spawnedStand.GetComponent<Renderer>();
-            if (standRenderer != null) standRenderer.enabled = false; // invisible
 
             _spawnedPreview = Instantiate(prefab, pos, rot);
             _spawnedPreview.name = $"ItemPreview_{prefab.name}";
 
-            // Fizyka NORMALNA -- item "wisi" (spada na invisible stand, leży na nim).
-            // OVRGrabbable.Start cache'uje kinem=false -> po release non-kinematic ->
-            // spada na stand z powrotem (jesli obok) albo na ziemie.
+            // Item WISI stabilnie przed graczem -- kinematic=true, no gravity.
+            // OVRGrabbable.Start cache'uje starting kinematic -> po release
+            // wraca do kinematic=true -> item znowu wisi (nie spada na ziemie).
+            // Proste, przewidywalne, latwe do grab (non-moving target).
             var rb = _spawnedPreview.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.isKinematic = false;
-                rb.useGravity  = true;
-                rb.linearVelocity  = Vector3.zero;
-                rb.angularVelocity = Vector3.zero;
+                if (!rb.isKinematic)
+                {
+                    rb.linearVelocity  = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
+                rb.isKinematic = true;
+                rb.useGravity  = false;
             }
 
             Debug.Log($"{LOG} SpawnPreview: {_spawnedPreview.name} @ {pos:F2} " +
-                $"(stand={_spawnedStand.name} invisible, rb kinem={rb?.isKinematic})");
+                $"(rb kinem={rb?.isKinematic}, grav={rb?.useGravity})");
         }
 
-        /// <summary>Destroy current preview item + jego stand.
+        /// <summary>Destroy current preview item.
         /// Public for HamburgerMenu.Close (issue #158).</summary>
         public void DespawnPreview()
         {
-            if (_spawnedPreview != null)
-            {
-                Destroy(_spawnedPreview);
-                _spawnedPreview = null;
-            }
-            if (_spawnedStand != null)
-            {
-                Destroy(_spawnedStand);
-                _spawnedStand = null;
-            }
+            if (_spawnedPreview == null) return;
+            Destroy(_spawnedPreview);
+            _spawnedPreview = null;
         }
 
-        /// <summary>Confirm preview -- spawned item + jego stand zostaja w swiecie.
-        /// ItemBrowser przestaje je sledzic (DespawnPreview nie tknie). Stand dalej
-        /// trzyma item na miejscu dopoki user go nie przesunie.
+        /// <summary>Confirm preview -- spawned item zostaje w swiecie.
+        /// ItemBrowser przestaje go sledzic (DespawnPreview nie tknie go).
         /// Przycisk A w ITEMS sekcji HamburgerMenu.</summary>
         public bool ConfirmSpawn()
         {
@@ -226,14 +203,8 @@ namespace Plaga44
             _spawnedPreview.name = prevName.StartsWith("ItemPreview_")
                 ? "Item_" + prevName.Substring("ItemPreview_".Length)
                 : "Item_" + prevName;
-
-            // Rename stand tez -- zeby pokazac ze jest "zatwierdzony"
-            if (_spawnedStand != null)
-                _spawnedStand.name = _spawnedStand.name.Replace("ItemStand_", "ItemStand_Confirmed_");
-
-            Debug.Log($"{LOG} ConfirmSpawn: {_spawnedPreview.name} + stand zostaja w swiecie");
+            Debug.Log($"{LOG} ConfirmSpawn: {_spawnedPreview.name} zostaje w swiecie (unreferenced)");
             _spawnedPreview = null;
-            _spawnedStand   = null;
             return true;
         }
 
