@@ -61,6 +61,17 @@ namespace Plaga44.Inventory
             base.GrabBegin();
         }
 
+        /// <summary>Nadpisz offset position/rotation trzymanego obiektu w grip
+        /// local space. Uzywane przez PlagaGrabbable.ApplyGripConfig gdy user
+        /// zmienia slider ITEM GRIP -- bez tego OVRGrabber.MoveGrabbedObject
+        /// per FixedUpdate uzywa computed m_grabbedObjectPosOff (na moment
+        /// GrabBegin) i nadpisuje nasze transform.localPosition mutate.</summary>
+        public void UpdateGrabbedOffset(Vector3 posOffset, Quaternion rotOffset)
+        {
+            m_grabbedObjectPosOff = posOffset;
+            m_grabbedObjectRotOff = rotOffset;
+        }
+
         /// <summary>Wymus grab konkretnego obiektu bez polegania na grab-volume
         /// discovery. Uzywane przez ObjectSpawner do spawnowania itemu od razu
         /// w rece gracza. Gdy grabber juz cos trzyma -> release + destroy

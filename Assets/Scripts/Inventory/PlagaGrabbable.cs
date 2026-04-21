@@ -73,12 +73,20 @@ namespace Plaga44.Inventory
             // Guard transform.parent != null -- OVRGrabber parent w GrabBegin
             // wywolywany PO grabbable.GrabBegin, wiec przy pierwszym call
             // moze nie byc ustawiony -- localPos=zero teleportuje do origin!
-            // Zero-offset TEZ mutate (reset do hand origin) -- inaczej slider
-            // dzialal niespojnie (non-zero ok, zero ignored).
             if (isGrabbed && transform.parent != null)
             {
                 transform.localPosition = cfg.offsetPos;
                 transform.localRotation = Quaternion.Euler(cfg.offsetRotEuler);
+
+                // KLUCZOWE: OVRGrabber.MoveGrabbedObject per FixedUpdate uzywa
+                // m_grabbedObjectPosOff (computed na GrabBegin) -- nasza
+                // localPosition mutate jest natychmiast nadpisywana przez
+                // MovePosition/MoveRotation. Synchronizujemy grabber's offset
+                // z nasza config -> slider zmiany trwaja.
+                if (m_grabbedBy is Plaga44.Inventory.PlagaGrabber pg)
+                {
+                    pg.UpdateGrabbedOffset(cfg.offsetPos, Quaternion.Euler(cfg.offsetRotEuler));
+                }
             }
             transform.localScale = _originalScale * cfg.scale;
             _gripConfig = cfg;
