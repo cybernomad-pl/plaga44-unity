@@ -48,7 +48,16 @@ namespace Plaga44.Inventory
             }
 
             // Not holding -- grab nearest candidate
-            Debug.Log($"{LOG} Toggle GRAB via {m_controller}");
+            Debug.Log($"{LOG} Toggle GRAB via {m_controller}, candidates count = {m_grabCandidates.Count}");
+            if (m_grabCandidates.Count == 0)
+            {
+                Debug.LogWarning($"{LOG} ZERO candidates -- reka za daleko od itemu? Podejdz blizej / wyciagnij reke tak zeby palce zetknely sie z itemem.");
+            }
+            else
+            {
+                foreach (var kv in m_grabCandidates)
+                    Debug.Log($"{LOG}   candidate: {kv.Key?.name} (refCount={kv.Value})");
+            }
             base.GrabBegin();
         }
 

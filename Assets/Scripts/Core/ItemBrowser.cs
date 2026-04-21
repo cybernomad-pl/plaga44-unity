@@ -28,11 +28,11 @@ namespace Plaga44
         // =====================================================================
 
         [Header("Spawn Position (relative to head)")]
-        [Tooltip("Distance in front of player where items appear.")]
-        public float spawnDistance = 1.2f;
+        [Tooltip("Distance in front of player where items appear (default 0.5m -- reka wyciagnieta reach).")]
+        public float spawnDistance = 0.5f;
 
-        [Tooltip("Height offset from head (negative = below eye level, like a table).")]
-        public float spawnHeightOffset = -0.5f;
+        [Tooltip("Height offset from head (negative = below eye level).")]
+        public float spawnHeightOffset = -0.2f;
 
         // =====================================================================
         // State

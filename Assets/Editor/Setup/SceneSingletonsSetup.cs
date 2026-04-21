@@ -21,6 +21,19 @@ namespace Plaga44.Editor.Setup
             changed |= EnsureSingleton<SkyRotator>("_SkyRotator", "SkyRotator", sr => sr.rotationSpeed = cfg.skyRotationSpeed);
             changed |= EnsureSingleton<AvatarGallery>("_AvatarGallery", "AvatarGallery", null);
             changed |= EnsureSingleton<ItemBrowser>("_ItemBrowser", "ItemBrowser", null);
+
+            // Wymus spawn values na ItemBrowser (nadpisuje scene override).
+            // Poprzednio scene mial spawnDistance=1.2m -- za daleko, user nie
+            // dosiegal reka. 0.5m = reka wyciagnieta reach.
+            var ib = Object.FindAnyObjectByType<ItemBrowser>();
+            if (ib != null && (ib.spawnDistance != 0.5f || ib.spawnHeightOffset != -0.2f))
+            {
+                ib.spawnDistance     = 0.5f;
+                ib.spawnHeightOffset = -0.2f;
+                EditorUtility.SetDirty(ib);
+                changed = true;
+                Debug.Log($"{LOG} [FORCE] ItemBrowser.spawnDistance=0.5 spawnHeightOffset=-0.2");
+            }
             return changed;
         }
 
