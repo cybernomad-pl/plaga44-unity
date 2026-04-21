@@ -144,6 +144,7 @@ namespace Plaga44.Editor
             // HandPhysicsSetup przeniesione do runtime (HandPhysicsEnabler.cs):
             // OVRHandPrefab jest aktywowane dopiero w runtime przez SDK,
             // editor-time "No OVRSkeleton in scene".
+            LogStepVoid("PlayerPhysicsLayers",        () => PlayerPhysicsLayers.Run());
             LogStepVoid("BodyPhysicsSetup",           () => BodyPhysicsSetup.Run());
             changed |= LogStep("InventorySetup",      () => InventorySetup.Run(cfg));
             changed |= LogStep("SceneSingletonsSetup",() => SceneSingletonsSetup.Run(cfg));

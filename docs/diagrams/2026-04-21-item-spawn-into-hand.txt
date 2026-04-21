@@ -209,3 +209,57 @@ STYLIZED CHARACTER LOCOMOTION FIXER (animacja chodzenia)
   Po tym: prefab defaults wchodza z Meta Samples~/AdvancedSamples/ISDKLocomotion
   -> locomotion + IK dzialaja jak w baseline sample MovementISDKLocomotion.unity.
 
+  AKTUALIZACJA 2026-04-21 v2: m_Controller override NIE JEST usuwany.
+  LocomotionSkeletalProcessor.UpdatePose wywoluje Animator.SetFloat -- bez
+  controllera = "Animator is not playing an AnimatorController" warning +
+  animacja chodzenia nie dziala. LocomotionController.controller z ISDK
+  Locomotion sample zostaje przypisany.
+
+============================================================================
+PLAYER BODY PHYSICS V2 -- LAYERS + COLLISION MATRIX
+============================================================================
+
+  PROBLEM V1 (zerowany 2026-04-21):
+    Capsule na kosciach avatara + Kinematic Rigidbody na rigu -> capsule
+    NOG ruszaja sie z body trackingiem -> fizyka wykrywa penetracje
+    capsule-vs-Terrain -> push response odrzuca gracza -> gracz "fruwa",
+    skacze, nie mozna zlecziec. CharacterController isGrounded raycast
+    tez false-positive na wlasnych capsule.
+
+  ROZWIAZANIE V2 -- LAYERS + KINEMATIC-MOVING:
+
+  1) WARSTWY (PlayerPhysicsLayers.cs editor):
+       Layer 6 = "PlayerBody"  -- wszystkie body capsule awatara
+       Layer 7 = "Item"        -- wszystkie spawnowane itemy
+     Zapisane do ProjectSettings/TagManager.asset (persist przez repo).
+
+  2) COLLISION MATRIX (PlayerPhysicsLayersRuntime.cs runtime):
+       PlayerBody x Default         = OFF  <-- nie odbija od terrain
+       PlayerBody x TransparentFX   = OFF
+       PlayerBody x IgnoreRaycast   = OFF
+       PlayerBody x Water           = OFF
+       PlayerBody x UI              = OFF
+       PlayerBody x PlayerBody      = OFF  <-- wlasne konczyny + 2 awatary
+       PlayerBody x Item            = ON   <-- CEL: reka/tors blokuje item
+       Item       x Default         = ON   <-- item spada na ziemie
+     Ustawiane [RuntimeInitializeOnLoadMethod(BeforeSceneLoad)] --
+     Physics.IgnoreLayerCollision nie persystuje do DynamicsManager.asset
+     (runtime-only API mimo nazwy).
+
+  3) KINEMATIC-MOVING COLLIDER (BodyPhysicsSetup.cs):
+     Kazdy *_PhysCol GO dostaje:
+       - gameObject.layer = PlayerBody
+       - Rigidbody isKinematic=true + useGravity=false
+       - Capsule/SphereCollider jak wczesniej
+     Bez Rigidbody kinematic na capsule = "static collider moving"
+     warning Unity (bo kosc sie rusza). Kinematic RB signal do physics
+     engine ze ten collider ruszany intencjonalnie.
+
+     USUNIETY Kinematic Rigidbody z RIGU ROOT (poprzednia V1). Psul
+     CharacterController.isGrounded raycast.
+
+  4) ITEMY NA WARSTWE "Item" (ObjectSpawner.WireComponents):
+     SetLayerRecursive(instance, LayerMask.NameToLayer("Item"))
+     -> PlayerBody x Item = ON, item blokowany przez reka/tors.
+     -> Default x Item = ON, item nadal spada na ziemie po release.
+

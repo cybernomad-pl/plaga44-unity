@@ -292,6 +292,12 @@ namespace Plaga44
 
         private static void WireComponents(GameObject instance, SpawnEntry entry)
         {
+            // Layer "Item" -- PlayerBody kolidy TYLKO z Item (blokuje item),
+            // a z Default/Terrain/Water nie. Item takze koliduje z Default
+            // (spada na ziemie). Wszystkie dzieci tez na Item.
+            int itemLayer = LayerMask.NameToLayer("Item");
+            if (itemLayer >= 0) SetLayerRecursive(instance, itemLayer);
+
             // Rigidbody -- mass z prefabu wygrywa nad entry.mass (celowa wartosc
             // ustawiona przez designera). entry.mass tylko dla freshly-added RB.
             if (entry.autoRigidbody)
@@ -338,6 +344,13 @@ namespace Plaga44
             Bounds b = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) b.Encapsulate(renderers[i].bounds);
             return b;
+        }
+
+        private static void SetLayerRecursive(GameObject go, int layer)
+        {
+            go.layer = layer;
+            foreach (Transform child in go.transform)
+                SetLayerRecursive(child.gameObject, layer);
         }
     }
 }

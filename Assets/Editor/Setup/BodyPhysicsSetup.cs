@@ -4,22 +4,27 @@
 // Efekt: cialo (tors, ramie, przedramie, noga, glowa) fizycznie blokuje
 // itemy + ponadto nie mozna "przebic" sciany ruchem VR.
 //
-// KOMPLEMENTARNE:
-//   - HandPhysicsSetup: palce + dlon (OVRSkeleton capsule generator)
-//   - BodyPhysicsSetup: glowa, tors, ramiona, przedramiona, uda, lydki
-//   Wspolnie = pelne cialo fizyczne.
+// KLUCZOWE -- LAYER "PlayerBody":
+//   Wszystkie capsule laduja na warstwie PlayerBody (PlayerPhysicsLayers).
+//   Physics matrix skonfigurowana tak:
+//     PlayerBody x Default/Terrain/Water = OFF (gracz nie fruwa od capsule-terrain push)
+//     PlayerBody x PlayerBody = OFF (wlasne konczyny nie odbijaja, dwa awatary tez nie)
+//     PlayerBody x Item       = ON  (cel body physics -- blokuje itemy)
+//
+// Zero Rigidbody na rigu -- static collidery wystarczaja. Kinematic RB byl
+// bezsensowny (kinematic nie daje force'ow) i psul CharacterController
+// grounded-check (raycast trafial na capsule nog).
 //
 // DZIALANIE:
 //   1. Znajdz Animator Humanoid na defaultRig
 //   2. Dla kazdej pary (bone, childBone) w BoneSegments -> CapsuleCollider
 //      o wysokosci = odleglosc bone->child, radius = default dla segmentu
 //   3. Glowa -> SphereCollider
-//   4. Rigidbody Kinematic na rigu (dla physics system awareness)
+//   4. Kazdy <Bone>_PhysCol GO -> layer PlayerBody
 //
 // Idempotentne: jesli capsule juz istnieje na kosci (po nazwie GO), skip.
 // =============================================================================
 #if UNITY_EDITOR
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -81,7 +86,14 @@ namespace Plaga44.Editor.Setup
                 return;
             }
 
-            EnsureKinematicRigidbody(rig);
+            // Zapewnij warstwe PlayerBody (idempotent -- jesli juz istnieje, no-op).
+            // Bez tego capsule trafia na Default -> kolizja z terrain -> gracz fruwa.
+            PlayerPhysicsLayers.Run();
+
+            // USUN ewentualny Kinematic Rigidbody z poprzedniej wersji setupu.
+            // Static collidery wystarczaja, kinematic RB psul isGrounded check
+            // CharacterControllera.
+            RemoveRigidbodyIfKinematic(rig);
 
             int added   = 0;
             int already = 0;
@@ -106,7 +118,7 @@ namespace Plaga44.Editor.Setup
             var head = animator.GetBoneTransform(HumanBodyBones.Head);
             if (head != null)
             {
-                if (HasSphere(head)) already++;
+                if (HasCapsule(head)) already++;
                 else { CreateSphere(head, HeadSphereRadius); added++; }
             }
             else missing++;
@@ -114,27 +126,17 @@ namespace Plaga44.Editor.Setup
             Debug.Log($"{LOG} {rig.name}: added={added}, already={already}, missing={missing} (bone refs)");
         }
 
-        private static void EnsureKinematicRigidbody(GameObject root)
+        private static void RemoveRigidbodyIfKinematic(GameObject root)
         {
             var rb = root.GetComponent<Rigidbody>();
-            if (rb == null) rb = root.AddComponent<Rigidbody>();
-            rb.isKinematic              = true;
-            rb.useGravity               = false;
-            rb.interpolation            = RigidbodyInterpolation.Interpolate;
-            rb.collisionDetectionMode   = CollisionDetectionMode.ContinuousSpeculative;
-            EditorUtility.SetDirty(rb);
+            if (rb == null) return;
+            if (!rb.isKinematic) return; // nie ruszaj non-kinematic -- nie naszy
+            Undo.DestroyObjectImmediate(rb);
+            Debug.Log($"{LOG} Usunieto Kinematic Rigidbody z {root.name} (psul CharacterController)");
         }
 
+        // Szuka dziecka o nazwie "<boneName>_PhysCol" -- capsule LUB sphere.
         private static bool HasCapsule(Transform bone)
-        {
-            // Szukamy dziecka o nazwie "<boneName>_PhysCol"
-            string want = bone.name + ColliderGoSuffix;
-            for (int i = 0; i < bone.childCount; i++)
-                if (bone.GetChild(i).name == want) return true;
-            return false;
-        }
-
-        private static bool HasSphere(Transform bone)
         {
             string want = bone.name + ColliderGoSuffix;
             for (int i = 0; i < bone.childCount; i++)
@@ -144,10 +146,7 @@ namespace Plaga44.Editor.Setup
 
         private static void CreateCapsule(Transform from, Transform to, float radius)
         {
-            var go = new GameObject(from.name + ColliderGoSuffix);
-            Undo.RegisterCreatedObjectUndo(go, "BodyPhysicsSetup create capsule");
-            go.transform.SetParent(from, worldPositionStays: false);
-
+            var go = CreateColliderGO(from);
             float length = Vector3.Distance(from.position, to.position);
             var cap = go.AddComponent<CapsuleCollider>();
             cap.radius    = radius;
@@ -162,21 +161,36 @@ namespace Plaga44.Editor.Setup
                 go.transform.rotation   = Quaternion.LookRotation(dir.normalized);
                 go.transform.position   = from.position + dir * 0.5f;
             }
-
             EditorUtility.SetDirty(go);
         }
 
         private static void CreateSphere(Transform bone, float radius)
         {
-            var go = new GameObject(bone.name + ColliderGoSuffix);
-            Undo.RegisterCreatedObjectUndo(go, "BodyPhysicsSetup create sphere");
-            go.transform.SetParent(bone, worldPositionStays: false);
-
+            var go = CreateColliderGO(bone);
             var sph = go.AddComponent<SphereCollider>();
             sph.radius = radius;
             sph.center = new Vector3(0f, radius * 0.8f, 0f); // glowa wyzej niz bone pivot (szyja)
-
             EditorUtility.SetDirty(go);
+        }
+
+        // Tworzy GO pod 'parentBone' z warstwa PlayerBody + Rigidbody Kinematic.
+        // Rigidbody Kinematic jest NIEZBEDNY -- bez niego capsule na poruszajacej
+        // sie kosci = "static collider moving" warning Unity + zla detekcja kolizji.
+        // Kinematic RB oznacza "kinematic moving collider" -- transform parent moze
+        // sie ruszac, physics engine trzyma internal state spojny.
+        private static GameObject CreateColliderGO(Transform parentBone)
+        {
+            var go = new GameObject(parentBone.name + ColliderGoSuffix);
+            Undo.RegisterCreatedObjectUndo(go, "BodyPhysicsSetup create collider");
+            go.transform.SetParent(parentBone, worldPositionStays: false);
+            go.layer = PlayerPhysicsLayers.PlayerBodyLayer;
+
+            var rb = go.AddComponent<Rigidbody>();
+            rb.isKinematic            = true;
+            rb.useGravity             = false;
+            rb.interpolation          = RigidbodyInterpolation.None;
+            rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
+            return go;
         }
     }
 }
