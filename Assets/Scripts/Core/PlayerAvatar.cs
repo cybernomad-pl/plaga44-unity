@@ -250,7 +250,8 @@ namespace Plaga44
                 if (locomotionController != null)
                 {
                     anim.runtimeAnimatorController = locomotionController;
-                    Debug.Log($"{LOG} Animator.runtimeAnimatorController = LocomotionController");
+                    anim.applyRootMotion = false; // inaczej animacje (Run, Idle) przesuwaja transform -> avatar "odjezdza" z pozycji
+                    Debug.Log($"{LOG} Animator.runtimeAnimatorController = LocomotionController, applyRootMotion=false");
                 }
                 else
                 {
