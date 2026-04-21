@@ -262,8 +262,32 @@ namespace Plaga44
             _spawnedMode = mode;
         }
 
+        // Wysokosc liczona z Humanoid bones (deterministyczne, niezalezne od
+        // SkinnedMeshRenderer.bounds ktore nie sa cache'owane w pierwszym frame
+        // po Instantiate -> powodowalo "avatar zmienia rozmiar: normal->maly->normal").
+        // Fallback na Renderer.bounds tylko gdy avatar NIE jest Humanoid.
         private static void NormalizeToHeight(GameObject inst, float targetHeight)
         {
+            var animator = inst.GetComponentInChildren<Animator>(true);
+            if (animator != null && animator.isHuman)
+            {
+                var head     = animator.GetBoneTransform(HumanBodyBones.Head);
+                var leftFoot = animator.GetBoneTransform(HumanBodyBones.LeftFoot);
+                if (head != null && leftFoot != null)
+                {
+                    // +0.22m = przyblizona wysokosc glowy powyzej bone Head (od oczu do czubka)
+                    float h = (head.position.y - leftFoot.position.y) + 0.22f;
+                    if (h > 0.3f)
+                    {
+                        float scaleFactor = targetHeight / h;
+                        inst.transform.localScale *= scaleFactor;
+                        Debug.Log($"[PLAGA44][Avatar] NormalizeToHeight[Humanoid]: {inst.name} h={h:F2} -> scale={inst.transform.localScale.x:F4}");
+                        return;
+                    }
+                }
+            }
+
+            // Fallback: Renderer.bounds (moze byc niedokladne przy pierwszym frame)
             var renderers = inst.GetComponentsInChildren<Renderer>(true);
             if (renderers.Length == 0)
             {
@@ -272,15 +296,15 @@ namespace Plaga44
             }
             Bounds b = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) b.Encapsulate(renderers[i].bounds);
-            float h = b.size.y;
-            if (h < 0.001f)
+            float hb = b.size.y;
+            if (hb < 0.001f)
             {
-                Debug.LogWarning($"[PLAGA44][Avatar] NormalizeToHeight: {inst.name} height={h} too small!");
+                Debug.LogWarning($"[PLAGA44][Avatar] NormalizeToHeight: {inst.name} bounds h={hb} too small!");
                 return;
             }
-            float scaleFactor = targetHeight / h;
-            inst.transform.localScale *= scaleFactor;
-            Debug.Log($"[PLAGA44][Avatar] NormalizeToHeight: {inst.name} h={h:F2} -> scale={inst.transform.localScale.x:F4}");
+            float scaleFactorB = targetHeight / hb;
+            inst.transform.localScale *= scaleFactorB;
+            Debug.Log($"[PLAGA44][Avatar] NormalizeToHeight[Bounds-fallback]: {inst.name} h={hb:F2} -> scale={inst.transform.localScale.x:F4}");
         }
 
         private void CacheAnimatorBones()

@@ -216,16 +216,34 @@ namespace Plaga44
             _spawnedPreview = null;
         }
 
+        // Humanoid bones = deterministyczne. Renderer.bounds nie cache'owane
+        // w pierwszym frame Instantiate -> "preview zmienia rozmiar" bug.
         private static void NormalizeToHeight(GameObject inst, float targetHeight)
         {
+            var animator = inst.GetComponentInChildren<Animator>(true);
+            if (animator != null && animator.isHuman)
+            {
+                var head     = animator.GetBoneTransform(HumanBodyBones.Head);
+                var leftFoot = animator.GetBoneTransform(HumanBodyBones.LeftFoot);
+                if (head != null && leftFoot != null)
+                {
+                    float h = (head.position.y - leftFoot.position.y) + 0.22f;
+                    if (h > 0.3f)
+                    {
+                        inst.transform.localScale *= targetHeight / h;
+                        return;
+                    }
+                }
+            }
+
+            // Fallback: Renderer.bounds
             var renderers = inst.GetComponentsInChildren<Renderer>(true);
             if (renderers.Length == 0) return;
             Bounds b = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) b.Encapsulate(renderers[i].bounds);
-            float h = b.size.y;
-            if (h < 0.001f) return;
-            float scale = targetHeight / h;
-            inst.transform.localScale *= scale;
+            float hb = b.size.y;
+            if (hb < 0.001f) return;
+            inst.transform.localScale *= targetHeight / hb;
         }
 
         private Vector3 GetSpawnPosition()
