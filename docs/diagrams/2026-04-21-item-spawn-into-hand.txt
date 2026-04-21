@@ -150,3 +150,62 @@ DRUGI MODEL ROBOTA W GAMEPLAY (screenshot 2026-04-21 11:12)
 
   PlayerAvatar._instance (avatar gracza) NIE sync z Gallery preview.
 
+============================================================================
+HANDS + BODY PHYSICS (reka/reszta ciala NIE przechodzi przez item)
+============================================================================
+
+  PROBLEM:
+    OVRHandPrefab rendered palce/dlon = tylko mesh, brak colliderow.
+    Cialo avatara (StylizedCharacterLocomotion) tez tylko mesh + body tracking.
+    -> gracz moze "przebic" przedramieniem, torsem, noga przez item/sciane.
+
+  FIX -- dwa skladniki:
+  1) HandPhysicsSetup -- dlonie + palce
+       Dla kazdego OVRSkeleton z SkeletonType=HandLeft/HandRight:
+         SerializedObject.FindProperty("_enablePhysicsCapsules").boolValue = true
+       Meta SDK sam generuje CapsuleCollider per palce + Rigidbody kinematic.
+
+  2) BodyPhysicsSetup -- tors, ramiona, przedramiona, uda, lydki, glowa
+       Dla defaultRig Humanoid Animator:
+         Segmenty: Hips->Spine, Spine->Chest, Chest->UpperChest, UpperChest->Neck,
+                   LeftUpperArm->LeftLowerArm, LeftLowerArm->LeftHand,
+                   (prawo symetrycznie),
+                   LeftUpperLeg->LeftLowerLeg, LeftLowerLeg->LeftFoot,
+                   (prawo symetrycznie)
+         Dla kazdego segmentu: CapsuleCollider (radius per segment typ) w child GO
+         "<BoneName>_PhysCol".
+         Glowa: SphereCollider radius=0.11m.
+       Rigidbody Kinematic na rigu roocie.
+
+  Oba wywolywane z Bootstrap (RunSetup) po PlayerRigSetup.
+  Idempotentne: HandPhysics skip jesli juz true, BodyPhysics skip jesli GO
+  "<Bone>_PhysCol" juz istnieje.
+
+============================================================================
+STYLIZED CHARACTER LOCOMOTION FIXER (animacja chodzenia)
+============================================================================
+
+  PROBLEM:
+    Scena TESTBED.unity miala overrides na StylizedCharacterLocomotion
+    PrefabInstance ktore ZEROWAŁY:
+      _twoBoneIKProcessor._endJoint / _rootJoint / _midJoint / _ikTarget -> null
+      _twoBoneIKProcessor._weight -> 0, _iterations -> 0
+      _locomotionProcessor._footTransform / _headTransform (data[3..5]) -> null
+      m_Controller -> LocomotionController  (sample Meta NIE przypisuje)
+    -> IK wylaczony, processor nie wie jakie kosci animowac -> T-pose w gameplay.
+
+  FIX -- StylizedCharacterLocomotionFixer.Run:
+    1. Znajdz StylizedCharacterLocomotion w scenie (PlayerAvatar.defaultRig
+       albo GameObject.Find po nazwie).
+    2. PrefabUtility.GetPropertyModifications -> lista overrides.
+    3. Revert overrides ktore pasuja do REGUŁ:
+       a) propertyPath == "m_Controller"
+       b) propertyPath zaczyna sie "_sourceProcessorContainers" lub
+          "_targetProcessorContainers", objectReference == null, property
+          konczy sie Transform/Joint/Target/Rig/Hand
+       c) _twoBoneIKProcessor._weight == "0" lub _iterations == "0"
+    4. SetPropertyModifications z kept[]. Scene dirty.
+
+  Po tym: prefab defaults wchodza z Meta Samples~/AdvancedSamples/ISDKLocomotion
+  -> locomotion + IK dzialaja jak w baseline sample MovementISDKLocomotion.unity.
+

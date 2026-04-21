@@ -140,6 +140,9 @@ namespace Plaga44.Editor
             changed |= LogStep("AmbientSetup",        () => AmbientSetup.Run(cfg));
             changed |= LogStep("BounceLightSetup",    () => BounceLightSetup.Run(cfg));
             changed |= LogStep("PlayerRigSetup",      () => PlayerRigSetup.Run(cfg));
+            LogStepVoid("StylizedCharacterLocomotionFixer", () => StylizedCharacterLocomotionFixer.Run());
+            LogStepVoid("HandPhysicsSetup",           () => HandPhysicsSetup.Run());
+            LogStepVoid("BodyPhysicsSetup",           () => BodyPhysicsSetup.Run());
             changed |= LogStep("InventorySetup",      () => InventorySetup.Run(cfg));
             changed |= LogStep("SceneSingletonsSetup",() => SceneSingletonsSetup.Run(cfg));
             changed |= LogStep("ObjectSpawnerSetup",  () => ObjectSpawnerSetup.Run(cfg));
