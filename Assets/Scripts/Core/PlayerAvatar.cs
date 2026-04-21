@@ -252,17 +252,16 @@ namespace Plaga44
                 + $"scale={_instance.transform.localScale:F3} "
                 + $"parent={transform.name} parentPos={transform.position:F2}");
 
-            // Meta OVRUnityHumanoidSkeletonRetargeter -- replikacja
-            // StylizedCharacterLocomotion (ktory dziala). Retargeter uzywa body
-            // tracking (OVRBody) -> mapuje na Humanoid avatar (Exo_Gray ma
-            // animationType=3 Humanoid, rig valid).
-            //
-            // Wymogi:
-            //   - Animator z Humanoid avatar (jest, ustawione w MixamoMaterialExtractor)
-            //   - OVRBody w scenie (OVRManager tworzy ale komponent osobny -- sprawdzamy)
+            // Meta OVRUnityHumanoidSkeletonRetargeter -- body tracking (OVRBody) ->
+            // mapuje na Humanoid avatar. Wymogi:
+            //   - Animator z Humanoid avatar (ustawione w MixamoAvatarImporter
+            //     AssetPostprocessor.OnPreprocessModel)
+            //   - OVRBody w scenie (OVRManager tworzy, komponent osobny)
             if (_instance.GetComponent<OVRUnityHumanoidSkeletonRetargeter>() == null)
+            {
                 _instance.AddComponent<OVRUnityHumanoidSkeletonRetargeter>();
-            Debug.Log($"{LOG} OVRUnityHumanoidSkeletonRetargeter dodany do {_instance.name}");
+                Debug.Log($"{LOG} OVRUnityHumanoidSkeletonRetargeter dodany do {_instance.name}");
+            }
 
             _spawnedMode = mode;
         }
