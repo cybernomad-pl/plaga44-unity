@@ -252,16 +252,13 @@ namespace Plaga44
                 + $"scale={_instance.transform.localScale:F3} "
                 + $"parent={transform.name} parentPos={transform.position:F2}");
 
-            // Meta OVRUnityHumanoidSkeletonRetargeter -- body tracking (OVRBody) ->
-            // mapuje na Humanoid avatar. Wymogi:
-            //   - Animator z Humanoid avatar (ustawione w MixamoAvatarImporter
-            //     AssetPostprocessor.OnPreprocessModel)
-            //   - OVRBody w scenie (OVRManager tworzy, komponent osobny)
-            if (_instance.GetComponent<OVRUnityHumanoidSkeletonRetargeter>() == null)
-            {
-                _instance.AddComponent<OVRUnityHumanoidSkeletonRetargeter>();
-                Debug.Log($"{LOG} OVRUnityHumanoidSkeletonRetargeter dodany do {_instance.name}");
-            }
+            // Retargeter NIE dodawany tutaj -- prefab ma juz CharacterRetargeter
+            // (Meta SDK v83 API) dodany przez ExoRetargeterSetup przez SDK
+            // Building Block menu item. Zachowuje sie przy Instantiate.
+            //
+            // OVRUnityHumanoidSkeletonRetargeter (stare OVRSkeleton-based API) NIE
+            // wystepuje w zadnym samplu Meta SDK v83 -- dwa rownoleglie retargetery
+            // na jednym avatarze walczylyby o bones. Jedno zrodlo prawdy = prefab.
 
             _spawnedMode = mode;
         }
