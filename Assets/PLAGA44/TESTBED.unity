@@ -2491,33 +2491,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &2080263418
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7838596979504006163}
-  serializedVersion: 5
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 1
-  m_Constraints: 0
-  m_CollisionDetection: 3
 --- !u!1001 &7838596979504006162
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2530,6 +2503,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1847225715797833676, guid: 286d7e2005861d341a0a94d7f615675a, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: f138d28f925fa6442b115318a86915ef, type: 2}
     - target: {fileID: 3750397122103947461, guid: 286d7e2005861d341a0a94d7f615675a, type: 3}
       propertyPath: _targetProcessorContainers.Array.data[2]._currentProcessorType
       value: 4
@@ -2748,9 +2725,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5411249200755154652, guid: 286d7e2005861d341a0a94d7f615675a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 7838596979504006164}
-    - targetCorrespondingSourceObject: {fileID: 5411249200755154652, guid: 286d7e2005861d341a0a94d7f615675a, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2080263418}
   m_SourcePrefab: {fileID: 100100000, guid: 286d7e2005861d341a0a94d7f615675a, type: 3}
 --- !u!1 &7838596979504006163 stripped
 GameObject:
