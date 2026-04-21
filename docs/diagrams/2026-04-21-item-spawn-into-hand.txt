@@ -118,3 +118,35 @@ MIXAMO FBX MATERIALS FIX (Exo_Gray rozowy)
     4. ConvertMaterialsToUrp(folder)                // (juz bylo) shader URP/Lit
 
   Efekt: FBX -> .mat (URP/Lit + BaseMap + BumpMap) -> renderuje tekstury
+
+============================================================================
+DRUGI MODEL ROBOTA W GAMEPLAY (screenshot 2026-04-21 11:12)
+============================================================================
+
+  DIAGNOZA:
+    PlayerAvatar.Start -> SetAvatarMode(persistedMode)
+      mode > 0 -> SpawnAvatar -> SyncGalleryActiveIndex(mode)
+                               -> AvatarGallery.SetActiveIndex(idx)
+                               -> Gallery spawnuje preview w swiecie (2m przed graczem)
+      mode = 0 -> ShowDefaultRigOnly -> DeactivateGalleryPreviews
+                                      -> Gallery.SetActiveIndex(-1)
+                                      -> SpawnSdkDefaultPreview (SDK rig w swiecie)
+
+    Efekt: od boot sceny, ZANIM user otworzy menu, Gallery preview jest
+           widoczny w gameplay. PlayerAvatar._instance rendered na
+           OVRCameraRig (pierwsza osoba), Gallery._spawnedPreview rendered
+           w swiecie (2m przed graczem) -- gracz widzi DWA modele.
+
+  FIX w PlayerAvatar:
+    - SpawnAvatar: usuniete SyncGalleryActiveIndex(mode)
+    - ShowDefaultRigOnly: usuniete DeactivateGalleryPreviews
+    - FallbackToNone: usuniete DeactivateGalleryPreviews
+    - usunieta metoda SyncGalleryActiveIndex + DeactivateGalleryPreviews (dead)
+
+  AvatarGallery STEROWANA TYLKO przez HamburgerMenu:
+    Open  -> ForceSpawnNow (preview widoczny w menu)
+    Close -> HideAllPreviews (brute-force cleanup orphanow)
+    Slider change (menu) -> PreviewAvatarMode -> Gallery.SetActiveIndex
+
+  PlayerAvatar._instance (avatar gracza) NIE sync z Gallery preview.
+
