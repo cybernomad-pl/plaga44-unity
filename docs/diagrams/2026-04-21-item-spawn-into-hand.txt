@@ -215,6 +215,19 @@ STYLIZED CHARACTER LOCOMOTION FIXER (animacja chodzenia)
   animacja chodzenia nie dziala. LocomotionController.controller z ISDK
   Locomotion sample zostaje przypisany.
 
+  AKTUALIZACJA v3 (per-frame warning wciaz leci):
+    Runtime Editor.log pokazywal "Animator is not playing" co klatka --
+    override m_Controller nie istnial w scenie (wczesniejsza operacja
+    skasowala, np. MissingScriptCleaner albo manual reset). Fixer nie
+    nadpisuje bo liczyl ze override "juz jest".
+    Zrobiony KROK 1 EnsureAnimatorController:
+      animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath
+        <RuntimeAnimatorController>("Assets/Samples/.../LocomotionController.controller");
+    Nie polegamy na PrefabInstance overrides -- forsujemy referencje
+    bezposrednio. Tworzy nowy override w PrefabInstance automatycznie.
+    Efekt: retargeter SetFloat ma gdzie pisac, stan animatora stabilny ->
+    kosci nie deformuja sie, avatar nie trzesie.
+
 ============================================================================
 PLAYER BODY PHYSICS V2 -- LAYERS + COLLISION MATRIX
 ============================================================================

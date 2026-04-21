@@ -38,6 +38,11 @@ namespace Plaga44.Editor.Setup
         private const string LOG     = "[PLAGA44][LocomotionFixer]";
         private const string RigName = "StylizedCharacterLocomotion";
 
+        // LocomotionController.controller z ISDK Locomotion sample.
+        // guid f138d28f925fa6442b115318a86915ef (sprawdzone w .meta).
+        private const string LocomotionControllerPath =
+            "Assets/Samples/Meta XR Movement SDK/83.0.0/Advanced Samples/ISDKLocomotion/Animations/LocomotionController.controller";
+
         public static void Run()
         {
             GameObject rigRoot = ResolveRig();
@@ -47,10 +52,14 @@ namespace Plaga44.Editor.Setup
                 return;
             }
 
+            // KROK 1 -- wymus LocomotionController na Animatorze (nie polegaj
+            // na PrefabInstance override).
+            EnsureAnimatorController(rigRoot);
+
             var prefabRoot = PrefabUtility.GetOutermostPrefabInstanceRoot(rigRoot);
             if (prefabRoot == null)
             {
-                Debug.LogWarning($"{LOG} {rigRoot.name} is not a PrefabInstance -- skipping fixer");
+                Debug.LogWarning($"{LOG} {rigRoot.name} is not a PrefabInstance -- skipping overrides cleanup");
                 return;
             }
 
@@ -140,6 +149,39 @@ namespace Plaga44.Editor.Setup
             // Fallback: by name
             var byName = GameObject.Find(RigName);
             return byName;
+        }
+
+        // Wymus Animator.runtimeAnimatorController = LocomotionController.
+        // Bez controllera LocomotionSkeletalProcessor.UpdatePose wywoluje
+        // SetFloat -> "Animator is not playing an AnimatorController" warning
+        // per frame + retargeter stan undefined -> avatar sie trzesie/deformuje.
+        private static void EnsureAnimatorController(GameObject rig)
+        {
+            var animator = rig.GetComponent<Animator>();
+            if (animator == null) animator = rig.GetComponentInChildren<Animator>(true);
+            if (animator == null)
+            {
+                Debug.LogWarning($"{LOG} No Animator on {rig.name} -- cannot assign LocomotionController");
+                return;
+            }
+
+            var controller = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(LocomotionControllerPath);
+            if (controller == null)
+            {
+                Debug.LogError($"{LOG} LocomotionController not found at: {LocomotionControllerPath}");
+                return;
+            }
+
+            if (animator.runtimeAnimatorController == controller)
+            {
+                Debug.Log($"{LOG} [OK] Animator controller already = LocomotionController");
+                return;
+            }
+
+            Undo.RecordObject(animator, "Assign LocomotionController");
+            animator.runtimeAnimatorController = controller;
+            EditorUtility.SetDirty(animator);
+            Debug.Log($"{LOG} [ASSIGNED] Animator.runtimeAnimatorController = LocomotionController");
         }
     }
 }
