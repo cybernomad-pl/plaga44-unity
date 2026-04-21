@@ -119,6 +119,18 @@ MIXAMO FBX MATERIALS FIX (Exo_Gray rozowy)
 
   Efekt: FBX -> .mat (URP/Lit + BaseMap + BumpMap) -> renderuje tekstury
 
+  AKTUALIZACJA v3 (Exo rozowy mimo SearchAndRemapMaterials):
+    externalObjects w .meta wskazuje na ghost GUID -- stare .mat-y
+    skasowane przez Unity reimport, Exo_Gray.fbx.meta trzyma fileID
+    dla Body_MAT -> 6fbff614... ale actual Body_MAT.mat ma guid
+    96b2f10c... -> Unity nie znajduje, fallback do embedded BiRP = ROZOWE.
+    Moja logika skipowala cleanup bo "liczylam mapping po entries count"
+    a wszystkie byly null-target.
+    FIX: sprawdzaj kv.Value != null, wycinam ghost keys przez
+    importer.RemoveRemap, potem SearchAndRemapMaterials + SaveAndReimport
+    ZAWSZE (idempotent). Post fix externalObjects wskazuje na istniejace
+    .mat-y po nazwie (Body_MAT -> Body_MAT.mat).
+
 ============================================================================
 DRUGI MODEL ROBOTA W GAMEPLAY (screenshot 2026-04-21 11:12)
 ============================================================================
