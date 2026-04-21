@@ -69,19 +69,16 @@ namespace Plaga44.Inventory
                 _originalScale = transform.localScale;
                 _originalScaleCached = true;
             }
-            // Pos/Rot offset mutate TYLKO gdy:
-            // 1. Item jest grabbed (parent przypisany przez OVRGrabber)
-            // 2. transform.parent != null (guard -- OVRGrabber parent w GrabBegin
-            //    wywolywany PO grabbable.GrabBegin, wiec przy pierwszym call
-            //    moze nie byc ustawiony -- localPos=zero teleportuje do origin!)
-            // 3. offset != zero (jesli domyslny zero, zostawiamy OVRGrabber
-            //    default pose -- item tam gdzie grabber go chce)
+            // Apply gripconfig ZAWSZE gdy isGrabbed + parent przypisany.
+            // Guard transform.parent != null -- OVRGrabber parent w GrabBegin
+            // wywolywany PO grabbable.GrabBegin, wiec przy pierwszym call
+            // moze nie byc ustawiony -- localPos=zero teleportuje do origin!
+            // Zero-offset TEZ mutate (reset do hand origin) -- inaczej slider
+            // dzialal niespojnie (non-zero ok, zero ignored).
             if (isGrabbed && transform.parent != null)
             {
-                if (cfg.offsetPos != Vector3.zero)
-                    transform.localPosition = cfg.offsetPos;
-                if (cfg.offsetRotEuler != Vector3.zero)
-                    transform.localRotation = Quaternion.Euler(cfg.offsetRotEuler);
+                transform.localPosition = cfg.offsetPos;
+                transform.localRotation = Quaternion.Euler(cfg.offsetRotEuler);
             }
             transform.localScale = _originalScale * cfg.scale;
             _gripConfig = cfg;
