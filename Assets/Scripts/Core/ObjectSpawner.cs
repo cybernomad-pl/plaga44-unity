@@ -159,6 +159,79 @@ namespace Plaga44
             return instance;
         }
 
+        /// <summary>Spawn prefab z Resources/ prosto do rece gracza, state=GRABBED.
+        /// Gdy grabber juz cos trzyma -> release + destroy poprzedniego.
+        /// Zwraca spawned GO albo null gdy blad (brak prefabu / brak grabbera).</summary>
+        /// <param name="hand">RTouch albo LTouch -- ktora reka ma item zlapac.</param>
+        public GameObject SpawnIntoHand(string resourcePath, OVRInput.Controller hand = OVRInput.Controller.RTouch)
+        {
+            var prefab = Resources.Load<GameObject>(resourcePath);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"{LOG} SpawnIntoHand: resource not found: {resourcePath}");
+                return null;
+            }
+
+            var grabber = FindGrabber(hand);
+            if (grabber == null)
+            {
+                Debug.LogWarning($"{LOG} SpawnIntoHand: grabber not found for {hand}");
+                return null;
+            }
+
+            // Jesli cos juz trzymane -- release + destroy (podmiana itemu w rece).
+            if (grabber.CurrentGrabbed != null)
+            {
+                var prev = grabber.CurrentGrabbed.gameObject;
+                Debug.Log($"{LOG} SpawnIntoHand: replacing {prev.name} in {hand}");
+                // ForceGrab zrobi GrabEnd jesli trzeba, ale musimy sami Destroy poprzedniego
+                // zeby nie zostal w swiecie po podmianie.
+                _spawned.Remove(prev);
+                Destroy(prev);
+            }
+
+            // Spawn w pozycji grabbera. OVRGrabbable.GrabBegin sparentuje do ground,
+            // a OVRGrabber.Update przesuwa rigidbody MoveRotation do grip pozycji.
+            var entry = new SpawnEntry
+            {
+                resourcePath = resourcePath,
+                autoRigidbody = true,
+                autoCollider = true,
+                autoGrabbable = true,
+                mass = 1.0f
+            };
+            var instance = Instantiate(prefab, grabber.transform.position, grabber.transform.rotation);
+            instance.name = prefab.name;
+            WireComponents(instance, entry);
+            _spawned.Add(instance);
+
+            var grabbable = instance.GetComponent<OVRGrabbable>();
+            if (grabbable == null)
+            {
+                Debug.LogWarning($"{LOG} SpawnIntoHand: {instance.name} missing OVRGrabbable after WireComponents -- cannot force grab");
+                return instance;
+            }
+
+            if (!grabber.ForceGrab(grabbable))
+            {
+                Debug.LogWarning($"{LOG} SpawnIntoHand: ForceGrab failed for {instance.name}");
+            }
+            else
+            {
+                Debug.Log($"{LOG} SpawnIntoHand: {instance.name} zlapany przez {hand}");
+            }
+            return instance;
+        }
+
+        private static PlagaGrabber FindGrabber(OVRInput.Controller hand)
+        {
+            foreach (var g in Object.FindObjectsByType<PlagaGrabber>(FindObjectsSortMode.None))
+            {
+                if (g.OwnerController == hand) return g;
+            }
+            return null;
+        }
+
         /// <summary>Despawn all tracked items.</summary>
         public void DespawnAll()
         {
@@ -212,18 +285,26 @@ namespace Plaga44
 
         private static void WireComponents(GameObject instance, SpawnEntry entry)
         {
-            // Rigidbody
+            // Rigidbody -- mass z prefabu wygrywa nad entry.mass (celowa wartosc
+            // ustawiona przez designera). entry.mass tylko dla freshly-added RB.
             if (entry.autoRigidbody)
             {
                 var rb = instance.GetComponent<Rigidbody>();
-                if (rb == null) rb = instance.AddComponent<Rigidbody>();
-                rb.mass = entry.mass;
-                rb.interpolation = RigidbodyInterpolation.Interpolate;
+                bool rbAdded = rb == null;
+                if (rbAdded)
+                {
+                    rb = instance.AddComponent<Rigidbody>();
+                    rb.mass = entry.mass;
+                }
+                rb.interpolation          = RigidbodyInterpolation.Interpolate;
                 rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
             }
 
-            // Collider -- add BoxCollider fitted to mesh bounds if none exists
-            if (entry.autoCollider && instance.GetComponentInChildren<Collider>() == null)
+            // Collider na ROOT (nie in-children). OVRGrabbable.Awake wymaga
+            // Colliderra na tym samym GO do fallback grabPoints (gdy m_grabPoints
+            // pusty). Child collidery nie wystarcza -- Awake rzuci ArgumentException.
+            // BoxCollider dopasowany do mesh bounds -- obejmuje cala bryle obiektu.
+            if (entry.autoCollider && instance.GetComponent<Collider>() == null)
             {
                 var bounds = ComputeBounds(instance);
                 var col = instance.AddComponent<BoxCollider>();

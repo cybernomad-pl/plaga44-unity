@@ -51,5 +51,42 @@ namespace Plaga44.Inventory
             Debug.Log($"{LOG} Toggle GRAB via {m_controller}");
             base.GrabBegin();
         }
+
+        /// <summary>Wymus grab konkretnego obiektu bez polegania na grab-volume
+        /// discovery. Uzywane przez ObjectSpawner do spawnowania itemu od razu
+        /// w rece gracza. Gdy grabber juz cos trzyma -> release + destroy
+        /// poprzedniego (caller odpowiada za Destroy).</summary>
+        /// <returns>true jesli target zostal zlapany.</returns>
+        public bool ForceGrab(OVRGrabbable target)
+        {
+            if (target == null)
+            {
+                Debug.LogWarning($"{LOG} ForceGrab: target == null");
+                return false;
+            }
+            if (target.isGrabbed && !target.allowOffhandGrab)
+            {
+                Debug.LogWarning($"{LOG} ForceGrab: target '{target.name}' juz trzymany i nie allowOffhandGrab");
+                return false;
+            }
+
+            // Zwolnij cokolwiek trzymamy. Destroy poprzedniego = odpowiedzialnosc callera.
+            if (m_grabbedObj != null)
+            {
+                Debug.Log($"{LOG} ForceGrab: releasing current {m_grabbedObj.name} before forcing {target.name}");
+                GrabEnd();
+            }
+
+            // Clear candidates + dodaj tylko target. base.GrabBegin() iteruje
+            // po m_grabCandidates i wybiera najblizszy -- z jednym elementem
+            // zawsze wybierze target.
+            m_grabCandidates.Clear();
+            m_grabCandidates[target] = 1;
+
+            Debug.Log($"{LOG} ForceGrab: {target.name} via {m_controller}");
+            // Wywolanie przez our-override trafia do base poniewaz m_grabbedObj==null.
+            GrabBegin();
+            return m_grabbedObj == target;
+        }
     }
 }

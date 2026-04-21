@@ -55,7 +55,16 @@ namespace Plaga44.Editor.Setup
             return processed;
         }
 
-        // Per-FBX: extract embedded textures + convert materials do URP/Lit
+        // Per-FBX: extract embedded textures + ensure External materials + remap
+        // istniejace .mat-y do FBX po nazwie + convert materials do URP/Lit.
+        //
+        // KLUCZOWE: gdy .meta FBXa ma materialLocation=Embedded (stan z repo po
+        // zerowaniu testbedu), wyekstrraktowane .mat-y w Materials/ sa orphaned
+        // -- FBX uzywa embedded BiRP materials (rozowe w URP). Dlatego:
+        //   1. Wymus materialLocation=External (naprawa .meta w repo)
+        //   2. SearchAndRemapMaterials(BasedOnMaterialName, Everywhere)
+        //      -> Unity znajduje .mat-y po nazwie materialu i remapuje FBX
+        //   3. SaveAndReimport -> zapis .meta + zastosowanie bindingu
         private static bool ProcessOne(string fbxPath)
         {
             var importer = AssetImporter.GetAtPath(fbxPath) as ModelImporter;
@@ -71,6 +80,40 @@ namespace Plaga44.Editor.Setup
             EnsureFolder(texFolder);
             if (importer.ExtractTextures(texFolder))
                 Debug.Log($"{LOG} [TEX] Extracted -> {texFolder}");
+
+            // --- Naprawa materialLocation + remap -----------------------------
+            // Jesli .meta ma Embedded (stan z repo po zerowaniu testbedu) lub
+            // externalObjects nie ma zadnego Material mapping -- wymus External
+            // + SearchAndRemap + SaveAndReimport. Inaczej skip (konfiguracja
+            // juz poprawna, pelny reimport FBXa jest kosztowny).
+            bool needsFix = false;
+
+            if (importer.materialLocation != ModelImporterMaterialLocation.External)
+            {
+                importer.materialLocation = ModelImporterMaterialLocation.External;
+                Debug.Log($"{LOG} [META] {fbxPath}: Embedded -> External");
+                needsFix = true;
+            }
+
+            int matRemapCount = 0;
+            foreach (var kv in importer.GetExternalObjectMap())
+                if (kv.Key.type == typeof(Material)) matRemapCount++;
+
+            if (matRemapCount == 0)
+            {
+                // FBX nie ma zmapowanych .mat-ow -- szukamy po nazwie materialu.
+                importer.SearchAndRemapMaterials(
+                    ModelImporterMaterialName.BasedOnMaterialName,
+                    ModelImporterMaterialSearch.Everywhere);
+                Debug.Log($"{LOG} [REMAP] {fbxPath}: SearchAndRemapMaterials");
+                needsFix = true;
+            }
+
+            if (needsFix)
+            {
+                importer.SaveAndReimport();
+                Debug.Log($"{LOG} [REIMPORT] {fbxPath} (materialLocation + remap applied)");
+            }
 
             // Import settings (Humanoid / no-anim / external-mat) sa ustawione
             // przez MixamoAvatarImporter.OnPreprocessModel -- nie duplikujemy.

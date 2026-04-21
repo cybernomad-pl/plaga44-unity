@@ -1,0 +1,120 @@
+============================================================================
+ITEM SPAWN -> PRAWA REKA, state=GRABBED, toggle release
+2026-04-21, CYBERNOMAD
+============================================================================
+
+PROBLEM (z testow na Queście):
+  1. Shotgun spawnowany na "wirtualnym stole" przed graczem -- grab nie lapal
+  2. Reka przechodzi przez item (bez collision -- osobny temat, PhysicsHands)
+  3. Po release grawitacja nie dziala -- item wisi w powietrzu
+     (przyczyna: ItemBrowser.SpawnPreview ustawial rb.isKinematic=true +
+      useGravity=false PRZED OVRGrabbable.Start, ktore czyta isKinematic
+      do m_grabbedKinematic i restoruje po release -> zostaje kinematic)
+
+ROZWIAZANIE: spawn od razu w rece gracza, state=GRABBED.
+
+============================================================================
+NOWY FLOW
+============================================================================
+
+  [HamburgerMenu: wybor itemu]
+              |
+              v
+  ItemBrowser.SetItem(index)
+              |
+              +--- index == 0 ---> DespawnCurrent (release+destroy)
+              |
+              v
+  ObjectSpawner.SpawnIntoHand(resourcePath, hand=RTouch)
+              |
+              +--> FindGrabber(RTouch)      // Plaga44.Inventory.PlagaGrabber
+              |    |
+              |    v
+              |   grabber.CurrentGrabbed != null ?
+              |    |
+              |    Y ---> Destroy(prev)  // podmiana itemu
+              |    |
+              |    N ---> (continue)
+              |
+              +--> Instantiate(prefab, grabber.transform)
+              |    WireComponents (RB, root-Collider, PlagaGrabbable, Haptic)
+              |
+              +--> grabber.ForceGrab(grabbable)  // bypass grab-volume discovery
+                      |
+                      v
+                 PlagaGrabber.ForceGrab:
+                   m_grabCandidates.Clear()
+                   m_grabCandidates[target] = 1
+                   GrabBegin()  // nasza override -> base -> target zlapany
+
+============================================================================
+PLAGAGRABBER -- GRAB TOGGLE + FORCE GRAB
+============================================================================
+
+  Awake:
+    grabEnd = -1f       // blokuje hold-to-release z OVRGrabber base
+
+  GrabBegin (override):
+    m_grabbedObj != null ?
+      Y -> GrabEnd                    // toggle release
+      N -> base.GrabBegin()           // toggle grab z candidates
+
+  ForceGrab(target)   <-- NOWE
+    target == null             -> warn, return false
+    target.isGrabbed && !allow  -> warn, return false
+    m_grabbedObj != null       -> GrabEnd (release previous)
+    m_grabCandidates.Clear()
+    m_grabCandidates[target] = 1
+    GrabBegin()                // our override -> m_grabbedObj==null -> base
+
+============================================================================
+GRAWITACJA PO RELEASE -- teraz DZIALA
+============================================================================
+
+  PRZED (ItemBrowser.SpawnPreview):
+    rb.isKinematic = true       <-- PSUJE m_grabbedKinematic w OVRGrabbable.Start
+    rb.useGravity = false       <-- nikt tego nie przywraca
+    --> po release item wisi
+
+  TERAZ (ObjectSpawner.SpawnIntoHand):
+    (prefab defaults: isKinematic=false, useGravity=true)
+    Instantiate -> OVRGrabbable.Start reads isKinematic=false
+    ForceGrab -> GrabBegin (rb.isKinematic=true only while grabbed)
+    GrabEnd -> rb.isKinematic=false (restored) + useGravity=true
+    --> item spada na ziemie
+
+============================================================================
+WIRECOMPONENTS FIX -- COLLIDER NA ROOT
+============================================================================
+
+  OVRGrabbable.Awake:
+    if (m_grabPoints.Length == 0):
+      collider = GetComponent<Collider>()    // ROOT ONLY, nie children
+      if (collider == null) throw ArgumentException
+      m_grabPoints = [collider]
+
+  PRZED: WireComponents uzywal GetComponentInChildren<Collider>()
+    -> gdy prefab mial child meshCollidery ale pusty root
+       AddComponent<PlagaGrabbable>() -> Awake throw -> crash
+
+  TERAZ: GetComponent<Collider>() (root only)
+    -> gdy brak root collidera, AddComponent<BoxCollider> z mesh bounds
+    -> OVRGrabbable.Awake ma fallback grabPoint
+
+============================================================================
+MIXAMO FBX MATERIALS FIX (Exo_Gray rozowy)
+============================================================================
+
+  DIAGNOZA:
+    Exo_Gray.fbx.meta: materialLocation=0 (Embedded) + externalObjects={}
+    -> FBX uzywa embedded BiRP Standard materials -> URP renderuje jako magenta
+    -> .mat-y w Materials/ sa orphaned (stworzone, ale FBX ich nie referuje)
+
+  FIX w MixamoMaterialExtractor.ProcessOne:
+    1. importer.materialLocation = External         // naprawia .meta
+    2. importer.SearchAndRemapMaterials(            // szuka .mat po nazwie
+         BasedOnMaterialName, Everywhere)           // populuje externalObjects
+    3. importer.SaveAndReimport()                   // zapis + reaplikacja
+    4. ConvertMaterialsToUrp(folder)                // (juz bylo) shader URP/Lit
+
+  Efekt: FBX -> .mat (URP/Lit + BaseMap + BumpMap) -> renderuje tekstury
