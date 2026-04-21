@@ -24,20 +24,22 @@ namespace Plaga44.Editor
     {
         private const string LOG = "[PLAGA44][Bootstrap]";
         private const string ConfigPath = "Assets/PLAGA44/Config/BootstrapConfig_Quest.asset";
-        private const string SessionKey = "Plaga44.Bootstrap.Done";
 
         // =====================================================================
-        // Auto-run przy starcie edytora
+        // Auto-run przy kazdym domain reload (Unity start + asembly reload)
         // =====================================================================
+        //
+        // ZERO SessionKey guard -- setupy sa idempotent, drugi reload wolny
+        // tylko o kilka sekund (AvatarRegistrySetup reimportuje FBXy
+        // niezaleznie, to osobny problem). Korzysc: auto-run DZIALA zawsze,
+        // bez manualnego CYBERNOMAD/Bootstrap po kazdym edycie skryptu.
+        //
+        // Pomijamy TYLKO gdy Play Mode (domain reload przy Enter/Exit Play --
+        // nie chcemy saveowac sceny w trakcie grania).
 
-        // Unity 6: delayCall from [InitializeOnLoad] constructor is unreliable.
-        // EditorApplication.update fires every editor tick -- we unhook after first call.
         static Bootstrap()
         {
             EditorApplication.update += WaitForReady;
-            // Re-trigger przy otwarciu sceny testbed: user moze przelaczac scenes
-            // albo restart Unity z inna scena -- chcemy auto-run po przejsciu
-            // na TESTBED.unity.
             EditorSceneManager.sceneOpened += OnSceneOpened;
         }
 
@@ -45,11 +47,6 @@ namespace Plaga44.Editor
         {
             if (!scene.path.EndsWith("TESTBED.unity", System.StringComparison.OrdinalIgnoreCase))
                 return;
-            if (SessionState.GetBool(SessionKey, false))
-            {
-                // Juz odpalilismy -- scenka reopened w tej sesji, SKIP (inaczej loop).
-                return;
-            }
             Debug.Log($"{LOG} sceneOpened({scene.name}) -> queuing auto-run");
             _waitTicks = 0;
             EditorApplication.update -= WaitForReady; // unhook jesli jeszcze wisi
@@ -59,16 +56,25 @@ namespace Plaga44.Editor
         private static int _waitTicks;
 
         // Po ilu tickach forsujemy run mimo isCompiling (failsafe -- Unity 6
-        // po pelnym reimporcie potrafi nie wyjsc z isUpdating, auto-run
-        // utykal w nieskonczonosc).
+        // po pelnym reimporcie potrafi nie wyjsc z isUpdating/isCompiling,
+        // auto-run utykal w nieskonczonosc).
         private const int MaxWaitTicks = 60 * 60; // ~60s at 60 tick/s
 
         private static void WaitForReady()
         {
             _waitTicks++;
 
+            // Nie odpalaj w Play Mode / przed tranzycja -- scena nie powinna byc
+            // modyfikowana + save podczas grania.
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                EditorApplication.update -= WaitForReady;
+                Debug.Log($"{LOG} WaitForReady: skipped (Play Mode)");
+                return;
+            }
+
             // Czekamy TYLKO na isCompiling (nie isUpdating -- AssetDatabase po
-            // pelnym reimporcie moze nie zejsc do false, blokowalo auto-run).
+            // pelnym reimporcie moze nie zejsc do false).
             // Failsafe: po MaxWaitTicks forsujemy run niezaleznie.
             if (EditorApplication.isCompiling && _waitTicks < MaxWaitTicks)
             {
@@ -78,14 +84,6 @@ namespace Plaga44.Editor
             }
 
             EditorApplication.update -= WaitForReady;
-
-            if (SessionState.GetBool(SessionKey, false))
-            {
-                Debug.Log($"{LOG} Auto-run SKIPPED -- already ran this session (SessionState '{SessionKey}'=true). " +
-                    "Uzyj CYBERNOMAD/Bootstrap zeby re-run, ALBO restart Unity (SessionState jest per proces).");
-                return;
-            }
-            SessionState.SetBool(SessionKey, true);
 
             string reason = _waitTicks >= MaxWaitTicks ? "TIMEOUT-FORCED" : "ready";
             Debug.Log($"{LOG} Auto-run ({reason}): loading scene and validating... (waited {_waitTicks} ticks, isCompiling={EditorApplication.isCompiling}, isUpdating={EditorApplication.isUpdating})");
