@@ -1546,9 +1546,8 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5e48d93b64a9ae4f9fd5a728c8f51af, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  _renderers:
-  - {fileID: 1349191462701934227}
+  m_EditorClassIdentifier:
+  _renderers: []
   _vectorProperties: []
   _colorProperties: []
   _floatProperties: []
