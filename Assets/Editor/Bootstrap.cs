@@ -179,15 +179,12 @@ namespace Plaga44.Editor
             // HandPhysicsSetup przeniesione do runtime (HandPhysicsEnabler.cs):
             // OVRHandPrefab jest aktywowane dopiero w runtime przez SDK,
             // editor-time "No OVRSkeleton in scene".
-            // BodyPhysics + PlayerPhysicsLayers OLANE (Borys: olej full body physics).
+            // BodyPhysics + PlayerPhysicsLayers OLANE (Borys: olej full body physics)
+            // -- collision matrix PlayerBody x Item = ON powodowalo ze item trzymany
+            // w rece zderza sie z body capsule -> gracz wariuje.
             LogStepVoid("BodyPhysicsCleanup",         () => BodyPhysicsCleanup.Run());
-
-            // MIGRACJA OVR Core grab -> ISDK HandGrabInteractor (Meta sample pattern).
-            // 1. Scena dostaje ISDK hand adapter + HandGrabInteractor pod hand anchors.
-            // 2. Shotgun.prefab dostaje HandGrabInteractable zamiast PlagaGrabbable.
-            LogStepVoid("ISDKHandGrabSetup",          () => ISDKHandGrabSetup.Run());
-            LogStepVoid("ShotgunISDKSetup",           () => ShotgunISDKSetup.Run());
-
+            // ItemStand -- dynamiczny per-item stand robiony runtime w ItemBrowser.SpawnPreview
+            // (invisible BoxCollider 1.5x1.5m zaraz pod itemem). Bootstrap step zbedny.
             changed |= LogStep("InventorySetup",      () => InventorySetup.Run(cfg));
             changed |= LogStep("SceneSingletonsSetup",() => SceneSingletonsSetup.Run(cfg));
             changed |= LogStep("ObjectSpawnerSetup",  () => ObjectSpawnerSetup.Run(cfg));
