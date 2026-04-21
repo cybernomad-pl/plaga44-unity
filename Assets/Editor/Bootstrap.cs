@@ -41,30 +41,10 @@ namespace Plaga44.Editor
         {
             EditorApplication.update += WaitForReady;
             EditorSceneManager.sceneOpened += OnSceneOpened;
-            // ExitingEditMode = user klikal Play ale Play jeszcze sie nie zaczal.
-            // Ostatnia szansa na setup sceny ZANIM Play wchodzi -- inaczej
-            // WaitForReady skipuje (Play Mode guard) i fixery nie odpalaja sie.
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
-        }
-
-        private static void OnPlayModeStateChanged(PlayModeStateChange state)
-        {
-            if (state != PlayModeStateChange.ExitingEditMode) return;
-            // Sprawdz czy aktywna scena to testbed -- inaczej nic nie rob.
-            var active = SceneManager.GetActiveScene();
-            if (!active.path.EndsWith("TESTBED.unity", System.StringComparison.OrdinalIgnoreCase))
-                return;
-
-            Debug.Log($"{LOG} ExitingEditMode -- running pre-Play fixers synchronously");
-            try
-            {
-                var cfg = LoadConfig();
-                if (cfg != null) RunSetup(cfg);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError($"{LOG} Pre-Play fixer failed: {e.Message}\n{e.StackTrace}");
-            }
+            // USUNIETY playModeStateChanged hook -- ExitingEditMode trigger
+            // RunSetup modyfikowal scene W TRAKCIE enter Play -> Unity crash
+            // podczas transition -> Play Mode natychmiast exit. Auto-run w
+            // cctor + sceneOpened wystarcza.
         }
 
         private static void OnSceneOpened(UnityEngine.SceneManagement.Scene scene, OpenSceneMode mode)
