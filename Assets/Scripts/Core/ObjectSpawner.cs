@@ -292,11 +292,9 @@ namespace Plaga44
 
         private static void WireComponents(GameObject instance, SpawnEntry entry)
         {
-            // Layer "Item" -- PlayerBody kolidy TYLKO z Item (blokuje item),
-            // a z Default/Terrain/Water nie. Item takze koliduje z Default
-            // (spada na ziemie). Wszystkie dzieci tez na Item.
-            int itemLayer = LayerMask.NameToLayer("Item");
-            if (itemLayer >= 0) SetLayerRecursive(instance, itemLayer);
+            // Layer "Item" USUNIETY -- body physics olane. Poprzednio PlayerBody
+            // x Item = ON powodowal ze item w rece zderzal sie z body capsule
+            // avatara -> gracz wariowal. Item zostaje na Default layer.
 
             // Rigidbody -- mass z prefabu wygrywa nad entry.mass (celowa wartosc
             // ustawiona przez designera). entry.mass tylko dla freshly-added RB.

@@ -143,14 +143,32 @@ namespace Plaga44.Inventory
 
         public override void GrabBegin(OVRGrabber hand, Collider grabPoint)
         {
+            // LOG PRE -- stan przed przekazaniem do OVRGrabbable base
+            var rbPre = GetComponent<Rigidbody>();
+            Debug.Log($"{LOG} GRAB[1/4] PRE: {name} pos={transform.position:F2} " +
+                $"rb(kinem={rbPre?.isKinematic},grav={rbPre?.useGravity},vel={rbPre?.linearVelocity.magnitude:F2}) " +
+                $"parent={(transform.parent != null ? transform.parent.name : "<null>")} " +
+                $"grabPoint={grabPoint?.name} handCtrl={(hand != null ? ResolveController(hand).ToString() : "null")}");
+
             base.GrabBegin(hand, grabPoint);
+
+            // LOG POST BASE -- base zmienilo parent + kinematic
+            var rbPost = GetComponent<Rigidbody>();
+            Debug.Log($"{LOG} GRAB[2/4] POST-BASE: {name} pos={transform.position:F2} " +
+                $"rb(kinem={rbPost?.isKinematic},grav={rbPost?.useGravity}) " +
+                $"parent={(transform.parent != null ? transform.parent.name : "<null>")} " +
+                $"isGrabbed={isGrabbed} grabbedBy={(m_grabbedBy != null ? m_grabbedBy.name : "null")}");
+
             _holdingController = ResolveController(hand);
             _gripHeldLastFrame = false;
-            Debug.Log($"{LOG} GrabBegin: {name} by {_holdingController} (base={BaseName})");
             if (_haptic != null) _haptic.OnGrab(_holdingController);
 
             // Load + apply saved grip offset (per-item PlayerPrefs)
-            ApplyGripConfig(ItemGripConfig.Load(BaseName));
+            var cfg = ItemGripConfig.Load(BaseName);
+            ApplyGripConfig(cfg);
+            Debug.Log($"{LOG} GRAB[3/4] GripConfig applied: {name} " +
+                $"offsetPos={cfg.offsetPos:F3} offsetRot={cfg.offsetRotEuler:F1} scale={cfg.scale:F3} " +
+                $"-> localPos={transform.localPosition:F3} localRot={transform.localEulerAngles:F1}");
 
             // Freeze SDK hand fingers while holding -- lock at CURRENT pose (natural grip
             // from hand tracking at moment of grab). No artificial fist -- just stop animating.
@@ -158,7 +176,11 @@ namespace Plaga44.Inventory
 
             // Remove from holster if attached
             if (homeHolster != null && homeHolster.ContainedItem == gameObject)
+            {
+                Debug.Log($"{LOG} GRAB[4/4] Released from holster {homeHolster.name}");
                 homeHolster.Release();
+            }
+            Debug.Log($"{LOG} GRAB[DONE]: {name} by {_holdingController}");
         }
 
         public override void GrabEnd(Vector3 linearVelocity, Vector3 angularVelocity)
@@ -167,7 +189,11 @@ namespace Plaga44.Inventory
                 ? _holdingController
                 : ResolveController(m_grabbedBy);
 
-            Debug.Log($"{LOG} GrabEnd: {name} released, vel={linearVelocity.magnitude:F2}m/s");
+            var rbPre = GetComponent<Rigidbody>();
+            Debug.Log($"{LOG} RELEASE[1/3] PRE: {name} pos={transform.position:F2} " +
+                $"rb(kinem={rbPre?.isKinematic},grav={rbPre?.useGravity}) " +
+                $"vel={linearVelocity.magnitude:F2}m/s angVel={angularVelocity.magnitude:F2} " +
+                $"ctrl={controller}");
 
             // Stop any ongoing grip haptic
             StopGripHaptic();
@@ -186,16 +212,35 @@ namespace Plaga44.Inventory
             }
             catch (System.Exception e)
             {
-                Debug.LogWarning($"{LOG} GrabEnd exception (non-fatal): {e.Message}");
-                // OVRGrabbable.GrabEnd can throw if Rigidbody was destroyed or kinematic state changed
+                Debug.LogWarning($"{LOG} RELEASE exception (non-fatal): {e.Message}");
             }
+
+            // LOG POST -- base odparentowal + restore kinematic state
+            var rbPost = GetComponent<Rigidbody>();
+            Debug.Log($"{LOG} RELEASE[2/3] POST-BASE: {name} pos={transform.position:F2} " +
+                $"rb(kinem={rbPost?.isKinematic},grav={rbPost?.useGravity},vel={rbPost?.linearVelocity.magnitude:F2}) " +
+                $"parent={(transform.parent != null ? transform.parent.name : "<null>")}");
 
             // Auto-return to holster if released near it
             if (homeHolster != null && homeHolster.IsInRange(transform.position))
             {
-                Debug.Log($"{LOG} {name} snapping back to {homeHolster.name}");
+                Debug.Log($"{LOG} RELEASE[3/3] snapping to holster {homeHolster.name}");
                 homeHolster.Holster(gameObject);
             }
+            else
+            {
+                Debug.Log($"{LOG} RELEASE[3/3] dropped to world (no holster)");
+            }
+        }
+
+        // Periodic position log gdy trzymany -- wykrywa czy item znika albo teleportuje
+        private float _nextHeldLog;
+        private void LateUpdate()
+        {
+            if (!isGrabbed) return;
+            if (Time.unscaledTime < _nextHeldLog) return;
+            _nextHeldLog = Time.unscaledTime + 1f; // raz na sekunde
+            Debug.Log($"{LOG} HELD: {name} pos={transform.position:F2} parent={(transform.parent != null ? transform.parent.name : "<null>")}");
         }
 
         private static OVRInput.Controller ResolveController(OVRGrabber hand)

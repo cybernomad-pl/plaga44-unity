@@ -153,27 +153,44 @@ namespace Plaga44
 
         private void SpawnPreview(GameObject prefab)
         {
-            Vector3 pos = GetSpawnPosition();
+            // Spawnuj nad ItemStand (fizyczny stolik) zamiast w powietrzu.
+            // Item spada na stand -> leza na nim -> user moze chwycic.
+            // Po release spada z powrotem na stand (jesli obok), inaczej na ziemie.
+            Vector3 pos = GetSpawnAboveStand();
             Quaternion rot = GetSpawnRotation();
 
             _spawnedPreview = Instantiate(prefab, pos, rot);
             _spawnedPreview.name = $"ItemPreview_{prefab.name}";
 
-            // Statyczny podglad -- kinematic = nie reaguje na fizyke, stoi w miejscu.
-            // OVRGrabber przejmie sterowanie przy GrabBegin (wylaczy kinematic sam).
+            // Fizyka NORMALNA (nie kinematic) -- item spada na stand.
+            // OVRGrabbable.Start zapisze m_grabbedKinematic=false, po release
+            // wroci do non-kinematic -> item moze znowu spadac.
             var rb = _spawnedPreview.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                // Kolejnosc: zero velocities PRZED switchem na kinematic
-                // (kinematic rigidbody nie pozwala set velocity -- warning).
-                if (!rb.isKinematic)
-                {
-                    rb.linearVelocity = Vector3.zero;
-                    rb.angularVelocity = Vector3.zero;
-                }
-                rb.isKinematic = true;
-                rb.useGravity = false;
+                rb.isKinematic = false;
+                rb.useGravity  = true;
+                rb.linearVelocity  = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
             }
+
+            Debug.Log($"{LOG} SpawnPreview: {_spawnedPreview.name} @ {pos:F2} " +
+                $"(rb kinem={rb?.isKinematic}, grav={rb?.useGravity})");
+        }
+
+        private Vector3 GetSpawnAboveStand()
+        {
+            var stand = GameObject.Find("ItemStand");
+            if (stand != null)
+            {
+                // Spawn 0.3m nad standem -- item spada na gore.
+                var standPos = stand.transform.position;
+                float standTopY = standPos.y + (stand.transform.localScale.y * 0.5f);
+                return new Vector3(standPos.x, standTopY + 0.3f, standPos.z);
+            }
+            // Fallback: przed graczem (stary path) jesli brak standu.
+            Debug.LogWarning($"{LOG} ItemStand not found in scene -- fallback to head-relative spawn");
+            return GetSpawnPosition();
         }
 
         /// <summary>Destroy current preview item. Public for HamburgerMenu.Close (issue #158).</summary>

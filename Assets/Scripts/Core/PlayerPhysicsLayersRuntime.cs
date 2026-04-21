@@ -33,8 +33,10 @@ namespace Plaga44
         private const int WaterLayer         = 4;
         private const int UILayer            = 5;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void ConfigureCollisionMatrix()
+        // RuntimeInitializeOnLoadMethod WYLACZONE -- body physics olane, collision
+        // matrix nie ustawiamy. Jesli wracamy do tematu, odkomentuj atrybut.
+        // [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        public static void ConfigureCollisionMatrix()
         {
             // PlayerBody NIE koliduje ze srodowiskiem -> capsule nog nie odbijaja
             // od terenu -> gracz nie fruwa.
