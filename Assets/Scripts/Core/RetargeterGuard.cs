@@ -28,6 +28,10 @@ namespace Plaga44
             "Unable to process a controller whose SampleRateHz is 0",
             "XR: Error setting active audio output driver",
             "Local Dimming feature is not supported",
+            // body tracking fidelity: OVRBody probuje ustawic High Fidelity
+            // na editor/Quest bez tego feature. Fallback do low auto-dziala.
+            "body tracking fidelity is not supported",
+            "RequestBodyTrackingFidelity",
         };
 
         private static ILogHandler _original;

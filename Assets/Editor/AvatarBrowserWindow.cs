@@ -165,7 +165,7 @@ namespace Plaga44.Editor
         private void DrawAvatarList()
         {
             if (_registry == null || _registry.Count == 0)
-            { EditorGUILayout.HelpBox("No avatars.\nRescan to import.", MessageType.Info); return; }
+            { EditorGUILayout.HelpBox("No avatars.\nClick Refresh to rescan.", MessageType.Info); return; }
 
             for (int i = 0; i < _registry.Count; i++)
             {

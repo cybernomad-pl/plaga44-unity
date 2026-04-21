@@ -22,6 +22,13 @@ namespace Plaga44
         [Tooltip("Save Y position too (uncheck for ground-snap respawn each session).")]
         public bool saveY = true;
 
+        // Sanity bounds -- gdy gracz zbugowal sie i spada w nieskonczonosc, Y
+        // ladowalo w setkach tysiecy ujemnych. Nie restore/save takich pozycji,
+        // bo kazdy nastepny start loop "spawn pod terenem -> spada -> zapisz
+        // jeszcze nizej".
+        private const float MinValidY = -100f;
+        private const float MaxValidY = 10000f;
+
         private string PrefsKey => KeyPrefix + SceneManager.GetActiveScene().name;
 
         private void Start()
@@ -44,6 +51,16 @@ namespace Plaga44
             float z = PlayerPrefs.GetFloat(key + "_z");
             float yaw = PlayerPrefs.GetFloat(key + "_yaw");
 
+            // Sanity -- zepsuta zapisana pozycja (gracz spadl w nieskonczonosc).
+            // Czyscimy i uzywamy scene default.
+            if (saveY && (y < MinValidY || y > MaxValidY))
+            {
+                Debug.LogWarning($"{LOG} Saved Y={y:F1} out of [{MinValidY}, {MaxValidY}] " +
+                    "(gracz spadl w poprzedniej sesji?). CLEARING saved position, using scene default.");
+                ClearSaved();
+                return;
+            }
+
             Vector3 oldPos = transform.position;
             Vector3 newPos = saveY ? new Vector3(x, y, z) : new Vector3(x, transform.position.y, z);
             transform.position = newPos;
@@ -63,8 +80,19 @@ namespace Plaga44
 
         private void Save(string trigger)
         {
-            string key = PrefsKey;
             Vector3 p = transform.position;
+
+            // Sanity -- nie utrwalaj zepsutego state (gracz spada w nieskonczonosc).
+            // Inaczej przy restart restore wraca do zepsutej pozycji, spawn pod
+            // terenem -> spada dalej -> save jeszcze nizej -> loop.
+            if (saveY && (p.y < MinValidY || p.y > MaxValidY))
+            {
+                Debug.LogWarning($"{LOG} NIE ZAPISUJE pozycji Y={p.y:F1} (out of [{MinValidY}, {MaxValidY}]) " +
+                    $"via {trigger} -- gracz w zlym stanie.");
+                return;
+            }
+
+            string key = PrefsKey;
             float yaw = transform.eulerAngles.y;
             PlayerPrefs.SetFloat(key + "_x", p.x);
             PlayerPrefs.SetFloat(key + "_y", p.y);

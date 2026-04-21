@@ -159,6 +159,86 @@ namespace Plaga44
             return instance;
         }
 
+        /// <summary>Spawn prefab z Resources/ prosto do rece gracza, state=GRABBED.
+        /// Gdy grabber juz cos trzyma -> release + destroy poprzedniego.
+        /// Zwraca spawned GO albo null gdy blad (brak prefabu / brak grabbera).</summary>
+        /// <param name="hand">RTouch albo LTouch -- ktora reka ma item zlapac.</param>
+        public GameObject SpawnIntoHand(string resourcePath, OVRInput.Controller hand = OVRInput.Controller.RTouch)
+        {
+            var prefab = Resources.Load<GameObject>(resourcePath);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"{LOG} SpawnIntoHand: resource not found: {resourcePath}");
+                return null;
+            }
+
+            var grabber = FindGrabber(hand);
+            if (grabber == null)
+            {
+                Debug.LogWarning($"{LOG} SpawnIntoHand: grabber not found for {hand}");
+                return null;
+            }
+
+            // Zachowaj referencje do poprzedniego itemu -- NIE destroy jeszcze.
+            // Destroy PRZED ForceGrab = OVRGrabber trzyma destroyed Collider ref,
+            // PlagaGrabber.GrabEnd wywoluje OVRGrabbable.ForceRelease na
+            // zniszczonym GO, leci Cannot set parent + MissingReferenceException
+            // na ClosestPointOnBounds w nastepnym GrabBegin.
+            GameObject prevToDestroy = null;
+            if (grabber.CurrentGrabbed != null)
+            {
+                prevToDestroy = grabber.CurrentGrabbed.gameObject;
+                Debug.Log($"{LOG} SpawnIntoHand: replacing {prevToDestroy.name} in {hand} (destroy after ForceGrab)");
+                _spawned.Remove(prevToDestroy);
+            }
+
+            // Spawn w pozycji grabbera. OVRGrabbable.GrabBegin sparentuje do ground,
+            // a OVRGrabber.Update przesuwa rigidbody MoveRotation do grip pozycji.
+            var entry = new SpawnEntry
+            {
+                resourcePath = resourcePath,
+                autoRigidbody = true,
+                autoCollider = true,
+                autoGrabbable = true,
+                mass = 1.0f
+            };
+            var instance = Instantiate(prefab, grabber.transform.position, grabber.transform.rotation);
+            instance.name = prefab.name;
+            WireComponents(instance, entry);
+            _spawned.Add(instance);
+
+            var grabbable = instance.GetComponent<OVRGrabbable>();
+            if (grabbable == null)
+            {
+                Debug.LogWarning($"{LOG} SpawnIntoHand: {instance.name} missing OVRGrabbable after WireComponents -- cannot force grab");
+                if (prevToDestroy != null) Destroy(prevToDestroy);
+                return instance;
+            }
+
+            // ForceGrab czysto zwalnia poprzedniego (GrabEnd) + czysci m_grabCandidates
+            // + chwyta nowy target. Dopiero potem bezpieczny Destroy(prev).
+            if (!grabber.ForceGrab(grabbable))
+            {
+                Debug.LogWarning($"{LOG} SpawnIntoHand: ForceGrab failed for {instance.name}");
+            }
+            else
+            {
+                Debug.Log($"{LOG} SpawnIntoHand: {instance.name} zlapany przez {hand}");
+            }
+
+            if (prevToDestroy != null) Destroy(prevToDestroy);
+            return instance;
+        }
+
+        private static PlagaGrabber FindGrabber(OVRInput.Controller hand)
+        {
+            foreach (var g in Object.FindObjectsByType<PlagaGrabber>(FindObjectsSortMode.None))
+            {
+                if (g.OwnerController == hand) return g;
+            }
+            return null;
+        }
+
         /// <summary>Despawn all tracked items.</summary>
         public void DespawnAll()
         {
@@ -212,18 +292,32 @@ namespace Plaga44
 
         private static void WireComponents(GameObject instance, SpawnEntry entry)
         {
-            // Rigidbody
+            // Layer "Item" -- PlayerBody kolidy TYLKO z Item (blokuje item),
+            // a z Default/Terrain/Water nie. Item takze koliduje z Default
+            // (spada na ziemie). Wszystkie dzieci tez na Item.
+            int itemLayer = LayerMask.NameToLayer("Item");
+            if (itemLayer >= 0) SetLayerRecursive(instance, itemLayer);
+
+            // Rigidbody -- mass z prefabu wygrywa nad entry.mass (celowa wartosc
+            // ustawiona przez designera). entry.mass tylko dla freshly-added RB.
             if (entry.autoRigidbody)
             {
                 var rb = instance.GetComponent<Rigidbody>();
-                if (rb == null) rb = instance.AddComponent<Rigidbody>();
-                rb.mass = entry.mass;
-                rb.interpolation = RigidbodyInterpolation.Interpolate;
+                bool rbAdded = rb == null;
+                if (rbAdded)
+                {
+                    rb = instance.AddComponent<Rigidbody>();
+                    rb.mass = entry.mass;
+                }
+                rb.interpolation          = RigidbodyInterpolation.Interpolate;
                 rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
             }
 
-            // Collider -- add BoxCollider fitted to mesh bounds if none exists
-            if (entry.autoCollider && instance.GetComponentInChildren<Collider>() == null)
+            // Collider na ROOT (nie in-children). OVRGrabbable.Awake wymaga
+            // Colliderra na tym samym GO do fallback grabPoints (gdy m_grabPoints
+            // pusty). Child collidery nie wystarcza -- Awake rzuci ArgumentException.
+            // BoxCollider dopasowany do mesh bounds -- obejmuje cala bryle obiektu.
+            if (entry.autoCollider && instance.GetComponent<Collider>() == null)
             {
                 var bounds = ComputeBounds(instance);
                 var col = instance.AddComponent<BoxCollider>();
@@ -250,6 +344,13 @@ namespace Plaga44
             Bounds b = renderers[0].bounds;
             for (int i = 1; i < renderers.Length; i++) b.Encapsulate(renderers[i].bounds);
             return b;
+        }
+
+        private static void SetLayerRecursive(GameObject go, int layer)
+        {
+            go.layer = layer;
+            foreach (Transform child in go.transform)
+                SetLayerRecursive(child.gameObject, layer);
         }
     }
 }

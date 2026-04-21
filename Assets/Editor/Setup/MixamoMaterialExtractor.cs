@@ -1,14 +1,17 @@
 // =============================================================================
 // MixamoMaterialExtractor.cs
-// CYBERNOMAD -- Ekstrahuje embedded textures + materials z Mixamo FBX do
-// External folderow. Bez tego avatary importowane z embedded textures
-// renderuja sie na bialo (URP/Lit domyslny mat, zero texture binding).
+// CYBERNOMAD -- Post-import processing dla Mixamo FBX w Assets/PLAGA44/Avatars/.
+// Odpowiedzialnosc: tylko texture extraction + URP/Lit material conversion.
 //
-// Proces per avatar:
-//   1. Znajdz FBX w Assets/PLAGA44/Avatars/<Name>/
-//   2. ExtractTextures -> <Folder>/Textures/
-//   3. materialLocation = External -> Unity stworzy materials w <Folder>/Materials/
-//   4. Reimport FBX z ForceUpdate
+// Import settings (Humanoid, NO-anim, NO-optimize, External materials) ustawia
+// MixamoAvatarImporter (AssetPostprocessor, OnPreprocessModel) -- NIE powiela
+// sie tutaj. Jedyne zrodlo prawdy = MixamoAvatarImporter.
+//
+// Proces per avatar FBX:
+//   1. ExtractTextures -> <Folder>/Textures/ (Unity API)
+//   2. Znajdz .mat assety w <Folder>/ (stworzone przez Unity z
+//      materialLocation=External) i przestaw shader na URP/Lit + re-bind
+//      _BaseMap / _BumpMap / _MetallicGlossMap (gdy mat ma te property).
 //
 // Auto -- wywolywane przez AvatarRegistrySetup przed ScanAllForce.
 // Bez menu item (polityka "wszystko automatycznie przy bootstrap").
@@ -22,8 +25,9 @@ namespace Plaga44.Editor.Setup
 {
     public static class MixamoMaterialExtractor
     {
-        private const string LOG        = "[PLAGA44][MixamoExtractor]";
+        private const string LOG         = "[PLAGA44][MixamoExtractor]";
         private const string AvatarsRoot = "Assets/PLAGA44/Avatars";
+        private const string UrpLitName  = "Universal Render Pipeline/Lit";
 
         public static int ExtractAll()
         {
@@ -33,26 +37,35 @@ namespace Plaga44.Editor.Setup
                 return 0;
             }
 
-            int extracted = 0;
+            int processed = 0;
             string[] guids = AssetDatabase.FindAssets("t:Model", new[] { AvatarsRoot });
             foreach (var guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 if (!path.EndsWith(".fbx", System.StringComparison.OrdinalIgnoreCase)) continue;
-
-                if (ExtractOne(path)) extracted++;
+                if (ProcessOne(path)) processed++;
             }
 
-            if (extracted > 0)
+            if (processed > 0)
             {
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
-            Debug.Log($"{LOG} Extracted textures/materials from {extracted} FBX files.");
-            return extracted;
+            Debug.Log($"{LOG} Processed {processed} FBX files (textures extracted + URP materials).");
+            return processed;
         }
 
-        private static bool ExtractOne(string fbxPath)
+        // Per-FBX: extract embedded textures + ensure External materials + remap
+        // istniejace .mat-y do FBX po nazwie + convert materials do URP/Lit.
+        //
+        // KLUCZOWE: gdy .meta FBXa ma materialLocation=Embedded (stan z repo po
+        // zerowaniu testbedu), wyekstrraktowane .mat-y w Materials/ sa orphaned
+        // -- FBX uzywa embedded BiRP materials (rozowe w URP). Dlatego:
+        //   1. Wymus materialLocation=External (naprawa .meta w repo)
+        //   2. SearchAndRemapMaterials(BasedOnMaterialName, Everywhere)
+        //      -> Unity znajduje .mat-y po nazwie materialu i remapuje FBX
+        //   3. SaveAndReimport -> zapis .meta + zastosowanie bindingu
+        private static bool ProcessOne(string fbxPath)
         {
             var importer = AssetImporter.GetAtPath(fbxPath) as ModelImporter;
             if (importer == null)
@@ -61,82 +74,69 @@ namespace Plaga44.Editor.Setup
                 return false;
             }
 
-            string folder = Path.GetDirectoryName(fbxPath);
+            string folder    = Path.GetDirectoryName(fbxPath);
             string texFolder = Path.Combine(folder, "Textures").Replace('\\', '/');
-            string matFolder = Path.Combine(folder, "Materials").Replace('\\', '/');
 
-            // 1. Extract embedded textures -> <Folder>/Textures/
             EnsureFolder(texFolder);
-            bool texExtracted = importer.ExtractTextures(texFolder);
-            if (texExtracted)
-                Debug.Log($"{LOG} [TEX] Extracted textures -> {texFolder}");
+            if (importer.ExtractTextures(texFolder))
+                Debug.Log($"{LOG} [TEX] Extracted -> {texFolder}");
 
-            // 2. Switch material mode to External -> Unity tworzy .mat w folderze fbx
-            //    + wymusz Humanoid + CreateFromThisModel (regeneracja avatara z T-pose
-            //    tego konkretnego FBX, unika "Rig Error: Avatar Configuration mismatch").
-            bool changed = false;
+            // --- Naprawa materialLocation + remap -----------------------------
+            // Wymus materialLocation=External (zapisane do .meta przez Save).
             if (importer.materialLocation != ModelImporterMaterialLocation.External)
             {
                 importer.materialLocation = ModelImporterMaterialLocation.External;
-                changed = true;
-            }
-            if (importer.animationType != ModelImporterAnimationType.Human)
-            {
-                importer.animationType = ModelImporterAnimationType.Human;
-                changed = true;
-            }
-            if (importer.avatarSetup != ModelImporterAvatarSetup.CreateFromThisModel)
-            {
-                importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
-                changed = true;
-            }
-            // Retarget live z Questa -- klipy animacji z FBX niepotrzebne.
-            // Ich obecnosc powoduje "Rig Error: Bone length in configuration does
-            // not match position in animation file" bo klipy maja absolute positions
-            // z eksportu Mixamo, a avatar regenerowany (CreateFromThisModel) ma
-            // swieze bone lengths. Usunac klipy = usunac mismatch.
-            if (importer.importAnimation)
-            {
-                importer.importAnimation = false;
-                changed = true;
-            }
-            // Zachowaj pelna hierarchie bones -- retargeter SDK wymaga dostepu
-            // do transformow per-bone. Optimize zwija je do bind pose binding.
-            if (importer.optimizeGameObjects)
-            {
-                importer.optimizeGameObjects = false;
-                changed = true;
-            }
-            // VRAM optymalizacja Quest -- mesh nie musi byc CPU-readable.
-            if (importer.isReadable)
-            {
-                importer.isReadable = false;
-                changed = true;
-            }
-            if (changed)
-            {
-                importer.SaveAndReimport();
-                Debug.Log($"{LOG} [CFG] Humanoid + External materials + CreateFromThisModel: {fbxPath}");
+                Debug.Log($"{LOG} [META] {fbxPath}: Embedded -> External");
             }
 
-            AssetDatabase.ImportAsset(fbxPath, ImportAssetOptions.ForceUpdate);
+            // KLUCZOWE: externalObjects moga wskazywac na NIEISTNIEJACE .mat-y
+            // (ghost GUIDs z poprzedniej generacji Unity reimport-u). Liczenie
+            // "mam mapping" po entries count klamie -- musimy sprawdzac
+            // kv.Value != null (target asseta realnie istnieje).
+            int validRemaps = 0;
+            int ghostRemaps = 0;
+            var ghostKeys = new System.Collections.Generic.List<AssetImporter.SourceAssetIdentifier>();
+            foreach (var kv in importer.GetExternalObjectMap())
+            {
+                if (kv.Key.type != typeof(Material)) continue;
+                if (kv.Value != null) { validRemaps++; }
+                else { ghostRemaps++; ghostKeys.Add(kv.Key); }
+            }
 
-            // 3. Post-process: converted/external materials moga miec Autodesk/Standard
-            //    shader -> swap na URP/Lit i re-bind textures. Bez tego = rozowy render.
-            ConvertMaterialsToUrp(folder, texFolder);
+            // Usun ghost mappings -- wskazuja na skasowane .mat-y, Unity
+            // fallback do embedded BiRP (rozowe w URP).
+            foreach (var ghost in ghostKeys)
+            {
+                importer.RemoveRemap(ghost);
+                Debug.Log($"{LOG} [REMAP-GHOST] {fbxPath}: removed {ghost.name} (null target)");
+            }
 
-            Debug.Log($"{LOG} [OK] {Path.GetFileName(fbxPath)}");
+            // SearchAndRemap zawsze po cleanup -- szuka .mat-y po nazwie
+            // materialu w FBX, dodaje valid mapping do externalObjects.
+            // Idempotent: jesli mapping juz valid, nic nie zmienia.
+            importer.SearchAndRemapMaterials(
+                ModelImporterMaterialName.BasedOnMaterialName,
+                ModelImporterMaterialSearch.Everywhere);
+
+            // Zawsze SaveAndReimport -- zapisuje materialLocation + externalObjects
+            // do .meta. Bez tego zmiany siedza tylko w pamieci importera.
+            importer.SaveAndReimport();
+            Debug.Log($"{LOG} [REIMPORT] {fbxPath} (valid={validRemaps}, ghost-cleaned={ghostRemaps})");
+
+            // Import settings (Humanoid / no-anim / external-mat) sa ustawione
+            // przez MixamoAvatarImporter.OnPreprocessModel -- nie duplikujemy.
+            ConvertMaterialsToUrp(folder);
             return true;
         }
 
         // ---- URP material conversion ----------------------------------------
 
-        private static void ConvertMaterialsToUrp(string avatarFolder, string texFolder)
+        private static void ConvertMaterialsToUrp(string avatarFolder)
         {
-            var urp = Shader.Find("Universal Render Pipeline/Lit");
+            var urp = Shader.Find(UrpLitName);
             if (urp == null)
             {
-                Debug.LogError($"{LOG} URP/Lit shader not found");
+                Debug.LogError($"{LOG} Shader '{UrpLitName}' not found");
                 return;
             }
 
@@ -146,24 +146,23 @@ namespace Plaga44.Editor.Setup
                 string path = AssetDatabase.GUIDToAssetPath(g);
                 var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
                 if (mat == null) continue;
-                if (mat.shader != null && mat.shader.name == urp.name) continue; // already URP
+                if (mat.shader != null && mat.shader.name == UrpLitName) continue; // already URP
 
-                var diffuse = mat.HasProperty("_MainTex") ? mat.GetTexture("_MainTex") : null;
-                if (diffuse == null && mat.HasProperty("_BaseMap")) diffuse = mat.GetTexture("_BaseMap");
-                var normal  = mat.HasProperty("_BumpMap") ? mat.GetTexture("_BumpMap") : null;
-                var specGloss = mat.HasProperty("_SpecGlossMap") ? mat.GetTexture("_SpecGlossMap")
-                              : (mat.HasProperty("_MetallicGlossMap") ? mat.GetTexture("_MetallicGlossMap") : null);
+                // Property reads sa NULL-safe -- mat.HasProperty() sprawdza shader slot.
+                Texture diffuse   = ReadTexture(mat, "_MainTex", "_BaseMap");
+                Texture normal    = ReadTexture(mat, "_BumpMap");
+                Texture specGloss = ReadTexture(mat, "_SpecGlossMap", "_MetallicGlossMap");
 
-                // Fallback: szukaj textures po nazwie w Textures/ folderze
-                if (diffuse == null) diffuse = FindTexture(texFolder, mat.name, new[] { "diffuse", "albedo", "basecolor", "color" });
-                if (normal  == null) normal  = FindTexture(texFolder, mat.name, new[] { "normal", "nrm", "_n" });
-                if (specGloss == null) specGloss = FindTexture(texFolder, mat.name, new[] { "specular", "spec", "metallic", "gloss" });
+                // ZERO FALLBACK (CLAUDE.md). Brak binding = LogWarning, nie zgadujemy
+                // po nazwach plikow. Borys decyduje czy material ma byc renderowany bez textury.
+                if (diffuse == null)
+                    Debug.LogWarning($"{LOG} '{mat.name}': brak _MainTex/_BaseMap binding");
 
                 mat.shader = urp;
-                // Metallic workflow (domyslny URP/Lit -- bez _SPECULAR_SETUP)
-                mat.SetFloat("_WorkflowMode", 0f);
-                mat.SetFloat("_Smoothness", 0.5f);
-                mat.SetColor("_BaseColor", Color.white);
+                mat.SetFloat("_WorkflowMode", 0f);              // 0=Metallic workflow
+                mat.SetFloat("_Smoothness",   0.5f);
+                mat.SetColor("_BaseColor",    Color.white);
+
                 if (diffuse != null) mat.SetTexture("_BaseMap", diffuse);
                 if (normal != null)
                 {
@@ -177,30 +176,19 @@ namespace Plaga44.Editor.Setup
                 }
 
                 EditorUtility.SetDirty(mat);
-                Debug.Log($"{LOG} [URP] {mat.name} -> URP/Lit (diff={(diffuse != null)} nrm={(normal != null)} spec={(specGloss != null)})");
+                Debug.Log($"{LOG} [URP] {mat.name} (diff={diffuse != null} nrm={normal != null} spec={specGloss != null})");
             }
         }
 
-        private static Texture FindTexture(string texFolder, string matName, string[] keywords)
+        private static Texture ReadTexture(Material mat, params string[] propertyNames)
         {
-            if (!AssetDatabase.IsValidFolder(texFolder)) return null;
-            string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { texFolder });
-            Texture best = null;
-            foreach (var g in guids)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(g);
-                string lower = Path.GetFileNameWithoutExtension(path).ToLowerInvariant();
-                foreach (var kw in keywords)
+            foreach (var prop in propertyNames)
+                if (mat.HasProperty(prop))
                 {
-                    if (lower.Contains(kw))
-                    {
-                        var t = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-                        if (t != null) { best = t; break; }
-                    }
+                    var t = mat.GetTexture(prop);
+                    if (t != null) return t;
                 }
-                if (best != null) break;
-            }
-            return best;
+            return null;
         }
 
         private static void EnsureFolder(string path)

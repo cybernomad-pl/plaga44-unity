@@ -24,38 +24,93 @@ namespace Plaga44.Editor
     {
         private const string LOG = "[PLAGA44][Bootstrap]";
         private const string ConfigPath = "Assets/PLAGA44/Config/BootstrapConfig_Quest.asset";
-        private const string SessionKey = "Plaga44.Bootstrap.Done";
 
         // =====================================================================
-        // Auto-run przy starcie edytora
+        // Auto-run przy kazdym domain reload (Unity start + asembly reload)
         // =====================================================================
+        //
+        // ZERO SessionKey guard -- setupy sa idempotent, drugi reload wolny
+        // tylko o kilka sekund (AvatarRegistrySetup reimportuje FBXy
+        // niezaleznie, to osobny problem). Korzysc: auto-run DZIALA zawsze,
+        // bez manualnego CYBERNOMAD/Bootstrap po kazdym edycie skryptu.
+        //
+        // Pomijamy TYLKO gdy Play Mode (domain reload przy Enter/Exit Play --
+        // nie chcemy saveowac sceny w trakcie grania).
 
-        // Unity 6: delayCall from [InitializeOnLoad] constructor is unreliable.
-        // EditorApplication.update fires every editor tick -- we unhook after first call.
-        static Bootstrap() => EditorApplication.update += WaitForReady;
+        static Bootstrap()
+        {
+            EditorApplication.update += WaitForReady;
+            EditorSceneManager.sceneOpened += OnSceneOpened;
+            // ExitingEditMode = user klikal Play ale Play jeszcze sie nie zaczal.
+            // Ostatnia szansa na setup sceny ZANIM Play wchodzi -- inaczej
+            // WaitForReady skipuje (Play Mode guard) i fixery nie odpalaja sie.
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        }
+
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state != PlayModeStateChange.ExitingEditMode) return;
+            // Sprawdz czy aktywna scena to testbed -- inaczej nic nie rob.
+            var active = SceneManager.GetActiveScene();
+            if (!active.path.EndsWith("TESTBED.unity", System.StringComparison.OrdinalIgnoreCase))
+                return;
+
+            Debug.Log($"{LOG} ExitingEditMode -- running pre-Play fixers synchronously");
+            try
+            {
+                var cfg = LoadConfig();
+                if (cfg != null) RunSetup(cfg);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"{LOG} Pre-Play fixer failed: {e.Message}\n{e.StackTrace}");
+            }
+        }
+
+        private static void OnSceneOpened(UnityEngine.SceneManagement.Scene scene, OpenSceneMode mode)
+        {
+            if (!scene.path.EndsWith("TESTBED.unity", System.StringComparison.OrdinalIgnoreCase))
+                return;
+            Debug.Log($"{LOG} sceneOpened({scene.name}) -> queuing auto-run");
+            _waitTicks = 0;
+            EditorApplication.update -= WaitForReady; // unhook jesli jeszcze wisi
+            EditorApplication.update += WaitForReady;
+        }
 
         private static int _waitTicks;
+
+        // Po ilu tickach forsujemy run mimo isCompiling (failsafe -- Unity 6
+        // po pelnym reimporcie potrafi nie wyjsc z isUpdating/isCompiling,
+        // auto-run utykal w nieskonczonosc).
+        private const int MaxWaitTicks = 60 * 60; // ~60s at 60 tick/s
 
         private static void WaitForReady()
         {
             _waitTicks++;
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+
+            // Nie odpalaj w Play Mode / przed tranzycja -- scena nie powinna byc
+            // modyfikowana + save podczas grania.
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
             {
-                if (_waitTicks % 300 == 0) // co ~5s log status (assuming ~60 ticks/s)
-                    Debug.Log($"{LOG} WaitForReady: still waiting (compiling={EditorApplication.isCompiling}, updating={EditorApplication.isUpdating})");
+                EditorApplication.update -= WaitForReady;
+                Debug.Log($"{LOG} WaitForReady: skipped (Play Mode)");
+                return;
+            }
+
+            // Czekamy TYLKO na isCompiling (nie isUpdating -- AssetDatabase po
+            // pelnym reimporcie moze nie zejsc do false).
+            // Failsafe: po MaxWaitTicks forsujemy run niezaleznie.
+            if (EditorApplication.isCompiling && _waitTicks < MaxWaitTicks)
+            {
+                if (_waitTicks % 300 == 0) // co ~5s log status
+                    Debug.Log($"{LOG} WaitForReady: compiling... (tick {_waitTicks}/{MaxWaitTicks})");
                 return;
             }
 
             EditorApplication.update -= WaitForReady;
 
-            if (SessionState.GetBool(SessionKey, false))
-            {
-                Debug.Log($"{LOG} Auto-run SKIPPED -- already ran this session (key={SessionKey}). Use CYBERNOMAD/Bootstrap to re-run.");
-                return;
-            }
-            SessionState.SetBool(SessionKey, true);
-
-            Debug.Log($"{LOG} Auto-run: loading scene and validating... (waited {_waitTicks} ticks)");
+            string reason = _waitTicks >= MaxWaitTicks ? "TIMEOUT-FORCED" : "ready";
+            Debug.Log($"{LOG} Auto-run ({reason}): loading scene and validating... (waited {_waitTicks} ticks, isCompiling={EditorApplication.isCompiling}, isUpdating={EditorApplication.isUpdating})");
             Run();
         }
 
@@ -140,6 +195,12 @@ namespace Plaga44.Editor
             changed |= LogStep("AmbientSetup",        () => AmbientSetup.Run(cfg));
             changed |= LogStep("BounceLightSetup",    () => BounceLightSetup.Run(cfg));
             changed |= LogStep("PlayerRigSetup",      () => PlayerRigSetup.Run(cfg));
+            LogStepVoid("StylizedCharacterLocomotionFixer", () => StylizedCharacterLocomotionFixer.Run());
+            // HandPhysicsSetup przeniesione do runtime (HandPhysicsEnabler.cs):
+            // OVRHandPrefab jest aktywowane dopiero w runtime przez SDK,
+            // editor-time "No OVRSkeleton in scene".
+            LogStepVoid("PlayerPhysicsLayers",        () => PlayerPhysicsLayers.Run());
+            LogStepVoid("BodyPhysicsSetup",           () => BodyPhysicsSetup.Run());
             changed |= LogStep("InventorySetup",      () => InventorySetup.Run(cfg));
             changed |= LogStep("SceneSingletonsSetup",() => SceneSingletonsSetup.Run(cfg));
             changed |= LogStep("ObjectSpawnerSetup",  () => ObjectSpawnerSetup.Run(cfg));

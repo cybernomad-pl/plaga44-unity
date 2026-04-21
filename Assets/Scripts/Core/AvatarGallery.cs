@@ -73,14 +73,10 @@ namespace Plaga44
         // Auto-boot + lifecycle
         // =====================================================================
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void AutoBoot()
-        {
-            if (Instance != null) return;
-            if (FindAnyObjectByType<AvatarGallery>() != null) return;
-            new GameObject(AutoBootGoName).AddComponent<AvatarGallery>();
-            Debug.LogWarning($"{LOG} AutoBoot fallback -- Bootstrap should create this GO");
-        }
+        // ZERO FALLBACK (CLAUDE.md). AutoBoot usunieta -- AvatarGallery ma byc
+        // tworzona przez Bootstrap/SceneSingletonsSetup explicit. Jesli jej brak
+        // w scenie, callers (HamburgerMenu/PlayerAvatar) dostaja null i sami
+        // reaguja -- nie ukrywamy bledu setupu przez cichy AutoBoot.
 
         private void Awake()
         {

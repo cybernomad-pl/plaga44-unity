@@ -125,13 +125,11 @@ namespace Plaga44
         {
             DespawnAvatar();
             ShowDefaultRig(true);
-            DeactivateGalleryPreviews();
+            // AvatarGallery NIE ruszana -- preview jest sterowana przez HamburgerMenu
+            // (Open=ForceSpawnNow, Close=HideAllPreviews). Gdy ktos z poziomu
+            // PlayerAvatar triggerowal gallery.SetActiveIndex, preview pojawialo sie
+            // w swiecie poza menu = "drugi model robota" na screenshotach Borysa.
             Debug.Log($"{LOG} Mode=None -- default rig visible, no avatar spawned");
-        }
-
-        private static void DeactivateGalleryPreviews()
-        {
-            if (AvatarGallery.Instance != null) AvatarGallery.Instance.SetActiveIndex(-1);
         }
 
         private void ShowDefaultRig(bool visible)
@@ -212,7 +210,8 @@ namespace Plaga44
 
             InstantiateAvatar(prefab, mode);
             CacheAnimatorBones();
-            SyncGalleryActiveIndex(mode);
+            // Gallery preview NIE sync -- Gallery sterowana wylacznie przez
+            // HamburgerMenu. Inaczej preview pojawia sie w gameplay.
 
             Debug.Log($"{LOG} Spawned '{_instance.name}' mode={mode} (humanoid={(_animator != null && _animator.isHuman)})");
         }
@@ -222,7 +221,7 @@ namespace Plaga44
             Debug.LogWarning($"{LOG} No prefab for mode={mode}. Falling back to None.");
             avatarMode = 0;
             ShowDefaultRig(true);
-            DeactivateGalleryPreviews();
+            // Gallery nie ruszana -- patrz ShowDefaultRigOnly.
         }
 
         private const float TargetAvatarHeight = 1.8f;
@@ -252,17 +251,13 @@ namespace Plaga44
                 + $"scale={_instance.transform.localScale:F3} "
                 + $"parent={transform.name} parentPos={transform.position:F2}");
 
-            // Meta OVRUnityHumanoidSkeletonRetargeter -- replikacja
-            // StylizedCharacterLocomotion (ktory dziala). Retargeter uzywa body
-            // tracking (OVRBody) -> mapuje na Humanoid avatar (Exo_Gray ma
-            // animationType=3 Humanoid, rig valid).
+            // Retargeter NIE dodawany tutaj -- prefab ma juz CharacterRetargeter
+            // (Meta SDK v83 API) dodany przez ExoRetargeterSetup przez SDK
+            // Building Block menu item. Zachowuje sie przy Instantiate.
             //
-            // Wymogi:
-            //   - Animator z Humanoid avatar (jest, ustawione w MixamoMaterialExtractor)
-            //   - OVRBody w scenie (OVRManager tworzy ale komponent osobny -- sprawdzamy)
-            if (_instance.GetComponent<OVRUnityHumanoidSkeletonRetargeter>() == null)
-                _instance.AddComponent<OVRUnityHumanoidSkeletonRetargeter>();
-            Debug.Log($"{LOG} OVRUnityHumanoidSkeletonRetargeter dodany do {_instance.name}");
+            // OVRUnityHumanoidSkeletonRetargeter (stare OVRSkeleton-based API) NIE
+            // wystepuje w zadnym samplu Meta SDK v83 -- dwa rownoleglie retargetery
+            // na jednym avatarze walczylyby o bones. Jedno zrodlo prawdy = prefab.
 
             _spawnedMode = mode;
         }
@@ -296,14 +291,6 @@ namespace Plaga44
             if (_animator == null || !_animator.isHuman) return;
             _headBone = _animator.GetBoneTransform(HumanBodyBones.Head);
             _neckBone = _animator.GetBoneTransform(HumanBodyBones.Neck);
-        }
-
-        private static void SyncGalleryActiveIndex(int mode)
-        {
-            var gallery = AvatarGallery.Instance;
-            if (gallery == null) return;
-            int idx = mode - 1;
-            gallery.SetActiveIndex((idx >= 0 && idx < gallery.Count) ? idx : -1);
         }
 
         private void DespawnAvatar()

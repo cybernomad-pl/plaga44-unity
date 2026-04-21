@@ -1,0 +1,290 @@
+============================================================================
+ITEM SPAWN -> PRAWA REKA, state=GRABBED, toggle release
+2026-04-21, CYBERNOMAD
+============================================================================
+
+PROBLEM (z testow na Queście):
+  1. Shotgun spawnowany na "wirtualnym stole" przed graczem -- grab nie lapal
+  2. Reka przechodzi przez item (bez collision -- osobny temat, PhysicsHands)
+  3. Po release grawitacja nie dziala -- item wisi w powietrzu
+     (przyczyna: ItemBrowser.SpawnPreview ustawial rb.isKinematic=true +
+      useGravity=false PRZED OVRGrabbable.Start, ktore czyta isKinematic
+      do m_grabbedKinematic i restoruje po release -> zostaje kinematic)
+
+ROZWIAZANIE: spawn od razu w rece gracza, state=GRABBED.
+
+============================================================================
+NOWY FLOW
+============================================================================
+
+  [HamburgerMenu: wybor itemu]
+              |
+              v
+  ItemBrowser.SetItem(index)
+              |
+              +--- index == 0 ---> DespawnCurrent (release+destroy)
+              |
+              v
+  ObjectSpawner.SpawnIntoHand(resourcePath, hand=RTouch)
+              |
+              +--> FindGrabber(RTouch)      // Plaga44.Inventory.PlagaGrabber
+              |    |
+              |    v
+              |   grabber.CurrentGrabbed != null ?
+              |    |
+              |    Y ---> Destroy(prev)  // podmiana itemu
+              |    |
+              |    N ---> (continue)
+              |
+              +--> Instantiate(prefab, grabber.transform)
+              |    WireComponents (RB, root-Collider, PlagaGrabbable, Haptic)
+              |
+              +--> grabber.ForceGrab(grabbable)  // bypass grab-volume discovery
+                      |
+                      v
+                 PlagaGrabber.ForceGrab:
+                   m_grabCandidates.Clear()
+                   m_grabCandidates[target] = 1
+                   GrabBegin()  // nasza override -> base -> target zlapany
+
+============================================================================
+PLAGAGRABBER -- GRAB TOGGLE + FORCE GRAB
+============================================================================
+
+  Awake:
+    grabEnd = -1f       // blokuje hold-to-release z OVRGrabber base
+
+  GrabBegin (override):
+    m_grabbedObj != null ?
+      Y -> GrabEnd                    // toggle release
+      N -> base.GrabBegin()           // toggle grab z candidates
+
+  ForceGrab(target)   <-- NOWE
+    target == null             -> warn, return false
+    target.isGrabbed && !allow  -> warn, return false
+    m_grabbedObj != null       -> GrabEnd (release previous)
+    m_grabCandidates.Clear()
+    m_grabCandidates[target] = 1
+    GrabBegin()                // our override -> m_grabbedObj==null -> base
+
+============================================================================
+GRAWITACJA PO RELEASE -- teraz DZIALA
+============================================================================
+
+  PRZED (ItemBrowser.SpawnPreview):
+    rb.isKinematic = true       <-- PSUJE m_grabbedKinematic w OVRGrabbable.Start
+    rb.useGravity = false       <-- nikt tego nie przywraca
+    --> po release item wisi
+
+  TERAZ (ObjectSpawner.SpawnIntoHand):
+    (prefab defaults: isKinematic=false, useGravity=true)
+    Instantiate -> OVRGrabbable.Start reads isKinematic=false
+    ForceGrab -> GrabBegin (rb.isKinematic=true only while grabbed)
+    GrabEnd -> rb.isKinematic=false (restored) + useGravity=true
+    --> item spada na ziemie
+
+============================================================================
+WIRECOMPONENTS FIX -- COLLIDER NA ROOT
+============================================================================
+
+  OVRGrabbable.Awake:
+    if (m_grabPoints.Length == 0):
+      collider = GetComponent<Collider>()    // ROOT ONLY, nie children
+      if (collider == null) throw ArgumentException
+      m_grabPoints = [collider]
+
+  PRZED: WireComponents uzywal GetComponentInChildren<Collider>()
+    -> gdy prefab mial child meshCollidery ale pusty root
+       AddComponent<PlagaGrabbable>() -> Awake throw -> crash
+
+  TERAZ: GetComponent<Collider>() (root only)
+    -> gdy brak root collidera, AddComponent<BoxCollider> z mesh bounds
+    -> OVRGrabbable.Awake ma fallback grabPoint
+
+============================================================================
+MIXAMO FBX MATERIALS FIX (Exo_Gray rozowy)
+============================================================================
+
+  DIAGNOZA:
+    Exo_Gray.fbx.meta: materialLocation=0 (Embedded) + externalObjects={}
+    -> FBX uzywa embedded BiRP Standard materials -> URP renderuje jako magenta
+    -> .mat-y w Materials/ sa orphaned (stworzone, ale FBX ich nie referuje)
+
+  FIX w MixamoMaterialExtractor.ProcessOne:
+    1. importer.materialLocation = External         // naprawia .meta
+    2. importer.SearchAndRemapMaterials(            // szuka .mat po nazwie
+         BasedOnMaterialName, Everywhere)           // populuje externalObjects
+    3. importer.SaveAndReimport()                   // zapis + reaplikacja
+    4. ConvertMaterialsToUrp(folder)                // (juz bylo) shader URP/Lit
+
+  Efekt: FBX -> .mat (URP/Lit + BaseMap + BumpMap) -> renderuje tekstury
+
+  AKTUALIZACJA v3 (Exo rozowy mimo SearchAndRemapMaterials):
+    externalObjects w .meta wskazuje na ghost GUID -- stare .mat-y
+    skasowane przez Unity reimport, Exo_Gray.fbx.meta trzyma fileID
+    dla Body_MAT -> 6fbff614... ale actual Body_MAT.mat ma guid
+    96b2f10c... -> Unity nie znajduje, fallback do embedded BiRP = ROZOWE.
+    Moja logika skipowala cleanup bo "liczylam mapping po entries count"
+    a wszystkie byly null-target.
+    FIX: sprawdzaj kv.Value != null, wycinam ghost keys przez
+    importer.RemoveRemap, potem SearchAndRemapMaterials + SaveAndReimport
+    ZAWSZE (idempotent). Post fix externalObjects wskazuje na istniejace
+    .mat-y po nazwie (Body_MAT -> Body_MAT.mat).
+
+============================================================================
+DRUGI MODEL ROBOTA W GAMEPLAY (screenshot 2026-04-21 11:12)
+============================================================================
+
+  DIAGNOZA:
+    PlayerAvatar.Start -> SetAvatarMode(persistedMode)
+      mode > 0 -> SpawnAvatar -> SyncGalleryActiveIndex(mode)
+                               -> AvatarGallery.SetActiveIndex(idx)
+                               -> Gallery spawnuje preview w swiecie (2m przed graczem)
+      mode = 0 -> ShowDefaultRigOnly -> DeactivateGalleryPreviews
+                                      -> Gallery.SetActiveIndex(-1)
+                                      -> SpawnSdkDefaultPreview (SDK rig w swiecie)
+
+    Efekt: od boot sceny, ZANIM user otworzy menu, Gallery preview jest
+           widoczny w gameplay. PlayerAvatar._instance rendered na
+           OVRCameraRig (pierwsza osoba), Gallery._spawnedPreview rendered
+           w swiecie (2m przed graczem) -- gracz widzi DWA modele.
+
+  FIX w PlayerAvatar:
+    - SpawnAvatar: usuniete SyncGalleryActiveIndex(mode)
+    - ShowDefaultRigOnly: usuniete DeactivateGalleryPreviews
+    - FallbackToNone: usuniete DeactivateGalleryPreviews
+    - usunieta metoda SyncGalleryActiveIndex + DeactivateGalleryPreviews (dead)
+
+  AvatarGallery STEROWANA TYLKO przez HamburgerMenu:
+    Open  -> ForceSpawnNow (preview widoczny w menu)
+    Close -> HideAllPreviews (brute-force cleanup orphanow)
+    Slider change (menu) -> PreviewAvatarMode -> Gallery.SetActiveIndex
+
+  PlayerAvatar._instance (avatar gracza) NIE sync z Gallery preview.
+
+============================================================================
+HANDS + BODY PHYSICS (reka/reszta ciala NIE przechodzi przez item)
+============================================================================
+
+  PROBLEM:
+    OVRHandPrefab rendered palce/dlon = tylko mesh, brak colliderow.
+    Cialo avatara (StylizedCharacterLocomotion) tez tylko mesh + body tracking.
+    -> gracz moze "przebic" przedramieniem, torsem, noga przez item/sciane.
+
+  FIX -- dwa skladniki:
+  1) HandPhysicsSetup -- dlonie + palce
+       Dla kazdego OVRSkeleton z SkeletonType=HandLeft/HandRight:
+         SerializedObject.FindProperty("_enablePhysicsCapsules").boolValue = true
+       Meta SDK sam generuje CapsuleCollider per palce + Rigidbody kinematic.
+
+  2) BodyPhysicsSetup -- tors, ramiona, przedramiona, uda, lydki, glowa
+       Dla defaultRig Humanoid Animator:
+         Segmenty: Hips->Spine, Spine->Chest, Chest->UpperChest, UpperChest->Neck,
+                   LeftUpperArm->LeftLowerArm, LeftLowerArm->LeftHand,
+                   (prawo symetrycznie),
+                   LeftUpperLeg->LeftLowerLeg, LeftLowerLeg->LeftFoot,
+                   (prawo symetrycznie)
+         Dla kazdego segmentu: CapsuleCollider (radius per segment typ) w child GO
+         "<BoneName>_PhysCol".
+         Glowa: SphereCollider radius=0.11m.
+       Rigidbody Kinematic na rigu roocie.
+
+  Oba wywolywane z Bootstrap (RunSetup) po PlayerRigSetup.
+  Idempotentne: HandPhysics skip jesli juz true, BodyPhysics skip jesli GO
+  "<Bone>_PhysCol" juz istnieje.
+
+============================================================================
+STYLIZED CHARACTER LOCOMOTION FIXER (animacja chodzenia)
+============================================================================
+
+  PROBLEM:
+    Scena TESTBED.unity miala overrides na StylizedCharacterLocomotion
+    PrefabInstance ktore ZEROWAŁY:
+      _twoBoneIKProcessor._endJoint / _rootJoint / _midJoint / _ikTarget -> null
+      _twoBoneIKProcessor._weight -> 0, _iterations -> 0
+      _locomotionProcessor._footTransform / _headTransform (data[3..5]) -> null
+      m_Controller -> LocomotionController  (sample Meta NIE przypisuje)
+    -> IK wylaczony, processor nie wie jakie kosci animowac -> T-pose w gameplay.
+
+  FIX -- StylizedCharacterLocomotionFixer.Run:
+    1. Znajdz StylizedCharacterLocomotion w scenie (PlayerAvatar.defaultRig
+       albo GameObject.Find po nazwie).
+    2. PrefabUtility.GetPropertyModifications -> lista overrides.
+    3. Revert overrides ktore pasuja do REGUŁ:
+       a) propertyPath == "m_Controller"
+       b) propertyPath zaczyna sie "_sourceProcessorContainers" lub
+          "_targetProcessorContainers", objectReference == null, property
+          konczy sie Transform/Joint/Target/Rig/Hand
+       c) _twoBoneIKProcessor._weight == "0" lub _iterations == "0"
+    4. SetPropertyModifications z kept[]. Scene dirty.
+
+  Po tym: prefab defaults wchodza z Meta Samples~/AdvancedSamples/ISDKLocomotion
+  -> locomotion + IK dzialaja jak w baseline sample MovementISDKLocomotion.unity.
+
+  AKTUALIZACJA 2026-04-21 v2: m_Controller override NIE JEST usuwany.
+  LocomotionSkeletalProcessor.UpdatePose wywoluje Animator.SetFloat -- bez
+  controllera = "Animator is not playing an AnimatorController" warning +
+  animacja chodzenia nie dziala. LocomotionController.controller z ISDK
+  Locomotion sample zostaje przypisany.
+
+  AKTUALIZACJA v3 (per-frame warning wciaz leci):
+    Runtime Editor.log pokazywal "Animator is not playing" co klatka --
+    override m_Controller nie istnial w scenie (wczesniejsza operacja
+    skasowala, np. MissingScriptCleaner albo manual reset). Fixer nie
+    nadpisuje bo liczyl ze override "juz jest".
+    Zrobiony KROK 1 EnsureAnimatorController:
+      animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath
+        <RuntimeAnimatorController>("Assets/Samples/.../LocomotionController.controller");
+    Nie polegamy na PrefabInstance overrides -- forsujemy referencje
+    bezposrednio. Tworzy nowy override w PrefabInstance automatycznie.
+    Efekt: retargeter SetFloat ma gdzie pisac, stan animatora stabilny ->
+    kosci nie deformuja sie, avatar nie trzesie.
+
+============================================================================
+PLAYER BODY PHYSICS V2 -- LAYERS + COLLISION MATRIX
+============================================================================
+
+  PROBLEM V1 (zerowany 2026-04-21):
+    Capsule na kosciach avatara + Kinematic Rigidbody na rigu -> capsule
+    NOG ruszaja sie z body trackingiem -> fizyka wykrywa penetracje
+    capsule-vs-Terrain -> push response odrzuca gracza -> gracz "fruwa",
+    skacze, nie mozna zlecziec. CharacterController isGrounded raycast
+    tez false-positive na wlasnych capsule.
+
+  ROZWIAZANIE V2 -- LAYERS + KINEMATIC-MOVING:
+
+  1) WARSTWY (PlayerPhysicsLayers.cs editor):
+       Layer 6 = "PlayerBody"  -- wszystkie body capsule awatara
+       Layer 7 = "Item"        -- wszystkie spawnowane itemy
+     Zapisane do ProjectSettings/TagManager.asset (persist przez repo).
+
+  2) COLLISION MATRIX (PlayerPhysicsLayersRuntime.cs runtime):
+       PlayerBody x Default         = OFF  <-- nie odbija od terrain
+       PlayerBody x TransparentFX   = OFF
+       PlayerBody x IgnoreRaycast   = OFF
+       PlayerBody x Water           = OFF
+       PlayerBody x UI              = OFF
+       PlayerBody x PlayerBody      = OFF  <-- wlasne konczyny + 2 awatary
+       PlayerBody x Item            = ON   <-- CEL: reka/tors blokuje item
+       Item       x Default         = ON   <-- item spada na ziemie
+     Ustawiane [RuntimeInitializeOnLoadMethod(BeforeSceneLoad)] --
+     Physics.IgnoreLayerCollision nie persystuje do DynamicsManager.asset
+     (runtime-only API mimo nazwy).
+
+  3) KINEMATIC-MOVING COLLIDER (BodyPhysicsSetup.cs):
+     Kazdy *_PhysCol GO dostaje:
+       - gameObject.layer = PlayerBody
+       - Rigidbody isKinematic=true + useGravity=false
+       - Capsule/SphereCollider jak wczesniej
+     Bez Rigidbody kinematic na capsule = "static collider moving"
+     warning Unity (bo kosc sie rusza). Kinematic RB signal do physics
+     engine ze ten collider ruszany intencjonalnie.
+
+     USUNIETY Kinematic Rigidbody z RIGU ROOT (poprzednia V1). Psul
+     CharacterController.isGrounded raycast.
+
+  4) ITEMY NA WARSTWE "Item" (ObjectSpawner.WireComponents):
+     SetLayerRecursive(instance, LayerMask.NameToLayer("Item"))
+     -> PlayerBody x Item = ON, item blokowany przez reka/tors.
+     -> Default x Item = ON, item nadal spada na ziemie po release.
+
