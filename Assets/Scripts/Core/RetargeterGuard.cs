@@ -32,6 +32,12 @@ namespace Plaga44
             // na editor/Quest bez tego feature. Fallback do low auto-dziala.
             "body tracking fidelity is not supported",
             "RequestBodyTrackingFidelity",
+            // Meta LocomotionSkeletalProcessor wywoluje Animator.SetFloat per
+            // frame. Gdy custom avatar (Mixamo) nie ma assigned controllera
+            // albo CharacterRetargeter disabluje Animator -> warning per frame.
+            // Retargeter rusza kosci niezaleznie od Animatora (body tracking),
+            // wiec warning jest kosmetyczny. Filtrujemy by nie spamowac konsoli.
+            "Animator is not playing an AnimatorController",
         };
 
         private static ILogHandler _original;

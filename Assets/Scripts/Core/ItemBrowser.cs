@@ -3,9 +3,9 @@
 // CYBERNOMAD -- Runtime item browser. Laduje itemy z Resources/Items/,
 // pozwala wybrac item z HamburgerMenu.
 //
-// SPAWN BEHAVIOR: item pojawia sie OD RAZU W PRAWEJ RECE gracza z state=GRABBED.
-// Podmiana na inny item = poprzedni zostaje zniszczony, nowy laduje w rece.
-// Gracz moze go zwolnic (grab toggle) -> item spadnie na ziemie (gravity ON).
+// SPAWN BEHAVIOR: item pojawia sie PRZED graczem (na "niewidzialnym stole")
+// kiedy HamburgerMenu jest otwarte. Gracz podchodzi, chwyta gripem/triggerem
+// i ustawia punkt przyczepienia do kontrolera.
 // =============================================================================
 
 using UnityEngine;
@@ -19,6 +19,7 @@ namespace Plaga44
         private const string AutoBootGoName = "ItemBrowser";
         private const string ItemsResourceFolder = "Items";
         private const string PrefsKey = "Plaga44_ItemBrowser_SelectedItem";
+        private const string OvrRigName = "OVRCameraRig";
 
         public static ItemBrowser Instance { get; private set; }
 
@@ -26,9 +27,12 @@ namespace Plaga44
         // Config
         // =====================================================================
 
-        [Header("Spawn Target")]
-        [Tooltip("Ktora reka trzyma nowo spawnowany item.")]
-        public OVRInput.Controller spawnHand = OVRInput.Controller.RTouch;
+        [Header("Spawn Position (relative to head)")]
+        [Tooltip("Distance in front of player where items appear.")]
+        public float spawnDistance = 1.2f;
+
+        [Tooltip("Height offset from head (negative = below eye level, like a table).")]
+        public float spawnHeightOffset = -0.5f;
 
         // =====================================================================
         // State
@@ -125,14 +129,13 @@ namespace Plaga44
         public void SetItem(int index)
         {
             index = Mathf.Clamp(index, 0, MaxItem);
+            DespawnPreview();
 
             _selectedIndex = index;
             PlayerPrefs.SetInt(PrefsKey, _selectedIndex);
 
-            // None -- release + destroy aktualnego spawned itemu.
             if (index == 0)
             {
-                DespawnCurrent();
                 Debug.Log($"{LOG} Item: None");
                 return;
             }
@@ -140,58 +143,101 @@ namespace Plaga44
             int prefabIdx = index - 1;
             if (prefabIdx < 0 || prefabIdx >= _itemPrefabs.Length) return;
 
-            // Spawn do reki z state=GRABBED. ObjectSpawner.SpawnIntoHand sam
-            // zrobi podmiane (release + destroy poprzedniego) gdy cos juz trzyma.
-            var spawner = ObjectSpawner.Instance;
-            if (spawner == null)
-            {
-                Debug.LogWarning($"{LOG} SetItem: ObjectSpawner.Instance == null -- cannot spawn");
-                _spawnedPreview = null;
-                return;
-            }
-
-            // Key = resource path w Resources/Items/<name> (bez ".prefab").
-            string resourcePath = $"{ItemsResourceFolder}/{_itemPrefabs[prefabIdx].name}";
-            _spawnedPreview = spawner.SpawnIntoHand(resourcePath, spawnHand);
-            Debug.Log($"{LOG} Item: {CurrentLabel} -- spawned into {spawnHand}");
+            SpawnPreview(_itemPrefabs[prefabIdx]);
+            Debug.Log($"{LOG} Item: {CurrentLabel} -- spawned in front of player");
         }
 
         // =====================================================================
-        // Despawn
+        // Spawn / despawn -- item appears in front of player
         // =====================================================================
 
-        /// <summary>Release + destroy aktualnego spawned itemu. Public dla
-        /// HamburgerMenu.Close (issue #158) -- zamknieciu menu towarzyszy
-        /// zniknieciem aktualnego itemu.</summary>
-        public void DespawnCurrent()
+        private void SpawnPreview(GameObject prefab)
+        {
+            Vector3 pos = GetSpawnPosition();
+            Quaternion rot = GetSpawnRotation();
+
+            _spawnedPreview = Instantiate(prefab, pos, rot);
+            _spawnedPreview.name = $"ItemPreview_{prefab.name}";
+
+            // Statyczny podglad -- kinematic = nie reaguje na fizyke, stoi w miejscu.
+            // OVRGrabber przejmie sterowanie przy GrabBegin (wylaczy kinematic sam).
+            var rb = _spawnedPreview.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                // Kolejnosc: zero velocities PRZED switchem na kinematic
+                // (kinematic rigidbody nie pozwala set velocity -- warning).
+                if (!rb.isKinematic)
+                {
+                    rb.linearVelocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
+                rb.isKinematic = true;
+                rb.useGravity = false;
+            }
+        }
+
+        /// <summary>Destroy current preview item. Public for HamburgerMenu.Close (issue #158).</summary>
+        public void DespawnPreview()
         {
             if (_spawnedPreview == null) return;
             Destroy(_spawnedPreview);
             _spawnedPreview = null;
         }
 
-        /// <summary>[DEPRECATED] Alias zeby nie zepsuc callsites w HamburgerMenu.
-        /// Patrz DespawnCurrent().</summary>
-        public void DespawnPreview() => DespawnCurrent();
-
-        /// <summary>Confirm spawn -- spawned item staje sie "realnym" itemem w swiecie.
-        /// ItemBrowser przestaje go sledzic (SetItem/Close nie bedzie go niszczyl).
+        /// <summary>Confirm preview -- spawned preview staje sie realnym itemem w swiecie.
+        /// ItemBrowser przestaje go sledzic (Close menu nie bedzie go niszczyl).
         /// Przycisk A w ITEMS sekcji HamburgerMenu.</summary>
         public bool ConfirmSpawn()
         {
             if (_spawnedPreview == null)
             {
-                Debug.LogWarning($"{LOG} ConfirmSpawn: brak itemu do potwierdzenia");
+                Debug.LogWarning($"{LOG} ConfirmSpawn: brak preview do potwierdzenia");
                 return false;
             }
-            // Rename z przedrostkiem Item_ dla spojnosci (ItemBrowser nie spawnuje
-            // z prefiksem ItemPreview_ -- trzyma prefab name po WireComponents).
-            if (!_spawnedPreview.name.StartsWith("Item_", System.StringComparison.Ordinal))
-                _spawnedPreview.name = "Item_" + _spawnedPreview.name;
-
+            string prevName = _spawnedPreview.name;
+            _spawnedPreview.name = prevName.StartsWith("ItemPreview_")
+                ? "Item_" + prevName.Substring("ItemPreview_".Length)
+                : "Item_" + prevName;
             Debug.Log($"{LOG} ConfirmSpawn: {_spawnedPreview.name} zostaje w swiecie (unreferenced)");
             _spawnedPreview = null; // unreferencuj -- despawn nie tknie go
             return true;
+        }
+
+        private Vector3 GetSpawnPosition()
+        {
+            Transform head = FindHead();
+            if (head == null) return Vector3.forward * spawnDistance;
+
+            Vector3 fwd = head.forward;
+            fwd.y = 0f;
+            if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
+            fwd.Normalize();
+
+            return head.position + fwd * spawnDistance + Vector3.up * spawnHeightOffset;
+        }
+
+        private Quaternion GetSpawnRotation()
+        {
+            Transform head = FindHead();
+            if (head == null) return Quaternion.identity;
+
+            Vector3 fwd = head.forward;
+            fwd.y = 0f;
+            if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
+            fwd.Normalize();
+
+            // Item faces player
+            return Quaternion.LookRotation(-fwd, Vector3.up);
+        }
+
+        private Transform FindHead()
+        {
+            var rig = GameObject.Find(OvrRigName);
+            if (rig == null) return Camera.main?.transform;
+            var tracking = rig.transform.Find("TrackingSpace");
+            if (tracking == null) return rig.transform;
+            var eye = tracking.Find("CenterEyeAnchor");
+            return eye != null ? eye : tracking;
         }
     }
 }
