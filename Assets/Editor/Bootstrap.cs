@@ -32,17 +32,48 @@ namespace Plaga44.Editor
 
         // Unity 6: delayCall from [InitializeOnLoad] constructor is unreliable.
         // EditorApplication.update fires every editor tick -- we unhook after first call.
-        static Bootstrap() => EditorApplication.update += WaitForReady;
+        static Bootstrap()
+        {
+            EditorApplication.update += WaitForReady;
+            // Re-trigger przy otwarciu sceny testbed: user moze przelaczac scenes
+            // albo restart Unity z inna scena -- chcemy auto-run po przejsciu
+            // na TESTBED.unity.
+            EditorSceneManager.sceneOpened += OnSceneOpened;
+        }
+
+        private static void OnSceneOpened(UnityEngine.SceneManagement.Scene scene, OpenSceneMode mode)
+        {
+            if (!scene.path.EndsWith("TESTBED.unity", System.StringComparison.OrdinalIgnoreCase))
+                return;
+            if (SessionState.GetBool(SessionKey, false))
+            {
+                // Juz odpalilismy -- scenka reopened w tej sesji, SKIP (inaczej loop).
+                return;
+            }
+            Debug.Log($"{LOG} sceneOpened({scene.name}) -> queuing auto-run");
+            _waitTicks = 0;
+            EditorApplication.update -= WaitForReady; // unhook jesli jeszcze wisi
+            EditorApplication.update += WaitForReady;
+        }
 
         private static int _waitTicks;
+
+        // Po ilu tickach forsujemy run mimo isCompiling (failsafe -- Unity 6
+        // po pelnym reimporcie potrafi nie wyjsc z isUpdating, auto-run
+        // utykal w nieskonczonosc).
+        private const int MaxWaitTicks = 60 * 60; // ~60s at 60 tick/s
 
         private static void WaitForReady()
         {
             _waitTicks++;
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+
+            // Czekamy TYLKO na isCompiling (nie isUpdating -- AssetDatabase po
+            // pelnym reimporcie moze nie zejsc do false, blokowalo auto-run).
+            // Failsafe: po MaxWaitTicks forsujemy run niezaleznie.
+            if (EditorApplication.isCompiling && _waitTicks < MaxWaitTicks)
             {
-                if (_waitTicks % 300 == 0) // co ~5s log status (assuming ~60 ticks/s)
-                    Debug.Log($"{LOG} WaitForReady: still waiting (compiling={EditorApplication.isCompiling}, updating={EditorApplication.isUpdating})");
+                if (_waitTicks % 300 == 0) // co ~5s log status
+                    Debug.Log($"{LOG} WaitForReady: compiling... (tick {_waitTicks}/{MaxWaitTicks})");
                 return;
             }
 
@@ -50,12 +81,14 @@ namespace Plaga44.Editor
 
             if (SessionState.GetBool(SessionKey, false))
             {
-                Debug.Log($"{LOG} Auto-run SKIPPED -- already ran this session (key={SessionKey}). Use CYBERNOMAD/Bootstrap to re-run.");
+                Debug.Log($"{LOG} Auto-run SKIPPED -- already ran this session (SessionState '{SessionKey}'=true). " +
+                    "Uzyj CYBERNOMAD/Bootstrap zeby re-run, ALBO restart Unity (SessionState jest per proces).");
                 return;
             }
             SessionState.SetBool(SessionKey, true);
 
-            Debug.Log($"{LOG} Auto-run: loading scene and validating... (waited {_waitTicks} ticks)");
+            string reason = _waitTicks >= MaxWaitTicks ? "TIMEOUT-FORCED" : "ready";
+            Debug.Log($"{LOG} Auto-run ({reason}): loading scene and validating... (waited {_waitTicks} ticks, isCompiling={EditorApplication.isCompiling}, isUpdating={EditorApplication.isUpdating})");
             Run();
         }
 
