@@ -154,10 +154,11 @@ namespace Plaga44.Editor.Setup
                 var specGloss = mat.HasProperty("_SpecGlossMap") ? mat.GetTexture("_SpecGlossMap")
                               : (mat.HasProperty("_MetallicGlossMap") ? mat.GetTexture("_MetallicGlossMap") : null);
 
-                // Fallback: szukaj textures po nazwie w Textures/ folderze
-                if (diffuse == null) diffuse = FindTexture(texFolder, mat.name, new[] { "diffuse", "albedo", "basecolor", "color" });
-                if (normal  == null) normal  = FindTexture(texFolder, mat.name, new[] { "normal", "nrm", "_n" });
-                if (specGloss == null) specGloss = FindTexture(texFolder, mat.name, new[] { "specular", "spec", "metallic", "gloss" });
+                // ZERO FALLBACK (CLAUDE.md). Jesli material nie ma _MainTex/_BaseMap/_BumpMap
+                // przypisane explicite -> nie zgaduj po nazwach plikow. Brak textury = log
+                // warning, Borys decyduje co z tym zrobic.
+                if (diffuse == null)
+                    Debug.LogWarning($"{LOG} '{mat.name}': brak _MainTex/_BaseMap binding -- renderowanie bez textury diffuse");
 
                 mat.shader = urp;
                 // Metallic workflow (domyslny URP/Lit -- bez _SPECULAR_SETUP)
@@ -179,28 +180,6 @@ namespace Plaga44.Editor.Setup
                 EditorUtility.SetDirty(mat);
                 Debug.Log($"{LOG} [URP] {mat.name} -> URP/Lit (diff={(diffuse != null)} nrm={(normal != null)} spec={(specGloss != null)})");
             }
-        }
-
-        private static Texture FindTexture(string texFolder, string matName, string[] keywords)
-        {
-            if (!AssetDatabase.IsValidFolder(texFolder)) return null;
-            string[] guids = AssetDatabase.FindAssets("t:Texture2D", new[] { texFolder });
-            Texture best = null;
-            foreach (var g in guids)
-            {
-                string path = AssetDatabase.GUIDToAssetPath(g);
-                string lower = Path.GetFileNameWithoutExtension(path).ToLowerInvariant();
-                foreach (var kw in keywords)
-                {
-                    if (lower.Contains(kw))
-                    {
-                        var t = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
-                        if (t != null) { best = t; break; }
-                    }
-                }
-                if (best != null) break;
-            }
-            return best;
         }
 
         private static void EnsureFolder(string path)
