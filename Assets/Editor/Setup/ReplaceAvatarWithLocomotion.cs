@@ -31,17 +31,34 @@ namespace Plaga44.Editor.Setup
         private const string LOCOMOTION_PREFAB_GUID = "286d7e2005861d341a0a94d7f615675a";
 
         [MenuItem("PLAGA44/Setup/Replace PLAGA44 Avatar with Locomotion Sample")]
-        public static void Run()
+        public static void RunMenu()
+        {
+            Run();
+        }
+
+        /// <summary>
+        /// Idempotentne. Jesli juz jest StylizedCharacterLocomotion w scenie -- skip.
+        /// Jesli stary StylizedCharacterPLAGA44 -- usun i zamien. Inaczej spawnuj.
+        /// </summary>
+        /// <returns>true jesli scene byla modyfikowana</returns>
+        public static bool Run()
         {
             var scene = EditorSceneManager.GetActiveScene();
             if (!scene.IsValid())
             {
                 Debug.LogError($"{LOG} No active scene");
-                return;
+                return false;
+            }
+
+            // 0. Idempotent: jesli juz Locomotion prefab w scenie, nic nie rob
+            if (FindPrefabInstanceByGuid(scene, LOCOMOTION_PREFAB_GUID) != null)
+            {
+                Debug.Log($"{LOG} [OK] StylizedCharacterLocomotion juz w scenie -- skip");
+                return false;
             }
 
             // 1. Znajdz stary PLAGA44 PrefabInstance root w scenie (jesli istnieje)
-            GameObject oldAvatar = FindOldAvatar(scene);
+            GameObject oldAvatar = FindPrefabInstanceByGuid(scene, OLD_PLAGA44_GUID);
             Vector3 savedPos = Vector3.zero;
             Quaternion savedRot = Quaternion.identity;
             Transform savedParent = null;
@@ -64,13 +81,13 @@ namespace Plaga44.Editor.Setup
             if (string.IsNullOrEmpty(locoPath))
             {
                 Debug.LogError($"{LOG} Locomotion prefab not found by guid {LOCOMOTION_PREFAB_GUID}");
-                return;
+                return false;
             }
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(locoPath);
             if (prefab == null)
             {
                 Debug.LogError($"{LOG} Failed to load prefab at {locoPath}");
-                return;
+                return false;
             }
 
             // 3. Instantuj Locomotion jako PrefabInstance w scenie
@@ -104,7 +121,7 @@ namespace Plaga44.Editor.Setup
             if (retargeter == null)
             {
                 Debug.LogError($"{LOG} CharacterRetargeter not found in Locomotion instance");
-                return;
+                return false;
             }
 
             // 6. Wire _leftHand / _rightHand / _cameraRig na ISDKSkeletalProcessor source[0]
@@ -113,7 +130,7 @@ namespace Plaga44.Editor.Setup
             if (srcContainers == null || !srcContainers.isArray || srcContainers.arraySize == 0)
             {
                 Debug.LogError($"{LOG} _sourceProcessorContainers empty or missing");
-                return;
+                return false;
             }
 
             var data0 = srcContainers.GetArrayElementAtIndex(0);
@@ -121,7 +138,7 @@ namespace Plaga44.Editor.Setup
             if (isdkProc == null)
             {
                 Debug.LogError($"{LOG} _isdkProcessor property not found on source[0]");
-                return;
+                return false;
             }
 
             int wired = 0;
@@ -144,17 +161,16 @@ namespace Plaga44.Editor.Setup
 
             Debug.Log($"{LOG} Wired {wired}/3 ISDK source refs on {retargeter.gameObject.name}");
 
-            // 7. Save scene
+            // 7. MarkDirty -- Bootstrap (caller) SaveScene kolektywnie
             EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene);
-            Debug.Log($"{LOG} DONE -- scene saved. Enter Play Mode to test.");
+            Debug.Log($"{LOG} DONE -- avatar replaced, refs wired. Scene dirty.");
+            return true;
         }
 
-        private static GameObject FindOldAvatar(UnityEngine.SceneManagement.Scene scene)
+        private static GameObject FindPrefabInstanceByGuid(UnityEngine.SceneManagement.Scene scene, string targetGuid)
         {
             foreach (var root in scene.GetRootGameObjects())
             {
-                // Sprawdz root + wszystkie children czy sa PrefabInstance root z nasza guid
                 foreach (var t in root.GetComponentsInChildren<Transform>(true))
                 {
                     var go = t.gameObject;
@@ -163,7 +179,7 @@ namespace Plaga44.Editor.Setup
                     if (asset == null) continue;
                     string path = AssetDatabase.GetAssetPath(asset);
                     string guid = AssetDatabase.AssetPathToGUID(path);
-                    if (guid == OLD_PLAGA44_GUID) return go;
+                    if (guid == targetGuid) return go;
                 }
             }
             return null;

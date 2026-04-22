@@ -175,6 +175,11 @@ namespace Plaga44.Editor
             changed |= LogStep("AmbientSetup",        () => AmbientSetup.Run(cfg));
             changed |= LogStep("BounceLightSetup",    () => BounceLightSetup.Run(cfg));
             changed |= LogStep("PlayerRigSetup",      () => PlayerRigSetup.Run(cfg));
+            // ReplaceAvatarWithLocomotion MUSI byc PRZED LocomotionFixer --
+            // wymienia stary StylizedCharacterPLAGA44 (zepsuty wariant ISDK) na
+            // StylizedCharacterLocomotion (Meta sample). Idempotentny -- jesli
+            // juz Locomotion w scenie, skip.
+            changed |= LogStep("ReplaceAvatarWithLocomotion", () => ReplaceAvatarWithLocomotion.Run());
             LogStepVoid("StylizedCharacterLocomotionFixer", () => StylizedCharacterLocomotionFixer.Run());
             // HandPhysicsSetup przeniesione do runtime (HandPhysicsEnabler.cs):
             // OVRHandPrefab jest aktywowane dopiero w runtime przez SDK,
