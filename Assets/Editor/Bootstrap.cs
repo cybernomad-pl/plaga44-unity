@@ -180,6 +180,10 @@ namespace Plaga44.Editor
             // StylizedCharacterLocomotion (Meta sample). Idempotentny -- jesli
             // juz Locomotion w scenie, skip.
             changed |= LogStep("ReplaceAvatarWithLocomotion", () => ReplaceAvatarWithLocomotion.Run());
+            // BuildHybridRig: NOWY rig hybrydowy (Locomotion + Grab) w osobnym
+            // root GO "PlagaHybridRig" -- obok istniejacego starego rigu.
+            // Nic nie usuwa. Idempotent. Gdy dziala, stary rig do usuniecia recznie.
+            changed |= LogStep("BuildHybridRig", () => BuildHybridRig.Run());
             LogStepVoid("StylizedCharacterLocomotionFixer", () => StylizedCharacterLocomotionFixer.Run());
             // HandPhysicsSetup przeniesione do runtime (HandPhysicsEnabler.cs):
             // OVRHandPrefab jest aktywowane dopiero w runtime przez SDK,
