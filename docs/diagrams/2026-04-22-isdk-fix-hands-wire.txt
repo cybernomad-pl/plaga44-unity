@@ -1,0 +1,96 @@
+===============================================================================
+ ISDK fix: wywal ISDKExampleMenu subtree + wire IHand do CharacterRetargeter
+ 2026-04-22
+===============================================================================
+
+PROBLEM (logi play mode):
+
+  1. BLOCKER: Avatar PLAGA44 nie animuje. CharacterRetargeter.Start() crashuje:
+       Meta.XR.Movement.Retargeting.ISDKSkeletalProcessor.SetupHand
+         -> Assert.IsNotNull(handObject) -- _leftHand=null, _rightHand=null
+       -> retargeter NIE konczy Setup(), avatar stoi w T-pose/Idle.
+
+  2. 14x assertion spam z tutorial menu UI (Off/Low/Medium/High vignette +
+     SeatedMode + ISDKExampleMenu HmdRef) -- 3 prefaby nie z baseline.
+
+  3. HmdOffset/HmdRef NRE (2x) -- siedza w tym samym menu UI.
+
+DIAGNOZA:
+
+  Prefaby w naszym TESTBED ktorych NIE MA w baseline TESTBED_ISDK:
+    cf5e00f95bbc102419b456b1674f47f7 -- ISDKExampleMenu      (PI 1328886031)
+    2b6a1257ec0ff284693f68d0ddccbbe8 -- LocomotionSettingsWiring (PI 1750909302)
+    86972a90f4c18ef45be2ea6e93e65d7e -- LocomotionSettingsUI  (PI 1234782750)
+
+  Wszystkie 14 assertion UI (LocomotionComfortVignetteSetting,
+  LocomotionSeatedSetting, HmdRef, HmdOffset) -- zagniezdzone skladniki
+  tych 3 prefabow. Wywalajac korzenie = caly subtree znika.
+
+  _leftHand/_rightHand w Meta sample MovementISDKLocomotion.unity sa wire.
+  Baseline TESTBED_ISDK mial je null (baseline tez mial ten blad ale nie
+  testowany ostatnio). Musimy wire z naszej hierarchii:
+
+    ISDK (root)
+    +-- LeftHand  (fileID 1217030764)  ma Hand.cs (IHand implementer)  <-- wire
+    +-- RightHand (fileID 1786065292)  ma Hand.cs (IHand implementer)  <-- wire
+
+ZMIANY:
+
+  A) TESTBED.unity -- wywalono 3 PrefabInstance subtree (5194 linii):
+     - ISDKExampleMenu (tutorial UI ISDK Samples)
+     - LocomotionSettingsWiring (wire dla tego UI)
+     - LocomotionSettingsUI (nested UI panel)
+
+     skrypt: KLAUDIA/scripts/scene_cleanup5_isdkmenu.py
+     -- BFS hierarchia forward + inverse (m_Father, m_TransformParent, Children)
+     -- rozszerzona wersja cleanup4, teraz stripped TF tez puszcza TF kind
+        w queue zeby inverse edge przez PREFAB_TRANSFORM_PARENT dzialal.
+
+  B) TESTBED.unity -- wire _leftHand + _rightHand w ISDKSkeletalProcessor:
+     PrefabInstance 1971503401 (nasz PLAGA44 avatar) m_Modifications dodano:
+       _sourceProcessorContainers.Array.data[0]._isdkProcessor._leftHand  -> 1217030764
+       _sourceProcessorContainers.Array.data[0]._isdkProcessor._rightHand -> 1786065292
+
+     skrypt: KLAUDIA/scripts/wire_isdk_hands.py
+
+  C) disable 4 nowych komponentow (logi zalewane AssertionException):
+     - 2x HandGrabGlow           -- _handVisual/_materialEditor null
+     - 2x HandPokeOvershootGlow  -- tez null
+
+     W baseline TESTBED_ISDK te komponenty tez sa null-wired, tez crashuja
+     w Start(), AssertionException nie blokuje chodzenia ale zalewa console.
+     Disable = clean logi bez ryzyka. Potem jak bedzie _handVisual wire, enable.
+
+     skrypt: KLAUDIA/scripts/disable_components.py (rozszerzony)
+
+HIERARCHIA ISDK RIG (TESTBED):
+
+  GO ISDK (2080865093)
+  +-- LeftHand (1217030764)
+  |   +-- Hand.cs        (guid 1a379f34..., IHand left)
+  |   +-- HandActiveState (guid bebfb74b...)
+  |   +-- HandDataLeft
+  |   +-- HandFeaturesLeft
+  |   +-- HandInteractorsLeft
+  |       +-- HandGrabInteractor (460936269)
+  |   +-- OVRHandDataSource
+  |   +-- [BuildingBlock] Left Poke
+  +-- RightHand (1786065292)
+      +-- Hand.cs x2     (guid 1a379f34..., IHand right -- 2 instancje?!)
+      +-- HandActiveState
+      +-- HandInteractorsRight
+          +-- HandGrabInteractor (1204489558)
+
+CO NADAL DO POTWIERDZENIA:
+
+  [ ] Po play mode -- brak Assert.IsNotNull crash w SetupHand
+  [ ] Avatar PLAGA44 animuje przy ruchu HMD (body tracking)
+  [ ] Chodzenie: camera rig movement powinien wywolac locomotion state
+  [ ] RightHand ma 2x Hand.cs -- moze powodowac dwie rozne IHand w GetComponents
+      -- SetupHand bierze handInterfaces[^1] (ostatni), ale dziwne ze jest 2x
+
+SKRYPTY:
+  /mnt/c/Users/boris/Desktop/KLAUDIA/scripts/scene_cleanup5_isdkmenu.py
+  /mnt/c/Users/boris/Desktop/KLAUDIA/scripts/wire_isdk_hands.py
+  /mnt/c/Users/boris/Desktop/KLAUDIA/scripts/disable_components.py (rozszerzony)
+===============================================================================
