@@ -1,0 +1,48 @@
+===============================================================================
+ Replace StylizedCharacterPLAGA44 z StylizedCharacterLocomotion (Meta sample)
+ 2026-04-22
+===============================================================================
+
+PROBLEM:
+
+  StylizedCharacterPLAGA44.prefab deklarowal m_SourcePrefab = StylizedCharacterISDK
+  (guid 97815d0cfa...) -- wariant ISDK BEZ chodzenia.
+  Ale mial w srodku 179 modyfikacji z property path'ami jak
+    _targetProcessorContainers.Array.data[0]._locomotionProcessor._animator
+  ktore nalezaly do StylizedCharacterLocomotion (guid 286d7e20...).
+  Unity ignorowal te modyfikacje bo nie pasowaly do ISDK bazy.
+  ISDKSkeletalProcessor._leftHand/_rightHand zostawaly null ->
+  Assert.IsNotNull(handObject) w SetupHand -> CharacterRetargeter crash.
+
+ROZWIAZANIE:
+
+  Editor menu item: PLAGA44/Setup/Replace PLAGA44 Avatar with Locomotion Sample
+    -> Znajduje w scenie PrefabInstance StylizedCharacterPLAGA44 (96cedd71)
+    -> Zapamietuje pos/rot/parent
+    -> Usuwa
+    -> Instantuje StylizedCharacterLocomotion (286d7e20) w to samo miejsce
+    -> Znajduje LeftHand, RightHand GO, OVRCameraRig w scenie
+    -> Wire przez SerializedObject na ISDKSkeletalProcessor source[0]:
+       _leftHand  -> GO 'LeftHand'
+       _rightHand -> GO 'RightHand'
+       _cameraRig -> OVRCameraRig component
+    -> Zapisuje scene
+
+DLACZEGO EDITOR SCRIPT, NIE YAML:
+
+  Unity dla [SerializeReference] polimorficznych processorow generuje
+  target fileID runtime. Python skrypt nie potrafi ich wymyslic. Unity
+  Editor API sam zapisze prawidlowe targety w YAML po ApplyModifiedProperties.
+
+SKRYPT:
+  Assets/Editor/Setup/ReplaceAvatarWithLocomotion.cs
+
+INSTRUKCJA:
+  1. Otworz Unity -- poczekaj na kompilacje skryptu
+  2. Menu: PLAGA44 -> Setup -> Replace PLAGA44 Avatar with Locomotion Sample
+  3. Console: [PLAGA44][ReplaceAvatar] DONE -- scene saved.
+  4. Play Mode -- avatar Locomotion powinien:
+     - nie crashowac w ISDKSkeletalProcessor.SetupHand
+     - animowac sie przy ruchu HMD
+     - reagowac na input chodzenia
+===============================================================================
