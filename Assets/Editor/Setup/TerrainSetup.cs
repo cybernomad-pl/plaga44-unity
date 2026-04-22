@@ -34,8 +34,27 @@ namespace Plaga44.Editor.Setup
             changed |= SetupMaterial(terrain, cfg);
             changed |= SetupTerrainLayers(terrain, cfg);
             changed |= SetupTerrainScale(terrain, cfg);
+            changed |= SetupTerrainPosition(terrain);
             changed |= ClearTreePrototypes(terrain);
             return changed;
+        }
+
+        // Enforce terrain height y=-7 (Borys request). Terrain XZ centered via
+        // SetupTerrainScale + default centering: x=-512, z=-512 dla 1024x1024.
+        // Y zawsze = -7 (pod graczem spawn y=0).
+        private static bool SetupTerrainPosition(Terrain terrain)
+        {
+            const float TargetY = -7f;
+            Vector3 pos = terrain.transform.position;
+            if (Mathf.Approximately(pos.y, TargetY))
+            {
+                Debug.Log($"{LOG} [OK] Terrain y={pos.y:F2} (target {TargetY})");
+                return false;
+            }
+            Debug.Log($"{LOG} [FIX] Terrain y: {pos.y:F2} -> {TargetY}");
+            Undo.RecordObject(terrain.transform, "Bootstrap: Terrain y=-7");
+            terrain.transform.position = new Vector3(pos.x, TargetY, pos.z);
+            return true;
         }
 
         // Issue #178: trees deprecated -- clear broken/placeholder treePrototypes.

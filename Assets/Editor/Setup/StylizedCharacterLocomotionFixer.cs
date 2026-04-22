@@ -36,7 +36,10 @@ namespace Plaga44.Editor.Setup
     public static class StylizedCharacterLocomotionFixer
     {
         private const string LOG     = "[PLAGA44][LocomotionFixer]";
-        private const string RigName = "StylizedCharacterLocomotion";
+        // Nasz PLAGA44 prefab variant dziedziczy po StylizedCharacterISDK i
+        // w scenie ma m_Name override = "StylizedCharacterISDK" (z ISDK variant).
+        // Search by component instead of name -- niezawodne bez wzgl. na override.
+        private const string RigName = "StylizedCharacterPLAGA44";
 
         // LocomotionController.controller z ISDK Locomotion sample.
         // guid f138d28f925fa6442b115318a86915ef (sprawdzone w .meta).
@@ -187,7 +190,12 @@ namespace Plaga44.Editor.Setup
             var avatar = Object.FindAnyObjectByType<Plaga44.PlayerAvatar>();
             if (avatar != null && avatar.defaultRig != null) return avatar.defaultRig;
 
-            // Fallback: by name
+            // Secondary: szukaj po CharacterRetargeter komponentu (niezawodne
+            // wzgl. m_Name override -- nasz PLAGA44 w scenie ma name "StylizedCharacterISDK").
+            var retargeter = Object.FindAnyObjectByType<Meta.XR.Movement.Retargeting.CharacterRetargeter>();
+            if (retargeter != null) return retargeter.gameObject;
+
+            // Fallback: by name (stary behavior dla backward compat)
             var byName = GameObject.Find(RigName);
             return byName;
         }

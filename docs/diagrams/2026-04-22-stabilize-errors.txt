@@ -1,0 +1,59 @@
+===============================================================================
+ Stabilizacja codebase -- terrain y=-7, LocomotionFixer rename, disable
+ komponentow bez SyntheticHand wire
+ 2026-04-22
+===============================================================================
+
+ZMIANY:
+
+  A) TerrainSetup.cs -- dodany SetupTerrainPosition (enforce y=-7)
+     Bootstrap teraz za kazdym razem wymusza terrain y=-7 (pod graczem).
+     Dotychczas Vector3.zero przy create, a istniejacy terrain nie byl
+     weryfikowany.
+
+  B) StylizedCharacterLocomotionFixer.cs:
+     - RigName: "StylizedCharacterLocomotion" -> "StylizedCharacterPLAGA44"
+       (nasz Prefab Variant ma ta nazwe; scene modification moze overridowac
+        do "StylizedCharacterISDK" -- dla tego drugi fallback)
+     - ResolveRig() dodany CharacterRetargeter component search --
+       niezawodne niezaleznie od m_Name override w scenie.
+
+  C) TESTBED.unity -- disable 10 komponentow MonoBehaviour:
+     - 6x ActiveStateTracker (guid 194b7d10...) -- _gameObjects null
+     - 2x HandPokeLimiterVisual (guid cb028ce9...) -- _syntheticHand null
+     - 2x HandGrabStateVisual  (guid 2ff26c21...) -- _syntheticHand null
+
+     Dlaczego disable zamiast usuwac: Borys -- "moze bedzie potrzebne
+     pozniej" -- wrocimy do nich gdy dodamy SyntheticHand do sceny
+     (przez OVRHand data chain w runtime). Na teraz m_Enabled: 0 ->
+     zero assertion failures przy load sceny.
+
+  D) Terrain_SceneA Transform y: -6.68 -> -7 (w scenie, zsynchronizowane
+     z Bootstrap TerrainSetup enforce).
+
+CO NIE DZIALA JESZCZE (do rozwiazania potem):
+
+  1. Locomotion -- avatar nadal w Idle, nie reaguje na ruch camera rig
+     Przypuszczenie: wire _cameraRig slot[1] w scenie wskazuje Transform
+     fileID 1129576413 ([BuildingBlock] Camera Rig), ale LocomotionSkeletalProcessor
+     wymaga Transform ktory realnie rusza sie z graczem (CenterEyeAnchor?).
+     Do weryfikacji czy Transform root Camera Rig rusza sie przy teleporcie.
+
+  2. HmdRef/HmdOffset NRE (2x) -- pozostale poza tutorial subtree
+     Do zbadania skad te NRE jesli tutorial cleanup juz je usunal.
+
+  3. AssertionException Value was Null (4x) -- stack trace niekompletny
+     (wiadomo tylko "Assertion failure").
+
+WERYFIKACJA:
+
+  [ ] Po otwarciu sceny, Bootstrap log pokazuje [FIX] Terrain y -6.68 -> -7
+  [ ] Play mode -- brak UnassignedReferenceException z ActiveStateTracker
+  [ ] Play mode -- brak AssertionException z HandPokeLimiterVisual /
+      HandGrabStateVisual (SyntheticHand missing)
+  [ ] Locomotion status -- sprawdzic czy PLAGA44 avatar juz reaguje
+      na ruch camera rig (jesli nie -- kolejny etap wire input)
+
+SKRYPT:
+  /mnt/c/Users/boris/Desktop/KLAUDIA/scripts/disable_components.py
+===============================================================================
