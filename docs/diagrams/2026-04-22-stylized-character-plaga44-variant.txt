@@ -1,0 +1,102 @@
+===============================================================================
+ StylizedCharacterPLAGA44 -- Prefab Variant chain
+ 2026-04-22
+===============================================================================
+
+ZANIM (stan z commit 894bb6a):
+------------------------------
+
+  Armature-Pose.prefab  (01841ff2...)
+         |
+         v
+  StylizedCharacter.prefab  (0e5c330c...)   [base MSDK]
+         |
+         v
+  StylizedCharacterISDK.prefab  (97815d0c...)   [ISDK grab]
+         |
+         v
+  [scene TESTBED.unity PrefabInstance 1971503401]
+     + inline AddedComponent Animator (1847225715797833676)
+       m_Controller = LocomotionController
+       m_Avatar     = Idle.fbx avatar
+     + stripped GO 5411249200755154652 (parent dla Animator)
+     --- BRAK locomotion processors ---
+
+PO ZMIANIE (ten commit):
+------------------------
+
+  Armature-Pose.prefab  (01841ff2...)
+         |
+         v
+  StylizedCharacter.prefab  (0e5c330c...)
+         |
+         v
+  StylizedCharacterISDK.prefab  (97815d0c...)
+         |
+         v
+  StylizedCharacterPLAGA44.prefab  (96cedd71...)   [NOWY! <-- nasz variant]
+     |
+     |  m_Modifications (skopiowane z StylizedCharacterLocomotion.prefab):
+     |     - targetProcessorContainers.size = 6
+     |     - data[0] = AnimationProcessor  (Idle/Run/Strafe blending)
+     |     - data[1] = LocomotionProcessor
+     |     - data[2] = LocomotionProcessor
+     |     - data[3] = LocomotionProcessor
+     |     - data[4] = TwistProcessor
+     |     - data[5] = TwoBoneIKProcessor (feet)
+     |     - + HipPinningProcessor
+     |     - + 170 paramow procesorow
+     |
+     |  m_AddedComponents:
+     |     Animator (fileID 1847225715797833676)
+     |       m_Avatar     = Idle.fbx (f7f7cd4a...)
+     |       m_Controller = LocomotionController (f138d28f...)
+         |
+         v
+  [scene TESTBED.unity PrefabInstance 1971503401]
+     m_SourcePrefab = 96cedd71 (PLAGA44 variant)
+     m_AddedComponents: []   <-- Animator dziedziczony z PLAGA44 prefab
+     --- ISDK grab dziala (dziedziczony przez chain) ---
+     --- Locomotion processors aktywne (z PLAGA44 overrides) ---
+
+KLUCZOWE PUNKTY:
+----------------
+
+  1. PLAGA44 prefab = KOPIA Locomotion prefab z podmienionym
+     m_SourcePrefab (0e5c330c base -> 97815d0c ISDK).
+     Unity traktuje to jako chain: PLAGA44 -> ISDK -> base.
+
+  2. Locomotion override'y celuja w fileID 8156316538343237965
+     (CharacterRetargeter) z base GUID -- rezolucja przez chain
+     do bazowego komponentu.
+
+  3. ISDK override'y (source processor isdkProcessor na 8156 oraz
+     fileID 4857) zostaja NIEDOTKNIETE -- dziedziczone przez chain.
+
+  4. Brak kolizji overrides: ISDK modyfikuje _sourceProcessor*,
+     Locomotion modyfikuje _targetProcessor*. Oba na tym samym
+     CharacterRetargeter component ale rozne pola.
+
+  5. Scene Modifications zostaly przy 97815d0c (ISDK) fileIDach
+     -- to OK, Unity rezolwuje przez chain PLAGA44 -> ISDK.
+     m_Name override w scene = "StylizedCharacterISDK" wygrywa
+     nad m_Name = "StylizedCharacterPLAGA44" w prefabie PLAGA44
+     (scene modification ma wyzszy priorytet).
+
+CO WYMAGA WERYFIKACJI W UNITY:
+------------------------------
+
+  [ ] Avatar sie pojawia (nie ma crasha przy load sceny)
+  [ ] Avatar stoi (Idle animation gra)
+  [ ] Grab na Shotgun_ISDK dziala (ISDK dziedziczone)
+  [ ] _cameraRig w locomotion processors -- byc moze trzeba
+      recznie pociagnac [BuildingBlock] Camera Rig w Inspectorze
+      na ISDK instance w scenie (bo Locomotion prefab mial wire
+      do WLASNEGO camera rig ktorego w naszej scenie nie ma)
+
+ROLLBACK JESLI CRASH:
+---------------------
+
+  git revert HEAD
+  rm Assets/PLAGA44/Prefabs/StylizedCharacterPLAGA44.prefab*
+===============================================================================
