@@ -42,7 +42,6 @@ namespace Plaga44.Editor.Setup
 
         private const string OVRIC_PREFAB_GUID     = "0a7d2469f24041c4284c66706f84c45e"; // OVRInteractionComprehensive
         private const string LOCOMOTION_AVATAR_GUID = "286d7e2005861d341a0a94d7f615675a"; // StylizedCharacterLocomotion
-        private const string OLD_RIG_ROOT_NAME     = "ISDK";
 
         [MenuItem("PLAGA44/Setup/Build Hybrid Rig (Locomotion + Grab)")]
         public static void RunMenu() => Run();
@@ -80,14 +79,18 @@ namespace Plaga44.Editor.Setup
                 return false;
             }
 
-            // -- Sciezka C: full pipeline, wymaga starego rigu --
-            var oldRig = FindByName(scene, OLD_RIG_ROOT_NAME);
-            if (oldRig == null)                return ErrorB($"Brak OVRIC i brak starego rigu '{OLD_RIG_ROOT_NAME}' -- nic do zrobienia");
+            // -- Sciezka C: full pipeline. Root starego rigu = root hierarchii
+            //    aktualnego OVRCameraRig w scenie. Zalozenie: jest TYLKO JEDEN
+            //    OVRCameraRig przed instantuj-owaniem OVRIC.
+            var leftInteractors  = FindSceneTransform(scene, "HandInteractorsLeft");
+            var rightInteractors = FindSceneTransform(scene, "HandInteractorsRight");
+            if (leftInteractors == null)       return ErrorB("HandInteractorsLeft nie znaleziono w scenie -- brak starego rigu?");
+            if (rightInteractors == null)      return ErrorB("HandInteractorsRight nie znaleziono w scenie");
 
-            var leftInteractors  = FindChildTransform(oldRig, "HandInteractorsLeft");
-            var rightInteractors = FindChildTransform(oldRig, "HandInteractorsRight");
-            if (leftInteractors == null)       return ErrorB("HandInteractorsLeft subtree not found in old rig");
-            if (rightInteractors == null)      return ErrorB("HandInteractorsRight subtree not found in old rig");
+            var existingCamRig = Object.FindFirstObjectByType<OVRCameraRig>();
+            if (existingCamRig == null)        return ErrorB("OVRCameraRig nie znaleziony w scenie -- nie wiem co usunac");
+            var oldRigRoot = existingCamRig.transform.root;
+            Debug.Log($"{LOG} Old rig root: '{oldRigRoot.name}' (via OVRCameraRig '{existingCamRig.name}')");
 
             // -- 1. Zachowaj HandInteractors (reparent do keepera zeby przezyly destroy starego rigu) --
             var keeper = new GameObject("__HybridRigKeeper__");
@@ -95,9 +98,10 @@ namespace Plaga44.Editor.Setup
             Undo.SetTransformParent(leftInteractors,  keeper.transform, "Move LeftInteractors out");
             Undo.SetTransformParent(rightInteractors, keeper.transform, "Move RightInteractors out");
 
-            // -- 2. Usun stary rig --
-            Undo.DestroyObjectImmediate(oldRig);
-            Debug.Log($"{LOG} Usunieto stary rig '{OLD_RIG_ROOT_NAME}', HandInteractors zachowane w keeperze");
+            // -- 2. Usun stary rig (root OVRCameraRig) --
+            string oldName = oldRigRoot.name;
+            Undo.DestroyObjectImmediate(oldRigRoot.gameObject);
+            Debug.Log($"{LOG} Usunieto stary rig '{oldName}', HandInteractors zachowane w keeperze");
 
             // -- 3. Instantuj OVRInteractionComprehensive --
             var ovric = (GameObject)PrefabUtility.InstantiatePrefab(ovricPrefab, scene);
@@ -189,8 +193,12 @@ namespace Plaga44.Editor.Setup
             return true;
         }
 
-        private static Transform FindChildTransform(GameObject root, string name)
-            => root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == name);
+        private static Transform FindSceneTransform(Scene scene, string name)
+        {
+            foreach (var t in AllTransforms(scene))
+                if (t.name == name) return t;
+            return null;
+        }
 
         /// <summary>Zwraca true JESLI wire zostal zmieniony (idempotentne).</summary>
         private static bool WireRetargeter(CharacterRetargeter retargeter, GameObject leftHand, GameObject rightHand, OVRCameraRig camRig)
@@ -235,13 +243,6 @@ namespace Plaga44.Editor.Setup
             foreach (var root in scene.GetRootGameObjects())
                 foreach (var t in root.GetComponentsInChildren<Transform>(true))
                     yield return t;
-        }
-
-        private static GameObject FindByName(Scene scene, string name)
-        {
-            foreach (var t in AllTransforms(scene))
-                if (t.name == name) return t.gameObject;
-            return null;
         }
 
         private static GameObject FindPrefabInstance(Scene scene, string targetGuid)
