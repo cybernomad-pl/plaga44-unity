@@ -45,27 +45,49 @@ namespace Plaga44.Editor.Setup
         private const string OLD_RIG_ROOT_NAME     = "ISDK";
 
         [MenuItem("PLAGA44/Setup/Build Hybrid Rig (Locomotion + Grab)")]
-        public static void Run()
+        public static void RunMenu() => Run();
+
+        /// <summary>
+        /// Idempotent pipeline:
+        /// A) OVRIC juz w scenie + HandInteractors pod nim + wire kompletny -> skip (return false)
+        /// B) OVRIC juz w scenie ale cos brakuje -> uzupelnij wire (return true)
+        /// C) Brak OVRIC -> full pipeline (wymaga starego 'ISDK' rig + Locomotion avatar)
+        /// </summary>
+        public static bool Run()
         {
             var scene = EditorSceneManager.GetActiveScene();
-            if (!scene.IsValid())              { Error("No active scene"); return; }
+            if (!scene.IsValid())              return ErrorB("No active scene");
 
-            // -- Walidacja wstepna --
-            if (!TryLoadPrefab(OVRIC_PREFAB_GUID, out var ovricPrefab))     return;
+            if (!TryLoadPrefab(OVRIC_PREFAB_GUID, out var ovricPrefab))     return false;
 
             var locoAvatar = FindPrefabInstance(scene, LOCOMOTION_AVATAR_GUID);
-            if (locoAvatar == null)            { Error($"Locomotion avatar (guid {LOCOMOTION_AVATAR_GUID}) nie znaleziony -- odpal 'Replace PLAGA44 Avatar' najpierw"); return; }
-
-            var oldRig = FindByName(scene, OLD_RIG_ROOT_NAME);
-            if (oldRig == null)                { Error($"Stary rig GO '{OLD_RIG_ROOT_NAME}' nie znaleziony -- nie ma czego wyrzucac"); return; }
-
-            var leftInteractors  = oldRig.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "HandInteractorsLeft");
-            var rightInteractors = oldRig.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "HandInteractorsRight");
-            if (leftInteractors == null)       { Error("HandInteractorsLeft subtree not found in old rig"); return; }
-            if (rightInteractors == null)      { Error("HandInteractorsRight subtree not found in old rig"); return; }
+            if (locoAvatar == null)            return ErrorB($"Locomotion avatar (guid {LOCOMOTION_AVATAR_GUID}) nie znaleziony -- ReplaceAvatarWithLocomotion musi odpalic wczesniej");
 
             var retargeter = locoAvatar.GetComponentInChildren<CharacterRetargeter>(true);
-            if (retargeter == null)            { Error("CharacterRetargeter nie znaleziony w Locomotion avatar"); return; }
+            if (retargeter == null)            return ErrorB("CharacterRetargeter nie znaleziony w Locomotion avatar");
+
+            // -- Sciezka A/B: OVRIC juz istnieje --
+            var existingOvric = FindPrefabInstance(scene, OVRIC_PREFAB_GUID);
+            if (existingOvric != null)
+            {
+                bool wireChanged = EnsureWireOnly(existingOvric, retargeter, scene);
+                if (wireChanged)
+                {
+                    Debug.Log($"{LOG} [REWIRED] OVRIC juz w scenie, uzupelniono wire");
+                    return true;
+                }
+                Debug.Log($"{LOG} [OK] Hybrid rig juz kompletny -- skip");
+                return false;
+            }
+
+            // -- Sciezka C: full pipeline, wymaga starego rigu --
+            var oldRig = FindByName(scene, OLD_RIG_ROOT_NAME);
+            if (oldRig == null)                return ErrorB($"Brak OVRIC i brak starego rigu '{OLD_RIG_ROOT_NAME}' -- nic do zrobienia");
+
+            var leftInteractors  = FindChildTransform(oldRig, "HandInteractorsLeft");
+            var rightInteractors = FindChildTransform(oldRig, "HandInteractorsRight");
+            if (leftInteractors == null)       return ErrorB("HandInteractorsLeft subtree not found in old rig");
+            if (rightInteractors == null)      return ErrorB("HandInteractorsRight subtree not found in old rig");
 
             // -- 1. Zachowaj HandInteractors (reparent do keepera zeby przezyly destroy starego rigu) --
             var keeper = new GameObject("__HybridRigKeeper__");
@@ -79,97 +101,127 @@ namespace Plaga44.Editor.Setup
 
             // -- 3. Instantuj OVRInteractionComprehensive --
             var ovric = (GameObject)PrefabUtility.InstantiatePrefab(ovricPrefab, scene);
-            if (ovric == null)                 { Error("InstantiatePrefab OVRIC zwrocil null"); return; }
+            if (ovric == null)                 return ErrorB("InstantiatePrefab OVRIC zwrocil null");
             Undo.RegisterCreatedObjectUndo(ovric, "Instantiate OVRInteractionComprehensive");
             ovric.transform.position = Vector3.zero;
             ovric.transform.rotation = Quaternion.identity;
             Debug.Log($"{LOG} Instantiated '{ovric.name}' (OVRInteractionComprehensive)");
 
-            // -- 4. Znajdz Hand Left/Right w OVRIC (po Handedness) --
-            var hands = ovric.GetComponentsInChildren<Hand>(true);
-            var handLeft  = hands.FirstOrDefault(h => h.Handedness == Handedness.Left);
-            var handRight = hands.FirstOrDefault(h => h.Handedness == Handedness.Right);
-            if (handLeft == null || handRight == null)
-            {
-                Error($"Hand.cs w OVRIC niekompletne: L={handLeft!=null}, R={handRight!=null}");
-                return;
-            }
-            var camRig = ovric.GetComponentInChildren<OVRCameraRig>(true);
-            if (camRig == null)                { Error("OVRCameraRig nie znaleziony w OVRIC"); return; }
-
-            Debug.Log($"{LOG} OVRIC components: LeftHand='{handLeft.name}' RightHand='{handRight.name}' OVRCameraRig='{camRig.name}'");
-
-            // -- 5. Reparent HandInteractors pod GO z Hand.cs --
-            Undo.SetTransformParent(leftInteractors,  handLeft.transform,  "Move LeftInteractors under OVRIC LeftHand");
-            Undo.SetTransformParent(rightInteractors, handRight.transform, "Move RightInteractors under OVRIC RightHand");
-            leftInteractors.localPosition  = Vector3.zero;
-            leftInteractors.localRotation  = Quaternion.identity;
-            rightInteractors.localPosition = Vector3.zero;
-            rightInteractors.localRotation = Quaternion.identity;
-
-            // -- 6. Wire HandGrabInteractor._hand -- iteruj wszystkie HandGrabInteractor w subtree --
-            int wiredInteractors = 0;
-            foreach (var hgi in leftInteractors.GetComponentsInChildren<Oculus.Interaction.HandGrab.HandGrabInteractor>(true))
-                wiredInteractors += WireHandRef(hgi, handLeft);
-            foreach (var hgi in rightInteractors.GetComponentsInChildren<Oculus.Interaction.HandGrab.HandGrabInteractor>(true))
-                wiredInteractors += WireHandRef(hgi, handRight);
-            Debug.Log($"{LOG} Wired {wiredInteractors} HandGrabInteractor._hand refs");
-
-            // -- 7. Wire Locomotion avatar (ISDKSkeletalProcessor source[0]) --
-            if (!WireRetargeter(retargeter, handLeft.gameObject, handRight.gameObject, camRig))
-                return; // Error juz zalogowany
+            // -- 4-7. Reparent + wire (wspolna sciezka z Eklepem wire-only) --
+            if (!ResolveOvricAndWire(ovric, retargeter, leftInteractors, rightInteractors))
+                return false;
 
             // -- 8. Sprzatanie keepera --
             Undo.DestroyObjectImmediate(keeper);
 
-            // -- 9. Save --
+            // -- 9. Mark dirty (Bootstrap kolektywnie zapisuje) --
             EditorSceneManager.MarkSceneDirty(scene);
-            EditorSceneManager.SaveScene(scene);
             Debug.Log($"{LOG} DONE -- hybrid rig gotowy. Play Mode -- stickiem chodzisz, palcami lapiesz.");
+            return true;
+        }
+
+        /// <summary>
+        /// OVRIC juz w scenie. Sprawdz czy HandInteractors sa pod nim + wire kompletny.
+        /// Uzupelnij tylko co brakuje.
+        /// </summary>
+        private static bool EnsureWireOnly(GameObject ovric, CharacterRetargeter retargeter, Scene scene)
+        {
+            var hands = ovric.GetComponentsInChildren<Hand>(true);
+            var handLeft  = hands.FirstOrDefault(h => h.Handedness == Handedness.Left);
+            var handRight = hands.FirstOrDefault(h => h.Handedness == Handedness.Right);
+            if (handLeft == null || handRight == null) return ErrorB("OVRIC bez Hand Left/Right");
+            var camRig = ovric.GetComponentInChildren<OVRCameraRig>(true);
+            if (camRig == null) return ErrorB("OVRIC bez OVRCameraRig");
+
+            bool changed = false;
+            changed |= WireAllInteractors(handLeft.transform,  handLeft);
+            changed |= WireAllInteractors(handRight.transform, handRight);
+            changed |= WireRetargeter(retargeter, handLeft.gameObject, handRight.gameObject, camRig);
+            if (changed) EditorSceneManager.MarkSceneDirty(scene);
+            return changed;
+        }
+
+        /// <summary>
+        /// Reparent HandInteractors pod Hand.cs, wire HandGrabInteractor._hand, wire retargeter.
+        /// </summary>
+        private static bool ResolveOvricAndWire(GameObject ovric, CharacterRetargeter retargeter, Transform leftInteractors, Transform rightInteractors)
+        {
+            var hands = ovric.GetComponentsInChildren<Hand>(true);
+            var handLeft  = hands.FirstOrDefault(h => h.Handedness == Handedness.Left);
+            var handRight = hands.FirstOrDefault(h => h.Handedness == Handedness.Right);
+            if (handLeft == null || handRight == null) return ErrorB($"OVRIC Hand.cs niekompletne: L={handLeft!=null}, R={handRight!=null}");
+            var camRig = ovric.GetComponentInChildren<OVRCameraRig>(true);
+            if (camRig == null) return ErrorB("OVRIC bez OVRCameraRig");
+
+            Debug.Log($"{LOG} OVRIC: LeftHand='{handLeft.name}' RightHand='{handRight.name}' OVRCameraRig='{camRig.name}'");
+
+            Undo.SetTransformParent(leftInteractors,  handLeft.transform,  "Reparent LeftInteractors");
+            Undo.SetTransformParent(rightInteractors, handRight.transform, "Reparent RightInteractors");
+            leftInteractors.localPosition  = Vector3.zero; leftInteractors.localRotation  = Quaternion.identity;
+            rightInteractors.localPosition = Vector3.zero; rightInteractors.localRotation = Quaternion.identity;
+
+            WireAllInteractors(leftInteractors,  handLeft);
+            WireAllInteractors(rightInteractors, handRight);
+            return WireRetargeter(retargeter, handLeft.gameObject, handRight.gameObject, camRig);
+        }
+
+        private static bool WireAllInteractors(Transform parent, Hand hand)
+        {
+            bool changed = false;
+            foreach (var hgi in parent.GetComponentsInChildren<Oculus.Interaction.HandGrab.HandGrabInteractor>(true))
+                changed |= WireHandRef(hgi, hand);
+            return changed;
         }
 
         // =====================================================================
         // Wire helpers
         // =====================================================================
 
-        private static int WireHandRef(Oculus.Interaction.HandGrab.HandGrabInteractor hgi, Hand hand)
+        private static bool WireHandRef(Oculus.Interaction.HandGrab.HandGrabInteractor hgi, Hand hand)
         {
             var so = new SerializedObject(hgi);
             var prop = so.FindProperty("_hand");
-            if (prop == null) return LogZero($"HandGrabInteractor '{hgi.name}' -- no _hand property");
-            if (prop.objectReferenceValue == hand) return 0;
+            if (prop == null) { Debug.LogWarning($"{LOG} HandGrabInteractor '{hgi.name}' -- no _hand property"); return false; }
+            if (prop.objectReferenceValue == hand) return false;
             prop.objectReferenceValue = hand;
             so.ApplyModifiedProperties();
             EditorUtility.SetDirty(hgi);
-            return 1;
+            return true;
         }
 
-        private static int LogZero(string msg) { Debug.LogWarning($"{LOG} {msg}"); return 0; }
+        private static Transform FindChildTransform(GameObject root, string name)
+            => root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == name);
 
+        /// <summary>Zwraca true JESLI wire zostal zmieniony (idempotentne).</summary>
         private static bool WireRetargeter(CharacterRetargeter retargeter, GameObject leftHand, GameObject rightHand, OVRCameraRig camRig)
         {
             var so  = new SerializedObject(retargeter);
             var src = so.FindProperty("_sourceProcessorContainers");
             if (src == null || !src.isArray || src.arraySize == 0)
-                return ErrorB($"_sourceProcessorContainers empty on '{retargeter.gameObject.name}'");
+            { Debug.LogError($"{LOG} _sourceProcessorContainers empty on '{retargeter.gameObject.name}'"); return false; }
 
             var isdk = src.GetArrayElementAtIndex(0).FindPropertyRelative("_isdkProcessor");
-            if (isdk == null) return ErrorB("_isdkProcessor missing on source[0]");
+            if (isdk == null) { Debug.LogError($"{LOG} _isdkProcessor missing on source[0]"); return false; }
 
-            if (!Set(isdk, "_leftHand",  leftHand))  return false;
-            if (!Set(isdk, "_rightHand", rightHand)) return false;
-            if (!Set(isdk, "_cameraRig", camRig))    return false;
+            bool changed = false;
+            changed |= SetIfDifferent(isdk, "_leftHand",  leftHand);
+            changed |= SetIfDifferent(isdk, "_rightHand", rightHand);
+            changed |= SetIfDifferent(isdk, "_cameraRig", camRig);
 
-            so.ApplyModifiedProperties();
-            EditorUtility.SetDirty(retargeter);
-            Debug.Log($"{LOG} [WIRED] retargeter '{retargeter.gameObject.name}': LH={leftHand.name} RH={rightHand.name} Cam={camRig.name}");
-            return true;
+            if (changed)
+            {
+                so.ApplyModifiedProperties();
+                EditorUtility.SetDirty(retargeter);
+                Debug.Log($"{LOG} [WIRED] retargeter '{retargeter.gameObject.name}': LH={leftHand.name} RH={rightHand.name} Cam={camRig.name}");
+            }
+            return changed;
         }
 
-        private static bool Set(SerializedProperty parent, string path, Object value)
+        private static bool SetIfDifferent(SerializedProperty parent, string path, Object value)
         {
             var p = parent.FindPropertyRelative(path);
-            if (p == null) return ErrorB($"Property '{path}' not found on {parent.propertyPath}");
+            if (p == null) { Debug.LogError($"{LOG} Property '{path}' not found on {parent.propertyPath}"); return false; }
+            if (p.objectReferenceValue == value) return false;
             p.objectReferenceValue = value;
             return true;
         }
@@ -220,7 +272,6 @@ namespace Plaga44.Editor.Setup
         // Logging
         // =====================================================================
 
-        private static void Error(string msg)       { Debug.LogError($"{LOG} {msg}"); }
         private static bool  ErrorB(string msg)     { Debug.LogError($"{LOG} {msg}"); return false; }
     }
 }
