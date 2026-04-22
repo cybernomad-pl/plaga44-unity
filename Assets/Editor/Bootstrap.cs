@@ -180,12 +180,11 @@ namespace Plaga44.Editor
             // StylizedCharacterLocomotion (Meta sample). Idempotentny -- jesli
             // juz Locomotion w scenie, skip.
             changed |= LogStep("ReplaceAvatarWithLocomotion", () => ReplaceAvatarWithLocomotion.Run());
-            // BuildHybridRig MUSI byc PO ReplaceAvatarWithLocomotion -- wymaga
-            // Locomotion avatar w scenie. Zamienia stary recznie zbudowany rig
-            // 'ISDK' na OVRInteractionComprehensive (Meta prefab) + zachowuje
-            // HandGrabInteractor z ISDKIntegration. Idempotentny -- jesli OVRIC
-            // juz w scenie z pelnym wire, skip.
-            changed |= LogStep("BuildHybridRig",              () => BuildHybridRig.Run());
+            // BuildHybridRig WYLACZONY: poprzednia wersja usuwala zbyt szeroko
+            // (OVRCameraRig.transform.root zabieralo nie tylko OVR rig ale cala
+            // hierarchie z kamera). Do rozwaznej przebudowy. Dostepne reczne
+            // odpalenie przez menu item: PLAGA44/Setup/Build Hybrid Rig.
+            // changed |= LogStep("BuildHybridRig", () => BuildHybridRig.Run());
             LogStepVoid("StylizedCharacterLocomotionFixer", () => StylizedCharacterLocomotionFixer.Run());
             // HandPhysicsSetup przeniesione do runtime (HandPhysicsEnabler.cs):
             // OVRHandPrefab jest aktywowane dopiero w runtime przez SDK,
