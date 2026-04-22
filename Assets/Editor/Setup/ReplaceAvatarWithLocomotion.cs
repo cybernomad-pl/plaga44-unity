@@ -10,17 +10,15 @@
 //   _rightHand -> GO 'RightHand' (ma Hand.cs = IHand implementer)
 //   _cameraRig -> OVRCameraRig component w scenie
 //
-// To rozwiazuje BLOCKER: Assert.IsNotNull(handObject) w ISDKSkeletalProcessor.
-// SetupHand -- retargeter przestanie crashowac w Start().
-//
-// ZERO FALLBACKS: jesli LeftHand/RightHand/OVRCameraRig nie znaleziono
-// w scenie -> LogError + return false. NIE spawnuje avatara bez wire.
+// ZERO FALLBACKS: brak ktorejkolwiek zaleznosci -> LogError + abort.
 // =============================================================================
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using Meta.XR.Movement.Retargeting;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Plaga44.Editor.Setup
 {
@@ -32,219 +30,190 @@ namespace Plaga44.Editor.Setup
         private const string LOCOMOTION_PREFAB_GUID = "286d7e2005861d341a0a94d7f615675a";
 
         [MenuItem("PLAGA44/Setup/Replace PLAGA44 Avatar with Locomotion Sample")]
-        public static void RunMenu()
-        {
-            Run();
-        }
+        public static void RunMenu() => Run();
 
         /// <summary>
         /// Idempotent pipeline:
-        /// 1) Jesli Locomotion juz w scenie -> SPRAWDZ wire (może brakować); uzupelnij i return.
-        /// 2) Jesli stary PLAGA44 w scenie -> waliduj zaleznosci, zamien, wire, return.
-        /// 3) Brak obu -> LogError, return false (nie spawnujemy znikad).
+        /// 1) Locomotion juz w scenie -> sprawdz + uzupelnij wire.
+        /// 2) Stary PLAGA44 -> waliduj zaleznosci, zamien, wire.
+        /// 3) Brak obu -> LogError, return false.
         /// </summary>
-        /// <returns>true jesli scena modyfikowana</returns>
         public static bool Run()
         {
             var scene = EditorSceneManager.GetActiveScene();
             if (!scene.IsValid())
-            {
-                Debug.LogError($"{LOG} No active scene");
-                return false;
-            }
+                return Error("No active scene");
 
-            // 1) Walidacja zaleznosci PRZED zmianami w scenie
-            GameObject leftHand = FindByName(scene, "LeftHand");
-            GameObject rightHand = FindByName(scene, "RightHand");
-            OVRCameraRig camRig = Object.FindFirstObjectByType<OVRCameraRig>();
+            // Walidacja zaleznosci PRZED jakakolwiek zmiana w scenie
+            if (!TryResolveDeps(scene, out var leftHand, out var rightHand, out var camRig))
+                return false;
 
-            if (leftHand == null)
-            {
-                Debug.LogError($"{LOG} LeftHand GO not found in scene -- abort");
+            if (!TryLoadPrefab(LOCOMOTION_PREFAB_GUID, out var prefab))
                 return false;
-            }
-            if (rightHand == null)
-            {
-                Debug.LogError($"{LOG} RightHand GO not found in scene -- abort");
-                return false;
-            }
-            if (camRig == null)
-            {
-                Debug.LogError($"{LOG} OVRCameraRig not found in scene -- abort");
-                return false;
-            }
 
-            // 2) Sciezka prefab
-            string locoPath = AssetDatabase.GUIDToAssetPath(LOCOMOTION_PREFAB_GUID);
-            if (string.IsNullOrEmpty(locoPath))
-            {
-                Debug.LogError($"{LOG} Locomotion prefab not found by guid {LOCOMOTION_PREFAB_GUID}");
-                return false;
-            }
-            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(locoPath);
-            if (prefab == null)
-            {
-                Debug.LogError($"{LOG} Failed to load prefab at {locoPath}");
-                return false;
-            }
-
-            // 3) Jesli Locomotion juz jest -- sprawdz wire, uzupelnij brakujace
-            GameObject existingLoco = FindPrefabInstanceByGuid(scene, LOCOMOTION_PREFAB_GUID);
+            // Locomotion juz jest -> tylko rewire
+            var existingLoco = FindPrefabInstance(scene, LOCOMOTION_PREFAB_GUID);
             if (existingLoco != null)
-            {
-                bool wireChanged = EnsureWire(existingLoco, leftHand, rightHand, camRig);
-                if (wireChanged)
-                {
-                    EditorSceneManager.MarkSceneDirty(scene);
-                    Debug.Log($"{LOG} [REWIRED] Locomotion juz w scenie, uzupelniono wire");
-                    return true;
-                }
-                Debug.Log($"{LOG} [OK] Locomotion juz w scenie z pelnym wire -- skip");
-                return false;
-            }
+                return WireAndReport(existingLoco, leftHand, rightHand, camRig, scene, "REWIRED istniejacy Locomotion");
 
-            // 4) Znajdz stary PLAGA44 -- wymagany zeby zamienic (nie spawnujemy znikad)
-            GameObject oldAvatar = FindPrefabInstanceByGuid(scene, OLD_PLAGA44_GUID);
+            // Stary PLAGA44 -> zamiana
+            var oldAvatar = FindPrefabInstance(scene, OLD_PLAGA44_GUID);
             if (oldAvatar == null)
-            {
-                Debug.LogError($"{LOG} Ani StylizedCharacterLocomotion, ani stary PLAGA44 nie w scenie -- abort. Recznie wstaw Locomotion prefab do sceny.");
-                return false;
-            }
+                return Error("Ani Locomotion, ani stary PLAGA44 w scenie -- recznie wstaw Locomotion prefab");
 
-            Vector3 savedPos = oldAvatar.transform.position;
-            Quaternion savedRot = oldAvatar.transform.rotation;
-            Transform savedParent = oldAvatar.transform.parent;
-            Debug.Log($"{LOG} Znaleziono stary avatar '{oldAvatar.name}' at {savedPos} parent={savedParent?.name ?? "(scene root)"}");
+            var (savedPos, savedRot, savedParent) = (oldAvatar.transform.position, oldAvatar.transform.rotation, oldAvatar.transform.parent);
+            Debug.Log($"{LOG} Znaleziono stary '{oldAvatar.name}' at {savedPos} parent={savedParent?.name ?? "(root)"}");
 
-            // 5) Instantuj nowy PRZED destroy -- zeby w razie bledu mozna cofnac bez utraty starego
+            // Instantuj PRZED destroy -- rollback jesli walidacja failuje
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
             if (instance == null)
-            {
-                Debug.LogError($"{LOG} InstantiatePrefab zwrocil null -- abort");
-                return false;
-            }
+                return Error("InstantiatePrefab returned null");
             Undo.RegisterCreatedObjectUndo(instance, "Instantiate Locomotion");
 
-            // Walidacja CharacterRetargeter w nowym instance PRZED destroy starego
-            var retargeter = instance.GetComponentInChildren<CharacterRetargeter>(true);
-            if (retargeter == null)
+            if (instance.GetComponentInChildren<CharacterRetargeter>(true) == null)
             {
-                Debug.LogError($"{LOG} CharacterRetargeter nie znaleziony w Locomotion instance -- abort, rollback");
                 Undo.DestroyObjectImmediate(instance);
-                return false;
+                return Error("CharacterRetargeter nie znaleziony w Locomotion -- rollback");
             }
 
-            // 6) Teraz usun stary i ustaw pozycje/parent nowego
+            // Wszystko OK -- zamien
             Undo.DestroyObjectImmediate(oldAvatar);
-            if (savedParent != null)
-                instance.transform.SetParent(savedParent, worldPositionStays: false);
+            if (savedParent != null) instance.transform.SetParent(savedParent, worldPositionStays: false);
             instance.transform.SetPositionAndRotation(savedPos, savedRot);
             Debug.Log($"{LOG} Instantiated '{instance.name}' at {savedPos}");
 
-            // 7) Wire ISDKSkeletalProcessor source[0]
-            if (!WireRetargeter(retargeter, leftHand, rightHand, camRig))
-            {
-                Debug.LogError($"{LOG} Wire retargeter FAILED -- scena moze byc w niepelnym stanie");
-                return false;
-            }
+            return WireAndReport(instance, leftHand, rightHand, camRig, scene, "DONE -- avatar zamieniony");
+        }
 
-            EditorSceneManager.MarkSceneDirty(scene);
-            Debug.Log($"{LOG} DONE -- avatar zamieniony, ISDK source wire kompletny.");
+        // =====================================================================
+        // Walidacja zaleznosci
+        // =====================================================================
+
+        private static bool TryResolveDeps(Scene scene, out GameObject leftHand, out GameObject rightHand, out OVRCameraRig camRig)
+        {
+            leftHand = FindByName(scene, "LeftHand");
+            rightHand = FindByName(scene, "RightHand");
+            camRig = Object.FindFirstObjectByType<OVRCameraRig>();
+
+            if (leftHand == null) return Error("LeftHand GO not found");
+            if (rightHand == null) return Error("RightHand GO not found");
+            if (camRig == null) return Error("OVRCameraRig not found");
             return true;
         }
 
-        /// <summary>
-        /// Sprawdza aktualny wire na Locomotion avatar i uzupelnia brakujace refs.
-        /// </summary>
-        /// <returns>true jesli ktorykolwiek wire zostal zmieniony</returns>
-        private static bool EnsureWire(GameObject locoInstance, GameObject leftHand, GameObject rightHand, OVRCameraRig camRig)
+        private static bool TryLoadPrefab(string guid, out GameObject prefab)
+        {
+            prefab = null;
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (string.IsNullOrEmpty(path)) return Error($"Prefab not found by guid {guid}");
+            prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            return prefab != null || Error($"Failed to load prefab at {path}");
+        }
+
+        // =====================================================================
+        // Wire ISDKSkeletalProcessor source[0]
+        // =====================================================================
+
+        private static bool WireAndReport(GameObject locoInstance, GameObject leftHand, GameObject rightHand, OVRCameraRig camRig, Scene scene, string reportMsg)
         {
             var retargeter = locoInstance.GetComponentInChildren<CharacterRetargeter>(true);
             if (retargeter == null)
-            {
-                Debug.LogError($"{LOG} CharacterRetargeter nie znaleziony w istniejacym Locomotion instance");
+                return Error($"CharacterRetargeter nie znaleziony w '{locoInstance.name}'");
+
+            if (!TryWireRetargeter(retargeter, leftHand, rightHand, camRig, out bool changed))
                 return false;
+
+            if (changed)
+            {
+                EditorSceneManager.MarkSceneDirty(scene);
+                Debug.Log($"{LOG} [{reportMsg}]");
+                return true;
             }
-            return WireRetargeter(retargeter, leftHand, rightHand, camRig);
+            Debug.Log($"{LOG} [OK] wire retargetera juz poprawne -- skip");
+            return false;
         }
 
-        /// <summary>
-        /// Ustawia _leftHand/_rightHand/_cameraRig na ISDKSkeletalProcessor source[0]
-        /// tylko jesli sa aktualnie rozne -- zwraca true jesli ktorys zmieniony.
-        /// Zwraca false + LogError jesli struktura retargetera nieoczekiwana.
-        /// </summary>
-        private static bool WireRetargeter(CharacterRetargeter retargeter, GameObject leftHand, GameObject rightHand, OVRCameraRig camRig)
+        private static bool TryWireRetargeter(CharacterRetargeter retargeter, GameObject leftHand, GameObject rightHand, OVRCameraRig camRig, out bool changed)
         {
+            changed = false;
             var so = new SerializedObject(retargeter);
             var src = so.FindProperty("_sourceProcessorContainers");
             if (src == null || !src.isArray || src.arraySize == 0)
-            {
-                Debug.LogError($"{LOG} _sourceProcessorContainers empty or missing on retargeter '{retargeter.gameObject.name}'");
-                return false;
-            }
+                return Error($"_sourceProcessorContainers empty on '{retargeter.gameObject.name}'");
 
             var isdk = src.GetArrayElementAtIndex(0).FindPropertyRelative("_isdkProcessor");
-            if (isdk == null)
-            {
-                Debug.LogError($"{LOG} _isdkProcessor property not found on source[0]");
-                return false;
-            }
+            if (isdk == null) return Error("_isdkProcessor property missing on source[0]");
 
-            var leftProp = isdk.FindPropertyRelative("_leftHand");
-            var rightProp = isdk.FindPropertyRelative("_rightHand");
-            var camProp = isdk.FindPropertyRelative("_cameraRig");
-            if (leftProp == null || rightProp == null || camProp == null)
-            {
-                Debug.LogError($"{LOG} ISDK processor props missing (leftHand={leftProp!=null}, rightHand={rightProp!=null}, cameraRig={camProp!=null})");
-                return false;
-            }
+            if (!TryFindProp(isdk, "_leftHand", out var leftProp)) return false;
+            if (!TryFindProp(isdk, "_rightHand", out var rightProp)) return false;
+            if (!TryFindProp(isdk, "_cameraRig", out var camProp)) return false;
 
-            bool changed = false;
-            if (leftProp.objectReferenceValue != leftHand) { leftProp.objectReferenceValue = leftHand; changed = true; }
-            if (rightProp.objectReferenceValue != rightHand) { rightProp.objectReferenceValue = rightHand; changed = true; }
-            if ((OVRCameraRig)camProp.objectReferenceValue != camRig) { camProp.objectReferenceValue = camRig; changed = true; }
+            changed |= AssignIfDifferent(leftProp, leftHand);
+            changed |= AssignIfDifferent(rightProp, rightHand);
+            changed |= AssignIfDifferent(camProp, camRig);
 
             if (changed)
             {
                 so.ApplyModifiedProperties();
                 EditorUtility.SetDirty(retargeter);
-                Debug.Log($"{LOG} [WIRED] retargeter '{retargeter.gameObject.name}': leftHand={leftHand.name}, rightHand={rightHand.name}, cameraRig={camRig.name}");
+                Debug.Log($"{LOG} [WIRED] '{retargeter.gameObject.name}': LH={leftHand.name} RH={rightHand.name} Cam={camRig.name}");
             }
-            else
-            {
-                Debug.Log($"{LOG} [OK] retargeter '{retargeter.gameObject.name}' wire already correct");
-            }
-            return changed;
+            return true;
         }
 
-        private static GameObject FindByName(UnityEngine.SceneManagement.Scene scene, string name)
+        private static bool TryFindProp(SerializedProperty parent, string relativePath, out SerializedProperty prop)
+        {
+            prop = parent.FindPropertyRelative(relativePath);
+            return prop != null || Error($"Property '{relativePath}' not found on {parent.propertyPath}");
+        }
+
+        private static bool AssignIfDifferent(SerializedProperty prop, Object newValue)
+        {
+            if (prop.objectReferenceValue == newValue) return false;
+            prop.objectReferenceValue = newValue;
+            return true;
+        }
+
+        // =====================================================================
+        // Scene traversal helpers
+        // =====================================================================
+
+        private static IEnumerable<Transform> AllTransforms(Scene scene)
         {
             foreach (var root in scene.GetRootGameObjects())
-            {
                 foreach (var t in root.GetComponentsInChildren<Transform>(true))
-                {
-                    if (t.name == name) return t.gameObject;
-                }
+                    yield return t;
+        }
+
+        private static GameObject FindByName(Scene scene, string name)
+        {
+            foreach (var t in AllTransforms(scene))
+                if (t.name == name) return t.gameObject;
+            return null;
+        }
+
+        private static GameObject FindPrefabInstance(Scene scene, string targetGuid)
+        {
+            foreach (var t in AllTransforms(scene))
+            {
+                var go = t.gameObject;
+                if (!PrefabUtility.IsAnyPrefabInstanceRoot(go)) continue;
+                var asset = PrefabUtility.GetCorrespondingObjectFromSource(go);
+                if (asset == null) continue;
+                if (AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset)) == targetGuid)
+                    return go;
             }
             return null;
         }
 
-        private static GameObject FindPrefabInstanceByGuid(UnityEngine.SceneManagement.Scene scene, string targetGuid)
+        // =====================================================================
+        // Logging
+        // =====================================================================
+
+        private static bool Error(string msg)
         {
-            foreach (var root in scene.GetRootGameObjects())
-            {
-                foreach (var t in root.GetComponentsInChildren<Transform>(true))
-                {
-                    var go = t.gameObject;
-                    if (!PrefabUtility.IsAnyPrefabInstanceRoot(go)) continue;
-                    var asset = PrefabUtility.GetCorrespondingObjectFromSource(go);
-                    if (asset == null) continue;
-                    string path = AssetDatabase.GetAssetPath(asset);
-                    string guid = AssetDatabase.AssetPathToGUID(path);
-                    if (guid == targetGuid) return go;
-                }
-            }
-            return null;
+            Debug.LogError($"{LOG} {msg}");
+            return false;
         }
     }
 }
