@@ -1,0 +1,66 @@
+===============================================================================
+ Usuniete z TESTBED.unity: tutorial subtree + Locomotion duplicate character
+ 2026-04-22
+===============================================================================
+
+CO ZOSTALO WYCIETE (141 fileIDs, 3353 linii scene):
+
+  A) MicrogestureTutorials subtree (rooted at GO 300050130) -- 30 GOs +
+     82 komponentow, w tym:
+     - ActiveStateGroup (guid aebd5da9...) z `_activeStates: [null]`
+         -- root cause 9883x NullReferenceException
+     - ActiveStateUnityEventWrapper (guid 1d270567...)
+         -- wolac na null ActiveState, log spam
+     - HmdRef (guid 484167e6...) z `_hmd: {fileID: 0}`
+         -- NRE w remove_WhenUpdated
+     - HmdOffset (guid 8310d469...)
+         -- NRE w OnDisable
+     - deep children: BG, LocomotePrompt, TurnPointer, SmoothHandPosition,
+       Offset, etc.
+
+  B) Scene-level tutorial top-level GOs (ISDK sample lefotwers):
+     - MetaLocoTutorialUITeleportLine x2 (90210064, 2002617274)
+     - MetaLocoTutorialUISnap (369925221)
+     - MetaLocoTutorialUITeleport x2 (824317991, 1313277104)
+     - ArcPointer x2 (1020937897, 1187122566)
+     - TurnPointer (1342957674)
+
+  C) StylizedCharacterLocomotion duplicate PrefabInstance (1909536090)
+     -- duplikat naszego StylizedCharacterPLAGA44, pozostalosc po Locomotion
+        sample. Scene-root tylko, bez stripped subtree.
+
+TRANSITIVE CLOSURE (skrypt scene_cleanup4.py):
+  Forward edges:
+    - GO -> komponenty z m_Component
+    - Transform -> dzieci z m_Children
+    - PrefabInstance -> stripped z m_PrefabInstance=ta + addedObject
+  Inverse edges:
+    - Transform -> Transformy z m_Father=ten (orphany)
+    - Transform -> PrefabInstances z m_TransformParent=ten
+
+SAFETY:
+  External refs after closure: 2
+    - 300050131 (MicrogestureTutorials Transform) w scene Transform root
+      m_Children -- linia czyszczona przy cleanup m_Children
+    - 1909536090 w SceneRoots (sentinel type 1660057539) -- linia czyszczona
+      przy cleanup m_Roots
+  Oba to safe -- po cleanup linii zero broken refs w scenie.
+  Walidacja: missing scene-local fileID references: 0
+
+SANITY CHECK PO USUWANIU:
+  [x] StylizedCharacterPLAGA44 PrefabInstance (1971503401) -- w scenie
+  [x] [BuildingBlock] Camera Rig (1129576408) -- w scenie
+  [x] Shotgun_ISDK (23 refs) -- w scenie
+  [x] LocomotionController wire + _cameraRig wire (z commit fa87952) -- zachowane
+
+EFEKT SPODZIEWANY W EDITOR.LOG:
+  [ ] Brak NullReferenceException z ActiveStateGroup (bylo 9883x)
+  [ ] Brak NRE z HmdRef / HmdOffset
+  [ ] Brak IsFinite assertion (NaN w renderze)
+
+ROLLBACK:
+  git revert HEAD
+
+SKRYPT:
+  /mnt/c/Users/boris/Desktop/KLAUDIA/scripts/scene_cleanup4.py
+===============================================================================
