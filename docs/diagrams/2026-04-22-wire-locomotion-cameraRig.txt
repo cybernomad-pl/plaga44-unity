@@ -1,0 +1,55 @@
+===============================================================================
+ Wire _cameraRig dla locomotion processor slot[1]
+ 2026-04-22
+===============================================================================
+
+TLO:
+
+  StylizedCharacterPLAGA44 prefab dziedziczy locomotion overrides z Locomotion
+  variant. Locomotion prefab samo ma pole `_cameraRig` = null na wszystkich
+  slotach. W oryginalnym sample scene `MovementISDKLocomotion.unity` Meta
+  wire-owal _cameraRig scene-level override TYLKO dla slot[1]:
+
+    data[1]._locomotionProcessor._cameraRig = OVRCameraRig Transform
+    data[2..4]._locomotionProcessor._cameraRig = null  (zostawione)
+    data[5]._locomotionProcessor._cameraRig = brak override (N/A, to HipPinning)
+
+  Sample DZIALA z taka konfiguracja. Wystarczy single wire na slot[1].
+
+FIX:
+
+  Do PrefabInstance 1971503401 (StylizedCharacterPLAGA44 w scenie TESTBED)
+  dodany scene-level override:
+
+    - target: {fileID: 8156316538343237965, guid: 0e5c330c8..., type: 3}
+      propertyPath: _targetProcessorContainers.Array.data[1]
+                    ._locomotionProcessor._cameraRig
+      value: (empty)
+      objectReference: {fileID: 1129576413}   # [BuildingBlock] Camera Rig
+                                               # Transform
+
+  fileID 1129576413 = GO "[BuildingBlock] Camera Rig" Transform w scenie
+  (z Building Blocks ISDK Integration). Typ field = Transform (nie
+  OVRCameraRig component), sprawdzone w LocomotionSkeletalProcessor.cs:69:
+    [SerializeField] private Transform _cameraRig;
+
+SPODZIEWANY EFEKT:
+
+  LocomotionSkeletalProcessor slot[1] dostaje pozycje/rotacje gracza z
+  camera rig -> oblicza delta -> Animator.SetFloat(Horizontal/Vertical)
+  -> blend tree LocomotionController animuje postać.
+
+CO NADAL MOZE BRAKOWAC:
+
+  - Source input (thumbstick -> character movement). W Meta sample to
+    byl PlayerLocomotionProvider + OVRGamepadController albo InputActions.
+    To LocomotionSettingsWiring prefab.
+  - `_animatorVerticalParam` / `_animatorHorizontalParam` -- sprawdzic
+    wartosci stringow match z LocomotionController blend tree.
+
+WERYFIKACJA:
+
+  [ ] Play mode -> avatar nadal stoi bez NRE
+  [ ] Przesuwanie camera rig w scenie recznie (F, drag) -> avatar
+      reaguje animacja Run/Strafe
+===============================================================================
