@@ -1,0 +1,43 @@
+BuildQuest.Build -- FIX scenes source
+=====================================
+
+PRZED (bug):
+  [BuildQuest.Build]
+       |
+       v
+  scenes = ["PLAGA44_Demo.unity"]  <-- HARDCODED
+       |
+       v
+  APK zawiera 1 scene
+       |
+       v
+  Runtime: SceneManager.LoadScene("PLAGA44_Demo") z SplashScene
+       |
+       v
+  BLAD: SplashScene NIE JEST w APK (index 0 tez pominietego)
+       |
+       v
+  Actual: TYLKO PLAGA44_Demo, ale scena startowa moze byc zla
+          bo EditorBuildSettings ma index 0 = SplashScene ktora
+          nie trafia do buildu -> logika splash-loader zepsuta
+
+PO (fix):
+  [BuildQuest.Build]
+       |
+       v
+  scenes = EditorBuildSettings.scenes.where(enabled).map(path)
+       |    -> [SplashScene.unity, PLAGA44_Demo.unity]
+       v
+  APK zawiera 2 sceny w kolejnosci z inspektora:
+       [0] SplashScene   (build index 0, uruchamia sie pierwsza)
+       [1] PLAGA44_Demo  (build index 1, LoadScene z Splasha dziala)
+       |
+       v
+  Runtime: Splash -> LoadScene(1) -> PLAGA44_Demo
+       |
+       v
+  OK.
+
+Zasada:
+  Wszystkie scenes zdefiniowane w Project Settings -> Editor Build Settings
+  ida do APK. BuildQuest NIE trzyma wlasnej listy -- zaufaj Unity registry.

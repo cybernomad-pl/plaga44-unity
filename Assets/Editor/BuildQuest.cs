@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -6,7 +7,20 @@ public class BuildQuest
     [MenuItem("CYBERNOMAD/Build Quest APK")]
     public static void Build()
     {
-        var scenes = new[] { "Assets/Scenes/PLAGA44_Demo.unity" };
+        // Use scenes from EditorBuildSettings (respects SplashScene index 0 + PLAGA44_Demo index 1)
+        var scenes = EditorBuildSettings.scenes
+            .Where(s => s.enabled)
+            .Select(s => s.path)
+            .ToArray();
+
+        if (scenes.Length == 0)
+        {
+            Debug.LogError("[PLAGA44] BUILD FAILED: no enabled scenes in EditorBuildSettings");
+            return;
+        }
+
+        Debug.Log($"[PLAGA44] Building {scenes.Length} scenes: {string.Join(", ", scenes)}");
+
         var options = new BuildPlayerOptions
         {
             scenes = scenes,
