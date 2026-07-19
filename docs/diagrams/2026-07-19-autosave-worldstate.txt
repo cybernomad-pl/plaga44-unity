@@ -1,0 +1,54 @@
+PLAGA44 -- Auto-save world state (#196) 2026-07-19
+==================================================
+
+PLIK
+----
+  Application.persistentDataPath/plaga44_save.json   (dziala na Quescie)
+  Brak pliku -> czysty start ze sceny.
+
+EVENT-DRIVEN ZAPIS (bez interwalu, bez pollingu)
+------------------------------------------------
+  HamburgerMenu.Open()   --> Save("menu-open")
+  HamburgerMenu.Close()  --> Save("menu-close")
+  PlagaGrabber back-holster spawn --> Save("item-spawn")
+  OnApplicationQuit()    --> Save("quit")
+  OnApplicationPause(t)  --> Save("pause")     [Quest: home button]
+
+CO SIE ZAPISUJE
+---------------
+  WorldSave
+   +- playerPos, playerYaw        (OVRCameraRig transform)
+   +- avatarMode                  (PlayerAvatar.CurrentMode)
+   +- settings[]                  key="SEKCJA/Nazwa", value
+   |     snapshot z SettingsRegistry (step>0; read-only/akcje pominiete)
+   |     MIRROR -- PlayerPrefs zostaje zywym mechanizmem
+   +- objects[]                   kazdy SaveableObject
+         resourcePath (EXPLICIT, ustawiany przy spawnie -- zero zgadywania)
+         pos, euler, vel, angVel, held
+
+LOAD NA BOOT
+------------
+  WorldSaveManager.Start() -> Load()
+     +- ApplySettings   -> s.set(clamp(zapisana))   akcje maja value 0 -> no-op
+     +- ApplyPlayer     -> rig.position/yaw + SetAvatarMode
+     +- RespawnObjects  -> Resources.Load(resourcePath) -> Instantiate
+                           + Tag(SaveableObject) + velocity
+
+ANTY-DUPLIKAT
+-------------
+  ObjectSpawner.Update():
+     if (WorldSaveManager.HasSave) -> POMIN domyslny spawn
+     (obiekty odtwarza world-save; inaczej default + saved = duplikaty)
+
+TAGOWANIE (skad respawn wie co to)
+----------------------------------
+  ObjectSpawner.WireComponents -> SaveableObject.Tag(inst, entry.resourcePath)
+  PlagaGrabber back-holster     -> SaveableObject.Tag(go, backHolsterResource)
+  ItemBrowser preview           -> NIE tagowany (transient, filtr "Preview")
+
+ZNANE / DO DOPRACOWANIA
+-----------------------
+  - held=true przy zapisie -> respawn w zapisanym transformie jako WOLNY obiekt.
+    Auto-wlozenie do dloni na boot = refinement (rece nie sa jeszcze trackowane).
+  - PlayerPositionPersistence tez restoruje pozycje z PlayerPrefs -- moze
+    konkurowac z world-save; do ujednolicenia (world-save ma byc autorytatywny).

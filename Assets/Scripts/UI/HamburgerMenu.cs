@@ -197,6 +197,8 @@ namespace Plaga44.UI
             if (gallery != null) gallery.ForceSpawnNow();
 
             Debug.Log($"{LOG} OPEN");
+            // Event-driven world-save (#196): wejscie do menu.
+            Plaga44.WorldSaveManager.Instance?.Save("menu-open");
         }
 
         public void Close()
@@ -215,6 +217,8 @@ namespace Plaga44.UI
             if (items != null) items.DespawnPreview();
 
             Debug.Log($"{LOG} CLOSE");
+            // Event-driven world-save (#196): wyjscie z menu (po despawnie preview).
+            Plaga44.WorldSaveManager.Instance?.Save("menu-close");
         }
 
         // =====================================================================

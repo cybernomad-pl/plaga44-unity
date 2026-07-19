@@ -138,6 +138,10 @@ namespace Plaga44.Inventory
             m_grabCandidates[grab] = 1;
             Debug.Log($"{LOG} Back-holster DRAW '{go.name}' into {m_controller}");
             base.GrabBegin();
+
+            // World-save (#196): explicit resourcePath + spawn itemu = trigger zapisu.
+            Plaga44.SaveableObject.Tag(go, backHolsterResource);
+            Plaga44.WorldSaveManager.Instance?.Save("item-spawn");
         }
 
         // CenterEyeAnchor via rig (same convention as LocomotionController/ItemBrowser).
