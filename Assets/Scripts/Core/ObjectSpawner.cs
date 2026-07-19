@@ -101,6 +101,14 @@ namespace Plaga44
         private void Update()
         {
             if (_spawnTriggered || !spawnOnStart) return;
+            // World-save (#196) jest autorytatywny: gdy istnieje save, obiekty odtwarza
+            // WorldSaveManager -- domyslnego spawnu NIE robimy (inaczej duplikaty).
+            if (WorldSaveManager.HasSave)
+            {
+                _spawnTriggered = true;
+                Debug.Log($"{LOG} Default spawn skipped -- world save present.");
+                return;
+            }
             if (!IsPlayerGrounded()) return;
             _spawnTriggered = true;
             SpawnAll();
@@ -212,6 +220,9 @@ namespace Plaga44
 
         private static void WireComponents(GameObject instance, SpawnEntry entry)
         {
+            // World-save (#196): explicit resourcePath do respawnu.
+            SaveableObject.Tag(instance, entry.resourcePath);
+
             // Rigidbody
             if (entry.autoRigidbody)
             {
