@@ -205,8 +205,11 @@ namespace Plaga44.Locomotion
             // Prone blocks horizontal movement -- must stand up first
             bool movementBlocked = (_currentStance == Stance.Prone);
 
+            float leftY = moveInput.y;
             float rightY = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch).y;
-            UpdateFly(rightY);
+            // Land gesture: BOTH thumbsticks pushed DOWN together ends flight.
+            bool landGesture = leftY < -StickDownThreshold && rightY < -StickDownThreshold;
+            UpdateFly(rightY, landGesture);
             UpdateStance(rightY);
 
             // Safety: force FLOATING if flying with wrong stance
@@ -279,7 +282,7 @@ namespace Plaga44.Locomotion
         private const float HoverDriftChangeMax = 2f;
         private const float HoverDriftLerp = 2.5f;
 
-        private void UpdateFly(float rightY)
+        private void UpdateFly(float rightY, bool landGesture)
         {
             switch (_flyState)
             {
@@ -327,11 +330,11 @@ namespace Plaga44.Locomotion
                         _flySpeed = 0f;
                         Debug.Log($"{LOG} Fly: ASCENDING (from hover, normal accel)");
                     }
-                    else if (rightY < -StickDownThreshold)
+                    else if (landGesture)
                     {
-                        // R stick DOWN -> end flight, gravity takes over (player falls)
+                        // BOTH sticks DOWN -> end flight, gravity takes over (player falls)
                         EndFlight();
-                        Debug.Log($"{LOG} Fly: DROPPING (R stick DOWN in hover)");
+                        Debug.Log($"{LOG} Fly: DROPPING (both sticks DOWN in hover)");
                     }
                     else
                     {
@@ -377,33 +380,15 @@ namespace Plaga44.Locomotion
 
         private float _targetCCHeight;
         private float _targetTrackingY;
-        private bool _stanceDownPressed;
-        private bool _stanceUpPressed;
 
+        // CROUCH + PRONE DISABLED -- locomotion is fly-only.
+        // R-stick DOWN no longer cycles stance; fly (R-stick UP) is handled by
+        // UpdateFly. SetStance() stays because the fly system uses Stand/Floating.
         private void UpdateStance(float rightY)
         {
             if (_flyState != FlyState.Grounded) return;
-
-            // Edge detection -- trigger ONCE per stick push
-            bool downNow = rightY < -StickDownThreshold;
-            bool upNow = rightY > StickUpThreshold;
-
-            if (downNow && !_stanceDownPressed)
-            {
-                // Cycle DOWN: Stand -> Crouch -> Prone
-                if (_currentStance == Stance.Stand) SetStance(Stance.Crouch);
-                else if (_currentStance == Stance.Crouch) SetStance(Stance.Prone);
-            }
-            if (upNow && !_stanceUpPressed)
-            {
-                // Cycle UP: Prone -> Crouch -> Stand
-                if (_currentStance == Stance.Prone) SetStance(Stance.Crouch);
-                else if (_currentStance == Stance.Crouch) SetStance(Stance.Stand);
-            }
-            _stanceDownPressed = downNow;
-            _stanceUpPressed = upNow;
-
-            // Smooth transition
+            // Stance cycling removed by design -- keep LerpStance so any fly-set
+            // Stand/Floating target still settles smoothly.
             LerpStance();
         }
 

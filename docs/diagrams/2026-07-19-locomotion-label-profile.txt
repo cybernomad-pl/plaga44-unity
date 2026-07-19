@@ -1,0 +1,37 @@
+PLAGA44 -- quick fixes 2026-07-19 (TESTBED_V7)
+================================================
+
+[1] LOCOMOTION -- crouch/prone OFF, latanie tylko
+------------------------------------------------
+  PRZED:
+    R-stick DOWN --> cycle STAND -> CROUCH -> PRONE
+    R-stick UP   --> fly (ascend/hover)
+    R-stick DOWN w hover --> land
+
+  PO:
+    R-stick DOWN --> (nic, stance wylaczony)
+    R-stick UP   --> fly (ascend/hover)   [bez zmian]
+    L+R stick DOWN razem --> LAND (koniec lotu)
+
+    UpdateStance(): cykl usuniety, SetStance() zostaje (fly uzywa Stand/Floating)
+    UpdateFly(rightY, landGesture): land tylko gdy OBA sticki w dol
+
+[3] AVATAR -- domyslny label
+----------------------------
+  PlayerAvatar.CurrentLabel: mode 0  "None" --> "Robot"
+
+[5] SETTINGS -- jeden master profile
+------------------------------------
+  PRZED:  PROFILE > Target 0=Quest / 1=PCVR --> ApplyProfile() batch-override
+  PO:     sekcja PROFILE + ApplyProfile() + _activeProfile USUNIETE
+          jeden master = wartosci sceny/assetow
+          kazde ustawienie (renderScale/shadowDistance/LOD/eyeTex/FFR/
+          treeDist/detailDist/FPS) ma juz WLASNY slider -> zero utraty kontroli
+
+[4][6] DEFAULT w gicie
+----------------------
+  swiezy checkout bez PlayerPrefs -> CaptureDefaults() fallbackuje na
+  live scene values -> scena = master default (commit sceny osobno przez Borysa)
+
+NIE RUSZANE (import Meta SDK, brudny tree): .mat, Packages/, QualitySettings,
+MetaXR* assety, Plugins/ -- zostawione dla Borysa.

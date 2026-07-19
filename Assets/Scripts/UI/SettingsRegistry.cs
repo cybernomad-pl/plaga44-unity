@@ -29,7 +29,6 @@ namespace Plaga44.UI
         private static string[] _names;
         private static bool _built;
         private static List<SettingDef> _allSettings; // flat list for save/load
-        private static float _activeProfile = 0;
 
         public static List<SettingDef> GetSettings(string s) { if (!_built) Build(); return _sec.TryGetValue(s, out var l) ? l : new List<SettingDef>(); }
         public static string[] GetSectionNames() { if (!_built) Build(); return _names; }
@@ -615,13 +614,10 @@ namespace Plaga44.UI
                 s.Add(S("Gain W", "Highlights intensity", () => lgg.gain.value.w, v => { var x=lgg.gain.value; x.w=v; lgg.gain.Override(x); }, -1, 1, 0.02f, "F2"));
             });
 
-            // =============================================================
-            // PROFILE -- runtime preset switcher
-            // =============================================================
-            Sec("PROFILE", s => {
-                // 0=Quest, 1=PCVR -- applies a batch of settings
-                s.Add(S("Target", "0=Quest 1=PCVR -- applies preset", () => _activeProfile, v => { ApplyProfile((int)v); }, 0, 1, 1, "F0"));
-            });
+            // PROFILE section removed -- single master profile = current scene/asset
+            // values. Every setting the old Quest/PCVR presets touched (renderScale,
+            // shadowDistance, LOD, eyeTex, FFR, tree/detail dist, FPS) has its own
+            // slider and persists independently.
 
             // =============================================================
             // URP -- additional pipeline info
@@ -705,38 +701,6 @@ namespace Plaga44.UI
                 }
             }
             return restored;
-        }
-
-        static void ApplyProfile(int profile)
-        {
-            var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
-            var ter = UnityEngine.Object.FindAnyObjectByType<Terrain>();
-            string label = profile == 0 ? "Quest" : "PCVR";
-
-            if (profile == 0)
-            {
-                // Quest profile -- low settings for mobile VR
-                if (urp != null) { urp.renderScale = 0.8f; urp.shadowDistance = 20f; urp.msaaSampleCount = 4; }
-                QualitySettings.lodBias = 0.7f;
-                if (ter != null) { ter.detailObjectDistance = 80f; ter.treeDistance = 500f; }
-                XRSettings.eyeTextureResolutionScale = 0.8f;
-                try { OVRManager.foveatedRenderingLevel = (OVRManager.FoveatedRenderingLevel)3; } catch {}
-                Application.targetFrameRate = 72;
-            }
-            else
-            {
-                // PCVR profile -- high quality for desktop VR
-                if (urp != null) { urp.renderScale = 1.2f; urp.shadowDistance = 80f; urp.msaaSampleCount = 4; }
-                QualitySettings.lodBias = 1.5f;
-                if (ter != null) { ter.detailObjectDistance = 250f; ter.treeDistance = 2000f; }
-                XRSettings.eyeTextureResolutionScale = 1.2f;
-                try { OVRManager.foveatedRenderingLevel = (OVRManager.FoveatedRenderingLevel)0; } catch {}
-                Application.targetFrameRate = -1;
-            }
-
-            _activeProfile = profile;
-            Rebuild();
-            Debug.Log($"[PLAGA44][Settings] Applied profile: {label}");
         }
 
         static Light FindSun()

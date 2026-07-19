@@ -167,7 +167,7 @@ namespace Plaga44
         {
             get
             {
-                if (avatarMode == 0) return "None";
+                if (avatarMode == 0) return "Robot";
                 var g = AvatarGallery.Instance;
                 if (g == null || g.Count == 0) return "?";
                 int idx = avatarMode - 1;
