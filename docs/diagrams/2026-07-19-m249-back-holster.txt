@@ -1,0 +1,49 @@
+PLAGA44 -- M249 back-holster draw 2026-07-19 (TESTBED_V7)
+=========================================================
+
+LOOT
+----
+  bleeding-edge/Assets/PLAGA44/Weapons/{Models,Textures}/M249
+    -> V7/Assets/PLAGA44/Weapons/{Models,Textures}/M249   (GUID-y .meta zachowane)
+  M249PrefabBuilder.cs:
+    M249_low.fbx + URP/Lit mat (BaseMap+Normal)
+    -> Resources/Items/M249.prefab (Rigidbody 5kg + BoxCollider + PlagaGrabbable + Haptic)
+    auto-build [InitializeOnLoadMethod] gdy prefab brak i FBX zaimportowany
+
+GEST: DOBYCIE ZZA PLECOW
+-----------------------
+  Kazda dlon = osobny PlagaGrabber (m_controller = LTouch/RTouch).
+
+  grip DOWN --> PlagaGrabber.GrabBegin():
+     |
+     +-- trzymam cos?          --> TAK: toggle RELEASE
+     |
+     +-- reka pusta
+         && brak kandydata
+         && reka ZA PLECAMI     --> DrawFromBackHolster()
+         (za plaszczyzna glowy,  |
+          |y-y_head|<0.4m,       |
+          poziomo <0.7m)         |
+     |                          |
+     +-- inaczej                --> normalny grab najblizszego
+
+  DrawFromBackHolster -> coroutine SpawnAndGrab:
+     Instantiate(M249) w grip pos
+       -> yield 1 klatka (OVRGrabbable Awake=grabPoints, Start=kinematic baseline)
+       -> m_grabCandidates[M249]=1
+       -> base.GrabBegin()  (SDK: offsety + teleport do dloni + kinematic)
+
+  Prawy grip za plecami -> M249 w PRAWEJ. Lewy -> w LEWEJ.
+  (ten grabber JEST ta reka -> spawn w jego grip = wlasciwa dlon)
+
+DLACZEGO 1 KLATKA OPOZNIENIA
+----------------------------
+  OVRGrabbable.Start() lapie m_grabbedKinematic = isKinematic.
+  Gdyby grab byl w tej samej klatce co Instantiate, Start zlapalby
+  isKinematic=TRUE (ustawione przez GrabBegin) -> po release bron
+  zostalaby ZAMROZONA w powietrzu. Deferring o klatke to naprawia.
+
+TODO (poza tym PR)
+------------------
+  - drop M249 zostaje na mapie; kolejne dobycie spawnuje nastepny (do limitu pozniej)
+  - MaskMap (metallic/smoothness HDRP) pominiety -- tylko BaseMap+Normal
