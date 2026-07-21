@@ -1,0 +1,43 @@
+=============================================================================
+LOOT ASSETOW ZE WSZYSTKICH TESTBEDOW -> V7  (307MB, 0 GUID collisions)
+2026-07-21
+=============================================================================
+
+ZASADA BEZPIECZENSTWA: kazdy plik kopiowany TYLKO gdy jego GUID nie ma w V7.
+Kolizja GUID = dwa pliki ten sam GUID = martwy projekt. GUID-check przed kazda kopia.
+
+ZRODLA -> V7/Assets/PLAGA44/Looted/
+
+  PLAGA44/Assets (dump)          _assets_backup                bleeding-edge
+  ------------------             ---------------               -------------
+  Klaszczur1.fbx  ---.          Building1(ruina) --.          Weapons/ (Gun,
+  AKSLOPE.fbx     ----+-> Looted  Barricades_04    -+-> Looted   Sword,Bullet,
+  PINEA_YNG.fbx   ---'  /Charac.  PsycWard(27mod)  -+   /Environ  +5 skryptow)
+                        /Weapons  Billboards_08    -+            -> Looted/Weapons
+                        /Nature   Bulldozer        -'
+                                  VFX/Particles ------> Looted/VFX
+                                  (Fog,Smoke,3xExplo)
+
+  bleeding PLAGA44-BASE.unity (398 GO: teren+17x woda+postprocess)
+       -> V7/PLAGA44/PLAGA44-BASE.unity  + 8 zaleznosci -> Looted/MapScripts
+
+ETAPY:
+  1. BEZPIECZNE  custom + environment + VFX      OK  0 kolizji
+     - Audio V8 (126 wav)  -> SKIP: V7 JUZ MA (130/130 GUID collision)
+  2. BRON        Weapons per-plik               96 OK / 8 skip (M249 juz w V7)
+     - klasy C# (Shooting/Bullet/AudioManager..) sprawdzone: 0 kolizji nazw
+  3. MAPA        PLAGA44-BASE.unity + 8 dep      OK
+     - 44 GUID ref sceny: 9 w V7 + 8 loot + 27 pakiety (Meta/URP, V7 ma)
+     - 7 skryptow (VRCrouch/PoseableGrabbable/GrabToggle..): 0 kolizji nazw
+
+CZYSZCZENIE:
+  - SciFiSet (310MB) USUNIETY: luzne tekstury karabinu bez modelu/prefaba (osierocone)
+
+BRON DZIALAJACA (nowa w V7, wczesniej tylko statyczny M249+Revolver):
+  GunWithShooting = strzelanie + animacja + Bullet + haptyka
+  Sword           = bron biala (nowa kategoria)
+
+CO NIE WPADLO (jawnie):
+  - Drzewa: NIE ISTNIEJA jako modele nigdzie (tylko materialy+shadery TreeCreator)
+  - Woda jako osobny asset: brak (jest w scenie PLAGA44-BASE jako 17 kafli)
+  - Tekstury terenu Asphalt/Dirt (dziury): brak o tych GUID w V8 -- do osobnego fixu
