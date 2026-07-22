@@ -9,6 +9,7 @@ Properties {
     _GroundFade ("Ground Fade Softness", Range(0.01, 1)) = 0.3
     _CloudOpacity ("Cloud Opacity", Range(0, 2)) = 1.0
     _CloudTint ("Cloud Tint", Color) = (1, 1, 1, 1)
+    _FlipAmount ("Sky Flip Amount (altitude)", Range(0, 1)) = 0
     [NoScaleOffset] _Tex ("Sky Cubemap (HDR)", Cube) = "grey" {}
     _CloudTex ("Cloud Layer (RGBA)", 2D) = "black" {}
 }
@@ -41,6 +42,7 @@ SubShader {
         half _GroundFade;
         half _CloudOpacity;
         half4 _CloudTint;
+        half _FlipAmount;
 
         float4 RotateAroundYInDegrees (float4 vertex, float degrees)
         {
@@ -101,9 +103,15 @@ SubShader {
             // --- CLOUD LAYER (2D texture, overlay blend) ---
             // Latlong UV z direction vector
             half3 dir = normalize(i.texcoord);
+
+            // Wysokosciowe odwrocenie nieba: os Y patrzenia interpolowana z -Y.
+            // _FlipAmount=0 -> normalnie; =1 -> gora<->dol zamienione.
+            // Sterowane z C# (SkyFlipByAltitude) wg wysokosci gracza.
+            half flipY = lerp(dir.y, -dir.y, _FlipAmount);
+
             half2 cloudUV;
             cloudUV.x = atan2(dir.z, dir.x) / (2.0 * PI) + 0.5;
-            cloudUV.y = asin(dir.y) / PI + 0.5;
+            cloudUV.y = asin(flipY) / PI + 0.5;
 
             half4 cloudSample = SAMPLE_TEXTURE2D(_CloudTex, sampler_CloudTex, cloudUV);
             half3 cloudColor = cloudSample.rgb * _CloudTint.rgb;
@@ -112,8 +120,8 @@ SubShader {
             // Overlay blend -- chmury rozjaśniają jasne, przyciemniają ciemne
             half3 c = lerp(sky, BlendOverlay(sky, cloudColor), cloudAlpha);
 
-            // --- GROUND gradient ---
-            half viewY = dir.y;
+            // --- GROUND gradient (tez odwracany wysokoscia) ---
+            half viewY = flipY;
             half groundMask = saturate((_GroundBlend - viewY) / _GroundFade);
             c = lerp(c, _GroundColor.rgb * _Exposure, groundMask);
 

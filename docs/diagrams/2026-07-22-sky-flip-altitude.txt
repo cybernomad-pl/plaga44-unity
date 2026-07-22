@@ -1,0 +1,67 @@
+=============================================================================
+ SKY FLIP BY ALTITUDE  (PLAGA44 / TESTBED_V7)
+ Odwracanie skyboxa wraz z wysokoscia gracza
+=============================================================================
+
+CEL: im wyzej gracz, tym bardziej niebo "odwrocone":
+     ciemny GROUND na gorze, chmury pod nogami.
+
+-----------------------------------------------------------------------------
+ FLOW
+-----------------------------------------------------------------------------
+
+  player.position.y
+        |
+        v
+  +-----------------------------+
+  | SkyFlipByAltitude.cs (C#)   |
+  |                             |
+  | t = clamp01(               |
+  |   (y-groundY)              |
+  |   /(stratoY-groundY))      |
+  | flip = response.Evaluate(t) |   response = AnimationCurve (0..1)
+  +-------------+---------------+
+                |
+                | SetFloat("_FlipAmount", flip)
+                v
+  +-----------------------------+
+  | RenderSettings.skybox (mat) |  BGR_Sky1.mat
+  +-------------+---------------+
+                |
+                v
+  +-----------------------------------------------------+
+  | Shader Flooded_Grounds/Skybox_Rotating  (frag)      |
+  |                                                     |
+  |   flipY = lerp(dir.y, -dir.y, _FlipAmount)          |
+  |                                                     |
+  |   cloudUV.y  = asin(flipY)/PI + 0.5   <- chmury     |
+  |   groundMask = f(flipY)               <- ground     |
+  |   sky cubemap                         <- BEZ flipa  |
+  +-----------------------------------------------------+
+
+-----------------------------------------------------------------------------
+ STANY (os pionowa = co widzi gracz patrzac w GORE)
+-----------------------------------------------------------------------------
+
+  flip=0 (grunt)          flip=0.5 (troposfera)     flip=1 (stratosfera)
+  +----------------+      +----------------+        +----------------+
+  |     niebo      | gora |  niebo/mix     |        |  GROUND (ciemn)| gora
+  |   ~~~chmury~~~ |      |   ~~~chmury~~~ |        |   ~~~chmury~~~ |
+  |################| dol  |  ~~~chmury~~~  |        |     niebo      | dol
+  |GROUND (ciemny) |      |################|        |################|
+  +----------------+      +----------------+        +----------------+
+   ground na dole          gradient sie splaszcza    ground na gorze
+
+  _FlipAmount 0 ------------------ 0.5 ------------------ 1
+  (liniowo lub wg krzywej response w Inspectorze)
+
+-----------------------------------------------------------------------------
+ PLIKI
+-----------------------------------------------------------------------------
+  Assets/Potok/Skybox/FG_Skybox_Rotating.shader   (+ _FlipAmount, flipY)
+  Assets/Scripts/Core/SkyFlipByAltitude.cs         (nowy)
+
+  UWAGA: sky cubemap NIE jest flipowany (tlo/kosmos zostaje na miejscu) --
+  odwracamy tylko chmury + ground, bo to one daja czytelny efekt "gora/dol".
+  OnDisable przywraca _FlipAmount do wartosci startowej (shared material).
+=============================================================================
