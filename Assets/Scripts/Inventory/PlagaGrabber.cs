@@ -30,6 +30,13 @@ namespace Plaga44.Inventory
         private const string LOG = "[PLAGA44][PlagaGrabber]";
         private const string OvrRigName = "OVRCameraRig";
 
+        [Header("Magnetic grab")]
+        [Tooltip("Max zasieg z ktorego item przylatuje do reki na grip (m). 0 = wylaczone.")]
+        public float magneticRange = 8f;
+
+        [Tooltip("Czas lotu itemu do reki (s). Mniej = szybciej 'przyskakuje'.")]
+        public float magneticFlyTime = 0.18f;
+
         [Header("Back-holster draw")]
         [Tooltip("Resources path itemu dobywanego zza plecow (grip za glowa na wysokosci headsetu).")]
         public string backHolsterResource = "Items/M249";
@@ -72,8 +79,113 @@ namespace Plaga44.Inventory
                 return;
             }
 
+            // MAGNETYCZNY GRAB (priorytet): nic w zasiegu collidera -> najblizszy item
+            // w scenie FRUNIE do tej reki. Bez kucania/siegania.
+            if (m_grabCandidates.Count == 0 && TryMagneticGrab())
+                return;
+
             // Not holding -- grab nearest candidate.
             Debug.Log($"{LOG} Toggle GRAB via {m_controller}");
+            base.GrabBegin();
+        }
+
+        // =====================================================================
+        // TRIGGER SPAWN -- index trigger spawnuje item WYBRANY w galerii
+        // (HamburgerMenu -> ItemBrowser) wprost do TEJ dloni.
+        // Lewy grabber -> lewa reka, prawy -> prawa (ten grabber JEST ta reka).
+        // Ponowny trigger gdy cos trzymam -> toggle release (spojne z gripem).
+        // =====================================================================
+        public override void Update()
+        {
+            base.Update();
+            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, m_controller))
+                OnIndexTriggerPressed();
+        }
+
+        private void OnIndexTriggerPressed()
+        {
+            // MENU OTWARTE -> trigger nalezy do UI (HamburgerMenu: zmiana wartosci +/-).
+            // Bez tego jeden pull robilby jednoczesnie zmiane ustawienia I spawn itemu.
+            if (Plaga44.UI.HamburgerMenu.MenuOpen) return;
+
+            // Toggle: cos trzymam -> puszczam.
+            if (m_grabbedObj != null)
+            {
+                Debug.Log($"{LOG} Trigger RELEASE: {m_grabbedObj.name} from {m_controller}");
+                GrabEnd();
+                return;
+            }
+
+            var browser = Plaga44.ItemBrowser.Instance;
+            if (browser == null)
+            {
+                Debug.LogError($"{LOG} Trigger spawn: brak ItemBrowser w scenie -- nie wiem co spawnowac.");
+                return;
+            }
+
+            var prefab = browser.SelectedPrefab;
+            if (prefab == null)
+            {
+                Debug.LogWarning($"{LOG} Trigger spawn: zaden item nie wybrany w galerii (None). "
+                    + "Wybierz item w menu (sekcja ITEMS).");
+                return;
+            }
+
+            Debug.Log($"{LOG} Trigger SPAWN '{prefab.name}' -> {m_controller}");
+            StartCoroutine(SpawnAndGrab(prefab, browser.SelectedResourcePath));
+        }
+
+        // =====================================================================
+        // MAGNETYCZNY GRAB -- najblizszy PlagaGrabbable w scenie leci do reki.
+        // =====================================================================
+        private bool TryMagneticGrab()
+        {
+            if (magneticRange <= 0f) return false;
+
+            Vector3 hand = m_gripTransform != null ? m_gripTransform.position : transform.position;
+            PlagaGrabbable nearest = null;
+            float best = magneticRange;
+
+            foreach (var g in FindObjectsByType<PlagaGrabbable>(FindObjectsSortMode.None))
+            {
+                if (g == null || g.isGrabbed) continue; // nie kradnij z drugiej reki
+                float d = Vector3.Distance(hand, g.transform.position);
+                if (d < best) { best = d; nearest = g; }
+            }
+
+            if (nearest == null) return false;
+            Debug.Log($"{LOG} MAGNETIC grab '{nearest.name}' (d={best:F1}m) -> {m_controller}");
+            StartCoroutine(MagneticPull(nearest));
+            return true;
+        }
+
+        private IEnumerator MagneticPull(PlagaGrabbable target)
+        {
+            var rb = target.GetComponent<Rigidbody>();
+            bool prevKinematic = rb != null && rb.isKinematic;
+            if (rb != null) rb.isKinematic = true; // leci sterowany, bez fizyki po drodze
+
+            float t = 0f;
+            Vector3 start = target.transform.position;
+            float dur = Mathf.Max(0.01f, magneticFlyTime);
+
+            while (t < dur)
+            {
+                if (m_grabbedObj != null || target == null)
+                {
+                    if (rb != null) rb.isKinematic = prevKinematic;
+                    yield break; // chwycilem cos innego / item zniknal
+                }
+                Vector3 hand = m_gripTransform != null ? m_gripTransform.position : transform.position;
+                t += Time.deltaTime;
+                target.transform.position = Vector3.Lerp(start, hand, t / dur);
+                yield return null;
+            }
+
+            if (m_grabbedObj != null || target == null) yield break;
+
+            // Item w rece -> normalny pipeline grab (offsety, kinematic baseline, parent).
+            m_grabCandidates[target] = 1;
             base.GrabBegin();
         }
 
@@ -108,10 +220,12 @@ namespace Plaga44.Inventory
                     + "Zbuduj prefab (CYBERNOMAD > Inventory > Rebuild M249 Prefab).");
                 return;
             }
-            StartCoroutine(SpawnAndGrab(prefab));
+            StartCoroutine(SpawnAndGrab(prefab, backHolsterResource));
         }
 
-        private IEnumerator SpawnAndGrab(GameObject prefab)
+        /// <summary>Spawnuje prefab w dloni i chwyta go normalnym pipeline'em OVRGrabber.
+        /// resourcePath -- sciezka Resources do world-save tagowania (NIE zgadywana z nazwy).</summary>
+        private IEnumerator SpawnAndGrab(GameObject prefab, string resourcePath)
         {
             Vector3 pos = m_gripTransform != null ? m_gripTransform.position : transform.position;
             Quaternion rot = m_gripTransform != null ? m_gripTransform.rotation : transform.rotation;
@@ -136,11 +250,11 @@ namespace Plaga44.Inventory
             // Inject as sole candidate and run the normal grab pipeline
             // (computes offsets, teleports to hand, sets kinematic).
             m_grabCandidates[grab] = 1;
-            Debug.Log($"{LOG} Back-holster DRAW '{go.name}' into {m_controller}");
+            Debug.Log($"{LOG} DRAW '{go.name}' into {m_controller}");
             base.GrabBegin();
 
             // World-save (#196): explicit resourcePath + spawn itemu = trigger zapisu.
-            Plaga44.SaveableObject.Tag(go, backHolsterResource);
+            Plaga44.SaveableObject.Tag(go, resourcePath);
             Plaga44.WorldSaveManager.Instance?.Save("item-spawn");
         }
 

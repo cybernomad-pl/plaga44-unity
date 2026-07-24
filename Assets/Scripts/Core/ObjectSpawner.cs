@@ -49,6 +49,9 @@ namespace Plaga44
             [Tooltip("Mass (kg) for auto-added Rigidbody.")]
             public float mass = 1.0f;
 
+            [Tooltip("Float at eye level: no gravity + gentle bob until first grab, then falls after release. When false, legacy 'table' behaviour is unchanged.")]
+            public bool floatAtEyeLevel = false;
+
             public bool enabled = true;
         }
 
@@ -189,7 +192,10 @@ namespace Plaga44
                 return null;
             }
 
-            Vector3 pos = ResolveSpawnPosition(entry.offset);
+            // Float items ignore the tabletop y-offset -- spawn exactly at eye level (y=0).
+            Vector3 offset = entry.offset;
+            if (entry.floatAtEyeLevel) offset.y = 0f;
+            Vector3 pos = ResolveSpawnPosition(offset);
             var instance = Instantiate(prefab, pos, Quaternion.identity);
             instance.name = prefab.name;
 
@@ -249,6 +255,14 @@ namespace Plaga44
                     instance.AddComponent<HapticOnGrab>();
                 if (instance.GetComponent<PlagaGrabbable>() == null)
                     instance.AddComponent<PlagaGrabbable>();
+            }
+
+            // Float-at-eye-level: attach hover which kills gravity on Awake and re-enables
+            // it on the first release after a grab (item drifts, then falls when dropped).
+            if (entry.floatAtEyeLevel)
+            {
+                if (instance.GetComponent<Plaga44.Items.FloatHover>() == null)
+                    instance.AddComponent<Plaga44.Items.FloatHover>();
             }
         }
 

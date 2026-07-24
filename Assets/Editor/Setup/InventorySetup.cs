@@ -26,6 +26,11 @@ namespace Plaga44.Editor.Setup
             if (!RevolverPrefabBuilder.EnsurePrefab())
                 Debug.LogWarning($"{LOG} [WARN] Revolver prefab missing -- loadout will fail");
 
+            // Prefaby broni (Shotgun/M249) do Resources/Items. IZOLACJA: blad budowania
+            // broni NIE moze przerwac setupu grabberow/menu ponizej -- logujemy i lecimy dalej.
+            try { WeaponPrefabBuilder.EnsureAllWeapons(); }
+            catch (Exception e) { Debug.LogError($"{LOG} [WEAPONS] Build broni nie powiodl sie: {e.Message} -- setup gracza kontynuuje"); }
+
             var rig = GameObject.Find(OvrRigName);
             if (rig == null)
             {

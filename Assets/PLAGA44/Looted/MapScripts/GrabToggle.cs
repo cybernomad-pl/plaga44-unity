@@ -118,10 +118,6 @@ public class GrabToggle : MonoBehaviour
         if (IsGun(bestObj))
             bestObj.transform.localScale = GUN_SCALE;
 
-        // Enable shooting if gun
-        var shooting = bestObj.GetComponent<Shooting>();
-        if (shooting != null) shooting.enabled = true;
-
         // Hide hand model when holding weapon
         SetHandVisible(false);
 
@@ -149,10 +145,6 @@ public class GrabToggle : MonoBehaviour
             rb.linearVelocity = OVRInput.GetLocalControllerVelocity(_controller) * 1.5f;
             rb.angularVelocity = OVRInput.GetLocalControllerAngularVelocity(_controller);
         }
-
-        // Disable shooting
-        var shooting = _heldObject.GetComponent<Shooting>();
-        if (shooting != null) shooting.enabled = false;
 
         Debug.Log($"[GRAB] Released: {_heldObject.name}");
         _heldObject = null;

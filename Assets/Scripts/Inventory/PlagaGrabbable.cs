@@ -169,6 +169,11 @@ namespace Plaga44.Inventory
 
             Debug.Log($"{LOG} GrabEnd: {name} released, vel={linearVelocity.magnitude:F2}m/s");
 
+            // AUTO-SAVE grip offset per item TYPE (BaseName). Tuning z menu ITEM GRIP
+            // (albo domyslny) zostaje zapisany na nastepny spawn tego samego itemu.
+            // Bez tego offset gubil sie po puszczeniu -- wymagal recznego SAVE w menu.
+            ItemGripConfig.Save(BaseName, _gripConfig);
+
             // Stop any ongoing grip haptic
             StopGripHaptic();
             _gripHeldLastFrame = false;

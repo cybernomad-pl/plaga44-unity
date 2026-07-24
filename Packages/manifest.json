@@ -9,7 +9,7 @@
     }
   ],
   "dependencies": {
-    "com.meta.xr.sdk.audio": "81.0.0",
+    "com.meta.xr.sdk.audio": "83.0.0",
     "com.meta.xr.sdk.interaction.ovr": "83.0.0",
     "com.meta.xr.sdk.interaction": "83.0.0",
     "com.meta.xr.sdk.core": "83.0.0",

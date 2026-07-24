@@ -1,9 +1,12 @@
 // =============================================================================
 // SettingsRegistry.cs -- Complete runtime settings per section.
 // Each setting has a description. Save/Load presets to PlayerPrefs.
+// Additionally: ALL menu params dumped to / loaded from a human-readable JSON
+// file (persistentDataPath) on game start -- file wins over PlayerPrefs.
 // =============================================================================
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -35,8 +38,13 @@ namespace Plaga44.UI
         public static void Rebuild() { _built = false; _sec = null; }
 
         // Sekcje ktorych aktualnych wartosci NIE trwalimy (akcje, stan gry, read-only)
+        // NPC = akcje spawn/despawn + indeks animacji zaleny od runtime NPC ->
+        // restore na starcie (brak aktywnego NPC) tylko spamowalby notyfikacje.
+        // ITEMS + ITEM GRIP maja WLASNA persystencje (ItemBrowser PrefsKey / ItemGripConfig
+        // per-item) -- nie trwalimy ich przez file-persist, bo restore na starcie wywolalby
+        // SetItem() -> spawn itemu w swiecie BEZ otwartego menu (regresja file-persist).
         private static readonly HashSet<string> NON_PERSISTENT_SECTIONS =
-            new HashSet<string> { "GAME STATE" };
+            new HashSet<string> { "GAME STATE", "NPC", "ITEMS", "ITEM GRIP" };
 
         /// <summary>PlayerPrefs keys -- single source of truth, koniec z literal strings w kodzie.</summary>
         private static class PrefsKeys
@@ -80,6 +88,7 @@ namespace Plaga44.UI
             if (!PendingSave) return;
             PlayerPrefs.Save();
             PendingSave = false;
+            SaveToFile(); // plik na biezaco po zmianach w sesji (Close menu / Quit)
         }
 
         static SettingDef S(string n, string d, Func<float> g, Action<float> s, float mn, float mx, float st, string f="F1")
@@ -216,6 +225,11 @@ namespace Plaga44.UI
         {
             _sec = new Dictionary<string, List<SettingDef>>();
             _allSettings = new List<SettingDef>();
+
+            // Eye texture baseline: jawny 1.0 na start. XR/OpenXR podstawia "recommended"
+            // eyeTextureResolutionScale (czesto >1.0) -- przy 16GB RAM przeciaza pamiec
+            // (OOM kompilatora shaderow). Deterministyczny start, nie zgadywanie XR.
+            XRSettings.eyeTextureResolutionScale = 1.0f;
 
             var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
             var vol = UnityEngine.Object.FindAnyObjectByType<Volume>();
@@ -378,6 +392,23 @@ namespace Plaga44.UI
                             SetAction($"ITEM GRIP RESET for '{t.BaseName}'", true);
                         } else SetAction("ITEM GRIP: no active item", false);
                     } }, 0, 1, 1, "F0"));
+            });
+
+            // =============================================================
+            // NPC -- spawn Pinei + wybor animacji dla ostatniego NPC
+            // (wzor UI: ITEMS. Logika: Plaga44.Npc.NpcMenuSection)
+            // =============================================================
+            Sec("NPC", s => {
+                s.Add(S("Spawn Pinea", "Spawnuje Pinee przed graczem (staje sie aktywnym NPC)", () => 0,
+                    v => { if (v > 0.5f) Plaga44.Npc.NpcMenuSection.SpawnPinea(); }, 0, 1, 1, "F0"));
+
+                int animMax = Mathf.Max(0, Plaga44.Npc.NpcMenuSection.AnimCount - 1);
+                s.Add(S("Animacja", "Przewijaj animacje aktywnego NPC (stick L/R lub triggery)",
+                    () => Plaga44.Npc.NpcMenuSection.CurrentAnimIndex,
+                    v => Plaga44.Npc.NpcMenuSection.ScrollAnim((int)v), 0, animMax, 1, "F0"));
+
+                s.Add(S("Despawn All", "Niszczy wszystkie zespawnione NPC", () => 0,
+                    v => { if (v > 0.5f) Plaga44.Npc.NpcMenuSection.DespawnAll(); }, 0, 1, 1, "F0"));
             });
 
             // =============================================================
@@ -665,7 +696,9 @@ namespace Plaga44.UI
             if (_defaults == null) CaptureDefaults(); // musi byc PRZED RestorePersistedValues
             _built = true; // PRZED restore -- blokuje reentrant Build() z action setterow (LOG ALL etc)
             int restored = RestorePersistedValues();
-            Debug.Log($"[PLAGA44][Settings] Built: {_sec.Count} sections, {_allSettings.Count} saveable settings, {restored} restored from PlayerPrefs");
+            int fromFile = LoadFromFile(); // plik = zrodlo prawdy, ma priorytet nad PlayerPrefs
+            SaveToFile();                  // dump kompletu -- plik zawsze istnieje i jest aktualny na starcie
+            Debug.Log($"[PLAGA44][Settings] Built: {_sec.Count} sections, {_allSettings.Count} saveable, {restored} from PlayerPrefs, {fromFile} from file");
         }
 
         private static void CollectFlatSettingsList()
@@ -682,7 +715,12 @@ namespace Plaga44.UI
         // Action-type settings (getter always returns 0, setter fires action on >0.5).
         // These must NOT be restored from PlayerPrefs -- restoring 1.0 would re-trigger the action.
         private static readonly HashSet<string> ACTION_SETTINGS =
-            new HashSet<string> { "RESET ALL", "LOG ALL", "QUIT GAME", "SAVE GRIP", "RESET GRIP" };
+            new HashSet<string> { "RESET ALL", "LOG ALL", "QUIT GAME", "SAVE GRIP", "RESET GRIP", "Spawn Pinea", "Despawn All" };
+
+        // Ustawienia z wymuszonym baseline na start -- NIE przywracane z persist.
+        // Build() ustawia je jawnie; zapisany "Current" nie moze tego nadpisac.
+        private static readonly HashSet<string> FORCE_BASELINE_SETTINGS =
+            new HashSet<string> { "Eye Tex" };
 
         private static int RestorePersistedValues()
         {
@@ -694,6 +732,7 @@ namespace Plaga44.UI
                 {
                     if (setting.step <= 0) continue;
                     if (ACTION_SETTINGS.Contains(setting.name)) continue; // skip action buttons
+                    if (FORCE_BASELINE_SETTINGS.Contains(setting.name)) continue; // baseline wymuszony w Build, persist go nie nadpisuje
                     string key = PrefsKeys.Current(kv.Key, setting.name);
                     if (!PlayerPrefs.HasKey(key)) continue;
                     setting.set(Mathf.Clamp(PlayerPrefs.GetFloat(key), setting.min, setting.max));
@@ -701,6 +740,76 @@ namespace Plaga44.UI
                 }
             }
             return restored;
+        }
+
+        // =====================================================================
+        // FILE PERSISTENCE -- human-readable JSON with ALL menu params.
+        // Zapisywany przy starcie (dump kompletu) i po zmianach (flush).
+        // Wczytywany przy starcie -- plik ma priorytet nad PlayerPrefs.
+        // =====================================================================
+        [Serializable] private class FileEntry { public string key; public float value; }
+        [Serializable] private class FileData  { public List<FileEntry> entries = new List<FileEntry>(); }
+
+        public static string SettingsFilePath =>
+            Path.Combine(Application.persistentDataPath, "plaga44_menu_settings.json");
+
+        /// <summary>Jeden predykat "co trwalimy" -- te same reguly co RestorePersistedValues.
+        /// Pomija sekcje non-persistent, read-only/akcje (step<=0), przyciski-akcje i baseline-forced.</summary>
+        private static bool IsPersistable(string section, SettingDef s)
+            => !NON_PERSISTENT_SECTIONS.Contains(section)
+            && s.step > 0
+            && !ACTION_SETTINGS.Contains(s.name)
+            && !FORCE_BASELINE_SETTINGS.Contains(s.name);
+
+        /// <summary>Dump WSZYSTKICH parametrow menu do pliku JSON (biezace wartosci).</summary>
+        public static void SaveToFile()
+        {
+            if (!_built) Build();
+            var data = new FileData();
+            foreach (var kv in _sec)
+                foreach (var s in kv.Value)
+                    if (IsPersistable(kv.Key, s))
+                        data.entries.Add(new FileEntry { key = $"{kv.Key}::{s.name}", value = s.get() });
+            try
+            {
+                File.WriteAllText(SettingsFilePath, JsonUtility.ToJson(data, true));
+                Debug.Log($"[PLAGA44][Settings] Saved {data.entries.Count} params to file: {SettingsFilePath}");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[PLAGA44][Settings] SaveToFile FAILED: {e.Message}");
+            }
+        }
+
+        /// <summary>Wczytaj parametry z pliku JSON i zaaplikuj do setterow. Zwraca liczbe zaladowanych.
+        /// Nieznane klucze sa IGNOROWANE (zero zgadywania) -- nie mapuja sie na zaden setting.</summary>
+        public static int LoadFromFile()
+        {
+            if (!_built) Build();
+            string path = SettingsFilePath;
+            if (!File.Exists(path)) { Debug.Log($"[PLAGA44][Settings] No settings file at {path}"); return 0; }
+
+            FileData data;
+            try { data = JsonUtility.FromJson<FileData>(File.ReadAllText(path)); }
+            catch (Exception e) { Debug.LogError($"[PLAGA44][Settings] LoadFromFile parse FAILED: {e.Message}"); return 0; }
+            if (data == null || data.entries == null) return 0;
+
+            var map = new Dictionary<string, SettingDef>();
+            foreach (var kv in _sec)
+                foreach (var s in kv.Value)
+                    if (IsPersistable(kv.Key, s))
+                        map[$"{kv.Key}::{s.name}"] = s;
+
+            int loaded = 0;
+            foreach (var e in data.entries)
+            {
+                if (e == null || string.IsNullOrEmpty(e.key)) continue;
+                if (!map.TryGetValue(e.key, out var s)) continue; // nieznany klucz -> ignoruj
+                s.set(Mathf.Clamp(e.value, s.min, s.max));
+                loaded++;
+            }
+            Debug.Log($"[PLAGA44][Settings] Loaded {loaded}/{data.entries.Count} params from file: {path}");
+            return loaded;
         }
 
         static Light FindSun()

@@ -2,7 +2,7 @@
 // HamburgerMenu.cs
 // CYBERNOMAD -- 3-level VR settings menu PLAGA '44.
 // Poziomy: TOP (kafelki kategorii) -> GROUP (sub-kategorie) -> SETTINGS (slider list).
-// Kontrolki: Start=toggle, thumbstick=nav, A/X=enter, B/Y=back, triggery=value +/-.
+// Kontrolki: Start=toggle, thumbstick=nav, A/X(dolny)=enter/zatwierdz(+haptyka), B/Y(gorny)=back/cofnij, triggery=value +/-.
 // World-space canvas, faces player. Menu pauzuje GameState.
 // =============================================================================
 using System.Collections.Generic;
@@ -68,6 +68,7 @@ namespace Plaga44.UI
         // ---- Section names (routing) ---------------------------------------
         private const string AvatarSection = "AVATAR";
         private const string ItemsSection = "ITEMS";
+        private const string NpcSection = "NPC";
 
         // ---- Colors (dark theme) -------------------------------------------
         private static readonly Color BG_COLOR = new Color(0f, 0f, 0f, 0f);
@@ -82,7 +83,7 @@ namespace Plaga44.UI
         // ---- Groups (TOP-level) --------------------------------------------
         private static readonly (string name, string[] sections)[] GROUPS = new[]
         {
-            ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "AVATAR", "ITEMS", "ITEM GRIP", "GAME STATE", "NAVMESH" }),
+            ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "AVATAR", "ITEMS", "ITEM GRIP", "NPC", "GAME STATE", "NAVMESH" }),
             ("VISUAL",   new[] { "SHADOWS", "SUN", "FOG", "AMBIENT", "SKYBOX", "BLOOM", "COLOR", "COMFORT", "LGG", "URP" }),
             ("SYSTEM",   new[] { "PROFILE", "MISC", "AUDIO", "PHYSICS", "QUALITY", "CAMERA", "OCULUS", "TERRAIN", "EXIT" }),
         };
@@ -169,11 +170,15 @@ namespace Plaga44.UI
         private void OnApplicationQuit() => SettingsRegistry.FlushPlayerPrefs();
         private void OnApplicationPause(bool paused) { if (paused) SettingsRegistry.FlushPlayerPrefs(); }
 
+        // DOLNY przycisk = ENTER/ZATWIERDZ, GORNY = BACK/COFNIJ (zamienione per zyczenie).
+        // RawButton jawnie per fizyczny przycisk (nie virtual One/Two, ktore zaleza od hand):
+        //   A = dolny prawy, X = dolny lewy  -> ENTER (zatwierdz, + haptyka)
+        //   B = gorny prawy, Y = gorny lewy  -> BACK (cofnij, bez haptyki)
         private static bool PressedEnter()
-            => OVRInput.GetDown(OVRInput.Button.One) || OVRInput.GetDown(OVRInput.Button.Three);
+            => OVRInput.GetDown(OVRInput.RawButton.A) || OVRInput.GetDown(OVRInput.RawButton.X);
 
         private static bool PressedBack()
-            => OVRInput.GetDown(OVRInput.Button.Two) || OVRInput.GetDown(OVRInput.Button.Four);
+            => OVRInput.GetDown(OVRInput.RawButton.B) || OVRInput.GetDown(OVRInput.RawButton.Y);
 
         // =====================================================================
         // Open / Close
@@ -214,7 +219,7 @@ namespace Plaga44.UI
             var gallery = Plaga44.AvatarGallery.Instance;
             if (gallery != null) gallery.HideAllPreviews();
             var items = Plaga44.ItemBrowser.Instance;
-            if (items != null) items.DespawnPreview();
+            if (items != null) items.ConfirmSpawn(); // item ZOSTAJE w scenie (nie niszcz preview)
 
             Debug.Log($"{LOG} CLOSE");
             // Event-driven world-save (#196): wyjscie z menu (po despawnie preview).
@@ -227,6 +232,12 @@ namespace Plaga44.UI
 
         private void GoForward()
         {
+            // Haptyka na ZATWIERDZ (dolny A/X) -- w rece ktora wcisnela.
+            // A = prawy kontroler, X = lewy. GetDown jeszcze true w tej samej klatce co PressedEnter.
+            var ctrl = OVRInput.GetDown(OVRInput.RawButton.A)
+                ? OVRInput.Controller.RTouch : OVRInput.Controller.LTouch;
+            Plaga44.Feedback.HapticManager.Instance?.PlayCustom(ctrl, 0.6f, 0.7f, 0.05f, "menu-enter");
+
             switch (_level)
             {
                 case MenuLevel.Top: EnterGroup(); break;
@@ -403,7 +414,7 @@ namespace Plaga44.UI
             BuildTopTiles();
             _titleLabel.text = "SETTINGS";
             _footerLabel.text = "";
-            _footerValue.text = "A/X = enter    B/Y = close";
+            _footerValue.text = "B/Y = enter    A/X = close";
         }
 
         private void ShowGroupLevel()
@@ -411,7 +422,7 @@ namespace Plaga44.UI
             BuildGroupTiles();
             _titleLabel.text = GROUPS[_topIndex].name;
             _footerLabel.text = "";
-            _footerValue.text = "A/X = enter    B/Y = back";
+            _footerValue.text = "B/Y = enter    A/X = back";
         }
 
         private void ShowSettingsLevel()
@@ -593,25 +604,29 @@ namespace Plaga44.UI
             }
             if (ctx.IsItemMode(s))
                 return ($"{prefix}{s.name}: {ctx.Browser.CurrentLabel}", color);
+            if (ctx.IsNpcAnim(s))
+                return ($"{prefix}{s.name}: {Plaga44.Npc.NpcMenuSection.CurrentAnimLabel}", color);
             return ($"{prefix}{s.name}: {s.get().ToString(s.format)}", color);
         }
 
         private static string BuildFooterValue(SettingDef cur, RowContext ctx)
         {
             if (ctx.IsAvatarMode(cur))
-                return $"<  {ctx.Player.CurrentLabel}  >    [{cur.min}..{cur.max}]   B/Y = back";
+                return $"<  {ctx.Player.CurrentLabel}  >    [{cur.min}..{cur.max}]   A/X = back";
             if (ctx.IsItemMode(cur))
-                return $"<  {ctx.Browser.CurrentLabel}  >    [{cur.min}..{cur.max}]   B/Y = back";
-            return $"<  {cur.get().ToString(cur.format)}  >    [{cur.min}..{cur.max}]   B/Y = back";
+                return $"<  {ctx.Browser.CurrentLabel}  >    [{cur.min}..{cur.max}]   A/X = back";
+            if (ctx.IsNpcAnim(cur))
+                return $"<  {Plaga44.Npc.NpcMenuSection.CurrentAnimLabel}  >    [{cur.min}..{cur.max}]   A/X = back";
+            return $"<  {cur.get().ToString(cur.format)}  >    [{cur.min}..{cur.max}]   A/X = back";
         }
 
-        /// <summary>
         /// <summary>Kontekst per-render -- raz wyliczony section/avatar ptr zamiast 3x field lookupy.</summary>
         private readonly struct RowContext
         {
             public readonly string Section;
             public readonly bool IsAvatarSection;
             public readonly bool IsItemsSection;
+            public readonly bool IsNpcSection;
             public readonly Plaga44.PlayerAvatar Player;
             public readonly Plaga44.ItemBrowser Browser;
 
@@ -620,6 +635,7 @@ namespace Plaga44.UI
                 Section = section;
                 IsAvatarSection = section == AvatarSection;
                 IsItemsSection = section == ItemsSection;
+                IsNpcSection = section == NpcSection;
                 Player = IsAvatarSection ? Plaga44.PlayerAvatar.FindCurrent() : null;
                 Browser = IsItemsSection ? Plaga44.ItemBrowser.Instance : null;
             }
@@ -627,6 +643,7 @@ namespace Plaga44.UI
             public bool IsAvatarMode(SettingDef s) => IsAvatarSection && s.name == "Mode" && Player != null;
             public bool IsBrokenAvatarMode(SettingDef s) => IsAvatarMode(s) && Player.IsCurrentBroken;
             public bool IsItemMode(SettingDef s) => IsItemsSection && s.name == "Item" && Browser != null;
+            public bool IsNpcAnim(SettingDef s) => IsNpcSection && s.name == "Animacja";
         }
 
         // =====================================================================
@@ -640,6 +657,11 @@ namespace Plaga44.UI
             {
                 var avatar = Plaga44.PlayerAvatar.FindCurrent();
                 if (avatar != null) avatar.ConfirmPreview();
+            }
+            else if (section == ItemsSection)
+            {
+                // Opuszczenie sekcji ITEMS (GoBack) zatwierdza item -- zostaje w scenie
+                Plaga44.ItemBrowser.Instance?.ConfirmSpawn();
             }
         }
 

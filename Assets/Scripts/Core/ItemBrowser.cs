@@ -42,6 +42,7 @@ namespace Plaga44
         private string[] _itemNames;
         private int _selectedIndex; // 0 = None, 1..N = item
         private GameObject _spawnedPreview;
+        private string _spawnedPrefabName; // zapamietana nazwa prefabu -> resourcePath dla world-save
 
         // =====================================================================
         // Public API
@@ -49,6 +50,29 @@ namespace Plaga44
 
         public int MaxItem => (_itemPrefabs != null) ? _itemPrefabs.Length : 0;
         public int SelectedItem => _selectedIndex;
+
+        /// <summary>Prefab wybranego itemu, albo NULL gdy nic nie wybrano (index 0 = None).
+        /// Zrodlo dla trigger-spawn do dloni (PlagaGrabber). NIE zgaduje -- null = caller decyduje.</summary>
+        public GameObject SelectedPrefab
+        {
+            get
+            {
+                if (_selectedIndex == 0 || _itemPrefabs == null) return null;
+                int idx = _selectedIndex - 1;
+                if (idx < 0 || idx >= _itemPrefabs.Length) return null;
+                return _itemPrefabs[idx];
+            }
+        }
+
+        /// <summary>Resources path wybranego itemu (world-save tagowanie). NULL gdy nic nie wybrano.</summary>
+        public string SelectedResourcePath
+        {
+            get
+            {
+                var p = SelectedPrefab;
+                return p != null ? $"{ItemsResourceFolder}/{p.name}" : null;
+            }
+        }
 
         /// <summary>Currently spawned preview item (or null). Target for ITEM GRIP live tuning.</summary>
         public GameObject CurrentSpawned => _spawnedPreview;
@@ -158,6 +182,7 @@ namespace Plaga44
 
             _spawnedPreview = Instantiate(prefab, pos, rot);
             _spawnedPreview.name = $"ItemPreview_{prefab.name}";
+            _spawnedPrefabName = prefab.name;
 
             // Enable physics so player can grab it naturally with OVRGrabber
             var rb = _spawnedPreview.GetComponent<Rigidbody>();
@@ -174,6 +199,32 @@ namespace Plaga44
             if (_spawnedPreview == null) return;
             Destroy(_spawnedPreview);
             _spawnedPreview = null;
+            _spawnedPrefabName = null;
+        }
+
+        /// <summary>Zatwierdza aktualny preview jako TRWALY obiekt swiata -- item ZOSTAJE w scenie
+        /// zamiast zostac zniszczony. Wywolywane przy zamknieciu menu / opuszczeniu sekcji ITEMS.
+        /// Wlacza grawitacje, taguje do world-save (#196) i zwalnia referencje BEZ Destroy.
+        /// Reset wyboru -> kolejny start nie respawnuje duplikatu, nastepny wybor jest swiezy.</summary>
+        public void ConfirmSpawn()
+        {
+            if (_spawnedPreview == null) return;
+
+            var rb = _spawnedPreview.GetComponent<Rigidbody>();
+            if (rb != null) rb.useGravity = true; // przestaje "wisiec", staje sie normalnym obiektem
+
+            if (!string.IsNullOrEmpty(_spawnedPrefabName))
+            {
+                SaveableObject.Tag(_spawnedPreview, $"{ItemsResourceFolder}/{_spawnedPrefabName}");
+                _spawnedPreview.name = _spawnedPrefabName; // zdejmij prefiks "ItemPreview_"
+            }
+
+            _spawnedPreview = null;
+            _spawnedPrefabName = null;
+
+            _selectedIndex = 0;
+            PlayerPrefs.SetInt(PrefsKey, 0);
+            Debug.Log($"{LOG} ConfirmSpawn -- item pozostaje w scenie");
         }
 
         private Vector3 GetSpawnPosition()

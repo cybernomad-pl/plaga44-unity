@@ -1,0 +1,322 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aed9711c82461a94e9d84a4197aa0cc1, type: 3}
+  m_Name: NpcAnimationLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::Plaga44.Npc.NpcAnimationLibrary
+  clips:
+  - {fileID: -203655887218126122, guid: 11d3c3111d0d3ea448230d0567e32fbb, type: 3}
+  - {fileID: -203655887218126122, guid: 8b66f2037b8e4e94d9ce761157cc4e8d, type: 3}
+  - {fileID: -203655887218126122, guid: 1bf293b7b260a8640aacf4e62171543b, type: 3}
+  - {fileID: -203655887218126122, guid: 3c2a5dfea7a2dd7498445967ef5af79b, type: 3}
+  - {fileID: -203655887218126122, guid: 745e394650470ab4ba3a4fa9af932ffc, type: 3}
+  - {fileID: -203655887218126122, guid: a35f6962e15db224595a63e0aba890bb, type: 3}
+  - {fileID: -203655887218126122, guid: 6ab369c5f1432474a849150218358333, type: 3}
+  - {fileID: -203655887218126122, guid: c09ae83a51f225445a335ba8833e142f, type: 3}
+  - {fileID: -203655887218126122, guid: 8cf639dfb76d6f04d997cc38784c9c13, type: 3}
+  - {fileID: -203655887218126122, guid: 3391e1ea084c2d844a053142cf39bd9f, type: 3}
+  - {fileID: -203655887218126122, guid: 538605a2c767fb44e8e48df88704c9ae, type: 3}
+  - {fileID: -203655887218126122, guid: e82aa9c0ebe1a9941a257072e790205c, type: 3}
+  - {fileID: -203655887218126122, guid: 465844ea818f68f4b84ad9e5242b49e0, type: 3}
+  - {fileID: -203655887218126122, guid: c8d3b20a9e1aeba44b52e08c36151b3c, type: 3}
+  - {fileID: -203655887218126122, guid: 9763c543ef8654744b3a390be0d52492, type: 3}
+  - {fileID: -203655887218126122, guid: a6335b1dd34d46d488147d9866973010, type: 3}
+  - {fileID: -203655887218126122, guid: 60655c33570f5dd4182be70507a75299, type: 3}
+  - {fileID: -203655887218126122, guid: 4275135b67f5b2a4987a4c8f9a9757be, type: 3}
+  - {fileID: -203655887218126122, guid: f78e2139c41bc4b418df4af6b5c5b91d, type: 3}
+  - {fileID: -203655887218126122, guid: b0fad0578cee7a447a86fb4e3c3bd07d, type: 3}
+  - {fileID: -203655887218126122, guid: 650bbaa808caa854596d7840f5d7d906, type: 3}
+  - {fileID: -203655887218126122, guid: 4fdd38a70c5a5314591353d64a41b341, type: 3}
+  - {fileID: -203655887218126122, guid: e2cc8f53044b2504bb32049c8316fcb7, type: 3}
+  - {fileID: -203655887218126122, guid: e89bfab5f8364c843ba8138b48b0a935, type: 3}
+  - {fileID: -203655887218126122, guid: f1319d4c8d20a214585a424601db240f, type: 3}
+  - {fileID: -203655887218126122, guid: 47af092d8a3d07442a548350c1dc7cbf, type: 3}
+  - {fileID: -203655887218126122, guid: 9964502d31db8cb48b87e013687b15bd, type: 3}
+  - {fileID: -203655887218126122, guid: 193e962881a48ce42b9b73748212d3af, type: 3}
+  - {fileID: -203655887218126122, guid: 886c360e4bc096a439c5bf0b322b2d88, type: 3}
+  - {fileID: -203655887218126122, guid: f790fbfe9205aab4e99dacef24cf2f1b, type: 3}
+  - {fileID: -203655887218126122, guid: 10aed6f2c6983fb4daf07601579320da, type: 3}
+  - {fileID: -203655887218126122, guid: 88dd77cad75f38342adbdced48c981b3, type: 3}
+  - {fileID: -203655887218126122, guid: 85dc902630936f547949a5ef487363c8, type: 3}
+  - {fileID: -203655887218126122, guid: 3edeeaca7a0450842bce0f88f3d33b47, type: 3}
+  - {fileID: -203655887218126122, guid: e330d3f2f6a74c84d83f76ba585169bb, type: 3}
+  - {fileID: -203655887218126122, guid: 267be1a06abbbd1439166ea45357178f, type: 3}
+  - {fileID: -203655887218126122, guid: 76193744d160b3e4696e4cc15104cb26, type: 3}
+  - {fileID: -203655887218126122, guid: 02ef6ec5139ea4a4f9d376edfad83440, type: 3}
+  - {fileID: -203655887218126122, guid: b047ac6e38ee26c41b499f3794076c2b, type: 3}
+  - {fileID: -203655887218126122, guid: 212c5fe8a94278a43bcbe8089836b260, type: 3}
+  - {fileID: -203655887218126122, guid: fad91bb55253811438a4ac5f004a6c39, type: 3}
+  - {fileID: -203655887218126122, guid: ebbf9930962670a4da700ec304baeb4f, type: 3}
+  - {fileID: -203655887218126122, guid: 65badd3c58c8ea2438634da57233ac47, type: 3}
+  - {fileID: -203655887218126122, guid: ae8321ecd5e0c93449fed37a442187f8, type: 3}
+  - {fileID: -203655887218126122, guid: 020ff1820deb6f249aac8a1de8259a78, type: 3}
+  - {fileID: -203655887218126122, guid: 1ecbb32621a2d8a44ad906e6fd72b699, type: 3}
+  - {fileID: -203655887218126122, guid: 78b5a8db7f7090f418af17cf6828d546, type: 3}
+  - {fileID: -203655887218126122, guid: 5bc87020b524ece4ea2606e7e7ff9b47, type: 3}
+  - {fileID: -203655887218126122, guid: bb10830eba114884988ce3a31c771ac6, type: 3}
+  - {fileID: -203655887218126122, guid: 0dfcb63c714752848bedf15727f6cc61, type: 3}
+  - {fileID: -203655887218126122, guid: 08a110adae75a72408ff8b2c76a7ef58, type: 3}
+  - {fileID: -203655887218126122, guid: ffc19b47c9569194e87189c7725ced3a, type: 3}
+  - {fileID: -203655887218126122, guid: 468dddc54b6ffa5468e05c291d207348, type: 3}
+  - {fileID: -203655887218126122, guid: 5de1947186a6f3444b16c3f04e1cf968, type: 3}
+  - {fileID: -203655887218126122, guid: 259523dc93f75294b9ef9a2359f70ac9, type: 3}
+  - {fileID: -203655887218126122, guid: ee04a1e3f2ced954fa6acc8b98e5c85f, type: 3}
+  - {fileID: -203655887218126122, guid: b6cf368ccf645e84a9336d25367c680b, type: 3}
+  - {fileID: -203655887218126122, guid: f4ef38fc90afd2e488f401b131b08a0f, type: 3}
+  - {fileID: -203655887218126122, guid: cf223294cb3fd7f48a2e1b1c0532285c, type: 3}
+  - {fileID: -203655887218126122, guid: 3c268787f71c0e44fa41fa20305b85ff, type: 3}
+  - {fileID: -203655887218126122, guid: b5f8035470c71b344b5f510873bbd3c1, type: 3}
+  - {fileID: -203655887218126122, guid: 702a5010e33403d4bbfa7ea7f56d7fe1, type: 3}
+  - {fileID: -203655887218126122, guid: 0b723170aa70ea64698f73aeecfb31d9, type: 3}
+  - {fileID: -203655887218126122, guid: 10a445a388bcbd949b0ff173a7174a63, type: 3}
+  - {fileID: -203655887218126122, guid: 338a86ccc3790c5458b5ac7200af4f32, type: 3}
+  - {fileID: -203655887218126122, guid: e9262577cede62446bce60011f014162, type: 3}
+  - {fileID: -203655887218126122, guid: 026c70e16ffbfee46887ffea556e4df2, type: 3}
+  - {fileID: -203655887218126122, guid: b770eb994a855e84681cb0ad87103efd, type: 3}
+  - {fileID: -203655887218126122, guid: e11fce8e2163e7c4c9d69014c65e5d56, type: 3}
+  - {fileID: -203655887218126122, guid: e91709a23820821439b4d6e62843dce5, type: 3}
+  - {fileID: -203655887218126122, guid: 93d9130c2d0aebe419df3799a67cfdd6, type: 3}
+  - {fileID: -203655887218126122, guid: 878775bfa819fe04a922df949bc26a11, type: 3}
+  - {fileID: -203655887218126122, guid: 06e27ac81d80ae144b505874c490481d, type: 3}
+  - {fileID: -203655887218126122, guid: e6ed27e629dfb4541a7ae3fc360d8adb, type: 3}
+  - {fileID: -203655887218126122, guid: 82eccd4d03cb8db40b5bcc2767d3db80, type: 3}
+  - {fileID: -203655887218126122, guid: 067ff37a60bc17c469e69e02fc439666, type: 3}
+  - {fileID: -203655887218126122, guid: 83725d1dbc1092e4fb56a4b1b4a21318, type: 3}
+  - {fileID: -203655887218126122, guid: e377b0058517d314dbbc138a0d66df40, type: 3}
+  - {fileID: -203655887218126122, guid: dd9b9c7bd3b9a554989c39ae63e474cb, type: 3}
+  - {fileID: -203655887218126122, guid: b0c3cd5bd71387f4ab092efd39e9f67b, type: 3}
+  - {fileID: -203655887218126122, guid: 366c124abbe3e6442b46ee42428a0c23, type: 3}
+  - {fileID: -203655887218126122, guid: b40b9f337e188fe4da113c855b2d58c0, type: 3}
+  - {fileID: -203655887218126122, guid: 6c0537637045df44f9d2040e415dcd57, type: 3}
+  - {fileID: -203655887218126122, guid: 8794ba187c55cdb4abfcbbd8b79698b3, type: 3}
+  - {fileID: -203655887218126122, guid: 76e2d2e5e4473e34cbf199eae1722cd3, type: 3}
+  - {fileID: -203655887218126122, guid: 0f6ea63e0b1024a40b361ba28d40d792, type: 3}
+  - {fileID: -203655887218126122, guid: b07f90b8fc9b9584994aa14d1e53196a, type: 3}
+  - {fileID: -203655887218126122, guid: d750bd82a9f8b4f4e8d8e80f6f9d6b75, type: 3}
+  - {fileID: -203655887218126122, guid: 215bc406b72e96447a06051f9ea98889, type: 3}
+  - {fileID: -203655887218126122, guid: 8cb6339a6c3cd2f4c83bb3d6ab93cae3, type: 3}
+  - {fileID: -203655887218126122, guid: 4eded625133f26a4fbd032116050c154, type: 3}
+  - {fileID: -203655887218126122, guid: 0a088baf588fa8e41a4b66bf606d2295, type: 3}
+  - {fileID: -203655887218126122, guid: d05d2fdfa9876fd4aa81352b09ee1aa8, type: 3}
+  - {fileID: -203655887218126122, guid: 7366d77641e6e004ca756254392dc69b, type: 3}
+  - {fileID: -203655887218126122, guid: 856886690601ee548afa26dddac4758f, type: 3}
+  - {fileID: -203655887218126122, guid: f9631adba2e3fad40b954ceb56918110, type: 3}
+  - {fileID: -203655887218126122, guid: 404709288e0789e4dbc3f4fc75c4826f, type: 3}
+  - {fileID: -203655887218126122, guid: c7f88923000467d4da08863e58456c9e, type: 3}
+  - {fileID: -203655887218126122, guid: d94421d7a0c144049bc6ea5ecab23feb, type: 3}
+  - {fileID: -203655887218126122, guid: f5fb5e3e90a73ff4489ac571fa994506, type: 3}
+  - {fileID: -203655887218126122, guid: 31209bb25f047e1469c77904a890d87a, type: 3}
+  - {fileID: -203655887218126122, guid: 305fb6b96b907eb43b8962e97015a7d0, type: 3}
+  - {fileID: -203655887218126122, guid: b1564d6af90737d44961ec7fa9f35140, type: 3}
+  - {fileID: -203655887218126122, guid: b044f9c819320e04bbaba43b4535f30a, type: 3}
+  - {fileID: -203655887218126122, guid: de98bf74101a121479056513ab47d13a, type: 3}
+  - {fileID: -203655887218126122, guid: 425e2dfacd1400a47b5666339f3323b7, type: 3}
+  - {fileID: -203655887218126122, guid: 425249f3db9235e4a9b604e3474bbd8c, type: 3}
+  - {fileID: -203655887218126122, guid: 21bd1d6e793f2c545a78bc5a6cc429eb, type: 3}
+  - {fileID: -203655887218126122, guid: 89fa192f84c168445af336c52946165c, type: 3}
+  - {fileID: -203655887218126122, guid: 1478aac102fc8ef4abe79a29a20ce822, type: 3}
+  - {fileID: -203655887218126122, guid: a0489e5871d79154196acd043a6339f2, type: 3}
+  - {fileID: -203655887218126122, guid: 3a6c1cd17c9d44641b315a9e05891a4f, type: 3}
+  - {fileID: -203655887218126122, guid: 19a71368a39a6da4c92695e0ea6957ac, type: 3}
+  - {fileID: -203655887218126122, guid: aaec5f4552e68b046a37023775f05d76, type: 3}
+  - {fileID: -203655887218126122, guid: 51071f6041d8bff4a81efd0033fa7203, type: 3}
+  - {fileID: -203655887218126122, guid: 4fbef580eac82d24f99a07cec80c1b74, type: 3}
+  - {fileID: -203655887218126122, guid: 4db4b072e4f2ac24d8bd8089f4f6a1fc, type: 3}
+  - {fileID: -203655887218126122, guid: 8f07184b4f89d7142b9f93dba418c962, type: 3}
+  - {fileID: -203655887218126122, guid: 6a2eee1df03facf4e8b312676383ea36, type: 3}
+  - {fileID: -203655887218126122, guid: 8d33ed480a82b4c4592c1dbab1101cd4, type: 3}
+  - {fileID: -203655887218126122, guid: c92524bc7acd28d44b2b61ddd8c22a95, type: 3}
+  - {fileID: -203655887218126122, guid: 1393fe3fe7fa47c4d8879b6465d6c8b9, type: 3}
+  - {fileID: -203655887218126122, guid: 532e35c3826ee924eb180602c6552ca4, type: 3}
+  - {fileID: -203655887218126122, guid: e7970e9a5ae69734b8f713262fb06000, type: 3}
+  - {fileID: -203655887218126122, guid: ac4841f2519be0c46b7c00bbf63af077, type: 3}
+  - {fileID: -203655887218126122, guid: cc5cb880140aad242b011db5a30acb0c, type: 3}
+  - {fileID: -203655887218126122, guid: 23a6c2b511aba4240b8ec51c155b3607, type: 3}
+  - {fileID: -203655887218126122, guid: c0f437cf636748042a44791c11e1aec2, type: 3}
+  - {fileID: -203655887218126122, guid: 7bccc511b5a8523438ef16226253934f, type: 3}
+  - {fileID: -203655887218126122, guid: 12c6528d988d1f64eab8f9e6fc760d3a, type: 3}
+  - {fileID: -203655887218126122, guid: 1cfe7e4f4dcc87e47b7149d236a4c06c, type: 3}
+  - {fileID: -203655887218126122, guid: 4da8d926659069f46a609ab6daa23c6c, type: 3}
+  - {fileID: -203655887218126122, guid: 59a96526f3ee66d4dbf6be8adb636ded, type: 3}
+  - {fileID: -203655887218126122, guid: 5bc786f4e8213b2438353d3463c005f6, type: 3}
+  - {fileID: -203655887218126122, guid: 7e67dc8ecdf7f404993c72e6ca633290, type: 3}
+  - {fileID: -203655887218126122, guid: a6f8ee4a8e8043040b16607aeda5037b, type: 3}
+  - {fileID: -203655887218126122, guid: 83b36719ed4fbec4db1b3dce6411f519, type: 3}
+  - {fileID: -203655887218126122, guid: 32b4c6b1872932e47a45ab0a81d0cb0f, type: 3}
+  - {fileID: -203655887218126122, guid: a35f22aeb55fe8945a4cf0f42d168eb2, type: 3}
+  - {fileID: -203655887218126122, guid: 95676efd149e49745ada224857256e55, type: 3}
+  - {fileID: -203655887218126122, guid: ccaa08172dfd94543a9a6ab215653640, type: 3}
+  - {fileID: -203655887218126122, guid: 952bd59875bfd0f4bb706a87890ac361, type: 3}
+  - {fileID: -203655887218126122, guid: 4740805b9aff4a94f8f7c05f05646688, type: 3}
+  - {fileID: -203655887218126122, guid: 3ee046cdaea5c4844b68f4066a004841, type: 3}
+  - {fileID: -203655887218126122, guid: d97033ac1fd4ef446940d1a25981a830, type: 3}
+  - {fileID: -203655887218126122, guid: b44d835d06265944c95a23386921f84f, type: 3}
+  - {fileID: -203655887218126122, guid: 24800f6b52fbaa64982095d32a7f2424, type: 3}
+  - {fileID: -203655887218126122, guid: 38b050fa91878c743b24c7704e681671, type: 3}
+  - {fileID: -203655887218126122, guid: 9efa194149e8d494cb50317d02419582, type: 3}
+  - {fileID: -203655887218126122, guid: 7ddbc744f76b785459208409c81fe04d, type: 3}
+  - {fileID: -203655887218126122, guid: f379d77a571ea2a4fa01ae4045e59bfa, type: 3}
+  - {fileID: -203655887218126122, guid: 0c0f879d5bc8f9e45b176357216bdefe, type: 3}
+  - {fileID: -203655887218126122, guid: 810703dcaf8985a4ab4eca44c48e2325, type: 3}
+  displayNames:
+  - cover to stand (2)
+  - cover to stand
+  - crouched sneaking left
+  - crouched sneaking right
+  - falling idle
+  - falling to roll
+  - hard landing
+  - idle (2)
+  - idle (3)
+  - idle (4)
+  - idle (5)
+  - idle
+  - jumping up
+  - left cover sneak
+  - left turn
+  - right cover sneak
+  - right turn
+  - run to stop
+  - running
+  - stand to cover (2)
+  - stand to cover
+  - walking
+  - firing rifle
+  - hit reaction (3)
+  - hit reaction
+  - reloading (3)
+  - reloading
+  - rifle aiming idle
+  - rifle jump (3)
+  - rifle jump
+  - rifle run
+  - run backwards (3)
+  - run backwards
+  - strafe (2) (3)
+  - strafe (2)
+  - strafe left
+  - strafe right (3)
+  - strafe right
+  - strafe
+  - toss grenade
+  - turn left
+  - turning right 45 degrees
+  - walking backwards
+  - walking
+  - breakdance 1990 (2)
+  - breakdance 1990 (3)
+  - breakdance 1990
+  - breakdance ending 1
+  - breakdance ending 2
+  - breakdance ending 3
+  - breakdance footwork 1
+  - breakdance footwork 2
+  - breakdance footwork 3
+  - breakdance footwork to freeze
+  - breakdance footwork to idle (2)
+  - breakdance footwork to idle
+  - breakdance freeze var 1
+  - breakdance freeze var 2
+  - breakdance freeze var 3
+  - breakdance freeze var 4
+  - breakdance freezes
+  - breakdance ready (2)
+  - breakdance ready (3)
+  - breakdance ready
+  - breakdance swipes
+  - breakdance uprock (2)
+  - breakdance uprock to ground (2)
+  - breakdance uprock to ground
+  - breakdance uprock var 1 end
+  - breakdance uprock var 1 start
+  - breakdance uprock var 1
+  - breakdance uprock var 2
+  - breakdance uprock
+  - brooklyn uprock
+  - crossleg freeze
+  - flair (2)
+  - flair (3)
+  - flair
+  - idle
+  - jump
+  - left strafe walk
+  - left strafe
+  - left turn (2)
+  - left turn
+  - right strafe walk
+  - right strafe
+  - right turn (2)
+  - right turn
+  - running
+  - walking
+  - standing idle 01
+  - standing run back
+  - standing run forward stop
+  - standing run forward
+  - standing run left
+  - standing run right
+  - standing turn 90 left
+  - standing turn 90 right
+  - standing walk back
+  - standing walk forward
+  - standing walk left
+  - standing walk right
+  - draw sword 1
+  - draw sword 2
+  - sheath sword 1
+  - sheath sword 2
+  - sword and shield 180 turn (2)
+  - sword and shield 180 turn
+  - sword and shield attack (2)
+  - sword and shield attack (3)
+  - sword and shield attack (4)
+  - sword and shield attack
+  - sword and shield block (2)
+  - sword and shield block idle
+  - sword and shield block
+  - sword and shield casting (2)
+  - sword and shield casting
+  - sword and shield crouch block (2)
+  - sword and shield crouch block idle
+  - sword and shield crouch block
+  - sword and shield crouch idle
+  - sword and shield crouch
+  - sword and shield crouching (2)
+  - sword and shield crouching (3)
+  - sword and shield crouching
+  - sword and shield death (2)
+  - sword and shield death
+  - sword and shield idle (2)
+  - sword and shield idle (3)
+  - sword and shield idle (4)
+  - sword and shield idle
+  - sword and shield impact (2)
+  - sword and shield impact (3)
+  - sword and shield impact
+  - sword and shield jump (2)
+  - sword and shield jump
+  - sword and shield kick
+  - sword and shield power up
+  - sword and shield run (2)
+  - sword and shield run
+  - sword and shield slash (2)
+  - sword and shield slash (3)
+  - sword and shield slash (4)
+  - sword and shield slash (5)
+  - sword and shield slash
+  - sword and shield strafe (2)
+  - sword and shield strafe (3)
+  - sword and shield strafe (4)
+  - sword and shield strafe
+  - sword and shield turn (2)
+  - sword and shield turn
+  - sword and shield walk (2)
+  - sword and shield walk
