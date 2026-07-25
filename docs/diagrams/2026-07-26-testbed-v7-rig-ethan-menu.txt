@@ -1,0 +1,51 @@
+=============================================================================
+TESTBED_V7 -- terrain + Build Player Rig + Ethan + fix niespojnosci spustu
+2026-07-26  branch: wrk/npc-pinea
+=============================================================================
+
+1. TERRAIN (sam grunt) -- Assets/PLAGA44/TESTBED_V7.unity
+   Przeniesiony Terrain GO ze Scene_A (Flooded_Grounds):
+     GameObject "Terrain" + Terrain(218) + TerrainCollider(154) + Transform
+     TerrainData: guid 3067f4c4... (asset wspoldzielony, nietkniety)
+   Zmiany vs oryginal:
+     m_Father 941927226 -> 0        (Terrain na root sceny)
+     m_DrawTreesAndFoliage 1 -> 0   (BEZ drzew/trawy = sam grunt)
+   NIE ruszone: budynki, drzewa (osobne GO w Scene_A).
+
+2. BUILD PLAYER RIG -- Editor/Setup/BuildPlayerRigSetup.cs (NOWY)
+   Menu: CYBERNOMAD/Tools/Build Player Rig   (rooftop USUNIETY)
+   Idempotentny (jest -> reuse, brak -> stworz):
+     1. OVRCameraRig                [Meta SDK core prefab]
+     2. StylizedCharacterLocomotion [Movement SDK sample]  = defaultRig
+     3. PlayerRigSetup.Run(cfg)     CC + Locomotion + SmoothTurn + PlayerAvatar
+                                    + PositionPersistence + FingerFreezer + pozycja
+     4. _HamburgerMenu             [GO + HamburgerMenu.cs] menu (samo buduje canvas)
+   ZERO fallbackow: brak cfg/prefaba -> LogError + stop.
+
+3. ETHAN (avatar/NPC) -- Assets/PLAGA44/Avatars/Ethan/
+   fbx (humanoid) + EthanGrey/White.mat + EthanNormals/Occlusion.png
+   Skopiowane Z .meta -> GUIDy zachowane -> model->material->tekstura trzyma sie.
+   Shader: nakladany runtime na spawnie (Custom/Test Shader), zero konwersji URP.
+
+4. SPUSTY W MENU -- fix niespojnosci + "100 pinei" -- Scripts/UI/HamburgerMenu.cs
+
+           PRZED                          PO
+   spust  -> zmiana wartosci ±1      spust  -> NEXT/prev POZYCJA (scroll listy)
+            (held+accel repeat)               NIGDY nie wyzwala wartosci/akcji
+            = wyzwalal akcje!                 -> "100 pinei" ZABITE
+            SPAWN x100 pinei
+   A/X    -> martwe w Settings       A/X    -> ENTER: toggle 0<->1 / akcja (1x)
+   stick X-> zmienialo tez akcje     stick X-> tylko wartosci ciagle/multi-wybor
+   stick Y-> wybor pozycji           stick Y-> wybor pozycji (bez zmian)
+   B/Y    -> BACK                    B/Y    -> BACK (bez zmian)
+
+   Kryterium ENTER-aktywacji: pozycja min0/max1/step1 (toggle LUB akcja).
+     Spawn Pinea, Despawn All, Hide Head, Post FX, Fog On/Off, RESET, QUIT...
+     multi-wybor (Mode 0..N, Item 0..10, Animacja) -> stick X.
+
+   Nowe metody: UpdateSettingsSelectionByTriggers, MoveSettingIndex,
+                IsEnterActivated, ActivateCurrentSetting.
+   Spust obslugiwany poza stick-cooldownem (wlasny throttle _lastTriggerTime).
+
+STATUS: pisane z WSL, NIE skompilowane/przetestowane w Unity.
+=============================================================================

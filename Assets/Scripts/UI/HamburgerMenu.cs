@@ -157,7 +157,13 @@ namespace Plaga44.UI
             if (!MenuOpen) return;
 
             if (PressedBack()) { GoBack(); return; }
-            if (PressedEnter() && _level != MenuLevel.Settings) { GoForward(); return; }
+            if (PressedEnter())
+            {
+                // W Settings ENTER wykonuje akcje / przelacza toggle 0<->1 biezacej pozycji.
+                // Wyzej (Top/Group) ENTER wchodzi glebiej w menu.
+                if (_level == MenuLevel.Settings) { ActivateCurrentSetting(); return; }
+                GoForward(); return;
+            }
 
             HandleNavigation();
         }
@@ -287,6 +293,10 @@ namespace Plaga44.UI
 
         private void HandleNavigation()
         {
+            // Spust = nawigacja pozycji w Settings. Ma WLASNY throttle (_lastTriggerTime),
+            // wiec musi byc poza stick-cooldownem -- inaczej ruch sticka blokowalby spust.
+            if (_level == MenuLevel.Settings) UpdateSettingsSelectionByTriggers();
+
             Vector2 stick = GetStrongerThumbstick();
             if (Time.unscaledTime - _lastStickTime < STICK_COOLDOWN) return;
 
@@ -329,9 +339,9 @@ namespace Plaga44.UI
 
         private void HandleSettingsInput(Vector2 stick)
         {
-            UpdateSettingsSelection(stick);
-            UpdateSettingsValueByStick(stick);
-            UpdateSettingsValueByTriggers();
+            UpdateSettingsSelection(stick);     // stick Y = wybor pozycji
+            UpdateSettingsValueByStick(stick);  // stick X = zmiana wartosci (nie toggle/akcja)
+            // Spust (nawigacja pozycji) obslugiwany w HandleNavigation, poza stick-cooldownem.
         }
 
         private void UpdateSettingsSelection(Vector2 stick)
@@ -348,11 +358,19 @@ namespace Plaga44.UI
 
         private void UpdateSettingsValueByStick(Vector2 stick)
         {
+            // Toggle/akcja (0..1) NIE reaguja na stick -- zatwierdzenie tylko ENTER (A/X).
+            // Chroni przed przypadkowym przelaczeniem i (dla akcji) przed wyzwoleniem ze sticka.
+            if (_settingIndex >= 0 && _settingIndex < _currentSettings.Count
+                && IsEnterActivated(_currentSettings[_settingIndex])) return;
+
             if (stick.x > STICK_THRESHOLD) { AdjustSetting(1); _lastStickTime = Time.unscaledTime; }
             else if (stick.x < -STICK_THRESHOLD) { AdjustSetting(-1); _lastStickTime = Time.unscaledTime; }
         }
 
-        private void UpdateSettingsValueByTriggers()
+        // Spust L/R = poprzednia/nastepna POZYCJA w liscie ustawien (nie wartosc!).
+        // Przytrzymanie = przyspieszajace przewijanie listy. NIGDY nie zmienia wartosci
+        // ani nie wyzwala akcji -- to eliminuje "100 pinei" (spust trzymany na Spawn Pinea).
+        private void UpdateSettingsSelectionByTriggers()
         {
             bool trigL = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.LTouch);
             bool trigR = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
@@ -368,8 +386,8 @@ namespace Plaga44.UI
                 Mathf.Clamp01(holdTime / TRIGGER_ACCEL_TIME));
             if (Time.unscaledTime - _lastTriggerTime <= repeatRate) return;
 
-            if (trigL) AdjustSetting(-1);
-            if (trigR) AdjustSetting(1);
+            if (trigL) MoveSettingIndex(-1);
+            if (trigR) MoveSettingIndex(1);
             _lastTriggerTime = Time.unscaledTime;
         }
 
@@ -379,6 +397,41 @@ namespace Plaga44.UI
             var s = _currentSettings[_settingIndex];
             float val = Mathf.Clamp(s.get() + s.step * dir, s.min, s.max);
             s.set(val);
+            UpdateSettingsDisplay();
+        }
+
+        // Przesuwa wybor pozycji w liscie ustawien (spust L/R). Clamp do granic listy.
+        private void MoveSettingIndex(int dir)
+        {
+            int n = _currentSettings.Count;
+            if (n == 0) return;
+            int next = Mathf.Clamp(_settingIndex + dir, 0, n - 1);
+            if (next == _settingIndex) return;
+            _settingIndex = next;
+            UpdateSettingsDisplay();
+        }
+
+        // Pozycja typu 0..1 (step 1) = toggle LUB akcja -- zatwierdzana ENTEREM (A/X),
+        // nie stickiem/spustem. Wartosci ciagle i multi-wybor (max>1) tu nie wchodza.
+        private static bool IsEnterActivated(SettingDef s)
+            => Mathf.Approximately(s.min, 0f)
+            && Mathf.Approximately(s.max, 1f)
+            && Mathf.Approximately(s.step, 1f);
+
+        // ENTER (A/X) w Settings: toggle przelacza 0<->1, akcja (getter=0) wyzwala set(1).
+        // Wartosci ciagle / multi-wybor / read-only -> ENTER nic nie robi.
+        private void ActivateCurrentSetting()
+        {
+            if (_settingIndex < 0 || _settingIndex >= _currentSettings.Count) return;
+            var s = _currentSettings[_settingIndex];
+            if (!IsEnterActivated(s)) return;
+
+            float newVal = s.get() > 0.5f ? 0f : 1f;
+            s.set(newVal);
+
+            var ctrl = OVRInput.GetDown(OVRInput.RawButton.A)
+                ? OVRInput.Controller.RTouch : OVRInput.Controller.LTouch;
+            Plaga44.Feedback.HapticManager.Instance?.PlayCustom(ctrl, 0.6f, 0.7f, 0.05f, "menu-enter");
             UpdateSettingsDisplay();
         }
 
