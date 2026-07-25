@@ -100,6 +100,7 @@ namespace Plaga44.Npc
             Quaternion rot = ResolveSpawnRotation();
 
             var instance = Instantiate(prefab, pos, rot);
+            Plaga44.Rendering.TestShaderApplier.Apply(instance); // Custom/Test Shader
             instance.name = prefab.name;
 
             // Collider fizyczny -- kapsula stojacego NPC (stopy w 0, glowa ~1.8).

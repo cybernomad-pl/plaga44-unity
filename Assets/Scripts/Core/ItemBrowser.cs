@@ -183,6 +183,7 @@ namespace Plaga44
             _spawnedPreview = Instantiate(prefab, pos, rot);
             _spawnedPreview.name = $"ItemPreview_{prefab.name}";
             _spawnedPrefabName = prefab.name;
+            Plaga44.Rendering.TestShaderApplier.Apply(_spawnedPreview); // Custom/Test Shader (URP/Lit = magenta)
 
             // Enable physics so player can grab it naturally with OVRGrabber
             var rb = _spawnedPreview.GetComponent<Rigidbody>();

@@ -163,6 +163,7 @@ namespace Plaga44
             };
 
             var instance = Instantiate(prefab, worldPos, Quaternion.identity);
+            Plaga44.Rendering.TestShaderApplier.Apply(instance); // Custom/Test Shader
             instance.name = prefab.name;
             WireComponents(instance, entry);
             _spawned.Add(instance);
@@ -197,6 +198,7 @@ namespace Plaga44
             if (entry.floatAtEyeLevel) offset.y = 0f;
             Vector3 pos = ResolveSpawnPosition(offset);
             var instance = Instantiate(prefab, pos, Quaternion.identity);
+            Plaga44.Rendering.TestShaderApplier.Apply(instance); // Custom/Test Shader
             instance.name = prefab.name;
 
             WireComponents(instance, entry);

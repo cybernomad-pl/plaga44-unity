@@ -1,0 +1,53 @@
+=============================================================================
+ SHADER-AT-SPAWN -- Custom/Test Shader wymuszany runtime przy kazdym spawnie
+ 2026-07-25  branch bleeding-edge-v2
+=============================================================================
+
+PROBLEM
+  URP/Lit (guid 933532a4) renderuje sie MAGENTA w tym projekcie (shotgun rozowy).
+  Custom/Test Shader (guid a176945d, ten sam co dziala na PINEA) renderuje OK.
+  Recznie zmieniac material kazdego assetu = zawodne (nowe itemy = znowu rozowe).
+  ROZWIAZANIE: podmieniaj shader na INSTANCJACH przy kazdym spawnie, w kodzie.
+
+PRZEPLYW
+                        +-----------------------------+
+                        |  TestShaderApplier.Apply(go)|
+                        |  (static, Scripts/Rendering) |
+                        +--------------+--------------+
+                                       |
+              Shader.Find("Custom/Test Shader")  [cache: _searched/_shader]
+                                       |
+                        null? --> LogWarning raz, NO-OP (build bez shadera)
+                                       |
+                        foreach Renderer in children(true):
+                          mats = r.materials   <-- INSTANCJE (nie sharedMaterial)
+                          for m in mats: if m.shader != sh -> m.shader = sh
+                          if changed: r.materials = mats
+                                       |
+        +----------------+----------------+----------------+----------------+
+        |                |                |                |                |
+   ItemBrowser      PlagaGrabber      ObjectSpawner     NpcSpawner      AvatarGallery
+   SpawnPreview     SpawnAndGrab      (x2 spawn)        spawn NPC       spawn avatar
+   (galeria)        (trigger/back)                                     ("avatarom rowniez")
+        |                |                |                |                |
+        v                v                v                v                v
+     item w scenie   item do dloni    obiekt swiata    NPC w scenie    avatar w scenie
+     BEZ magenta     BEZ magenta      BEZ magenta      BEZ magenta     BEZ magenta
+
+KLUCZOWE
+  - .materials = klon per-renderer -> NIE dotyka assetu/prefabu na dysku.
+  - Zachowuje tekstury/property o zgodnych nazwach (URP/Lit -> Test maja te same sloty).
+  - No-op gdy shader null: ZERO FALLBACKU. Nie zgaduje zastepczego shadera,
+    zostawia material jak jest (widoczny brak = fixable) i loguje raz.
+
+OSTRZEZENIE -- BUILD QUEST
+  Custom/Test Shader lezy w URP PackageCache Tests/Editor/ -> EDITOR-ONLY.
+  Dziala w edytorze (demo), ale NIE wejdzie do APK Questa.
+  Przed buildem: skopiowac .shader do Assets/ LUB dodac do Always Included Shaders.
+  (osobny task -- nie ruszany w tym commicie)
+
+DODATKOWO W TYM COMMICIE
+  - No Name.mat (shotgun) + M249.mat: m_Shader -> a176945d (podglad w edytorze OK).
+  - AvatarRegistry.asset: avatars: [] (PINEA_YNG5 usuniety z menu AVATAR,
+    zostaje tylko w systemie NPC).
+=============================================================================

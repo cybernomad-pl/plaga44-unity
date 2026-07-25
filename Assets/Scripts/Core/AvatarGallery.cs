@@ -265,6 +265,7 @@ namespace Plaga44
                 Vector3 pos = origin + dir * spacing * i;
                 Debug.Log($"{LOG}   [{i}] '{entry.name}' instantiating at {pos:F2} (rot.y={rot.eulerAngles.y:F0})");
                 var inst = Instantiate(entry.prefab, pos, rot, transform);
+                Plaga44.Rendering.TestShaderApplier.Apply(inst); // Custom/Test Shader avatarom
                 inst.name = $"Preview_{entry.name}";
 
                 // Diagnose prefab structure

@@ -232,6 +232,7 @@ namespace Plaga44.Inventory
 
             var go = Instantiate(prefab, pos, rot);
             go.name = prefab.name;
+            Plaga44.Rendering.TestShaderApplier.Apply(go); // wymus Custom/Test Shader (URP/Lit = magenta)
 
             // One frame so OVRGrabbable.Awake (grabPoints) + Start (kinematic baseline) run
             // BEFORE we grab -- otherwise release would leave the item kinematic (frozen).

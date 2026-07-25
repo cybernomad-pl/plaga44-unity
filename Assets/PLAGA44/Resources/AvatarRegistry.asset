@@ -12,4 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d40e787bc1413141aaf242f358ae31c, type: 3}
   m_Name: AvatarRegistry
   m_EditorClassIdentifier: Assembly-CSharp::Plaga44.AvatarRegistry
-  avatars: []
+  avatars:
+  - name: PINEA_YNG5
+    prefab: {fileID: 1617058776068205836, guid: 51dbcfab2c02f37489e0f176e7b5d803, type: 3}
+    broken: 0
+    errorMessage: 
