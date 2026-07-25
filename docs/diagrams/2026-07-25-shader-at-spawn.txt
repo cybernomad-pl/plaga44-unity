@@ -40,11 +40,18 @@ KLUCZOWE
   - No-op gdy shader null: ZERO FALLBACKU. Nie zgaduje zastepczego shadera,
     zostawia material jak jest (widoczny brak = fixable) i loguje raz.
 
-OSTRZEZENIE -- BUILD QUEST
-  Custom/Test Shader lezy w URP PackageCache Tests/Editor/ -> EDITOR-ONLY.
-  Dziala w edytorze (demo), ale NIE wejdzie do APK Questa.
-  Przed buildem: skopiowac .shader do Assets/ LUB dodac do Always Included Shaders.
-  (osobny task -- nie ruszany w tym commicie)
+BUILD QUEST -- ZALATWIONE (drugi commit)
+  Custom/Test Shader skopiowany z URP Tests do ASSETU:
+    Assets/PLAGA44/Shaders/TestShader.shader   (nowy guid 6fd83c57...)
+  To Built-in surface shader (#pragma surface surf Standard, CGPROGRAM) -- NIE URP.
+  Renderuje poprawnie na PINEA (potwierdzone empirycznie przez Borysa).
+  - Shader.Find("Custom/Test Shader") znajdzie asset w buildzie -> applier dziala w APK.
+  - No Name.mat (shotgun) + M249.mat przepiete: guid a176945d (PackageCache/editor-only)
+    -> 6fd83c57 (asset/build-safe). Statyczne materialy tez OK w buildzie.
+  UWAGA edytor: w edytorze istnieja 3 shadery o nazwie "Custom/Test Shader"
+    (moj asset + 2x URP Tests) -> Unity moze logowac warning o duplikacie nazwy.
+    Renderuja identycznie (ta sama tresc). W buildzie zostaje tylko asset. Nieszkodliwe.
+    Jesli przeszkadza: dodac shader do Always Included Shaders i olac warning.
 
 DODATKOWO W TYM COMMICIE
   - No Name.mat (shotgun) + M249.mat: m_Shader -> a176945d (podglad w edytorze OK).

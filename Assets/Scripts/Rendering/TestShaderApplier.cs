@@ -7,9 +7,10 @@
 // Stosowane runtime na INSTANCJACH (renderer.materials, nie sharedMaterials) --
 // nie modyfikuje assetow/prefabow, tylko sklonowany obiekt w scenie.
 //
-// UWAGA: shader lezy w URP PackageCache Tests/Editor/ -- dziala w EDYTORZE,
-// ale NIE wejdzie do buildu Questa (Editor-only). Do buildu trzeba skopiowac
-// .shader do Assets/ lub dodac do Always Included Shaders (osobny task).
+// Shader jest ASSETEM: Assets/PLAGA44/Shaders/TestShader.shader (Custom/Test
+// Shader, kopia z URP Tests). Build-safe -- wejdzie do APK Questa, o ile jest
+// referowany przez material w buildzie (jest -- shotgun/M249) lub dodany do
+// Always Included Shaders. Shader.Find dziala po nazwie shaderlab.
 // =============================================================================
 
 using UnityEngine;
@@ -57,8 +58,9 @@ namespace Plaga44.Rendering
             if (_shader == null && !_warned)
             {
                 _warned = true;
-                Debug.LogWarning($"{LOG} '{ShaderName}' nie znaleziony (Editor-only shader -- brak w buildzie?). "
-                    + "Materialy bez zmian. Skopiuj .shader do Assets/ lub dodaj do Always Included Shaders.");
+                Debug.LogWarning($"{LOG} '{ShaderName}' nie znaleziony przez Shader.Find. "
+                    + "Materialy bez zmian. Sprawdz Assets/PLAGA44/Shaders/TestShader.shader "
+                    + "lub dodaj shader do Always Included Shaders (Project Settings > Graphics).");
             }
             return _shader;
         }
