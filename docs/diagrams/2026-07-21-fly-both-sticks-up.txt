@@ -1,0 +1,38 @@
+=============================================================================
+FLY GESTURE: OBA STICKI W GORE (symetria z ladowaniem)
+2026-07-21  LocomotionController.cs
+=============================================================================
+
+PRZED:                          PO:
+  fly up = R-stick GORA           fly up = OBA sticki GORA
+  land   = OBA sticki DOL         land   = OBA sticki DOL  (bez zmian)
+
+Gest liczony w Update() z leftY (L-stick.y) i rightY (R-stick.y):
+
+  flyGesture = leftY > 0.15  &&  rightY > 0.15     (latch -- start wznoszenia)
+  flyHold    = leftY > 0.05  &&  rightY > 0.05     (keep -- histereza, anty-flicker)
+  landGesture= leftY < -0.3  &&  rightY < -0.3     (koniec lotu)
+
+STATE MACHINE (UpdateFly):
+
+        flyGesture (OBA gora)
+  GROUNDED ----------------------> ASCENDING
+     ^                                |  |
+     |                        flyHold |  | !flyHold (puszczono ktorykolwiek)
+     | IsGrounded                     v  v
+     |  / EndFlight              (accel)  HOVERING
+     |                                     |   ^
+     |         landGesture (OBA dol)       |   | flyGesture (OBA gora)
+     +-------------------------------------+   | -> ASCENDING (od 0, normal accel)
+                                               |
+                                        drift (losowy hover)
+
+ZMIANY:
+  - UpdateFly(rightY, landGesture)  ->  UpdateFly(flyGesture, flyHold, landGesture)
+  - Grounded:  rightY>Up            ->  flyGesture
+  - Ascending: rightY>Release       ->  flyHold
+  - Hovering:  rightY>Up            ->  flyGesture
+  - UpdateStance(rightY)            ->  UpdateStance()   (param byl nieuzywany)
+
+Histereza zachowana: latch OBA>0.15, keep OBA>0.05.
+Puszczenie ktoregokolwiek sticka podczas wznoszenia -> HOVER.

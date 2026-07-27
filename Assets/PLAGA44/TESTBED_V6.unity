@@ -93,7 +93,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 112000000, guid: b5b1b122fec5c7b44ad209b47f3b7ecd, type: 2}
+  m_LightingDataAsset: {fileID: 0}
   m_LightingSettings: {fileID: 4890085278179872738, guid: ec195f0b0f1e1864f9e1861b57b84a0b, type: 2}
 --- !u!196 &4
 NavMeshSettings:
@@ -860,16 +860,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24b867055d828014684aa3cfcd180e91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plaga44.Inventory.PlagaGrabber
-  grabBegin: 0.55
-  grabEnd: 0.35
-  m_parentHeldObject: 1
-  m_moveHandPosition: 0
-  m_gripTransform: {fileID: 387489578}
-  m_grabVolumes:
-  - {fileID: 29900357}
-  m_controller: 2
-  m_parentTransform: {fileID: 0}
-  m_player: {fileID: 0}
 --- !u!54 &1007391263
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -909,16 +899,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24b867055d828014684aa3cfcd180e91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Plaga44.Inventory.PlagaGrabber
-  grabBegin: 0.55
-  grabEnd: 0.35
-  m_parentHeldObject: 1
-  m_moveHandPosition: 0
-  m_gripTransform: {fileID: 387489579}
-  m_grabVolumes:
-  - {fileID: 577479621}
-  m_controller: 1
-  m_parentTransform: {fileID: 0}
-  m_player: {fileID: 0}
 --- !u!114 &1007391265
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1378,12 +1358,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Plaga44.Locomotion.LocomotionController
   moveSpeed: 2.5
   strafeFactor: 0.8
+  sprintMultiplier: 2
+  sprintActive: 0
+  sprintRampSpeed: 2
   _headTransform: {fileID: 0}
   flyAcceleration: 5
   flyMaxSpeed: 8
   standHeight: 1.8
   crouchHeight: 1
   proneHeight: 0.5
+  airAcceleration: 6
+  airMaxSpeed: 8
+  airDrag: 0.5
   stanceTransitionSpeed: 3
 --- !u!143 &1530527698
 CharacterController:
@@ -1440,6 +1426,7 @@ MonoBehaviour:
   - holsterId: RightHip
     resourcePath: Items/Revolver
     enabled: 1
+  enableLoadout: 0
 --- !u!114 &1530527701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1809,7 +1796,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -512, y: 0, z: -512}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 20, y: 20, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}

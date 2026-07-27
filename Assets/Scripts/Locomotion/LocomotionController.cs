@@ -2,13 +2,12 @@
 // LocomotionController.cs
 // CYBERNOMAD -- Glowny kontroler lokomocji gracza w PLAGA '44.
 //
-// INPUT (lewy thumbstick = ruch, prawy thumbstick Y = fly/stance):
+// INPUT (lewy thumbstick = ruch, latanie = OBA sticki):
 //   L thumbstick: ruch head-relative (CharacterController.Move)
-//   R thumbstick UP: fly up (accelerating, gravity suspended)
-//   R thumbstick DOWN short: toggle CROUCH
-//   R thumbstick DOWN long hold: go to PRONE
-//   From crouch/prone, flick UP: stand up
+//   BOTH thumbsticks UP: fly up (accelerating, gravity suspended)
+//   BOTH thumbsticks DOWN (w hover): land / end flight
 //   R thumbstick X: smooth turn (handled by SmoothTurnController, no conflict)
+//   CROUCH/PRONE wylaczone -- lokomocja fly-only.
 //
 // STANCE: STAND -> CROUCH -> PRONE | FLOATING (auto-set while flying)
 //   CC height + center change for collisions.
@@ -207,10 +206,14 @@ namespace Plaga44.Locomotion
 
             float leftY = moveInput.y;
             float rightY = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch).y;
+            // Fly gesture: BOTH thumbsticks pushed UP together starts/keeps ascent
+            // (symmetric to landing). Latch at StickUpThreshold, keep at release threshold (hysteresis).
+            bool flyGesture = leftY > StickUpThreshold && rightY > StickUpThreshold;
+            bool flyHold = leftY > StickUpReleaseThreshold && rightY > StickUpReleaseThreshold;
             // Land gesture: BOTH thumbsticks pushed DOWN together ends flight.
             bool landGesture = leftY < -StickDownThreshold && rightY < -StickDownThreshold;
-            UpdateFly(rightY, landGesture);
-            UpdateStance(rightY);
+            UpdateFly(flyGesture, flyHold, landGesture);
+            UpdateStance();
 
             // Safety: force FLOATING if flying with wrong stance
             if (_flyState != FlyState.Grounded && _currentStance != Stance.Floating)
@@ -282,12 +285,12 @@ namespace Plaga44.Locomotion
         private const float HoverDriftChangeMax = 2f;
         private const float HoverDriftLerp = 2.5f;
 
-        private void UpdateFly(float rightY, bool landGesture)
+        private void UpdateFly(bool flyGesture, bool flyHold, bool landGesture)
         {
             switch (_flyState)
             {
                 case FlyState.Grounded:
-                    if (rightY > StickUpThreshold && _currentStance == Stance.Stand)
+                    if (flyGesture && _currentStance == Stance.Stand)
                     {
                         _flyState = FlyState.Ascending;
                         _flySpeed = 0f;
@@ -297,9 +300,9 @@ namespace Plaga44.Locomotion
                     break;
 
                 case FlyState.Ascending:
-                    // Hysteresis: once ascending, use LOWER threshold to keep ascending.
-                    // Prevents flicker when stick is near the UP threshold (issue #139).
-                    if (rightY > StickUpReleaseThreshold)
+                    // Hysteresis: once ascending, keep ascending while BOTH sticks stay above
+                    // the lower release threshold. Prevents flicker near the UP threshold (issue #139).
+                    if (flyHold)
                     {
                         // Accelerating upward
                         _flySpeed += flyAcceleration * _dt;
@@ -308,7 +311,7 @@ namespace Plaga44.Locomotion
                     }
                     else
                     {
-                        // Released stick -- transition to hover
+                        // Released a stick -- transition to hover
                         _flyState = FlyState.Hovering;
                         _flySpeed = 0f;
                         _hoverDrift = 0f;
@@ -322,9 +325,9 @@ namespace Plaga44.Locomotion
                     break;
 
                 case FlyState.Hovering:
-                    if (rightY > StickUpThreshold)
+                    if (flyGesture)
                     {
-                        // R stick UP -> normal fly up (NOT boost). Start from 0, accelerate normally.
+                        // BOTH sticks UP -> normal fly up. Start from 0, accelerate normally.
                         // Issue #162: 'jak jesteś hover to góra to góra i tyle' -- no special boost treatment.
                         _flyState = FlyState.Ascending;
                         _flySpeed = 0f;
@@ -382,9 +385,9 @@ namespace Plaga44.Locomotion
         private float _targetTrackingY;
 
         // CROUCH + PRONE DISABLED -- locomotion is fly-only.
-        // R-stick DOWN no longer cycles stance; fly (R-stick UP) is handled by
-        // UpdateFly. SetStance() stays because the fly system uses Stand/Floating.
-        private void UpdateStance(float rightY)
+        // Stance cycling removed; fly (BOTH sticks UP) is handled by UpdateFly.
+        // SetStance() stays because the fly system uses Stand/Floating.
+        private void UpdateStance()
         {
             if (_flyState != FlyState.Grounded) return;
             // Stance cycling removed by design -- keep LerpStance so any fly-set

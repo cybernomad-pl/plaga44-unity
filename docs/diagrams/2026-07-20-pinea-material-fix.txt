@@ -1,0 +1,46 @@
+PINEA -- "brak tekstur" : diagnoza i fix (2026-07-20)
+=====================================================
+
+CO BYLO SPRAWDZONE I OKAZALO SIE SPRAWNE
+----------------------------------------
+  shader        URP/Lit (guid 933532a4 = Lit.shader, com.unity.render-pipelines.universal)  OK
+  _BaseMap      -> PINEA_YNG5_packed0_diffuse.png    guid zgodny                            OK
+  _BumpMap      -> PINEA_YNG5_packed0_normal.png     guid zgodny, textureType=1 (normal)    OK
+  _SpecGlossMap -> PINEA_YNG5_SpecGloss.png          guid zgodny                            OK
+  _BaseColor    (1,1,1,1) opaque                                                            OK
+  registry      broken: 0, prefab podpiety                                                  OK
+  GUID audit    0 duplikatow w Assets; 3/3 referencje prefaba resolwuja                     OK
+
+PRAWDZIWA PRZYCZYNA
+-------------------
+  PINEA_YNG5.prefab to WARIANT prefaba. Nadpisuje materialy:
+
+     target: <renderer w .dae>
+     propertyPath: m_Materials.Array.data[0]
+     objectReference: PINEA_YNG5_Mat            (x4 renderery)
+
+  ALE w PINEA_YNG5.dae.meta bylo:
+
+     materialImportMode: 0        <-- None = model importuje sie BEZ materialow
+
+  => m_Materials ma rozmiar 0
+  => override na data[0] NIE MA SIE DO CZEGO PRZYCZEPIC (orphaned)
+  => renderery dostaja domyslny bialy material Unity
+
+  Objaw: "brak tekstur", mimo ze material jest spiety idealnie.
+  Material byl poprawny -- tylko NIEUZYWANY.
+
+FIX
+---
+  PINEA_YNG5.dae.meta:  materialImportMode: 0 -> 1   (ImportStandard)
+
+  Model dostaje sloty materialowe -> istniejacy override wariantu
+  wchodzi na data[0] -> PINEA_YNG5_Mat realnie sie renderuje.
+
+  materialLocation: 1 (External) + materialSearch: 1 zostaja bez zmian --
+  nawet jesli reimport wygeneruje dodatkowe materialy, override wariantu
+  i tak wygrywa na data[0].
+
+WERYFIKACJA (Borys)
+-------------------
+  Focus Unity -> reimport .dae -> PINEA w galerii ma byc teksturowana.
