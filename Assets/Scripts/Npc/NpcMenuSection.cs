@@ -27,6 +27,9 @@ namespace Plaga44.Npc
         // Ostatnio zespawniony NPC = cel akcji animacji. Unity fake-null obsluguje despawn.
         private static NpcController _active;
 
+        // Wybrany (jeszcze nie zespawniony) NPC z rejestru -- indeks w NpcRegistry.
+        private static int _selectedNpc;
+
         /// <summary>Aktywny NPC lub null (gdy nie zespawniono / zniszczony).</summary>
         private static NpcController ResolveActive()
         {
@@ -48,6 +51,49 @@ namespace Plaga44.Npc
 
             _active = npc;
             Notify($"NPC: Pinea zespawniona ({AnimCount} animacji)", true);
+        }
+
+        /// <summary>Liczba NPC w rejestrze.</summary>
+        public static int NpcCount => NpcSpawner.Instance != null ? NpcSpawner.Instance.NpcCount : 0;
+
+        /// <summary>Wybrany indeks NPC z rejestru (sklampowany do zakresu).</summary>
+        public static int SelectedNpc
+        {
+            get
+            {
+                int max = NpcCount - 1;
+                return max < 0 ? 0 : Mathf.Clamp(_selectedNpc, 0, max);
+            }
+            set
+            {
+                int max = NpcCount - 1;
+                _selectedNpc = max < 0 ? 0 : Mathf.Clamp(value, 0, max);
+            }
+        }
+
+        /// <summary>Nazwa wybranego NPC -- etykieta wiersza w menu.</summary>
+        public static string SelectedNpcLabel
+        {
+            get
+            {
+                var spawner = NpcSpawner.Instance;
+                if (spawner == null || NpcCount == 0) return "(brak NPC w rejestrze)";
+                return spawner.NpcName(SelectedNpc) ?? "(brak)";
+            }
+        }
+
+        /// <summary>Spawnuje aktualnie wybranego NPC z rejestru; zapamietuje jako aktywnego.</summary>
+        public static void SpawnSelected()
+        {
+            var spawner = NpcSpawner.Instance;
+            if (spawner == null) { Notify("NPC: brak NpcSpawner.Instance", false); return; }
+            if (NpcCount == 0) { Notify("NPC: rejestr pusty (odpal CYBERNOMAD/Setup/NPC Registry)", false); return; }
+
+            var npc = spawner.SpawnNpc(SelectedNpc);
+            if (npc == null) { Notify("NPC: spawn nieudany (patrz konsola)", false); return; }
+
+            _active = npc;
+            Notify($"NPC: {SelectedNpcLabel} zespawniony ({AnimCount} animacji)", true);
         }
 
         /// <summary>Niszczy wszystkie NPC i czysci aktywnego.</summary>

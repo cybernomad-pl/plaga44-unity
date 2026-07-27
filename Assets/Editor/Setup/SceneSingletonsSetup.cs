@@ -20,7 +20,7 @@ namespace Plaga44.Editor.Setup
             changed |= EnsureSingleton<HamburgerMenu>("_HamburgerMenu", "HamburgerMenu", null);
             changed |= EnsureSingleton<SkyRotator>("_SkyRotator", "SkyRotator", sr => sr.rotationSpeed = cfg.skyRotationSpeed);
             changed |= EnsureSingleton<AvatarGallery>("_AvatarGallery", "AvatarGallery", null);
-            changed |= EnsureSingleton<ItemBrowser>("_ItemBrowser", "ItemBrowser", null);
+            changed |= EnsureSingleton<ItemBrowser>("_ItemGallery", "Item Gallery", null);
             return changed;
         }
 

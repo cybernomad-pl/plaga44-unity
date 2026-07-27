@@ -25,7 +25,7 @@ namespace Plaga44.Inventory
         public class LoadoutEntry
         {
             public string holsterId = "RightHip";
-            public string resourcePath = "Items/Revolver";  // Resources.Load path
+            public string resourcePath = "Items/Shotgun";  // Resources.Load path
             public bool enabled = true;
         }
 

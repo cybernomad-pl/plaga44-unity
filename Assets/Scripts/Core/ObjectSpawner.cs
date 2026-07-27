@@ -32,7 +32,7 @@ namespace Plaga44
         public class SpawnEntry
         {
             [Tooltip("Resources path (e.g. 'Items/Revolver').")]
-            public string resourcePath = "Items/Revolver";
+            public string resourcePath = "Items/Shotgun";
 
             [Tooltip("Spawn offset relative to head (eye level). x=right, y=up from eyes (negative=table level), z=forward.")]
             public Vector3 offset = new Vector3(0f, -0.5f, 1.2f);

@@ -361,7 +361,7 @@ namespace Plaga44.UI
             // Toggle/akcja (0..1) NIE reaguja na stick -- zatwierdzenie tylko ENTER (A/X).
             // Chroni przed przypadkowym przelaczeniem i (dla akcji) przed wyzwoleniem ze sticka.
             if (_settingIndex >= 0 && _settingIndex < _currentSettings.Count
-                && IsEnterActivated(_currentSettings[_settingIndex])) return;
+                && IsEnterActivated(_currentSettings[_settingIndex], _activeSectionName)) return;
 
             if (stick.x > STICK_THRESHOLD) { AdjustSetting(1); _lastStickTime = Time.unscaledTime; }
             else if (stick.x < -STICK_THRESHOLD) { AdjustSetting(-1); _lastStickTime = Time.unscaledTime; }
@@ -413,10 +413,18 @@ namespace Plaga44.UI
 
         // Pozycja typu 0..1 (step 1) = toggle LUB akcja -- zatwierdzana ENTEREM (A/X),
         // nie stickiem/spustem. Wartosci ciagle i multi-wybor (max>1) tu nie wchodza.
-        private static bool IsEnterActivated(SettingDef s)
-            => Mathf.Approximately(s.min, 0f)
-            && Mathf.Approximately(s.max, 1f)
-            && Mathf.Approximately(s.step, 1f);
+        // WYJATEK: multi-wybory galerii (NPC/avatar/item/animacja) ZAWSZE ida na stick,
+        // nawet gdy zakres akurat 0..1 (np. 2 NPC) -- inaczej stick przestalby dzialac.
+        private static bool IsEnterActivated(SettingDef s, string section)
+        {
+            if (section == NpcSection && (s.name == "NPC" || s.name == "Animacja")) return false;
+            if (section == AvatarSection && s.name == "Mode") return false;
+            if (section == ItemsSection && s.name == "Item") return false;
+
+            return Mathf.Approximately(s.min, 0f)
+                && Mathf.Approximately(s.max, 1f)
+                && Mathf.Approximately(s.step, 1f);
+        }
 
         // ENTER (A/X) w Settings: toggle przelacza 0<->1, akcja (getter=0) wyzwala set(1).
         // Wartosci ciagle / multi-wybor / read-only -> ENTER nic nie robi.
@@ -424,7 +432,7 @@ namespace Plaga44.UI
         {
             if (_settingIndex < 0 || _settingIndex >= _currentSettings.Count) return;
             var s = _currentSettings[_settingIndex];
-            if (!IsEnterActivated(s)) return;
+            if (!IsEnterActivated(s, _activeSectionName)) return;
 
             float newVal = s.get() > 0.5f ? 0f : 1f;
             s.set(newVal);
@@ -659,6 +667,8 @@ namespace Plaga44.UI
                 return ($"{prefix}{s.name}: {ctx.Browser.CurrentLabel}", color);
             if (ctx.IsNpcAnim(s))
                 return ($"{prefix}{s.name}: {Plaga44.Npc.NpcMenuSection.CurrentAnimLabel}", color);
+            if (ctx.IsNpcSelect(s))
+                return ($"{prefix}{s.name}: {Plaga44.Npc.NpcMenuSection.SelectedNpcLabel}", color);
             return ($"{prefix}{s.name}: {s.get().ToString(s.format)}", color);
         }
 
@@ -670,6 +680,8 @@ namespace Plaga44.UI
                 return $"<  {ctx.Browser.CurrentLabel}  >    [{cur.min}..{cur.max}]   A/X = back";
             if (ctx.IsNpcAnim(cur))
                 return $"<  {Plaga44.Npc.NpcMenuSection.CurrentAnimLabel}  >    [{cur.min}..{cur.max}]   A/X = back";
+            if (ctx.IsNpcSelect(cur))
+                return $"<  {Plaga44.Npc.NpcMenuSection.SelectedNpcLabel}  >   Spawn = ENTER na 'Spawn'";
             return $"<  {cur.get().ToString(cur.format)}  >    [{cur.min}..{cur.max}]   A/X = back";
         }
 
@@ -697,6 +709,7 @@ namespace Plaga44.UI
             public bool IsBrokenAvatarMode(SettingDef s) => IsAvatarMode(s) && Player.IsCurrentBroken;
             public bool IsItemMode(SettingDef s) => IsItemsSection && s.name == "Item" && Browser != null;
             public bool IsNpcAnim(SettingDef s) => IsNpcSection && s.name == "Animacja";
+            public bool IsNpcSelect(SettingDef s) => IsNpcSection && s.name == "NPC";
         }
 
         // =====================================================================

@@ -39,7 +39,7 @@ namespace Plaga44.Inventory
 
         [Header("Back-holster draw")]
         [Tooltip("Resources path itemu dobywanego zza plecow (grip za glowa na wysokosci headsetu).")]
-        public string backHolsterResource = "Items/M249";
+        public string backHolsterResource = "Items/Shotgun"; // M249 usuniety z galerii -> Shotgun
 
         [Tooltip("Jak daleko ZA plaszczyzna glowy musi byc reka (m). Wieksze = trzeba siegnac glebiej.")]
         public float behindThreshold = 0.1f;

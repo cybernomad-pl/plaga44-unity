@@ -399,11 +399,17 @@ namespace Plaga44.UI
             // (wzor UI: ITEMS. Logika: Plaga44.Npc.NpcMenuSection)
             // =============================================================
             Sec("NPC", s => {
-                s.Add(S("Spawn Pinea", "Spawnuje Pinee przed graczem (staje sie aktywnym NPC)", () => 0,
-                    v => { if (v > 0.5f) Plaga44.Npc.NpcMenuSection.SpawnPinea(); }, 0, 1, 1, "F0"));
+                // Galeria NPC z rejestru (NpcRegistry). Wybor stickiem, spawn ENTEREM.
+                int npcMax = Mathf.Max(0, Plaga44.Npc.NpcMenuSection.NpcCount - 1);
+                s.Add(S("NPC", "Wybor NPC z rejestru (stick L/R)",
+                    () => Plaga44.Npc.NpcMenuSection.SelectedNpc,
+                    v => Plaga44.Npc.NpcMenuSection.SelectedNpc = (int)v, 0, npcMax, 1, "F0"));
+
+                s.Add(S("Spawn", "Spawnuje wybranego NPC przed graczem (staje sie aktywnym)", () => 0,
+                    v => { if (v > 0.5f) Plaga44.Npc.NpcMenuSection.SpawnSelected(); }, 0, 1, 1, "F0"));
 
                 int animMax = Mathf.Max(0, Plaga44.Npc.NpcMenuSection.AnimCount - 1);
-                s.Add(S("Animacja", "Przewijaj animacje aktywnego NPC (stick L/R lub triggery)",
+                s.Add(S("Animacja", "Przewijaj animacje aktywnego NPC (stick L/R)",
                     () => Plaga44.Npc.NpcMenuSection.CurrentAnimIndex,
                     v => Plaga44.Npc.NpcMenuSection.ScrollAnim((int)v), 0, animMax, 1, "F0"));
 
@@ -715,7 +721,7 @@ namespace Plaga44.UI
         // Action-type settings (getter always returns 0, setter fires action on >0.5).
         // These must NOT be restored from PlayerPrefs -- restoring 1.0 would re-trigger the action.
         private static readonly HashSet<string> ACTION_SETTINGS =
-            new HashSet<string> { "RESET ALL", "LOG ALL", "QUIT GAME", "SAVE GRIP", "RESET GRIP", "Spawn Pinea", "Despawn All" };
+            new HashSet<string> { "RESET ALL", "LOG ALL", "QUIT GAME", "SAVE GRIP", "RESET GRIP", "Spawn", "Despawn All" };
 
         // Ustawienia z wymuszonym baseline na start -- NIE przywracane z persist.
         // Build() ustawia je jawnie; zapisany "Current" nie moze tego nadpisac.

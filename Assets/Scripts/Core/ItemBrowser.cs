@@ -19,6 +19,10 @@ namespace Plaga44
         private const string AutoBootGoName = "ItemBrowser";
         private const string ItemsResourceFolder = "Items";
         private const string PrefsKey = "Plaga44_ItemBrowser_SelectedItem";
+
+        // Jawna kolejnosc na POCZATKU galerii (reszta alfabetycznie po nich).
+        // Deklaratywne, nie fallback: item spoza listy idzie do czesci alfabetycznej.
+        private static readonly string[] PreferredOrder = { "Shotgun", "Blaster", "Torch" };
         private const string OvrRigName = "OVRCameraRig";
 
         public static ItemBrowser Instance { get; private set; }
@@ -136,7 +140,7 @@ namespace Plaga44
                 return;
             }
 
-            System.Array.Sort(loaded, (a, b) => string.Compare(a.name, b.name, System.StringComparison.Ordinal));
+            System.Array.Sort(loaded, CompareItems);
 
             _itemPrefabs = loaded;
             _itemNames = new string[loaded.Length];
@@ -144,6 +148,17 @@ namespace Plaga44
                 _itemNames[i] = loaded[i].name;
 
             Debug.Log($"{LOG} Loaded {loaded.Length} items: {string.Join(", ", _itemNames)}");
+        }
+
+        // Kolejnosc: itemy z PreferredOrder pierwsze (wg indeksu listy), reszta alfabetycznie.
+        private static int CompareItems(GameObject a, GameObject b)
+        {
+            int ia = System.Array.IndexOf(PreferredOrder, a.name);
+            int ib = System.Array.IndexOf(PreferredOrder, b.name);
+            if (ia >= 0 && ib >= 0) return ia.CompareTo(ib); // oba preferred -> wg listy
+            if (ia >= 0) return -1;                          // tylko a preferred -> a pierwszy
+            if (ib >= 0) return 1;                           // tylko b preferred -> b pierwszy
+            return string.Compare(a.name, b.name, System.StringComparison.Ordinal); // reszta alfabetycznie
         }
 
         // =====================================================================
@@ -190,7 +205,7 @@ namespace Plaga44
             if (rb != null)
             {
                 rb.isKinematic = false;
-                rb.useGravity = false; // float in place until grabbed
+                rb.useGravity = true; // spada na ziemie, nie fruwa
             }
         }
 

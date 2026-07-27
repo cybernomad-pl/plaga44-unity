@@ -23,6 +23,7 @@ namespace Plaga44.Npc
         private const string OvrRigName = "OVRCameraRig";
         private const string PineaResourcePath = "Npc/PINEA_NPC";
         private const string LibraryResourcePath = "Npc/NpcAnimationLibrary";
+        private const string RegistryResourcePath = "Npc/NpcRegistry";
 
         // Wysokosc oczu -> stopy: NPC stoi na ziemi (oczy - 1.6m).
         private const float EyeToFeet = 1.6f;
@@ -79,7 +80,39 @@ namespace Plaga44.Npc
         // Public API (kontrakt)
         // -----------------------------------------------------------------
 
-        /// <summary>Spawnuje Pinee przed graczem (stopy na ziemi). Zwraca NpcController lub null.</summary>
+        /// <summary>Liczba NPC w rejestrze (Resources/Npc/NpcRegistry). 0 gdy brak rejestru.</summary>
+        public int NpcCount
+        {
+            get { var reg = Resources.Load<NpcRegistry>(RegistryResourcePath); return reg != null ? reg.Count : 0; }
+        }
+
+        /// <summary>Czytelna nazwa NPC pod indeksem rejestru, lub null (brak wpisu/rejestru).</summary>
+        public string NpcName(int index)
+        {
+            var reg = Resources.Load<NpcRegistry>(RegistryResourcePath);
+            var e = reg != null ? reg.Get(index) : null;
+            return e != null ? e.name : null;
+        }
+
+        /// <summary>Spawnuje NPC z rejestru pod danym indeksem. Zwraca NpcController lub null.</summary>
+        public NpcController SpawnNpc(int index)
+        {
+            var reg = Resources.Load<NpcRegistry>(RegistryResourcePath);
+            if (reg == null)
+            {
+                Debug.LogError($"{LOG} Rejestr nie znaleziony: Resources/{RegistryResourcePath}");
+                return null;
+            }
+            var entry = reg.Get(index);
+            if (entry == null || entry.prefab == null)
+            {
+                Debug.LogError($"{LOG} SpawnNpc({index}) -- brak wpisu/prefabu w rejestrze (Count={reg.Count})");
+                return null;
+            }
+            return SpawnFromPrefab(entry.prefab, entry.name);
+        }
+
+        /// <summary>Spawnuje Pinee (skrot -- prefab bezposrednio z Resources). Zwraca NpcController lub null.</summary>
         public NpcController SpawnPinea()
         {
             var prefab = Resources.Load<GameObject>(PineaResourcePath);
@@ -88,7 +121,12 @@ namespace Plaga44.Npc
                 Debug.LogError($"{LOG} Prefab nie znaleziony: Resources/{PineaResourcePath}");
                 return null;
             }
+            return SpawnFromPrefab(prefab, "Pinea");
+        }
 
+        // Wspolna logika spawnu NPC: pozycja head-relative, shader, collider, controller+library.
+        private NpcController SpawnFromPrefab(GameObject prefab, string logName)
+        {
             var library = Resources.Load<NpcAnimationLibrary>(LibraryResourcePath);
             if (library == null)
             {
@@ -104,9 +142,8 @@ namespace Plaga44.Npc
             instance.name = prefab.name;
 
             // Collider fizyczny -- kapsula stojacego NPC (stopy w 0, glowa ~1.8).
-            // Konfiguruj ZAWSZE: prefab z NpcSystemSetup ma juz CapsuleCollider z domyslnymi
-            // parametrami (center 0, height 2) -- gate "if == null" nigdy by tego nie poprawil,
-            // zostawiajac dolna polowe collidera pod ziemia.
+            // Konfiguruj ZAWSZE: prefab moze miec CapsuleCollider z domyslnymi parametrami
+            // (center 0, height 2) -- gate "if == null" zostawilby dolna polowe pod ziemia.
             var capsule = instance.GetComponent<CapsuleCollider>();
             if (capsule == null) capsule = instance.AddComponent<CapsuleCollider>();
             capsule.direction = 1; // os Y
@@ -119,7 +156,7 @@ namespace Plaga44.Npc
             controller.library = library;
 
             _active.Add(controller);
-            Debug.Log($"{LOG} SpawnPinea '{instance.name}' at {pos} (clips={library.Count}, active={_active.Count})");
+            Debug.Log($"{LOG} Spawn '{instance.name}' ({logName}) at {pos} (clips={library.Count}, active={_active.Count})");
             return controller;
         }
 

@@ -38,5 +38,5 @@ MonoBehaviour:
   bounceLightRotation: {x: -90, y: 0, z: 0}
   bounceLightShadows: 0
   spawnerOffset: {x: 0.8, y: 0, z: 1.5}
-  defaultSpawnItem: Items/Revolver
+  defaultSpawnItem: Items/Shotgun
   avatarRegistryPath: Assets/PLAGA44/Resources/AvatarRegistry.asset

@@ -1,15 +1,3 @@
-// =============================================================================
-// Bootstrap.cs
-// CYBERNOMAD -- jeden entry point, orkiestrator setupu sceny PLAGA '44.
-// Uruchamia sie automatycznie przy starcie edytora (InitializeOnLoad).
-//
-// Menu:
-//   CYBERNOMAD > Bootstrap          -- pelny setup sceny
-//   StratoJump removed -- player spawns at last position.
-//
-// Konfiguracja: Assets/PLAGA44/Config/BootstrapConfig_Quest.asset
-// Setup rozdzielony na osobne klasy w Assets/Editor/Setup/
-// =============================================================================
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -26,12 +14,6 @@ namespace Plaga44.Editor
         private const string ConfigPath = "Assets/PLAGA44/Config/BootstrapConfig_Quest.asset";
         private const string SessionKey = "Plaga44.Bootstrap.Done";
 
-        // =====================================================================
-        // Auto-run przy starcie edytora
-        // =====================================================================
-
-        // Unity 6: delayCall from [InitializeOnLoad] constructor is unreliable.
-        // EditorApplication.update fires every editor tick -- we unhook after first call.
         static Bootstrap() => EditorApplication.update += WaitForReady;
 
         private static int _waitTicks;
@@ -39,51 +21,29 @@ namespace Plaga44.Editor
         private static void WaitForReady()
         {
             _waitTicks++;
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating)
-            {
-                if (_waitTicks % 300 == 0) // co ~5s log status (assuming ~60 ticks/s)
-                    Debug.Log($"{LOG} WaitForReady: still waiting (compiling={EditorApplication.isCompiling}, updating={EditorApplication.isUpdating})");
-                return;
-            }
+            if (EditorApplication.isCompiling || EditorApplication.isUpdating) return;
 
             EditorApplication.update -= WaitForReady;
 
-            if (SessionState.GetBool(SessionKey, false))
-            {
-                Debug.Log($"{LOG} Auto-run SKIPPED -- already ran this session (key={SessionKey}). Use CYBERNOMAD/Bootstrap to re-run.");
-                return;
-            }
+            if (SessionState.GetBool(SessionKey, false)) return;
             SessionState.SetBool(SessionKey, true);
 
-            Debug.Log($"{LOG} Auto-run: loading scene and validating... (waited {_waitTicks} ticks)");
             Run();
         }
-
-        // =====================================================================
-        // Menu items
-        // =====================================================================
 
         [MenuItem("CYBERNOMAD/Bootstrap", false, 1)]
         public static void Run()
         {
             var cfg = LoadConfig();
             if (cfg == null) return;
-            OpenScene(cfg);
             EditorApplication.delayCall += () => RunSetup(cfg);
         }
-
-        // StratoJump removed from menu -- player spawns at last saved position.
-
-        // =====================================================================
-        // Config
-        // =====================================================================
 
         private static BootstrapConfig LoadConfig()
         {
             var cfg = AssetDatabase.LoadAssetAtPath<BootstrapConfig>(ConfigPath);
             if (cfg != null) return cfg;
 
-            Debug.Log($"{LOG} Config not found -- creating default Quest config");
             BootstrapUtils.EnsureFolder("Assets/PLAGA44", "Config");
             cfg = ScriptableObject.CreateInstance<BootstrapConfig>();
             AssetDatabase.CreateAsset(cfg, ConfigPath);
@@ -92,48 +52,40 @@ namespace Plaga44.Editor
             return cfg;
         }
 
-        // =====================================================================
-        // Scene
-        // =====================================================================
-
-        private static void OpenScene(BootstrapConfig cfg)
+        private static void RunSetup(BootstrapConfig cfg)
         {
-            var active = SceneManager.GetActiveScene();
-            if (active.IsValid() && active.path == cfg.scenePath) return;
-
-            if (!System.IO.File.Exists(cfg.scenePath))
+            var scene = SceneManager.GetActiveScene();
+            if (string.IsNullOrEmpty(scene.path))
             {
-                Debug.LogError($"{LOG} Scene not found: {cfg.scenePath}");
+                Debug.LogError($"{LOG} Brak zapisanej aktywnej sceny -- otworz i zapisz scene przed Bootstrap.");
                 return;
             }
 
-            EditorSceneManager.OpenScene(cfg.scenePath, OpenSceneMode.Single);
-            Debug.Log($"{LOG} Opened: {cfg.scenePath}");
-        }
-
-        // =====================================================================
-        // Setup
-        // =====================================================================
-
-        private static void RunSetup(BootstrapConfig cfg)
-        {
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            Debug.Log($"{LOG} === Setup START === scene={SceneManager.GetActiveScene().name}, cfg={cfg.name}");
+            Debug.Log($"{LOG} === Setup START === scene={scene.name}");
             bool changed = false;
 
-            changed |= LogStep("TerrainSetup",        () => TerrainSetup.Run(cfg));
-            changed |= LogStep("SkyboxSetup",         () => SkyboxSetup.Run(cfg));
-            changed |= LogStep("BounceLightSetup",    () => BounceLightSetup.Run(cfg));
-            changed |= LogStep("PlayerRigSetup",      () => PlayerRigSetup.Run(cfg));
-            changed |= LogStep("InventorySetup",      () => InventorySetup.Run(cfg));
-            changed |= LogStep("SceneSingletonsSetup",() => SceneSingletonsSetup.Run(cfg));
-            changed |= LogStep("ObjectSpawnerSetup",  () => ObjectSpawnerSetup.Run(cfg));
-            LogStepVoid("AvatarRegistrySetup",        () => AvatarRegistrySetup.Run(cfg));
-            changed |= LogStep("LightingCleanup",     () => LightingTools.AutoClearIfNeeded());
+            changed |= LogStep("0-ClearScene", () => ClearScene(scene));
+
+            // Migracja V6 -> V7. Fazy w kolejnosci hierarchii V6.
+            // Odkomentowuj PO JEDNEJ, testuj, potem nastepna.
+            changed |= LogStep("1-Terrain",            () => TerrainSetup.Run(cfg));
+            changed |= LogStep("2-Water",              () => WaterSetup.Run(cfg));
+            changed |= LogStep("2c-WadeWater",         () => WadeWaterSetup.Run(cfg));
+            changed |= LogStep("3-Skybox",             () => SkyboxSetup.Run(cfg));
+            changed |= LogStep("3b-PostProcess",       () => PostProcessSetup.Run(cfg));
+            changed |= LogStep("4-BounceLight",        () => BounceLightSetup.Run(cfg));
+            LogStepVoid("5-BuildRig",                  () => BuildPlayerRigSetup.Run());
+            changed |= LogStep("6-PlayerRig",          () => PlayerRigSetup.Run(cfg));
+            changed |= LogStep("7-Inventory",          () => InventorySetup.Run(cfg));
+            changed |= LogStep("8-Singletons",         () => SceneSingletonsSetup.Run(cfg));
+            changed |= LogStep("9-ObjectSpawner",      () => ObjectSpawnerSetup.Run(cfg));
+            changed |= LogStep("10-NpcSpawner",        () => NpcSpawnerSetup.Run(cfg));
+            LogStepVoid("11-AvatarRegistry",           () => AvatarRegistrySetup.Run(cfg));
 
             if (changed)
             {
-                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+                EditorSceneManager.MarkSceneDirty(scene);
                 EditorSceneManager.SaveOpenScenes();
                 Debug.Log($"{LOG} === Setup DONE, scene SAVED === ({sw.ElapsedMilliseconds}ms)");
             }
@@ -173,6 +125,16 @@ namespace Plaga44.Editor
             {
                 Debug.LogError($"{LOG}   [FAIL] {name} threw {e.GetType().Name}: {e.Message}\n{e.StackTrace}");
             }
+        }
+
+        private static bool ClearScene(Scene scene)
+        {
+            var roots = scene.GetRootGameObjects();
+            if (roots.Length == 0) return false;
+            foreach (var go in roots)
+                Undo.DestroyObjectImmediate(go);
+            Debug.Log($"{LOG}   scene wyczyszczona do 0 ({roots.Length} root GO usunietych)");
+            return true;
         }
 
         private static void FocusTerrain()
