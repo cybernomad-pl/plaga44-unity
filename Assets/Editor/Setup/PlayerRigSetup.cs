@@ -89,39 +89,66 @@ namespace Plaga44.Editor.Setup
         // Controlled by cfg.stratoJumpHeight:
         //   > 0: spawn at terrain ground + stratoJumpHeight (fun free-fall)
         //   = 0: snap to terrain ground (instant landing)
+        // Sadza gracza na SRODKU mapy (laczny srodek wszystkich kafli terenu),
+        // na wysokosci gruntu z kafla pod tym punktem. Dziala dla 1 terenu i siatki 3x3.
         private static bool PositionRig(GameObject rig, BootstrapConfig cfg)
         {
-            var terrain = Object.FindFirstObjectByType<Terrain>();
-            if (terrain == null)
+            var terrains = Object.FindObjectsByType<Terrain>(FindObjectsSortMode.None);
+            if (terrains.Length == 0)
             {
                 Debug.LogWarning($"{LOG} [SKIP] No terrain -- cannot position rig");
                 return false;
             }
 
+            Bounds area = TerrainWorldBounds(terrains[0]);
+            for (int i = 1; i < terrains.Length; i++) area.Encapsulate(TerrainWorldBounds(terrains[i]));
+
             Vector3 pos = rig.transform.position;
-            // Center rig on terrain if at origin (0,0,0)
-            if (Mathf.Approximately(pos.x, 0f) && Mathf.Approximately(pos.z, 0f))
+            pos.x = area.center.x;
+            pos.z = area.center.z;
+
+            var ground = TerrainAt(terrains, pos);
+            if (ground == null)
             {
-                var terrainData = terrain.terrainData;
-                pos.x = terrain.transform.position.x + terrainData.size.x * 0.5f;
-                pos.z = terrain.transform.position.z + terrainData.size.z * 0.5f;
-                Debug.Log($"{LOG} [FIX] Centering rig on terrain: x={pos.x:F0} z={pos.z:F0}");
+                Debug.LogWarning($"{LOG} [SKIP] srodek ({pos.x:F0},{pos.z:F0}) poza kaflami -- nie pozycjonuje");
+                return false;
             }
 
-            float groundY = terrain.SampleHeight(pos) + terrain.transform.position.y;
+            float groundY = ground.SampleHeight(pos) + ground.transform.position.y;
             float targetY = groundY + cfg.stratoJumpHeight;
             string mode = cfg.stratoJumpHeight > 0f ? $"StratoJump +{cfg.stratoJumpHeight:F0}m" : "Ground snap";
 
-            if (Mathf.Abs(pos.y - targetY) < 0.01f)
+            var cur = rig.transform.position;
+            if (Mathf.Abs(cur.y - targetY) < 0.01f
+                && Mathf.Approximately(cur.x, pos.x) && Mathf.Approximately(cur.z, pos.z))
             {
-                Debug.Log($"{LOG} [OK] Rig already at target y={pos.y:F2} ({mode})");
+                Debug.Log($"{LOG} [OK] Rig already at target ({mode})");
                 return false;
             }
 
             Undo.RecordObject(rig.transform, "PlayerRigSetup position rig");
             rig.transform.position = new Vector3(pos.x, targetY, pos.z);
-            Debug.Log($"{LOG} [FIX] Positioned rig: y={pos.y:F2} -> {targetY:F2} ground={groundY:F2} mode={mode}");
+            Debug.Log($"{LOG} [FIX] Rig -> ({pos.x:F0},{targetY:F2},{pos.z:F0}) ground={groundY:F2} kafli={terrains.Length} {mode}");
             return true;
+        }
+
+        private static Bounds TerrainWorldBounds(Terrain t)
+        {
+            var size = t.terrainData.size;
+            return new Bounds(t.transform.position + size * 0.5f, size);
+        }
+
+        // Kafel zawierajacy punkt XZ. Null gdy poza wszystkimi -- caller decyduje (bez zgadywania).
+        private static Terrain TerrainAt(Terrain[] terrains, Vector3 p)
+        {
+            foreach (var t in terrains)
+            {
+                var o = t.transform.position;
+                var s = t.terrainData.size;
+                if (p.x >= o.x && p.x <= o.x + s.x && p.z >= o.z && p.z <= o.z + s.z)
+                    return t;
+            }
+            return null;
         }
 
         private static bool SetupCharacterController(GameObject rig, BootstrapConfig cfg)

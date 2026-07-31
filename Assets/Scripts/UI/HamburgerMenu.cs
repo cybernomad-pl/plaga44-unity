@@ -23,9 +23,10 @@ namespace Plaga44.UI
         private const float CANVAS_DROP = 0.1f;
 
         // ---- Layout: tiles --------------------------------------------------
-        private const float TOP_TILE_W = 240f;
+        // 5 grup TOP-level w jednym rzedzie: 5*160 + 4*15 = 860 < CANVAS_W(900). OK.
+        private const float TOP_TILE_W = 160f;
         private const float TOP_TILE_H = 120f;
-        private const float TOP_TILE_SPACING = 20f;
+        private const float TOP_TILE_SPACING = 15f;
         private const float TOP_TILE_Y = 100f;
         private const int TOP_TILE_FONT = 20;
 
@@ -67,7 +68,8 @@ namespace Plaga44.UI
 
         // ---- Section names (routing) ---------------------------------------
         private const string AvatarSection = "AVATAR";
-        private const string ItemsSection = "ITEMS";
+        private const string LeftHandSection = "LEFT HAND";
+        private const string RightHandSection = "RIGHT HAND";
         private const string NpcSection = "NPC";
 
         // ---- Colors (dark theme) -------------------------------------------
@@ -83,9 +85,11 @@ namespace Plaga44.UI
         // ---- Groups (TOP-level) --------------------------------------------
         private static readonly (string name, string[] sections)[] GROUPS = new[]
         {
-            ("GAMEPLAY", new[] { "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "AVATAR", "ITEMS", "ITEM GRIP", "NPC", "GAME STATE", "NAVMESH" }),
-            ("VISUAL",   new[] { "SHADOWS", "SUN", "FOG", "AMBIENT", "SKYBOX", "BLOOM", "COLOR", "COMFORT", "LGG", "URP" }),
-            ("SYSTEM",   new[] { "PROFILE", "MISC", "AUDIO", "PHYSICS", "QUALITY", "CAMERA", "OCULUS", "TERRAIN", "EXIT" }),
+            ("ITEMS",     new[] { "LEFT HAND", "RIGHT HAND", "WEARABLES" }),
+            ("CHARACTER", new[] { "AVATAR", "LOCOMOTION", "SMOOTH TURN", "CHAR CTRL", "ITEM GRIP" }),
+            ("NPCs",      new[] { "NPC" }),
+            ("WORLD",     new[] { "ENVIRONMENT", "QUALITY" }),
+            ("SYSTEM",    new[] { "EXIT", "AUDIO", "MISC", "GAME STATE", "NAVMESH", "COMFORT" }),
         };
 
         // =====================================================================
@@ -224,8 +228,8 @@ namespace Plaga44.UI
             // Issue #158: clean up preview objects so they don't linger in the world.
             var gallery = Plaga44.AvatarGallery.Instance;
             if (gallery != null) gallery.HideAllPreviews();
-            var items = Plaga44.ItemBrowser.Instance;
-            if (items != null) items.ConfirmSpawn(); // item ZOSTAJE w scenie (nie niszcz preview)
+            // ITEMS preview-na-stole wycofany -- LEFT/RIGHT HAND spawnuja PROSTO do dloni
+            // (GripSpawnToHand), brak preview do zatwierdzania przy zamknieciu menu.
 
             Debug.Log($"{LOG} CLOSE");
             // Event-driven world-save (#196): wyjscie z menu (po despawnie preview).
@@ -419,7 +423,7 @@ namespace Plaga44.UI
         {
             if (section == NpcSection && (s.name == "NPC" || s.name == "Animacja")) return false;
             if (section == AvatarSection && s.name == "Mode") return false;
-            if (section == ItemsSection && s.name == "Item") return false;
+            if ((section == LeftHandSection || section == RightHandSection) && s.name == "Item") return false;
 
             return Mathf.Approximately(s.min, 0f)
                 && Mathf.Approximately(s.max, 1f)
@@ -663,8 +667,8 @@ namespace Plaga44.UI
                 color = ctx.Player.IsCurrentBroken ? Color.red : color;
                 return ($"{prefix}{s.name}: {ctx.Player.CurrentLabel}", color);
             }
-            if (ctx.IsItemMode(s))
-                return ($"{prefix}{s.name}: {ctx.Browser.CurrentLabel}", color);
+            if (ctx.IsHandItem(s))
+                return ($"{prefix}{s.name}: {ctx.HandItemLabel}", color);
             if (ctx.IsNpcAnim(s))
                 return ($"{prefix}{s.name}: {Plaga44.Npc.NpcMenuSection.CurrentAnimLabel}", color);
             if (ctx.IsNpcSelect(s))
@@ -676,8 +680,8 @@ namespace Plaga44.UI
         {
             if (ctx.IsAvatarMode(cur))
                 return $"<  {ctx.Player.CurrentLabel}  >    [{cur.min}..{cur.max}]   A/X = back";
-            if (ctx.IsItemMode(cur))
-                return $"<  {ctx.Browser.CurrentLabel}  >    [{cur.min}..{cur.max}]   A/X = back";
+            if (ctx.IsHandItem(cur))
+                return $"<  {ctx.HandItemLabel}  >    [{cur.min}..{cur.max}]   A/X = back";
             if (ctx.IsNpcAnim(cur))
                 return $"<  {Plaga44.Npc.NpcMenuSection.CurrentAnimLabel}  >    [{cur.min}..{cur.max}]   A/X = back";
             if (ctx.IsNpcSelect(cur))
@@ -690,24 +694,28 @@ namespace Plaga44.UI
         {
             public readonly string Section;
             public readonly bool IsAvatarSection;
-            public readonly bool IsItemsSection;
+            public readonly bool IsLeftHandSection;
+            public readonly bool IsRightHandSection;
             public readonly bool IsNpcSection;
             public readonly Plaga44.PlayerAvatar Player;
-            public readonly Plaga44.ItemBrowser Browser;
 
             public RowContext(string section)
             {
                 Section = section;
                 IsAvatarSection = section == AvatarSection;
-                IsItemsSection = section == ItemsSection;
+                IsLeftHandSection = section == LeftHandSection;
+                IsRightHandSection = section == RightHandSection;
                 IsNpcSection = section == NpcSection;
                 Player = IsAvatarSection ? Plaga44.PlayerAvatar.FindCurrent() : null;
-                Browser = IsItemsSection ? Plaga44.ItemBrowser.Instance : null;
             }
 
             public bool IsAvatarMode(SettingDef s) => IsAvatarSection && s.name == "Mode" && Player != null;
             public bool IsBrokenAvatarMode(SettingDef s) => IsAvatarMode(s) && Player.IsCurrentBroken;
-            public bool IsItemMode(SettingDef s) => IsItemsSection && s.name == "Item" && Browser != null;
+            // "Item" row w LEFT/RIGHT HAND -> etykieta z HandItemMenu (nazwa grabbable danej reki).
+            public bool IsHandItem(SettingDef s) => (IsLeftHandSection || IsRightHandSection) && s.name == "Item";
+            public string HandItemLabel => IsRightHandSection
+                ? Plaga44.Inventory.HandItemMenu.RightLabel
+                : Plaga44.Inventory.HandItemMenu.LeftLabel;
             public bool IsNpcAnim(SettingDef s) => IsNpcSection && s.name == "Animacja";
             public bool IsNpcSelect(SettingDef s) => IsNpcSection && s.name == "NPC";
         }
@@ -724,11 +732,8 @@ namespace Plaga44.UI
                 var avatar = Plaga44.PlayerAvatar.FindCurrent();
                 if (avatar != null) avatar.ConfirmPreview();
             }
-            else if (section == ItemsSection)
-            {
-                // Opuszczenie sekcji ITEMS (GoBack) zatwierdza item -- zostaje w scenie
-                Plaga44.ItemBrowser.Instance?.ConfirmSpawn();
-            }
+            // LEFT/RIGHT HAND nie maja preview do zatwierdzania -- spawn idzie prosto
+            // do dloni (GripSpawnToHand), item od razu istnieje w swiecie.
         }
 
         /// <summary>Adds Outline + Shadow to a UI text object for readability on transparent BG.</summary>

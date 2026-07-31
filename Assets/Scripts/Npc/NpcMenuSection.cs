@@ -11,6 +11,7 @@
 // MenuNotifier + return. Nie zgadujemy, nie tworzymy "zastepczego" NPC.
 // =============================================================================
 
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Plaga44.Npc
@@ -24,16 +25,81 @@ namespace Plaga44.Npc
         private const string LOG = "[PLAGA44][NpcMenu]";
         private const string LibraryResourcePath = "Npc/NpcAnimationLibrary";
 
+        // Galeria NPC pokazuje WYLACZNIE czyste IDLE (samo stanie w miejscu).
+        // ALLOWLIST EXPLICIT (nie blacklist, nie substring) -- dokladne nazwy klipow
+        // zweryfikowane na NpcAnimationLibrary.asset. Klip spoza tej listy jest ODRZUCONY
+        // i zalogowany. ZERO FALLBACK: nie zgadujemy po fragmencie nazwy.
+        // ODRZUCONE swiadomie (mimo "idle" w nazwie): falling idle, rifle aiming idle,
+        // breakdance footwork to idle (tranzycja), sword and shield (block/crouch/*) idle
+        // (warianty bojowe/akcyjne). To NIE jest czyste stanie.
+        // UWAGA: filtr jest LOKALNY dla galerii -- library NIE jest okrajana, bo dzieli ja
+        // AkslopeWanderAI (potrzebuje walk/run do locomotion). Zawezenie library zlamaloby AI.
+        // Porownanie po nazwie w lowercase (klucze ponizej sa lowercase).
+        private static readonly HashSet<string> IdleAllowlist = new HashSet<string>
+        {
+            "idle",             // ActionAdventure/idle + FemaleLocomotion/idle (obie nazwane "idle")
+            "idle (2)",
+            "idle (3)",
+            "idle (4)",
+            "idle (5)",
+            "standing idle 01", // LongbowLocomotion -- czyste stanie
+        };
+
         // Ostatnio zespawniony NPC = cel akcji animacji. Unity fake-null obsluguje despawn.
         private static NpcController _active;
 
         // Wybrany (jeszcze nie zespawniony) NPC z rejestru -- indeks w NpcRegistry.
         private static int _selectedNpc;
 
+        // Cache mapy idle: idle-index (pozycja na sliderze galerii) -> realny indeks w library.
+        // Klucz = referencja library; menu odpytuje co klatke, wiec (re)budowa + log tylko przy zmianie.
+        private static NpcAnimationLibrary _idleCacheLib;
+        private static List<int> _idleIndices;
+
         /// <summary>Aktywny NPC lub null (gdy nie zespawniono / zniszczony).</summary>
         private static NpcController ResolveActive()
         {
             return _active != null ? _active : null;
+        }
+
+        /// <summary>Library aktywnego NPC, albo z Resources gdy nic nie zespawniono. Null gdy brak.</summary>
+        private static NpcAnimationLibrary ActiveLibrary()
+        {
+            var npc = ResolveActive();
+            if (npc != null && npc.library != null) return npc.library;
+            return Resources.Load<NpcAnimationLibrary>(LibraryResourcePath);
+        }
+
+        /// <summary>Indeksy czystych klipow IDLE w library -- galeria NPC pokazuje WYLACZNIE te (idle-space).
+        /// Dopuszczenie = dokladne dopasowanie nazwy do IdleAllowlist (nie substring). ZERO FALLBACK:
+        /// klip spoza allowlisty NIE trafia na liste i jest logowany jako odrzucony; nie zgadujemy kategorii.
+        /// Cache per-library -> (re)budowa i logi tylko przy zmianie library.</summary>
+        private static List<int> IdleIndices()
+        {
+            var lib = ActiveLibrary();
+            if (lib == null) { _idleCacheLib = null; _idleIndices = null; return null; }
+
+            if (!ReferenceEquals(lib, _idleCacheLib) || _idleIndices == null)
+            {
+                _idleCacheLib = lib;
+                _idleIndices = new List<int>();
+                int rejected = 0;
+                for (int i = 0; i < lib.Count; i++)
+                {
+                    string n = lib.Name(i);
+                    if (n != null && IdleAllowlist.Contains(n.ToLowerInvariant()))
+                    {
+                        _idleIndices.Add(i);
+                    }
+                    else
+                    {
+                        rejected++;
+                        Debug.Log($"{LOG} [idle-filter] ODRZUCONO '{n}' -- nie na allowliscie czystego idle, ukryte w galerii NPC");
+                    }
+                }
+                Debug.Log($"{LOG} [idle-filter] galeria NPC: {_idleIndices.Count} idle / {lib.Count} klipow ({rejected} odrzuconych)");
+            }
+            return _idleIndices;
         }
 
         // =====================================================================
@@ -107,44 +173,51 @@ namespace Plaga44.Npc
             Notify("NPC: despawn wszystkich", true);
         }
 
-        /// <summary>Przewija animacje aktywnego NPC. Menu podaje absolutny (sklampowany)
-        /// indeks docelowy; kierunek wzgledem biezacego -> Next()/Prev() na kontrolerze.</summary>
-        public static void ScrollAnim(int requestedIndex)
+        /// <summary>Ustawia animacje aktywnego NPC na wybrany klip IDLE. Menu podaje absolutny
+        /// indeks w PRZESTRZENI IDLE (0..AnimCount-1); mapujemy go na realny indeks w library
+        /// i gramy bezposrednio (Play), zamiast Next/Prev po pelnej library. Dzieki temu galeria
+        /// nigdy nie wejdzie na klip non-idle.</summary>
+        public static void ScrollAnim(int requestedIdleIndex)
         {
             var npc = ResolveActive();
             if (npc == null) { Notify("NPC: brak aktywnego NPC (najpierw Spawn Pinea)", false); return; }
 
-            int cur = npc.CurrentIndex;
-            if (requestedIndex > cur) npc.Next();
-            else if (requestedIndex < cur) npc.Prev();
-            // requestedIndex == cur -> boundary/clamp, brak zmiany
+            var idle = IdleIndices();
+            if (idle == null || idle.Count == 0) { Notify("NPC: brak klipow idle w library", false); return; }
+
+            int clamped = Mathf.Clamp(requestedIdleIndex, 0, idle.Count - 1);
+            npc.Play(idle[clamped]);
         }
 
         // =====================================================================
         // Query (dla SettingDef.get + HamburgerMenu etykieta)
         // =====================================================================
 
-        /// <summary>Biezacy indeks animacji aktywnego NPC (0 gdy brak/nieustawiony).</summary>
+        /// <summary>Biezacy indeks animacji w PRZESTRZENI IDLE (pozycja slidera galerii).
+        /// Gdy aktualny klip NPC nie jest idle (np. AI gra locomotion / domyslny klip po spawnie)
+        /// -> 0 (pierwszy idle). To clamp pozycji slidera do przestrzeni idle, nie zgadywanie zachowania:
+        /// realnie grany klip pokazuje CurrentAnimLabel (prawda), tu chodzi tylko o pozycje na liscie.</summary>
         public static int CurrentAnimIndex
         {
             get
             {
                 var npc = ResolveActive();
                 if (npc == null) return 0;
-                int i = npc.CurrentIndex;
-                return i < 0 ? 0 : i;
+                var idle = IdleIndices();
+                if (idle == null) return 0;
+                int pos = idle.IndexOf(npc.CurrentIndex);
+                return pos < 0 ? 0 : pos;
             }
         }
 
-        /// <summary>Liczba dostepnych animacji (z aktywnego NPC lub z library w Resources).</summary>
+        /// <summary>Liczba animacji IDLE dostepnych w galerii (idle-space). Galeria nie pokazuje
+        /// non-idle, wiec to liczba przefiltrowana, NIE library.Count.</summary>
         public static int AnimCount
         {
             get
             {
-                var npc = ResolveActive();
-                if (npc != null && npc.library != null) return npc.library.Count;
-                var lib = Resources.Load<NpcAnimationLibrary>(LibraryResourcePath);
-                return lib != null ? lib.Count : 0;
+                var idle = IdleIndices();
+                return idle != null ? idle.Count : 0;
             }
         }
 

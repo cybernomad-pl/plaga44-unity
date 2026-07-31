@@ -11,7 +11,7 @@ namespace Plaga44.Editor
     public static class Bootstrap
     {
         private const string LOG = "[PLAGA44][Bootstrap]";
-        private const string ConfigPath = "Assets/PLAGA44/Config/BootstrapConfig_Quest.asset";
+        private const string ConfigPath = "Assets/PLAGA44/Config/BootstrapConfig.asset";
         private const string SessionKey = "Plaga44.Bootstrap.Done";
 
         static Bootstrap() => EditorApplication.update += WaitForReady;
@@ -68,19 +68,20 @@ namespace Plaga44.Editor
             changed |= LogStep("0-ClearScene", () => ClearScene(scene));
 
             // Migracja V6 -> V7. Fazy w kolejnosci hierarchii V6.
-            // Odkomentowuj PO JEDNEJ, testuj, potem nastepna.
-            changed |= LogStep("1-Terrain",            () => TerrainSetup.Run(cfg));
+            // changed |= LogStep("1-Terrain",            () => TerrainSetup.Run(cfg)); // WYLACZONE -- na razie tylko WODA
             changed |= LogStep("2-Water",              () => WaterSetup.Run(cfg));
-            changed |= LogStep("2c-WadeWater",         () => WadeWaterSetup.Run(cfg));
+            changed |= LogStep("2b-WaterBottom",       () => WaterBottomSetup.Run(cfg));
             changed |= LogStep("3-Skybox",             () => SkyboxSetup.Run(cfg));
             changed |= LogStep("3b-PostProcess",       () => PostProcessSetup.Run(cfg));
             changed |= LogStep("4-BounceLight",        () => BounceLightSetup.Run(cfg));
             LogStepVoid("5-BuildRig",                  () => BuildPlayerRigSetup.Run());
             changed |= LogStep("6-PlayerRig",          () => PlayerRigSetup.Run(cfg));
             changed |= LogStep("7-Inventory",          () => InventorySetup.Run(cfg));
+            changed |= LogStep("7b-ItemGrab",          () => ItemGrabSetup.Run(cfg));
             changed |= LogStep("8-Singletons",         () => SceneSingletonsSetup.Run(cfg));
             changed |= LogStep("9-ObjectSpawner",      () => ObjectSpawnerSetup.Run(cfg));
             changed |= LogStep("10-NpcSpawner",        () => NpcSpawnerSetup.Run(cfg));
+            changed |= LogStep("10b-NpcGrab",          () => NpcGrabSetup.Run(cfg));
             LogStepVoid("11-AvatarRegistry",           () => AvatarRegistrySetup.Run(cfg));
 
             if (changed)
@@ -133,7 +134,7 @@ namespace Plaga44.Editor
             if (roots.Length == 0) return false;
             foreach (var go in roots)
                 Undo.DestroyObjectImmediate(go);
-            Debug.Log($"{LOG}   scene wyczyszczona do 0 ({roots.Length} root GO usunietych)");
+            Debug.Log($"{LOG}   scene wyczyszczona do 0 ({roots.Length} root GO)");
             return true;
         }
 

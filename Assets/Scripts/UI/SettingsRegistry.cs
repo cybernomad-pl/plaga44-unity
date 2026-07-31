@@ -44,7 +44,7 @@ namespace Plaga44.UI
         // per-item) -- nie trwalimy ich przez file-persist, bo restore na starcie wywolalby
         // SetItem() -> spawn itemu w swiecie BEZ otwartego menu (regresja file-persist).
         private static readonly HashSet<string> NON_PERSISTENT_SECTIONS =
-            new HashSet<string> { "GAME STATE", "NPC", "ITEMS", "ITEM GRIP" };
+            new HashSet<string> { "GAME STATE", "NPC", "LEFT HAND", "RIGHT HAND", "WEARABLES", "ITEM GRIP" };
 
         /// <summary>PlayerPrefs keys -- single source of truth, koniec z literal strings w kodzie.</summary>
         private static class PrefsKeys
@@ -233,10 +233,9 @@ namespace Plaga44.UI
 
             var urp = GraphicsSettings.currentRenderPipeline as UniversalRenderPipelineAsset;
             var vol = UnityEngine.Object.FindAnyObjectByType<Volume>();
-            var ter = UnityEngine.Object.FindAnyObjectByType<Terrain>();
             var sky = RenderSettings.skybox;
             var sun = FindSun();
-            var tMat = ter != null ? ter.materialTemplate : null;
+            // TERRAIN sekcja usunieta (teren wylaczony) -- ter/tMat lookupy zbedne.
             ColorAdjustments ca = null; Vignette vig = null; WhiteBalance wb = null; LiftGammaGain lgg = null; Bloom blm = null;
             if (vol != null && vol.profile != null) { vol.profile.TryGet(out ca); vol.profile.TryGet(out vig); vol.profile.TryGet(out wb); vol.profile.TryGet(out lgg); vol.profile.TryGet(out blm); }
 
@@ -308,20 +307,37 @@ namespace Plaga44.UI
             });
 
             // =============================================================
-            // ITEMS -- item browser (like AVATAR but for held items)
+            // LEFT HAND / RIGHT HAND -- per-reka wybor grabbable + spawn DO DLONI
+            // Model: stick wybiera item z katalogu (ItemBrowser), ENTER na "Grab"
+            // spawnuje go PROSTO do tej dloni (GripSpawnToHand). Zero preview-na-stole.
+            // Wzor UI: NPC (indeks stickiem + akcja). Logika: HandItemMenu.
+            // max dynamiczny -- ItemBrowser.LoadItems() moze jeszcze nie odpalic przy Build.
             // =============================================================
-            // ITEMS -- max jest dynamiczny bo ItemBrowser.LoadItems() moze jeszcze nie odpalic
-            Sec("ITEMS", s => {
-                s.Add(new SettingDef("Item", "0=None, 1..N=Item",
-                    () => {
-                        var ib = Plaga44.ItemBrowser.Instance;
-                        return ib != null ? ib.SelectedItem : 0;
-                    },
-                    v => {
-                        var ib = Plaga44.ItemBrowser.Instance;
-                        if (ib != null) ib.SetItem((int)v);
-                    },
-                    0, 10, 1, "F0")); // max=10 jako bufor, SetItem clampuje do MaxItem
+            Sec("LEFT HAND", s => {
+                int max = Mathf.Max(0, Plaga44.Inventory.HandItemMenu.GrabbableCount - 1);
+                s.Add(S("Item", "Wybor grabbable do LEWEJ reki (stick L/R)",
+                    () => Plaga44.Inventory.HandItemMenu.SelectedLeft,
+                    v => Plaga44.Inventory.HandItemMenu.SelectedLeft = (int)v, 0, max, 1, "F0"));
+                s.Add(S("Grab", "Spawnuje wybrany item do LEWEJ dloni", () => 0,
+                    v => { if (v > 0.5f) Plaga44.Inventory.HandItemMenu.SpawnLeft(); }, 0, 1, 1, "F0"));
+            });
+
+            Sec("RIGHT HAND", s => {
+                int max = Mathf.Max(0, Plaga44.Inventory.HandItemMenu.GrabbableCount - 1);
+                s.Add(S("Item", "Wybor grabbable do PRAWEJ reki (stick L/R)",
+                    () => Plaga44.Inventory.HandItemMenu.SelectedRight,
+                    v => Plaga44.Inventory.HandItemMenu.SelectedRight = (int)v, 0, max, 1, "F0"));
+                s.Add(S("Grab", "Spawnuje wybrany item do PRAWEJ dloni", () => 0,
+                    v => { if (v > 0.5f) Plaga44.Inventory.HandItemMenu.SpawnRight(); }, 0, 1, 1, "F0"));
+            });
+
+            // WEARABLES -- ciuchy/armor zakladane na cialo (osobno od dloni).
+            // PLACEHOLDER: mechanika NIE istnieje (zero fake). WearableCount==0 ->
+            // sekcja pokazuje stan wprost, nie udaje dzialajacego selektora.
+            Sec("WEARABLES", s => {
+                int wearables = Plaga44.ItemBrowser.Instance != null ? Plaga44.ItemBrowser.Instance.WearableCount : 0;
+                s.Add(S("Wearables", "Ciuchy/armor -- mechanika zakladania jeszcze nie istnieje (placeholder)",
+                    () => wearables, v => {}, 0, 0, 0, "F0"));
             });
 
             // =============================================================
@@ -330,16 +346,11 @@ namespace Plaga44.UI
             // in PlayerPrefs keyed by item name. Applied automatically on next grab.
             // =============================================================
             Sec("ITEM GRIP", s => {
-                // Helpers -- operate on currently spawned ItemBrowser preview OR currently held item
+                // Cel = AKTUALNIE TRZYMANY item (preview-na-stole wycofane 2026-07-31).
+                // Szuka PlagaGrabbable z isGrabbed w scenie. Brak -> null (zero fallback):
+                // slidery operuja na Default, SAVE/RESET raportuja "no active item".
                 System.Func<Plaga44.Inventory.PlagaGrabbable> findTarget = () =>
                 {
-                    var ib = Plaga44.ItemBrowser.Instance;
-                    if (ib != null && ib.CurrentSpawned != null)
-                    {
-                        var pg = ib.CurrentSpawned.GetComponent<Plaga44.Inventory.PlagaGrabbable>();
-                        if (pg != null) return pg;
-                    }
-                    // Fallback: any currently grabbed PlagaGrabbable in scene
                     foreach (var g in UnityEngine.Object.FindObjectsByType<Plaga44.Inventory.PlagaGrabbable>(FindObjectsSortMode.None))
                         if (g.isGrabbed) return g;
                     return null;
@@ -440,83 +451,89 @@ namespace Plaga44.UI
             });
 
             // =============================================================
-            // PHYSICS
+            // ENVIRONMENT -- skonsolidowana sekcja-worek (SHADOWS + SUN + FOG + AMBIENT + SKYBOX).
+            // Nazwy prefiksowane per-podgrupa: klucze persystencji ENVIRONMENT::<name> MUSZA byc
+            // unikalne (SUN/FOG/AMBIENT mialy kolidujace "R"/"G"/"B"/"Intensity"). PHYSICS/CAMERA/
+            // OCULUS/BLOOM/COLOR/LGG/URP przeniesione do QUALITY. TERRAIN usuniete (teren wylaczony).
             // =============================================================
-            Sec("PHYSICS", s => {
-                s.Add(S("Gravity X", "Lateral gravity", () => Physics.gravity.x, v => { var g=Physics.gravity; g.x=v; Physics.gravity=g; }, -20, 20, 0.5f, "F1"));
-                s.Add(S("Gravity Y", "Vertical gravity (-9.81=Earth)", () => Physics.gravity.y, v => { var g=Physics.gravity; g.y=v; Physics.gravity=g; }, -20, 20, 0.5f, "F1"));
-                s.Add(S("Gravity Z", "Forward gravity", () => Physics.gravity.z, v => { var g=Physics.gravity; g.z=v; Physics.gravity=g; }, -20, 20, 0.5f, "F1"));
-                s.Add(S("Solver Iter", "Collision solver iterations", () => Physics.defaultSolverIterations, v => Physics.defaultSolverIterations=(int)v, 1, 25, 1, "F0"));
-                s.Add(S("Contact Off", "Min contact distance", () => Physics.defaultContactOffset, v => Physics.defaultContactOffset=v, 0.001f, 0.1f, 0.005f, "F3"));
-                s.Add(S("Sleep Thr", "Rigidbody sleep threshold", () => Physics.sleepThreshold, v => Physics.sleepThreshold=v, 0, 0.5f, 0.01f, "F2"));
-                s.Add(S("Bounce Thr", "Min bounce velocity", () => Physics.bounceThreshold, v => Physics.bounceThreshold=v, 0, 5, 0.1f));
-            });
-
-            // =============================================================
-            // SHADOWS
-            // =============================================================
-            Sec("SHADOWS", s => {
+            Sec("ENVIRONMENT", s => {
+                // --- SHADOWS ---
                 if (urp != null) {
-                    s.Add(S("Distance", "Shadow range (m)", () => urp.shadowDistance, v => urp.shadowDistance=v, 0, 150, 5, "F0"));
-                    s.Add(S("Resolution", "Shadow map px", () => urp.mainLightShadowmapResolution, v => urp.mainLightShadowmapResolution=(int)v, 256, 4096, 256, "F0"));
-                    s.Add(S("Depth Bias", "Prevents shadow acne", () => urp.shadowDepthBias, v => urp.shadowDepthBias=v, 0, 10, 0.5f));
-                    s.Add(S("Normal Bias", "Prevents peter-panning", () => urp.shadowNormalBias, v => urp.shadowNormalBias=v, 0, 10, 0.5f));
+                    s.Add(S("Shadow Dist", "Shadow range (m)", () => urp.shadowDistance, v => urp.shadowDistance=v, 0, 150, 5, "F0"));
+                    s.Add(S("Shadow Res", "Shadow map px", () => urp.mainLightShadowmapResolution, v => urp.mainLightShadowmapResolution=(int)v, 256, 4096, 256, "F0"));
+                    s.Add(S("Shadow Depth Bias", "Prevents shadow acne", () => urp.shadowDepthBias, v => urp.shadowDepthBias=v, 0, 10, 0.5f));
+                    s.Add(S("Shadow Normal Bias", "Prevents peter-panning", () => urp.shadowNormalBias, v => urp.shadowNormalBias=v, 0, 10, 0.5f));
                 }
                 if (sun != null)
-                    s.Add(S("Strength", "Shadow intensity (0-1)", () => sun.shadowStrength, v => sun.shadowStrength=v, 0, 1, 0.01f, "F2"));
-            });
+                    s.Add(S("Shadow Strength", "Shadow intensity (0-1)", () => sun.shadowStrength, v => sun.shadowStrength=v, 0, 1, 0.01f, "F2"));
 
-            // =============================================================
-            // SUN
-            // =============================================================
-            if (sun != null) Sec("SUN", s => {
-                s.Add(S("Intensity", "Sun brightness", () => sun.intensity, v => sun.intensity=v, 0, 5, 0.1f));
-                s.Add(S("R", "Sun color red", () => sun.color.r, v => { var c=sun.color; c.r=v; sun.color=c; }, 0, 1, 0.02f, "F2"));
-                s.Add(S("G", "Sun color green", () => sun.color.g, v => { var c=sun.color; c.g=v; sun.color=c; }, 0, 1, 0.02f, "F2"));
-                s.Add(S("B", "Sun color blue", () => sun.color.b, v => { var c=sun.color; c.b=v; sun.color=c; }, 0, 1, 0.02f, "F2"));
-                s.Add(S("Indirect", "Bounce light multiplier", () => sun.bounceIntensity, v => sun.bounceIntensity=v, 0, 5, 0.1f));
-                s.Add(S("Rot X", "Sun angle X (elevation)", () => sun.transform.eulerAngles.x, v => sun.transform.eulerAngles=new Vector3(v,sun.transform.eulerAngles.y,0), 0, 90, 1, "F0"));
-                s.Add(S("Rot Y", "Sun angle Y (azimuth)", () => sun.transform.eulerAngles.y, v => sun.transform.eulerAngles=new Vector3(sun.transform.eulerAngles.x,v,0), 0, 360, 5, "F0"));
-            });
+                // --- SUN ---
+                if (sun != null) {
+                    s.Add(S("Sun Intensity", "Sun brightness", () => sun.intensity, v => sun.intensity=v, 0, 5, 0.1f));
+                    s.Add(S("Sun R", "Sun color red", () => sun.color.r, v => { var c=sun.color; c.r=v; sun.color=c; }, 0, 1, 0.02f, "F2"));
+                    s.Add(S("Sun G", "Sun color green", () => sun.color.g, v => { var c=sun.color; c.g=v; sun.color=c; }, 0, 1, 0.02f, "F2"));
+                    s.Add(S("Sun B", "Sun color blue", () => sun.color.b, v => { var c=sun.color; c.b=v; sun.color=c; }, 0, 1, 0.02f, "F2"));
+                    s.Add(S("Sun Indirect", "Bounce light multiplier", () => sun.bounceIntensity, v => sun.bounceIntensity=v, 0, 5, 0.1f));
+                    s.Add(S("Sun Rot X", "Sun angle X (elevation)", () => sun.transform.eulerAngles.x, v => sun.transform.eulerAngles=new Vector3(v,sun.transform.eulerAngles.y,0), 0, 90, 1, "F0"));
+                    s.Add(S("Sun Rot Y", "Sun angle Y (azimuth)", () => sun.transform.eulerAngles.y, v => sun.transform.eulerAngles=new Vector3(sun.transform.eulerAngles.x,v,0), 0, 360, 5, "F0"));
+                }
 
-            // =============================================================
-            // FOG
-            // =============================================================
-            Sec("FOG", s => {
-                s.Add(S("On/Off", "Toggle fog", () => RenderSettings.fog?1:0, v => RenderSettings.fog=v>0.5f, 0, 1, 1, "F0"));
+                // --- FOG ---
+                s.Add(S("Fog On/Off", "Toggle fog", () => RenderSettings.fog?1:0, v => RenderSettings.fog=v>0.5f, 0, 1, 1, "F0"));
                 // Mode: 0=Linear, 1=Exp, 2=ExpSquared. Density slider only works in Exp/ExpSquared modes.
-                s.Add(S("Mode", "0=Linear (Start/End) 1=Exp (Density) 2=ExpSquared (Density)",
+                s.Add(S("Fog Mode", "0=Linear (Start/End) 1=Exp (Density) 2=ExpSquared (Density)",
                     () => (float)RenderSettings.fogMode,
                     v => RenderSettings.fogMode = (FogMode)Mathf.Clamp((int)v, 1, 3),
                     1, 3, 1, "F0"));
                 // Density: switches fogMode to Exp automatically if slider moved (issue #152).
                 // Linear mode ignores fogDensity -- user changing it without seeing effect was the bug.
-                s.Add(S("Density", "Density (auto-switches Mode to Exp)",
+                s.Add(S("Fog Density", "Density (auto-switches Mode to Exp)",
                     () => RenderSettings.fogDensity,
                     v => {
                         if (RenderSettings.fogMode == FogMode.Linear) RenderSettings.fogMode = FogMode.ExponentialSquared;
                         RenderSettings.fogDensity = v;
                     }, 0, 0.1f, 0.002f, "F3"));
-                s.Add(S("Start", "Start distance (Linear mode only)", () => RenderSettings.fogStartDistance, v => RenderSettings.fogStartDistance=v, 0, 200, 5, "F0"));
-                s.Add(S("End", "Full fog distance (Linear mode only)", () => RenderSettings.fogEndDistance, v => RenderSettings.fogEndDistance=v, 10, 500, 10, "F0"));
-                s.Add(S("R", "Fog color R", () => RenderSettings.fogColor.r, v => { var c=RenderSettings.fogColor; c.r=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
-                s.Add(S("G", "Fog color G", () => RenderSettings.fogColor.g, v => { var c=RenderSettings.fogColor; c.g=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
-                s.Add(S("B", "Fog color B", () => RenderSettings.fogColor.b, v => { var c=RenderSettings.fogColor; c.b=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
+                s.Add(S("Fog Start", "Start distance (Linear mode only)", () => RenderSettings.fogStartDistance, v => RenderSettings.fogStartDistance=v, 0, 200, 5, "F0"));
+                s.Add(S("Fog End", "Full fog distance (Linear mode only)", () => RenderSettings.fogEndDistance, v => RenderSettings.fogEndDistance=v, 10, 500, 10, "F0"));
+                s.Add(S("Fog R", "Fog color R", () => RenderSettings.fogColor.r, v => { var c=RenderSettings.fogColor; c.r=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
+                s.Add(S("Fog G", "Fog color G", () => RenderSettings.fogColor.g, v => { var c=RenderSettings.fogColor; c.g=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
+                s.Add(S("Fog B", "Fog color B", () => RenderSettings.fogColor.b, v => { var c=RenderSettings.fogColor; c.b=v; RenderSettings.fogColor=c; }, 0, 1, 0.02f, "F2"));
+
+                // --- AMBIENT ---
+                s.Add(S("Ambient Intensity", "Ambient brightness", () => RenderSettings.ambientIntensity, v => RenderSettings.ambientIntensity=v, 0, 3, 0.1f));
+                s.Add(S("Ambient R", "Ambient R", () => RenderSettings.ambientLight.r, v => { var c=RenderSettings.ambientLight; c.r=v; RenderSettings.ambientLight=c; }, 0, 1, 0.05f, "F2"));
+                s.Add(S("Ambient G", "Ambient G", () => RenderSettings.ambientLight.g, v => { var c=RenderSettings.ambientLight; c.g=v; RenderSettings.ambientLight=c; }, 0, 1, 0.05f, "F2"));
+                s.Add(S("Ambient B", "Ambient B", () => RenderSettings.ambientLight.b, v => { var c=RenderSettings.ambientLight; c.b=v; RenderSettings.ambientLight=c; }, 0, 1, 0.05f, "F2"));
+                s.Add(S("Ambient Reflection", "Reflection probe intensity", () => RenderSettings.reflectionIntensity, v => RenderSettings.reflectionIntensity=v, 0, 2, 0.1f));
+
+                // --- SKYBOX (guarded: material must exist) ---
+                if (sky != null) {
+                    if (sky.HasColor("_Tint")) {
+                        s.Add(S("Sky Tint R", "Sky tint R", () => sky.GetColor("_Tint").r, v => { var c=sky.GetColor("_Tint"); c.r=v; sky.SetColor("_Tint",c); }, 0, 2, 0.02f, "F2"));
+                        s.Add(S("Sky Tint G", "Sky tint G", () => sky.GetColor("_Tint").g, v => { var c=sky.GetColor("_Tint"); c.g=v; sky.SetColor("_Tint",c); }, 0, 2, 0.02f, "F2"));
+                        s.Add(S("Sky Tint B", "Sky tint B", () => sky.GetColor("_Tint").b, v => { var c=sky.GetColor("_Tint"); c.b=v; sky.SetColor("_Tint",c); }, 0, 2, 0.02f, "F2"));
+                    }
+                    if (sky.HasFloat("_Exposure")) s.Add(S("Sky Exposure", "Sky brightness", () => sky.GetFloat("_Exposure"), v => sky.SetFloat("_Exposure",v), 0, 8, 0.1f));
+                    if (sky.HasFloat("_Rotation")) s.Add(S("Sky Rotation", "Skybox static rotation (degrees)", () => sky.GetFloat("_Rotation"), v => sky.SetFloat("_Rotation",v), 0, 360, 5, "F0"));
+                    if (sky.HasFloat("_CloudBoost")) s.Add(S("Sky Cloud Bright", "Cloud brightness multiplier (1=normal)", () => sky.GetFloat("_CloudBoost"), v => sky.SetFloat("_CloudBoost",v), 0, 5, 0.1f));
+                    if (sky.HasFloat("_CloudThreshold")) s.Add(S("Sky Cloud Thresh", "Luminance threshold for cloud effect (lower=more clouds)", () => sky.GetFloat("_CloudThreshold"), v => sky.SetFloat("_CloudThreshold",v), 0, 1, 0.01f, "F2"));
+                    if (sky.HasColor("_GroundColor")) {
+                        s.Add(S("Sky Ground R", "Ground/horizon color R", () => sky.GetColor("_GroundColor").r, v => { var c=sky.GetColor("_GroundColor"); c.r=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
+                        s.Add(S("Sky Ground G", "Ground/horizon color G", () => sky.GetColor("_GroundColor").g, v => { var c=sky.GetColor("_GroundColor"); c.g=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
+                        s.Add(S("Sky Ground B", "Ground/horizon color B", () => sky.GetColor("_GroundColor").b, v => { var c=sky.GetColor("_GroundColor"); c.b=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
+                    }
+                    if (sky.HasFloat("_GroundBlend")) s.Add(S("Sky Ground Blend", "Horizon height (-0.5..0.5)", () => sky.GetFloat("_GroundBlend"), v => sky.SetFloat("_GroundBlend",v), -0.5f, 0.5f, 0.01f, "F2"));
+                    if (sky.HasFloat("_GroundFade")) s.Add(S("Sky Ground Fade", "Sky-ground transition softness", () => sky.GetFloat("_GroundFade"), v => sky.SetFloat("_GroundFade",v), 0.01f, 1, 0.02f, "F2"));
+                    if (sky.HasFloat("_RotSpeed")) s.Add(S("Sky Shader Rot Speed", "Built-in shader sky rotation (deg/s)", () => sky.GetFloat("_RotSpeed"), v => sky.SetFloat("_RotSpeed",v), 0, 30, 0.5f));
+                    if (skyRot != null)
+                        s.Add(S("Sky Rot Speed", "SkyRotator script speed (deg/s)", () => skyRot.rotationSpeed, v => skyRot.rotationSpeed=v, 0, 5, 0.1f));
+                }
             });
 
             // =============================================================
-            // AMBIENT
-            // =============================================================
-            Sec("AMBIENT", s => {
-                s.Add(S("Intensity", "Ambient brightness", () => RenderSettings.ambientIntensity, v => RenderSettings.ambientIntensity=v, 0, 3, 0.1f));
-                s.Add(S("R", "Ambient R", () => RenderSettings.ambientLight.r, v => { var c=RenderSettings.ambientLight; c.r=v; RenderSettings.ambientLight=c; }, 0, 1, 0.05f, "F2"));
-                s.Add(S("G", "Ambient G", () => RenderSettings.ambientLight.g, v => { var c=RenderSettings.ambientLight; c.g=v; RenderSettings.ambientLight=c; }, 0, 1, 0.05f, "F2"));
-                s.Add(S("B", "Ambient B", () => RenderSettings.ambientLight.b, v => { var c=RenderSettings.ambientLight; c.b=v; RenderSettings.ambientLight=c; }, 0, 1, 0.05f, "F2"));
-                s.Add(S("Reflection", "Reflection probe intensity", () => RenderSettings.reflectionIntensity, v => RenderSettings.reflectionIntensity=v, 0, 2, 0.1f));
-            });
-
-            // =============================================================
-            // QUALITY
+            // QUALITY -- skonsolidowana sekcja-worek (QUALITY + CAMERA + OCULUS + PHYSICS
+            // + BLOOM + COLOR + LGG + URP). Zadne nazwy nie koliduja -> bez prefiksow.
+            // Podgrupy post-fx (BLOOM/COLOR/LGG) i URP-info guardowane po volume/urp.
             // =============================================================
             Sec("QUALITY", s => {
                 if (urp != null) {
@@ -529,94 +546,70 @@ namespace Plaga44.UI
                 s.Add(S("Skin Wts", "Bones per vertex (1-4)", () => (float)QualitySettings.skinWeights, v => QualitySettings.skinWeights=(SkinWeights)(int)v, 1, 4, 1, "F0"));
                 s.Add(S("VSync", "Sync to display", () => QualitySettings.vSyncCount, v => QualitySettings.vSyncCount=(int)v, 0, 2, 1, "F0"));
                 s.Add(S("Aniso", "Anisotropic filtering", () => (float)QualitySettings.anisotropicFiltering, v => QualitySettings.anisotropicFiltering=(AnisotropicFiltering)(int)v, 0, 2, 1, "F0"));
-            });
 
-            // =============================================================
-            // CAMERA
-            // =============================================================
-            Sec("CAMERA", s => {
+                // --- CAMERA ---
                 s.Add(S("Near Clip", "Min render distance", () => Camera.main!=null?Camera.main.nearClipPlane:0.01f, v => { if(Camera.main) Camera.main.nearClipPlane=v; }, 0.01f, 1, 0.01f, "F2"));
                 s.Add(S("Far Clip", "Max render distance", () => Camera.main!=null?Camera.main.farClipPlane:1000, v => { if(Camera.main) Camera.main.farClipPlane=v; }, 50, 5000, 50, "F0"));
                 s.Add(S("FOV", "Field of view (degrees)", () => Camera.main!=null?Camera.main.fieldOfView:60, v => { if(Camera.main) Camera.main.fieldOfView=v; }, 30, 120, 1, "F0"));
-            });
 
-            // =============================================================
-            // OCULUS
-            // =============================================================
-            Sec("OCULUS", s => {
+                // --- OCULUS ---
                 try {
                     s.Add(S("FFR Level", "Foveated rendering (0=off, 4=max)", () => (float)OVRManager.foveatedRenderingLevel, v => OVRManager.foveatedRenderingLevel=(OVRManager.FoveatedRenderingLevel)(int)v, 0, 4, 1, "F0"));
                     s.Add(S("Refresh Hz", "Quest refresh rate", () => OVRManager.display!=null?OVRManager.display.displayFrequency:72, v => { if(OVRManager.display!=null) OVRManager.display.displayFrequency=v; }, 60, 120, 6, "F0"));
                 } catch (Exception ex) {
                     Debug.LogWarning($"[PLAGA44][Settings] OVRManager unavailable: {ex.Message}");
                 }
-            });
 
-            // =============================================================
-            // SKYBOX (full shader)
-            // =============================================================
-            if (sky != null) Sec("SKYBOX", s => {
-                if (sky.HasColor("_Tint")) {
-                    s.Add(S("Tint R", "Sky tint R", () => sky.GetColor("_Tint").r, v => { var c=sky.GetColor("_Tint"); c.r=v; sky.SetColor("_Tint",c); }, 0, 2, 0.02f, "F2"));
-                    s.Add(S("Tint G", "Sky tint G", () => sky.GetColor("_Tint").g, v => { var c=sky.GetColor("_Tint"); c.g=v; sky.SetColor("_Tint",c); }, 0, 2, 0.02f, "F2"));
-                    s.Add(S("Tint B", "Sky tint B", () => sky.GetColor("_Tint").b, v => { var c=sky.GetColor("_Tint"); c.b=v; sky.SetColor("_Tint",c); }, 0, 2, 0.02f, "F2"));
+                // --- PHYSICS ---
+                s.Add(S("Gravity X", "Lateral gravity", () => Physics.gravity.x, v => { var g=Physics.gravity; g.x=v; Physics.gravity=g; }, -20, 20, 0.5f, "F1"));
+                s.Add(S("Gravity Y", "Vertical gravity (-9.81=Earth)", () => Physics.gravity.y, v => { var g=Physics.gravity; g.y=v; Physics.gravity=g; }, -20, 20, 0.5f, "F1"));
+                s.Add(S("Gravity Z", "Forward gravity", () => Physics.gravity.z, v => { var g=Physics.gravity; g.z=v; Physics.gravity=g; }, -20, 20, 0.5f, "F1"));
+                s.Add(S("Solver Iter", "Collision solver iterations", () => Physics.defaultSolverIterations, v => Physics.defaultSolverIterations=(int)v, 1, 25, 1, "F0"));
+                s.Add(S("Contact Off", "Min contact distance", () => Physics.defaultContactOffset, v => Physics.defaultContactOffset=v, 0.001f, 0.1f, 0.005f, "F3"));
+                s.Add(S("Sleep Thr", "Rigidbody sleep threshold", () => Physics.sleepThreshold, v => Physics.sleepThreshold=v, 0, 0.5f, 0.01f, "F2"));
+                s.Add(S("Bounce Thr", "Min bounce velocity", () => Physics.bounceThreshold, v => Physics.bounceThreshold=v, 0, 5, 0.1f));
+
+                // --- BLOOM (guarded) ---
+                if (blm != null) {
+                    s.Add(S("Bloom Intensity", "Bloom glow strength", () => blm.intensity.value, v => blm.intensity.Override(v), 0, 5, 0.1f));
+                    s.Add(S("Bloom Threshold", "Bloom brightness threshold", () => blm.threshold.value, v => blm.threshold.Override(v), 0, 3, 0.1f));
+                    s.Add(S("Bloom Scatter", "Spread (0=sharp)", () => blm.scatter.value, v => blm.scatter.Override(v), 0, 1, 0.05f, "F2"));
                 }
-                if (sky.HasFloat("_Exposure")) s.Add(S("Exposure", "Sky brightness", () => sky.GetFloat("_Exposure"), v => sky.SetFloat("_Exposure",v), 0, 8, 0.1f));
-                if (sky.HasFloat("_Rotation")) s.Add(S("Rotation", "Skybox static rotation (degrees)", () => sky.GetFloat("_Rotation"), v => sky.SetFloat("_Rotation",v), 0, 360, 5, "F0"));
-                if (sky.HasFloat("_CloudBoost")) s.Add(S("Cloud Bright", "Cloud brightness multiplier (1=normal)", () => sky.GetFloat("_CloudBoost"), v => sky.SetFloat("_CloudBoost",v), 0, 5, 0.1f));
-                if (sky.HasFloat("_CloudThreshold")) s.Add(S("Cloud Thresh", "Luminance threshold for cloud effect (lower=more clouds)", () => sky.GetFloat("_CloudThreshold"), v => sky.SetFloat("_CloudThreshold",v), 0, 1, 0.01f, "F2"));
-                // Cloud Alpha + Cloud R/G/B removed per issue #144 -- clutter without value.
-                if (sky.HasColor("_GroundColor")) {
-                    s.Add(S("Ground R", "Ground/horizon color R", () => sky.GetColor("_GroundColor").r, v => { var c=sky.GetColor("_GroundColor"); c.r=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
-                    s.Add(S("Ground G", "Ground/horizon color G", () => sky.GetColor("_GroundColor").g, v => { var c=sky.GetColor("_GroundColor"); c.g=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
-                    s.Add(S("Ground B", "Ground/horizon color B", () => sky.GetColor("_GroundColor").b, v => { var c=sky.GetColor("_GroundColor"); c.b=v; sky.SetColor("_GroundColor",c); }, 0, 1, 0.02f, "F2"));
+
+                // --- COLOR (guarded) ---
+                if (ca != null) {
+                    s.Add(S("Color Exposure", "Post-exposure EV", () => ca.postExposure.value, v => ca.postExposure.Override(v), -3, 3, 0.1f));
+                    s.Add(S("Color Contrast", "Contrast", () => ca.contrast.value, v => ca.contrast.Override(v), -100, 100, 5, "F0"));
+                    s.Add(S("Color Saturation", "Saturation (-100=B&W)", () => ca.saturation.value, v => ca.saturation.Override(v), -100, 100, 5, "F0"));
+                    s.Add(S("Color Hue Shift", "Hue rotation (-180..180)", () => ca.hueShift.value, v => ca.hueShift.Override(v), -180, 180, 5, "F0"));
+                    s.Add(S("Color Filter R", "Color filter R", () => ca.colorFilter.value.r, v => { var c=ca.colorFilter.value; c.r=v; ca.colorFilter.Override(c); }, 0, 1, 0.02f, "F2"));
+                    s.Add(S("Color Filter G", "Color filter G", () => ca.colorFilter.value.g, v => { var c=ca.colorFilter.value; c.g=v; ca.colorFilter.Override(c); }, 0, 1, 0.02f, "F2"));
+                    s.Add(S("Color Filter B", "Color filter B", () => ca.colorFilter.value.b, v => { var c=ca.colorFilter.value; c.b=v; ca.colorFilter.Override(c); }, 0, 1, 0.02f, "F2"));
                 }
-                if (sky.HasFloat("_GroundBlend")) s.Add(S("Ground Blend", "Horizon height (-0.5..0.5)", () => sky.GetFloat("_GroundBlend"), v => sky.SetFloat("_GroundBlend",v), -0.5f, 0.5f, 0.01f, "F2"));
-                if (sky.HasFloat("_GroundFade")) s.Add(S("Ground Fade", "Sky-ground transition softness", () => sky.GetFloat("_GroundFade"), v => sky.SetFloat("_GroundFade",v), 0.01f, 1, 0.02f, "F2"));
-                if (sky.HasFloat("_RotSpeed")) s.Add(S("Shader Rot Speed", "Built-in shader sky rotation (deg/s)", () => sky.GetFloat("_RotSpeed"), v => sky.SetFloat("_RotSpeed",v), 0, 30, 0.5f));
-                // SkyRotator script speed
-                if (skyRot != null)
-                    s.Add(S("Rot Speed", "SkyRotator script speed (deg/s)", () => skyRot.rotationSpeed, v => skyRot.rotationSpeed=v, 0, 5, 0.1f));
-            });
 
-            // =============================================================
-            // TERRAIN
-            // =============================================================
-            if (ter != null) Sec("TERRAIN", s => {
-                s.Add(S("Detail Dist", "Detail range (grass)", () => ter.detailObjectDistance, v => ter.detailObjectDistance=v, 0, 500, 10, "F0"));
-                s.Add(S("Tree Dist", "Tree mesh range", () => ter.treeDistance, v => ter.treeDistance=v, 0, 5000, 100, "F0"));
-                s.Add(S("Billboard", "Tree billboard range", () => ter.treeBillboardDistance, v => ter.treeBillboardDistance=v, 0, 5000, 100, "F0"));
-                s.Add(S("Max Trees", "Max full LOD trees", () => ter.treeMaximumFullLODCount, v => ter.treeMaximumFullLODCount=(int)v, 0, 500, 10, "F0"));
-                s.Add(S("Pixel Err", "Heightmap error (higher=faster)", () => ter.heightmapPixelError, v => ter.heightmapPixelError=v, 1, 200, 5, "F0"));
-                s.Add(S("Basemap", "Full texture range", () => ter.basemapDistance, v => ter.basemapDistance=v, 0, 2000, 50, "F0"));
-                s.Add(S("Instanced", "GPU instancing (1=on)", () => ter.drawInstanced?1:0, v => ter.drawInstanced=v>0.5f, 0, 1, 1, "F0"));
-                if (tMat != null) {
-                    if (tMat.HasFloat("_NormalScale")) s.Add(S("Normal", "Normal map strength", () => tMat.GetFloat("_NormalScale"), v => tMat.SetFloat("_NormalScale",v), 0, 3, 0.1f));
-                    if (tMat.HasFloat("_Smoothness")) s.Add(S("Smooth", "Smoothness (0=matte, 1=wet)", () => tMat.GetFloat("_Smoothness"), v => tMat.SetFloat("_Smoothness",v), 0, 1, 0.05f, "F2"));
-                    if (tMat.HasFloat("_Metallic")) s.Add(S("Metal", "Metallic", () => tMat.GetFloat("_Metallic"), v => tMat.SetFloat("_Metallic",v), 0, 1, 0.05f, "F2"));
+                // --- LGG (Lift/Gamma/Gain, guarded) ---
+                if (lgg != null) {
+                    s.Add(S("Lift R", "Shadows R", () => lgg.lift.value.x, v => { var x=lgg.lift.value; x.x=v; lgg.lift.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Lift G", "Shadows G", () => lgg.lift.value.y, v => { var x=lgg.lift.value; x.y=v; lgg.lift.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Lift B", "Shadows B", () => lgg.lift.value.z, v => { var x=lgg.lift.value; x.z=v; lgg.lift.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Lift W", "Shadows intensity", () => lgg.lift.value.w, v => { var x=lgg.lift.value; x.w=v; lgg.lift.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Gamma R", "Midtones R", () => lgg.gamma.value.x, v => { var x=lgg.gamma.value; x.x=v; lgg.gamma.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Gamma G", "Midtones G", () => lgg.gamma.value.y, v => { var x=lgg.gamma.value; x.y=v; lgg.gamma.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Gamma B", "Midtones B", () => lgg.gamma.value.z, v => { var x=lgg.gamma.value; x.z=v; lgg.gamma.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Gamma W", "Midtones intensity", () => lgg.gamma.value.w, v => { var x=lgg.gamma.value; x.w=v; lgg.gamma.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Gain R", "Highlights R", () => lgg.gain.value.x, v => { var x=lgg.gain.value; x.x=v; lgg.gain.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Gain G", "Highlights G", () => lgg.gain.value.y, v => { var x=lgg.gain.value; x.y=v; lgg.gain.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Gain B", "Highlights B", () => lgg.gain.value.z, v => { var x=lgg.gain.value; x.z=v; lgg.gain.Override(x); }, -1, 1, 0.02f, "F2"));
+                    s.Add(S("Gain W", "Highlights intensity", () => lgg.gain.value.w, v => { var x=lgg.gain.value; x.w=v; lgg.gain.Override(x); }, -1, 1, 0.02f, "F2"));
                 }
-            });
 
-            // =============================================================
-            // BLOOM
-            // =============================================================
-            if (blm != null) Sec("BLOOM", s => {
-                s.Add(S("Intensity", "Bloom glow strength", () => blm.intensity.value, v => blm.intensity.Override(v), 0, 5, 0.1f));
-                s.Add(S("Threshold", "Bloom brightness threshold", () => blm.threshold.value, v => blm.threshold.Override(v), 0, 3, 0.1f));
-                s.Add(S("Scatter", "Spread (0=sharp)", () => blm.scatter.value, v => blm.scatter.Override(v), 0, 1, 0.05f, "F2"));
-            });
-
-            // =============================================================
-            // COLOR
-            // =============================================================
-            if (ca != null) Sec("COLOR", s => {
-                s.Add(S("Exposure", "Post-exposure EV", () => ca.postExposure.value, v => ca.postExposure.Override(v), -3, 3, 0.1f));
-                s.Add(S("Contrast", "Contrast", () => ca.contrast.value, v => ca.contrast.Override(v), -100, 100, 5, "F0"));
-                s.Add(S("Saturation", "Saturation (-100=B&W)", () => ca.saturation.value, v => ca.saturation.Override(v), -100, 100, 5, "F0"));
-                s.Add(S("Hue Shift", "Hue rotation (-180..180)", () => ca.hueShift.value, v => ca.hueShift.Override(v), -180, 180, 5, "F0"));
-                s.Add(S("Filter R", "Color filter R", () => ca.colorFilter.value.r, v => { var c=ca.colorFilter.value; c.r=v; ca.colorFilter.Override(c); }, 0, 1, 0.02f, "F2"));
-                s.Add(S("Filter G", "Color filter G", () => ca.colorFilter.value.g, v => { var c=ca.colorFilter.value; c.g=v; ca.colorFilter.Override(c); }, 0, 1, 0.02f, "F2"));
-                s.Add(S("Filter B", "Color filter B", () => ca.colorFilter.value.b, v => { var c=ca.colorFilter.value; c.b=v; ca.colorFilter.Override(c); }, 0, 1, 0.02f, "F2"));
+                // --- URP (read-only info) ---
+                if (urp != null) {
+                    s.Add(S("HDR", "High dynamic range (1=on)", () => urp.supportsHDR?1:0, v => {}, 0, 1, 0, "F0"));
+                    s.Add(S("Depth Tex", "Camera depth texture (1=on)", () => urp.supportsCameraDepthTexture?1:0, v => {}, 0, 1, 0, "F0"));
+                    s.Add(S("Opaque Tex", "Camera opaque texture (1=on)", () => urp.supportsCameraOpaqueTexture?1:0, v => {}, 0, 1, 0, "F0"));
+                    s.Add(S("SH Mode", "Spherical harmonics eval mode", () => (float)urp.shEvalMode, v => {}, 0, 2, 0, "F0"));
+                }
             });
 
             // =============================================================
@@ -633,38 +626,14 @@ namespace Plaga44.UI
                 }
             });
 
-            // =============================================================
-            // LGG
-            // =============================================================
-            if (lgg != null) Sec("LGG", s => {
-                s.Add(S("Lift R", "Shadows R", () => lgg.lift.value.x, v => { var x=lgg.lift.value; x.x=v; lgg.lift.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Lift G", "Shadows G", () => lgg.lift.value.y, v => { var x=lgg.lift.value; x.y=v; lgg.lift.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Lift B", "Shadows B", () => lgg.lift.value.z, v => { var x=lgg.lift.value; x.z=v; lgg.lift.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Lift W", "Shadows intensity", () => lgg.lift.value.w, v => { var x=lgg.lift.value; x.w=v; lgg.lift.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Gamma R", "Midtones R", () => lgg.gamma.value.x, v => { var x=lgg.gamma.value; x.x=v; lgg.gamma.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Gamma G", "Midtones G", () => lgg.gamma.value.y, v => { var x=lgg.gamma.value; x.y=v; lgg.gamma.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Gamma B", "Midtones B", () => lgg.gamma.value.z, v => { var x=lgg.gamma.value; x.z=v; lgg.gamma.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Gamma W", "Midtones intensity", () => lgg.gamma.value.w, v => { var x=lgg.gamma.value; x.w=v; lgg.gamma.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Gain R", "Highlights R", () => lgg.gain.value.x, v => { var x=lgg.gain.value; x.x=v; lgg.gain.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Gain G", "Highlights G", () => lgg.gain.value.y, v => { var x=lgg.gain.value; x.y=v; lgg.gain.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Gain B", "Highlights B", () => lgg.gain.value.z, v => { var x=lgg.gain.value; x.z=v; lgg.gain.Override(x); }, -1, 1, 0.02f, "F2"));
-                s.Add(S("Gain W", "Highlights intensity", () => lgg.gain.value.w, v => { var x=lgg.gain.value; x.w=v; lgg.gain.Override(x); }, -1, 1, 0.02f, "F2"));
-            });
+            // LGG (Lift/Gamma/Gain) przeniesione do sekcji QUALITY (skonsolidowanej).
 
             // PROFILE section removed -- single master profile = current scene/asset
             // values. Every setting the old Quest/PCVR presets touched (renderScale,
             // shadowDistance, LOD, eyeTex, FFR, tree/detail dist, FPS) has its own
             // slider and persists independently.
 
-            // =============================================================
-            // URP -- additional pipeline info
-            // =============================================================
-            if (urp != null) Sec("URP", s => {
-                s.Add(S("HDR", "High dynamic range (1=on)", () => urp.supportsHDR?1:0, v => {}, 0, 1, 0, "F0")); // read-only at runtime
-                s.Add(S("Depth Tex", "Camera depth texture (1=on)", () => urp.supportsCameraDepthTexture?1:0, v => {}, 0, 1, 0, "F0")); // RO
-                s.Add(S("Opaque Tex", "Camera opaque texture (1=on)", () => urp.supportsCameraOpaqueTexture?1:0, v => {}, 0, 1, 0, "F0")); // RO
-                s.Add(S("SH Mode", "Spherical harmonics eval mode", () => (float)urp.shEvalMode, v => {}, 0, 2, 0, "F0")); // RO
-            });
+            // URP (read-only info) przeniesione do sekcji QUALITY (skonsolidowanej).
 
             // =============================================================
             // NAVMESH -- agent settings if present
@@ -721,7 +690,7 @@ namespace Plaga44.UI
         // Action-type settings (getter always returns 0, setter fires action on >0.5).
         // These must NOT be restored from PlayerPrefs -- restoring 1.0 would re-trigger the action.
         private static readonly HashSet<string> ACTION_SETTINGS =
-            new HashSet<string> { "RESET ALL", "LOG ALL", "QUIT GAME", "SAVE GRIP", "RESET GRIP", "Spawn", "Despawn All" };
+            new HashSet<string> { "RESET ALL", "LOG ALL", "QUIT GAME", "SAVE GRIP", "RESET GRIP", "Spawn", "Despawn All", "Grab" };
 
         // Ustawienia z wymuszonym baseline na start -- NIE przywracane z persist.
         // Build() ustawia je jawnie; zapisany "Current" nie moze tego nadpisac.
@@ -760,8 +729,11 @@ namespace Plaga44.UI
             Path.Combine(Application.persistentDataPath, "plaga44_menu_settings.json");
 
         /// <summary>Jeden predykat "co trwalimy" -- te same reguly co RestorePersistedValues.
-        /// Pomija sekcje non-persistent, read-only/akcje (step<=0), przyciski-akcje i baseline-forced.</summary>
-        private static bool IsPersistable(string section, SettingDef s)
+        /// Pomija sekcje non-persistent (m.in. GAME STATE = runtime, nie ustawienie),
+        /// read-only/akcje (step<=0), przyciski-akcje i baseline-forced (m.in. Eye Tex).
+        /// PUBLIC bo WorldSaveManager MUSI trzymac ten sam kontrakt -- inaczej przywraca
+        /// GAME STATE/Phase na boot (blokada ruchu) i nadpisuje Eye Tex baseline 1.0.</summary>
+        public static bool IsPersistable(string section, SettingDef s)
             => !NON_PERSISTENT_SECTIONS.Contains(section)
             && s.step > 0
             && !ACTION_SETTINGS.Contains(s.name)

@@ -11,16 +11,6 @@ namespace Plaga44
     [CreateAssetMenu(menuName = "PLAGA44/Bootstrap Config", fileName = "BootstrapConfig")]
     public class BootstrapConfig : ScriptableObject
     {
-        [Header("Scene")]
-        public string scenePath = "Assets/PLAGA44/TESTBED_V6.unity";
-
-        [Header("Terrain")]
-        public string terrainAssetPath = "Assets/Potok/Terrain/Scene_A_Terrain.asset";
-        public string terrainMaterialPath = "Assets/PLAGA44/Materials/TerrainLit.mat";
-        public string terrainLayersFolder = "Assets/PLAGA44/TerrainLayers";
-        [Tooltip("Horizontal scale multiplier (X,Z) applied to terrain size. 1.0 = default. 2.0 = 2x wider in both directions.")]
-        public float terrainHorizontalScale = 2.0f;
-
         [Header("Skybox")]
         public string skyboxMatPath = "Assets/Potok/Skybox/BGR_Sky1.mat";
 
@@ -52,9 +42,6 @@ namespace Plaga44
         [Tooltip("If true AND stratoJumpHeight=0 -- restore last session position from PlayerPrefs.")]
         public bool savePlayerPosition = false;
 
-        [Header("Grab Volume")]
-        public float grabVolumeRadius = 0.08f;
-
         [Header("Bounce Light")]
         [Tooltip("Fill light pointing straight up (ground bounce simulation).")]
         public Color bounceLightColor = new Color(0.6f, 0.65f, 0.75f);
@@ -67,7 +54,7 @@ namespace Plaga44
         [Tooltip("Spawn offset relative to HEAD (eye level). x=right, y=up from eyes (negative=table level), z=forward.")]
         public Vector3 spawnerOffset = new Vector3(0f, -0.5f, 1.2f);
         [Tooltip("Default item Resources path for spawner.")]
-        public string defaultSpawnItem = "Items/Revolver";
+        public string defaultSpawnItem = "Items/Shotgun";
 
         [Header("Avatar Registry")]
         public string avatarRegistryPath = "Assets/PLAGA44/Resources/AvatarRegistry.asset";

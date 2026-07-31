@@ -1,0 +1,75 @@
+=============================================================================
+MENU REBUILD -- 5-grupowa hierarchia + per-reka spawn do dloni   (2026-07-31)
+=============================================================================
+
+NOWA HIERARCHIA MENU (HamburgerMenu.GROUPS)
+-------------------------------------------------------------------------
+  TOP-LEVEL (5 kafli w rzedzie, 160px kazdy -> 860<900 canvas):
+
+  ITEMS ----------> LEFT HAND ---> [Item] wybor grabbable (stick)
+                                   [Grab] ENTER -> spawn do LEWEJ dloni
+                    RIGHT HAND --> [Item] wybor grabbable (stick)
+                                   [Grab] ENTER -> spawn do PRAWEJ dloni
+                    WEARABLES ---> placeholder (0 -- brak mechaniki)
+
+  CHARACTER ------> AVATAR, LOCOMOTION, SMOOTH TURN, CHAR CTRL, ITEM GRIP
+
+  NPCs -----------> NPC
+
+  WORLD ----------> ENVIRONMENT (sun/fog/ambient/skybox/shadows)
+                    QUALITY     (bloom/color/lgg/urp/physics/camera/oculus)
+
+  SYSTEM ---------> EXIT, AUDIO, MISC, GAME STATE, NAVMESH, COMFORT
+                    (PROFILE POMINIETY -- sekcja usunieta wczesniej)
+
+
+FLOW SPAWNU DO DLONI (nowy model, ZERO preview-na-stole)
+-------------------------------------------------------------------------
+  Menu: LEFT HAND / [Grab] ENTER
+        |
+        v
+  SettingsRegistry  --> HandItemMenu.SpawnLeft()
+                              |
+                              | PrefabFor(Left) = ItemBrowser.GrabbablePrefab(SelectedLeft)
+                              v
+                        GripSpawnToHand.SpawnToHand(prefab, Handedness.Left)
+                              |
+                              | ForceSelect(allowManualRelease=false)
+                              v
+                        item W LEWEJ DLONI (trzymany deterministycznie)
+
+  ALT sciezka (spojna): grip pusta reka -> HandItemMenu.PrefabFor(hand)
+                        -> ten sam prefab co wybor w menu tej reki.
+
+
+KATALOG ITEMOW (ItemBrowser -- jedno zrodlo prawdy)
+-------------------------------------------------------------------------
+  GrabbableWhitelist = { Shotgun }      -> GrabbableCount / GrabbablePrefab / GrabbableName
+  WearableWhitelist  = { }  (pusty)     -> WearableCount = 0 (placeholder honesty)
+
+
+PLIKI ZMIENIONE
+-------------------------------------------------------------------------
+  [NEW] Scripts/Inventory/HandItemMenu.cs   -- per-reka selekcja + spawn (wzor NpcMenuSection)
+  [MOD] Scripts/Core/ItemBrowser.cs         -- Whitelist->Grabbable/Wearable split + akcesory
+  [MOD] Scripts/UI/SettingsRegistry.cs      -- Sec(ITEMS) -> LEFT HAND / RIGHT HAND / WEARABLES
+  [MOD] Scripts/UI/HamburgerMenu.cs         -- GROUPS 5-grup, layout 160px, ITEMS->hand special-case
+  [MOD] Scripts/Inventory/GripSpawnToHand.cs-- grip pusta reka czyta HandItemMenu.PrefabFor(hand)
+
+
+SPRZATNIETE (2026-07-31, po decyzji Borysa)
+-------------------------------------------------------------------------
+  [-] PROFILE -- domkniete: sekcja byla usunieta wczesniej, teraz nie ma jej
+      tez w GROUPS. Zero martwych referencji (vol.profile w QUALITY to URP
+      VolumeProfile, nie sekcja menu -- zostaje).
+  [-] PREVIEW-NA-STOLE -- ItemBrowser sprowadzony do czystego KATALOGU.
+      Usuniete: SetItem, SpawnPreview, DespawnPreview, ConfirmSpawn, SelectedPrefab,
+      SelectedResourcePath, SelectedItem, MaxItem, CurrentSpawned, CurrentLabel,
+      spawnDistance, spawnHeightOffset, GetSpawnPosition/Rotation, FindHead.
+      ITEM GRIP findTarget: usunieto galaz CurrentSpawned -> operuje TYLKO na
+      aktualnie trzymanym itemie (PlagaGrabbable.isGrabbed).
+
+  UWAGA (world-save): tagowanie itemu do #196 bylo w ConfirmSpawn (preview).
+  Itemy spawnowane do dloni nie sa juz auto-tagowane world-save -- do decyzji
+  osobno jesli demo ma zapisywac rozrzucone itemy.
+=============================================================================

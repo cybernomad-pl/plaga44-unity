@@ -22,7 +22,7 @@ namespace Plaga44.Editor.Setup
         private const string MenuName = "_HamburgerMenu";
         private const string SourceScene = "Assets/PLAGA44/TESTBED_V6.unity";
         private const string PrefabPath = "Assets/PLAGA44/Prefabs/PlayerRig.prefab";
-        private const string ConfigPath = "Assets/PLAGA44/Config/BootstrapConfig_Quest.asset";
+        private const string ConfigPath = "Assets/PLAGA44/Config/BootstrapConfig.asset";
 
         [MenuItem("CYBERNOMAD/Tools/Build Player Rig", false, 2)]
         public static void Run()

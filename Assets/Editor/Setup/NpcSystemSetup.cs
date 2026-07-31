@@ -30,6 +30,39 @@ namespace Plaga44.Editor.Setup
         private const string LibraryPath      = "Assets/Resources/Npc/NpcAnimationLibrary.asset";
         private const string PrefabPath       = "Assets/Resources/Npc/PINEA_NPC.prefab";
 
+        // WHITELIST animacji NPC: tylko klipy pasujace do wzorca trafiaja do biblioteki.
+        // pattern = fragment nazwy pliku (lowercase Contains). loop = czy klip petli.
+        // "Inne zostaw na kiedys" -> dopisz tu pare (pattern, loop). Reszta jest pomijana.
+        // ZERO FALLBACKOW: klip bez dopasowania NIE trafia do biblioteki (explicit exclude).
+        private static readonly (string pattern, bool loop)[] AnimWhitelist =
+        {
+            ("idle",  true),   // wszystkie idle -- petla
+            ("walk",  true),   // wszystkie walk/walking (tez "Catwalk Walk") -- petla
+            ("death", false),  // dying/death -- freeze na ostatniej klatce
+            ("dying", false),
+            // --- NEW NPC (2026-07-27) ---
+            ("swimming",      true),   // 52 klipy plywania -- petla (gra wodna)
+            ("side hit",      false),  // Big Side Hit x2 -- reakcja one-shot
+            ("fist",          false),  // Fist Fight B -- one-shot
+            ("assassination", false),  // Brutal Assassination -- one-shot
+            ("uppercut",      false),  // Receiving An Uppercut -- one-shot
+            ("petting",       true),   // Petting Animal -- gest ambient, petla
+            ("kneeling",      true),   // Kneeling Pointing -- poza ambient, petla
+            ("nervously",     true),   // Nervously Look Around -- idle wariant, petla
+        };
+
+        // Zwraca true + loop jesli nazwa pasuje do whitelist; false gdy poza whitelist.
+        private static bool TryWhitelist(string fileName, out bool loop)
+        {
+            string lower = fileName.ToLowerInvariant();
+            foreach (var (pattern, l) in AnimWhitelist)
+            {
+                if (lower.Contains(pattern)) { loop = l; return true; }
+            }
+            loop = false;
+            return false;
+        }
+
         [MenuItem("PLAGA44/Setup/NPC System (Full)")]
         public static void Run()
         {
@@ -122,10 +155,15 @@ namespace Plaga44.Editor.Setup
 
             var paths = new List<string>();
             int configured = 0;
+            int skipped = 0;
             foreach (var guid in guids)
             {
                 string path = AssetDatabase.GUIDToAssetPath(guid);
                 if (!path.EndsWith(".fbx", System.StringComparison.OrdinalIgnoreCase)) continue;
+
+                // WHITELIST: tylko IDLE/WALK/DYING. Reszta pominieta (nie importujemy 150 zbednych).
+                string fileName = Path.GetFileNameWithoutExtension(path);
+                if (!TryWhitelist(fileName, out bool loop)) { skipped++; continue; }
 
                 var importer = AssetImporter.GetAtPath(path) as ModelImporter;
                 if (importer == null)
@@ -138,12 +176,12 @@ namespace Plaga44.Editor.Setup
                 importer.avatarSetup = ModelImporterAvatarSetup.CopyFromOther;
                 importer.sourceAvatar = pineaAvatar;
 
-                // loopTime on: idle/walk/run loop; one-shots looping too is acceptable per plan.
+                // loopTime per kategoria: IDLE/WALK petla, DYING one-shot (freeze na koncu).
                 var clips = importer.clipAnimations;
                 if (clips == null || clips.Length == 0) clips = importer.defaultClipAnimations;
                 if (clips != null)
                 {
-                    for (int i = 0; i < clips.Length; i++) clips[i].loopTime = true;
+                    for (int i = 0; i < clips.Length; i++) clips[i].loopTime = loop;
                     importer.clipAnimations = clips;
                 }
 
@@ -154,11 +192,11 @@ namespace Plaga44.Editor.Setup
 
             if (configured == 0)
             {
-                Debug.LogError($"{LOG} [KROK 2][ABORT] Found {guids.Length} models but none were .fbx importable.");
+                Debug.LogError($"{LOG} [KROK 2][ABORT] Found {guids.Length} models but none matched whitelist (IDLE/WALK/DYING).");
                 return null;
             }
 
-            Debug.Log($"{LOG} [KROK 2][OK] Configured {configured} Mixamo animation fbx as Humanoid (CopyFromOther).");
+            Debug.Log($"{LOG} [KROK 2][OK] Whitelist: {configured} klip(ow) zaimportowanych, {skipped} poza whitelist pominietych.");
             return paths;
         }
 
@@ -169,6 +207,7 @@ namespace Plaga44.Editor.Setup
         {
             var clips = new List<AnimationClip>();
             var names = new List<string>();
+            var loops = new List<bool>();
 
             foreach (var path in animPaths)
             {
@@ -188,8 +227,14 @@ namespace Plaga44.Editor.Setup
                     continue;
                 }
 
+                string fileName = Path.GetFileNameWithoutExtension(path);
+                // path juz przeszlo whitelist w KROK 2 -> dopasowanie zawsze true.
+                TryWhitelist(fileName, out bool loop);
+
                 clips.Add(clip);
-                names.Add(Path.GetFileNameWithoutExtension(path));
+                names.Add(fileName);
+                loops.Add(loop);
+                Debug.Log($"{LOG} [KROK 3]   + '{fileName}' (loop={loop})");
             }
 
             if (clips.Count == 0)
@@ -203,6 +248,7 @@ namespace Plaga44.Editor.Setup
             var library = ScriptableObject.CreateInstance<NpcAnimationLibrary>();
             library.clips = clips.ToArray();
             library.displayNames = names.ToArray();
+            library.loops = loops.ToArray();
 
             var existing = AssetDatabase.LoadAssetAtPath<NpcAnimationLibrary>(LibraryPath);
             if (existing != null) AssetDatabase.DeleteAsset(LibraryPath);

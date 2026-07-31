@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b09fab5a258714788565653f92441c, type: 3}
+  m_Name: BootstrapConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Plaga44.BootstrapConfig
+  skyboxMatPath: Assets/Potok/Skybox/BGR_Sky1.mat
+  sunColor: {r: 1, g: 0.95, b: 0.84, a: 1}
+  sunIntensity: 1
+  sunRotation: {x: 50, y: -30, z: 0}
+  sunShadows: 2
+  ccHeight: 1.8
+  ccRadius: 0.3
+  ccCenter: {x: 0, y: 0.9, z: 0}
+  ccSkinWidth: 0.08
+  ccStepOffset: 0.5
+  moveSpeed: 2.5
+  strafeFactor: 0.8
+  turnSpeed: 120
+  turnDeadZone: 0.15
+  skyRotationSpeed: 0.5
+  stratoJumpHeight: 0
+  savePlayerPosition: 1
+  bounceLightColor: {r: 0.6, g: 0.65, b: 0.75, a: 1}
+  bounceLightIntensity: 0.35
+  bounceLightRotation: {x: -90, y: 0, z: 0}
+  bounceLightShadows: 0
+  spawnerOffset: {x: 0.8, y: 0, z: 1.5}
+  defaultSpawnItem: Items/Shotgun
+  avatarRegistryPath: Assets/PLAGA44/Resources/AvatarRegistry.asset

@@ -90,10 +90,13 @@ namespace Plaga44.Inventory
         }
 
         // =====================================================================
-        // TRIGGER SPAWN -- index trigger spawnuje item WYBRANY w galerii
-        // (HamburgerMenu -> ItemBrowser) wprost do TEJ dloni.
-        // Lewy grabber -> lewa reka, prawy -> prawa (ten grabber JEST ta reka).
-        // Ponowny trigger gdy cos trzymam -> toggle release (spojne z gripem).
+        // INDEX TRIGGER -- tylko toggle-release itemow trzymanych przez TEN
+        // (legacy OVRGrabber) grabber. Item Z GALERII bierze sie GRIPEM -- ISDK
+        // (HandGrabInteractable/DistanceHandGrabInteractable na prefabie) chwyta
+        // go dlonia ktora zacisnela grip. Reka rozstrzyga ISDK per-interactor,
+        // NIE ten grabber. Dawny gallery-spawn-do-reki usuniety: itemy sa teraz
+        // czysto ISDK (brak PlagaGrabbable) -> SpawnAndGrab i tak by je niszczyl,
+        // a rownolegly odczyt triggera konfliktowal z ISDK.
         // =====================================================================
         public override void Update()
         {
@@ -105,34 +108,15 @@ namespace Plaga44.Inventory
         private void OnIndexTriggerPressed()
         {
             // MENU OTWARTE -> trigger nalezy do UI (HamburgerMenu: zmiana wartosci +/-).
-            // Bez tego jeden pull robilby jednoczesnie zmiane ustawienia I spawn itemu.
             if (Plaga44.UI.HamburgerMenu.MenuOpen) return;
 
-            // Toggle: cos trzymam -> puszczam.
+            // Toggle: cos trzyma TEN legacy grabber -> puszcza. Itemy ISDK nie
+            // przechodza przez OVRGrabber, wiec dla nich m_grabbedObj == null (no-op).
             if (m_grabbedObj != null)
             {
                 Debug.Log($"{LOG} Trigger RELEASE: {m_grabbedObj.name} from {m_controller}");
                 GrabEnd();
-                return;
             }
-
-            var browser = Plaga44.ItemBrowser.Instance;
-            if (browser == null)
-            {
-                Debug.LogError($"{LOG} Trigger spawn: brak ItemBrowser w scenie -- nie wiem co spawnowac.");
-                return;
-            }
-
-            var prefab = browser.SelectedPrefab;
-            if (prefab == null)
-            {
-                Debug.LogWarning($"{LOG} Trigger spawn: zaden item nie wybrany w galerii (None). "
-                    + "Wybierz item w menu (sekcja ITEMS).");
-                return;
-            }
-
-            Debug.Log($"{LOG} Trigger SPAWN '{prefab.name}' -> {m_controller}");
-            StartCoroutine(SpawnAndGrab(prefab, browser.SelectedResourcePath));
         }
 
         // =====================================================================

@@ -1,0 +1,59 @@
+PLAGA44 -- Item Grab konwersja na Meta Interaction SDK (ISDK)
+Editor script: Assets/Editor/Setup/ItemGrabSetup.cs
+Menu: PLAGA44/Setup/Item Grab (ISDK)   |   API: ItemGrabSetup.Run(BootstrapConfig)
+Folder: Assets/Resources/Items   |   Whitelist: Box, BigStone, Shotgun
+Data: 2026-07-27
+================================================================================
+
+PRZED (legacy OVR)                       PO (ISDK HandGrab)
+------------------                       ------------------
+
+Root (Box/BigStone/Shotgun)              Root (Box/BigStone/Shotgun)
+ |- Transform                             |- Transform
+ |- Rigidbody          --------------->   |- Rigidbody          (bez zmian; wymagany)
+ |- BoxCollider        --------------->   |- BoxCollider        (bez zmian; wymagany)
+ |- HapticOnGrab       --------------->   |- HapticOnGrab       (ZOSTAJE, nietkniety)
+ |- PlagaGrabbable  ===[USUNIETY]         |- Item               (dodany; itemName, dualWield)
+    (OVRGrabbable)                        |- Grabbable
+                                          |     _rigidbody           -> root Rigidbody
+                                          |     _kinematicWhileSelected = true
+                                          |     _oneGrabTransformer   -> GrabFreeTransformer (ta sama instancja)
+                                          |     _twoGrabTransformer   -> GrabFreeTransformer (ta sama instancja)
+                                          |     _maxGrabPoints         = 2 (dual) | -1 (reszta)
+                                          |- GrabFreeTransformer  (ITransformer, 1- i 2-grab)
+                                          |
+                                          +-- TRYB A: brak Item.grabPoints (obecny stan wszystkich 3)
+                                          |    |- HandGrabInteractable  (na ROOT, free grab, BEZ pozy)
+                                          |          _rigidbody          -> root Rigidbody
+                                          |          _pointableElement   -> root Grabbable
+                                          |          _supportedGrabTypes = All (Pinch|Palm)
+                                          |          pinch = GrabbingRule.DefaultPinchRule
+                                          |          palm  = GrabbingRule.DefaultPalmRule
+                                          |    (LogWarning: dostroj grab pointy w Item)
+                                          |
+                                          +-- TRYB B: Item.grabPoints != puste (przyszlosc)
+                                               |- GrabPoint_<label>  (child @ localPos/Euler)
+                                               |     |- HandGrabPose
+                                               |     |     _relativeTo   -> root Transform
+                                               |     |     _usesHandPose = false
+                                               |     |- HandGrabInteractable
+                                               |           _rigidbody         -> root Rigidbody
+                                               |           _pointableElement  -> root Grabbable
+                                               |           _handGrabPoses      = [ HandGrabPose ]
+                                               |           supportedGrabTypes/pinch/palm = j.w.
+                                               |- GrabPoint_<label2> ... (Shotgun: trigger + loze)
+
+Shotgun (dual): Item.dualWield = true, Grabbable._maxGrabPoints = 2,
+                GrabFreeTransformer w obu slotach (jak StonePolyhedron sample).
+
+--------------------------------------------------------------------------------
+ZERO FALLBACK:
+  - brak Rigidbody na root            -> LogError + SKIP itemu (nie dodajemy fizyki)
+  - brak collidera w hierarchii RB    -> LogError + SKIP (assert HandGrabInteractable.Start)
+  - GrabHand Left/RightOnly           -> NIE egzekwowane (brak potwierdzonego per-hand API),
+                                         LogWarning, zostaje Any (osobny etap)
+IDEMPOTENCJA: kazdy run kasuje dzieci GrabPoint_* oraz HandGrabInteractable/HandGrabPose
+              dodane na ROOT, po czym regeneruje. Sample'owe interactable na innych
+              dzieciach prefabu NIE sa ruszane.
+--------------------------------------------------------------------------------
+Wzory: Mug.prefab (jednoreczny), StonePolyhedron.prefab (dual transformer).

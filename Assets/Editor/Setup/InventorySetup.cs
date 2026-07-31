@@ -1,11 +1,12 @@
 // =============================================================================
 // InventorySetup.cs
-// Dodaje HapticManager, PlayerInventory, InventoryLoadout i OVRGrabber
-// na obu dloniach. Wywolywany przez Bootstrap.
+// Dodaje HapticManager, PlayerInventory, InventoryLoadout oraz GripSpawnToHand
+// (spawn-do-reki na ISDK). AKTYWNIE usuwa legacy grab (PlagaGrabber + GrabVolume
+// + kinematyczny Rigidbody) z anchorow rigu -- ISDK jest jedynym systemem grab.
+// Wywolywany przez Bootstrap (faza 7, po BuildRig/PlayerRig).
 // =============================================================================
 #if UNITY_EDITOR
 using System;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using Plaga44.Feedback;
@@ -17,14 +18,12 @@ namespace Plaga44.Editor.Setup
     {
         private const string LOG = "[PLAGA44][InventorySetup]";
         private const string OvrRigName = "OVRCameraRig";
-        private const string RightAnchor = "RightHandAnchor";
-        private const string LeftAnchor = "LeftHandAnchor";
         private const string GrabVolumeName = "GrabVolume";
 
         public static bool Run(BootstrapConfig cfg)
         {
             // Prefaby broni (Shotgun/M249) do Resources/Items. IZOLACJA: blad budowania
-            // broni NIE moze przerwac setupu grabberow/menu ponizej -- logujemy i lecimy dalej.
+            // broni NIE moze przerwac setupu ponizej -- logujemy i lecimy dalej.
             try { WeaponPrefabBuilder.EnsureAllWeapons(); }
             catch (Exception e) { Debug.LogError($"{LOG} [WEAPONS] Build broni nie powiodl sie: {e.Message} -- setup gracza kontynuuje"); }
 
@@ -39,8 +38,13 @@ namespace Plaga44.Editor.Setup
             changed |= AddIfMissing<HapticManager>(rig, "HapticManager");
             changed |= AddIfMissing<PlayerInventory>(rig, "PlayerInventory");
             changed |= AddIfMissing<InventoryLoadout>(rig, "InventoryLoadout");
-            changed |= SetupGrabber(rig, RightAnchor, OVRInput.Controller.RTouch, cfg);
-            changed |= SetupGrabber(rig, LeftAnchor, OVRInput.Controller.LTouch, cfg);
+
+            // ISDK = jedyny system grab. Zdejmij legacy grabber z rigu (patrz nizej).
+            changed |= RemoveLegacyGrabbers(rig);
+
+            // Spawn-do-reki (grip pusta reka -> wybrany item galerii do TEJ dloni, ISDK ForceSelect).
+            changed |= AddIfMissing<GripSpawnToHand>(rig, "GripSpawnToHand");
+
             return changed;
         }
 
@@ -56,113 +60,90 @@ namespace Plaga44.Editor.Setup
             return true;
         }
 
-        private static bool SetupGrabber(GameObject rig, string anchorName, OVRInput.Controller ctrl, BootstrapConfig cfg)
+        // =====================================================================
+        // LEGACY GRAB CLEANUP -- aktywne usuniecie PlagaGrabber (OVRGrabber) i jego
+        // fizycznej obudowy (GrabVolume trigger + kinematyczny Rigidbody) z anchorow
+        // rigu. Konieczne, bo PlagaGrabber jest ZAPIECZONY w PlayerRig.prefab i wraca
+        // do sceny przy kazdym BuildRig -- ta faza (7) leci po BuildRig (5), wiec go zdejmuje.
+        // Idempotentne: drugi przebieg nie znajduje grabberow, dosprzata ewentualne
+        // osierocone GrabVolume.
+        //
+        // ZERO ZGADYWANIA fizyki: kinematyczny RB usuwam TYLKO gdy pasuje do stanu
+        // nadawanego przez legacy EnsureKinematicRigidbody (isKinematic=true, useGravity=false).
+        // Inny RB na anchorze -> NIE usuwam, LogWarning (zglaszam w raporcie).
+        // =====================================================================
+        private static bool RemoveLegacyGrabbers(GameObject rig)
         {
-            var anchor = FindChild(rig.transform, anchorName);
-            if (anchor == null)
+            bool changed = false;
+
+            // OVRGrabber lapie tez PlagaGrabber (subclass). Anchory to GO na ktorych siedzi grabber.
+            var grabbers = rig.GetComponentsInChildren<OVRGrabber>(true);
+            foreach (var g in grabbers)
             {
-                Debug.LogWarning($"{LOG} [MISSING] {anchorName} -- grabber skipped");
-                return false;
-            }
-            // Accept PlagaGrabber or OVRGrabber -- PlagaGrabber extends OVRGrabber
-            var existingGrabber = anchor.GetComponent<OVRGrabber>();
-            if (existingGrabber != null)
-            {
-                if (existingGrabber.GetType() == typeof(OVRGrabber))
+                if (g == null) continue;
+                var anchor = g.gameObject;
+                string typeName = g.GetType().Name;
+
+                // 1) GrabVolume (dziecko SphereCollider trigger).
+                var vol = anchor.transform.Find(GrabVolumeName);
+                if (vol != null)
                 {
-                    // Upgrade plain OVRGrabber to PlagaGrabber
-                    Debug.Log($"{LOG} [UPGRADE] Replacing OVRGrabber with PlagaGrabber on {anchorName}");
-                    UnityEngine.Object.DestroyImmediate(existingGrabber);
-                    // Fall through to add PlagaGrabber below (reuse existing GrabVolume + Rigidbody)
+                    Debug.Log($"{LOG} [REMOVE] {GrabVolumeName} z '{anchor.name}'");
+                    Undo.DestroyObjectImmediate(vol.gameObject);
+                    changed = true;
                 }
-                else
-                {
-                    Debug.Log($"{LOG} [OK] {existingGrabber.GetType().Name} on {anchorName}");
-                    return false;
-                }
+
+                // 2) sam grabber PRZED Rigidbody (PlagaGrabber ma [RequireComponent(Rigidbody)]).
+                Debug.Log($"{LOG} [REMOVE] {typeName} z '{anchor.name}'");
+                Undo.DestroyObjectImmediate(g);
+                changed = true;
+
+                // 3) kinematyczny RB nadany pod legacy grab -- tylko gdy pewny profil legacy.
+                changed |= RemoveLegacyKinematicRigidbody(anchor);
             }
 
-            // Reuse existing GrabVolume if present (from prior OVRGrabber setup)
-            var existingVolumeT = anchor.Find(GrabVolumeName);
-            Collider volume;
-            if (existingVolumeT != null)
+            // Idempotencja / dosprzatanie: osierocone GrabVolume na anchorach bez grabbera.
+            changed |= SweepOrphanGrabVolumes(rig);
+
+            if (!changed)
+                Debug.Log($"{LOG} [OK] brak legacy grab (PlagaGrabber/GrabVolume) na rigu -- czysto");
+            return changed;
+        }
+
+        private static bool RemoveLegacyKinematicRigidbody(GameObject anchor)
+        {
+            var rb = anchor.GetComponent<Rigidbody>();
+            if (rb == null) return false;
+
+            // Profil legacy (EnsureKinematicRigidbody): isKinematic=true, useGravity=false.
+            if (rb.isKinematic && !rb.useGravity)
             {
-                volume = existingVolumeT.GetComponent<Collider>();
-                if (volume == null) volume = CreateGrabVolume(anchor, cfg.grabVolumeRadius);
+                Debug.Log($"{LOG} [REMOVE] kinematyczny Rigidbody z '{anchor.name}' (legacy grab: isKinematic=1, useGravity=0)");
+                Undo.DestroyObjectImmediate(rb);
+                return true;
             }
-            else
+
+            Debug.LogWarning($"{LOG} [KEEP] Rigidbody na '{anchor.name}' NIE pasuje do profilu legacy grab " +
+                             $"(isKinematic={rb.isKinematic}, useGravity={rb.useGravity}) -- NIE usuwam, zglaszam. " +
+                             $"Sprawdz recznie czy potrzebny ISDK.");
+            return false;
+        }
+
+        // Usuwa dzieci nazwane GrabVolume z SphereCollider-trigger pod rigiem, gdy zostaly
+        // bez grabbera (np. po czesciowym przebiegu). Celowane po nazwie + trigger, nie po zasiegu.
+        private static bool SweepOrphanGrabVolumes(GameObject rig)
+        {
+            bool changed = false;
+            foreach (var t in rig.GetComponentsInChildren<Transform>(true))
             {
-                volume = CreateGrabVolume(anchor, cfg.grabVolumeRadius);
+                if (t == null || t.name != GrabVolumeName) continue;
+                var sc = t.GetComponent<SphereCollider>();
+                if (sc == null || !sc.isTrigger) continue;
+                Debug.Log($"{LOG} [REMOVE] osierocone {GrabVolumeName} pod '{(t.parent != null ? t.parent.name : "?")}'");
+                Undo.DestroyObjectImmediate(t.gameObject);
+                changed = true;
             }
-            EnsureKinematicRigidbody(anchor.gameObject);
-            var grabber = anchor.gameObject.AddComponent<PlagaGrabber>();
-
-            if (!ConfigureGrabber(grabber, anchor, volume, ctrl))
-            {
-                Debug.LogError($"{LOG} [SDK BREAK] PlagaGrabber on {anchorName} not configured -- removing. Check field names.");
-                UnityEngine.Object.DestroyImmediate(grabber);
-                UnityEngine.Object.DestroyImmediate(volume.gameObject);
-                var rb = anchor.GetComponent<Rigidbody>();
-                if (rb != null) UnityEngine.Object.DestroyImmediate(rb);
-                return false;
-            }
-
-            if (existingVolumeT == null)
-                Undo.RegisterCreatedObjectUndo(volume.gameObject, $"Bootstrap: GrabVolume {anchorName}");
-            Debug.Log($"{LOG} [ADDED] PlagaGrabber on {anchorName} ({ctrl})");
-            return true;
-        }
-
-        private static SphereCollider CreateGrabVolume(Transform parent, float radius)
-        {
-            var go = new GameObject(GrabVolumeName);
-            go.transform.SetParent(parent, worldPositionStays: false);
-            go.transform.localPosition = Vector3.zero;
-            var col = go.AddComponent<SphereCollider>();
-            col.isTrigger = true;
-            col.radius = radius;
-            return col;
-        }
-
-        private static void EnsureKinematicRigidbody(GameObject go)
-        {
-            if (go.GetComponent<Rigidbody>() != null) return;
-            var rb = go.AddComponent<Rigidbody>();
-            rb.isKinematic = true;
-            rb.useGravity = false;
-        }
-
-        // OVRGrabber ma protected fieldy -- ustawiamy przez reflection.
-        // Zwraca false jesli SDK zmienilo nazwy pol.
-        private static bool ConfigureGrabber(OVRGrabber grabber, Transform grip, Collider volume, OVRInput.Controller ctrl)
-        {
-            var t = typeof(OVRGrabber);
-            const BindingFlags f = BindingFlags.NonPublic | BindingFlags.Instance;
-            bool ok = true;
-            ok &= SetField(t, grabber, "m_gripTransform", grip, f);
-            ok &= SetField(t, grabber, "m_grabVolumes", new Collider[] { volume }, f);
-            ok &= SetField(t, grabber, "m_controller", ctrl, f);
-            ok &= SetField(t, grabber, "m_parentHeldObject", true, f);
-            return ok;
-        }
-
-        private static bool SetField(Type t, object target, string name, object value, BindingFlags flags)
-        {
-            var field = t.GetField(name, flags);
-            if (field == null)
-            {
-                Debug.LogError($"{LOG} [SDK BREAK] {t.Name}.{name} not found");
-                return false;
-            }
-            field.SetValue(target, value);
-            return true;
-        }
-
-        private static Transform FindChild(Transform root, string name)
-        {
-            foreach (var t in root.GetComponentsInChildren<Transform>(true))
-                if (t.name == name) return t;
-            return null;
+            return changed;
         }
     }
 }

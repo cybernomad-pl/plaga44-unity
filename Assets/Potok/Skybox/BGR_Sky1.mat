@@ -113,21 +113,21 @@ Material:
     - _DstBlendAlpha: 0
     - _EmissionScaleUI: 0
     - _EnvironmentReflections: 1
-    - _Exposure: 2.200043
+    - _Exposure: 2.1000438
     - _FlipAmount: 0
     - _GlossMapScale: 0
     - _Glossiness: 0.5
     - _GlossyReflections: 0
-    - _GroundBlend: -0.5
-    - _GroundFade: 0.64000034
+    - _GroundBlend: -0.13000017
+    - _GroundFade: 0.35
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 1
-    - _RotSpeed: 0.5
-    - _Rotation: 243.69775
+    - _RotSpeed: 1.5
+    - _Rotation: 258.96313
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -145,10 +145,10 @@ Material:
     - _Color: {r: 1, g: 1.15, b: 1.3, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorUI: {r: 1, g: 1, b: 1, a: 1}
-    - _GroundColor: {r: 0, g: 0, b: 0, a: 1}
+    - _GroundColor: {r: 0.07999963, g: 0.07999975, b: 0.07999923, a: 1}
     - _SkyTint: {r: 0.6367705, g: 0.80784315, b: 0.75780797, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _Tint: {r: 0.13999546, g: 0.13999707, b: 0.0999986, a: 1}
+    - _Tint: {r: 0.1799945, g: 0.17999622, b: 0.2599979, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &1703632752652408182

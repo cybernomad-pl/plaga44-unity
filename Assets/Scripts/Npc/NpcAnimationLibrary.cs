@@ -22,6 +22,9 @@ namespace Plaga44.Npc
         [Tooltip("Czytelne nazwy -- nazwa pliku bez rozszerzenia. Rownolegle do clips[].")]
         public string[] displayNames;
 
+        [Tooltip("Czy klip petli. Rownolegle do clips[]. IDLE/WALK = true, DYING = false (freeze na ostatniej klatce).")]
+        public bool[] loops;
+
         public int Count => clips != null ? clips.Length : 0;
 
         /// <summary>Zwraca klip pod indeksem lub null (LogError) gdy poza zakresem.</summary>
@@ -44,6 +47,18 @@ namespace Plaga44.Npc
                 return null;
             }
             return displayNames[index];
+        }
+
+        /// <summary>Czy klip petli. Poza zakresem -> LogError + false (defensywny freeze,
+        /// NIE zgadywanie petli -- brak danych = nie zapetlaj w nieskonczonosc).</summary>
+        public bool Loops(int index)
+        {
+            if (loops == null || index < 0 || index >= loops.Length)
+            {
+                Debug.LogError($"{LOG} Loops({index}) poza zakresem (loops={(loops != null ? loops.Length : 0)})");
+                return false;
+            }
+            return loops[index];
         }
     }
 }

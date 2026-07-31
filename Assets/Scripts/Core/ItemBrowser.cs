@@ -1,11 +1,11 @@
 // =============================================================================
 // ItemBrowser.cs
-// CYBERNOMAD -- Runtime item browser. Laduje itemy z Resources/Items/,
-// pozwala wybrac item z HamburgerMenu.
+// CYBERNOMAD -- KATALOG itemow. Laduje grabbable z Resources/Items/ (po whitelist),
+// sortuje wg PreferredOrder i wystawia je jako liste dla per-reka menu (HandItemMenu).
 //
-// SPAWN BEHAVIOR: item pojawia sie PRZED graczem (na "niewidzialnym stole")
-// kiedy HamburgerMenu jest otwarte. Gracz podchodzi, chwyta gripem/triggerem
-// i ustawia punkt przyczepienia do kontrolera.
+// TYLKO KATALOG -- zero spawnu. Preview-na-stole wycofane (2026-07-31): itemy
+// spawnuja sie PROSTO do dloni przez LEFT/RIGHT HAND -> HandItemMenu ->
+// GripSpawnToHand. ItemBrowser jest jednym zrodlem prawdy o zawartosci katalogu.
 // =============================================================================
 
 using UnityEngine;
@@ -18,25 +18,26 @@ namespace Plaga44
         private const string LOG = "[PLAGA44][ItemBrowser]";
         private const string AutoBootGoName = "ItemBrowser";
         private const string ItemsResourceFolder = "Items";
-        private const string PrefsKey = "Plaga44_ItemBrowser_SelectedItem";
 
-        // Jawna kolejnosc na POCZATKU galerii (reszta alfabetycznie po nich).
+        // PODZIAL ITEMOW: GRABBABLES (trzymane w dloni) vs WEARABLES (ciuchy/armor
+        // zakladane na cialo). Explicit whitelisty, zero fallback -- item spoza obu
+        // list wypada z katalogu calkowicie.
+        //
+        // GRABBABLES: TYLKO te itemy sa ladowane do katalogu dloni. Box, BigStone,
+        // Gun USUNIETE (2026-07-29). Aktualnie wylacznie Shotgun.
+        private static readonly string[] GrabbableWhitelist = { "Shotgun" };
+
+        // WEARABLES: ciuchy/armor zakladane na cialo (osobno od dloni). PLACEHOLDER --
+        // brak prefabow i brak mechaniki zakladania. Pusta lista = sekcja WEARABLES w
+        // menu jest explicit-pusta (nie udajemy dzialajacej mechaniki). Gdy powstana
+        // wearable prefaby -> dopisz tu nazwy i zaimplementuj mechanike.
+        private static readonly string[] WearableWhitelist = { };
+
+        // Jawna kolejnosc na POCZATKU katalogu (reszta alfabetycznie po nich).
         // Deklaratywne, nie fallback: item spoza listy idzie do czesci alfabetycznej.
         private static readonly string[] PreferredOrder = { "Shotgun", "Blaster", "Torch" };
-        private const string OvrRigName = "OVRCameraRig";
 
         public static ItemBrowser Instance { get; private set; }
-
-        // =====================================================================
-        // Config
-        // =====================================================================
-
-        [Header("Spawn Position (relative to head)")]
-        [Tooltip("Distance in front of player where items appear.")]
-        public float spawnDistance = 1.2f;
-
-        [Tooltip("Height offset from head (negative = below eye level, like a table).")]
-        public float spawnHeightOffset = -0.5f;
 
         // =====================================================================
         // State
@@ -44,53 +45,32 @@ namespace Plaga44
 
         private GameObject[] _itemPrefabs;
         private string[] _itemNames;
-        private int _selectedIndex; // 0 = None, 1..N = item
-        private GameObject _spawnedPreview;
-        private string _spawnedPrefabName; // zapamietana nazwa prefabu -> resourcePath dla world-save
 
         // =====================================================================
-        // Public API
+        // Public API -- katalog GRABBABLES (dla HandItemMenu)
         // =====================================================================
 
-        public int MaxItem => (_itemPrefabs != null) ? _itemPrefabs.Length : 0;
-        public int SelectedItem => _selectedIndex;
+        /// <summary>Liczba grabbable itemow w katalogu (po whitelist).</summary>
+        public int GrabbableCount => _itemPrefabs != null ? _itemPrefabs.Length : 0;
 
-        /// <summary>Prefab wybranego itemu, albo NULL gdy nic nie wybrano (index 0 = None).
-        /// Zrodlo dla trigger-spawn do dloni (PlagaGrabber). NIE zgaduje -- null = caller decyduje.</summary>
-        public GameObject SelectedPrefab
+        /// <summary>Grabbable prefab pod indeksem 0-based, albo NULL gdy poza zakresem.
+        /// Zero fallback -- caller decyduje co z null.</summary>
+        public GameObject GrabbablePrefab(int zeroBased)
         {
-            get
-            {
-                if (_selectedIndex == 0 || _itemPrefabs == null) return null;
-                int idx = _selectedIndex - 1;
-                if (idx < 0 || idx >= _itemPrefabs.Length) return null;
-                return _itemPrefabs[idx];
-            }
+            if (_itemPrefabs == null || zeroBased < 0 || zeroBased >= _itemPrefabs.Length) return null;
+            return _itemPrefabs[zeroBased];
         }
 
-        /// <summary>Resources path wybranego itemu (world-save tagowanie). NULL gdy nic nie wybrano.</summary>
-        public string SelectedResourcePath
+        /// <summary>Nazwa grabbable pod indeksem 0-based, albo NULL gdy poza zakresem.</summary>
+        public string GrabbableName(int zeroBased)
         {
-            get
-            {
-                var p = SelectedPrefab;
-                return p != null ? $"{ItemsResourceFolder}/{p.name}" : null;
-            }
+            if (_itemNames == null || zeroBased < 0 || zeroBased >= _itemNames.Length) return null;
+            return _itemNames[zeroBased];
         }
 
-        /// <summary>Currently spawned preview item (or null). Target for ITEM GRIP live tuning.</summary>
-        public GameObject CurrentSpawned => _spawnedPreview;
-
-        public string CurrentLabel
-        {
-            get
-            {
-                if (_selectedIndex == 0) return "None";
-                int idx = _selectedIndex - 1;
-                if (_itemNames == null || idx < 0 || idx >= _itemNames.Length) return "?";
-                return _itemNames[idx];
-            }
-        }
+        /// <summary>Liczba WEARABLES w katalogu. Aktualnie 0 (placeholder -- brak prefabow
+        /// i mechaniki). Sekcja WEARABLES w menu czyta to i pokazuje stan wprost.</summary>
+        public int WearableCount => WearableWhitelist.Length;
 
         // =====================================================================
         // Lifecycle
@@ -120,9 +100,7 @@ namespace Plaga44
         private void Start()
         {
             LoadItems();
-            int saved = PlayerPrefs.GetInt(PrefsKey, 0);
-            SetItem(Mathf.Clamp(saved, 0, MaxItem));
-            Debug.Log($"{LOG} Start: {MaxItem} items, restored={_selectedIndex} ({CurrentLabel})");
+            Debug.Log($"{LOG} Start: katalog {GrabbableCount} grabbable, {WearableCount} wearable");
         }
 
         // =====================================================================
@@ -140,6 +118,11 @@ namespace Plaga44
                 return;
             }
 
+            // WHITELIST GRABBABLES: odfiltruj do dozwolonych zanim zbudujesz katalog.
+            int before = loaded.Length;
+            loaded = System.Array.FindAll(loaded, p => System.Array.IndexOf(GrabbableWhitelist, p.name) >= 0);
+            Debug.Log($"{LOG} GrabbableWhitelist: {loaded.Length}/{before} itemow ({string.Join(",", GrabbableWhitelist)})");
+
             System.Array.Sort(loaded, CompareItems);
 
             _itemPrefabs = loaded;
@@ -147,7 +130,7 @@ namespace Plaga44
             for (int i = 0; i < loaded.Length; i++)
                 _itemNames[i] = loaded[i].name;
 
-            Debug.Log($"{LOG} Loaded {loaded.Length} items: {string.Join(", ", _itemNames)}");
+            Debug.Log($"{LOG} Loaded {loaded.Length} grabbable: {string.Join(", ", _itemNames)}");
         }
 
         // Kolejnosc: itemy z PreferredOrder pierwsze (wg indeksu listy), reszta alfabetycznie.
@@ -159,125 +142,6 @@ namespace Plaga44
             if (ia >= 0) return -1;                          // tylko a preferred -> a pierwszy
             if (ib >= 0) return 1;                           // tylko b preferred -> b pierwszy
             return string.Compare(a.name, b.name, System.StringComparison.Ordinal); // reszta alfabetycznie
-        }
-
-        // =====================================================================
-        // Selection
-        // =====================================================================
-
-        public void SetItem(int index)
-        {
-            index = Mathf.Clamp(index, 0, MaxItem);
-            DespawnPreview();
-
-            _selectedIndex = index;
-            PlayerPrefs.SetInt(PrefsKey, _selectedIndex);
-
-            if (index == 0)
-            {
-                Debug.Log($"{LOG} Item: None");
-                return;
-            }
-
-            int prefabIdx = index - 1;
-            if (prefabIdx < 0 || prefabIdx >= _itemPrefabs.Length) return;
-
-            SpawnPreview(_itemPrefabs[prefabIdx]);
-            Debug.Log($"{LOG} Item: {CurrentLabel} -- spawned in front of player");
-        }
-
-        // =====================================================================
-        // Spawn / despawn -- item appears in front of player
-        // =====================================================================
-
-        private void SpawnPreview(GameObject prefab)
-        {
-            Vector3 pos = GetSpawnPosition();
-            Quaternion rot = GetSpawnRotation();
-
-            _spawnedPreview = Instantiate(prefab, pos, rot);
-            _spawnedPreview.name = $"ItemPreview_{prefab.name}";
-            _spawnedPrefabName = prefab.name;
-            Plaga44.Rendering.TestShaderApplier.Apply(_spawnedPreview); // Custom/Test Shader (URP/Lit = magenta)
-
-            // Enable physics so player can grab it naturally with OVRGrabber
-            var rb = _spawnedPreview.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.isKinematic = false;
-                rb.useGravity = true; // spada na ziemie, nie fruwa
-            }
-        }
-
-        /// <summary>Destroy current preview item. Public for HamburgerMenu.Close (issue #158).</summary>
-        public void DespawnPreview()
-        {
-            if (_spawnedPreview == null) return;
-            Destroy(_spawnedPreview);
-            _spawnedPreview = null;
-            _spawnedPrefabName = null;
-        }
-
-        /// <summary>Zatwierdza aktualny preview jako TRWALY obiekt swiata -- item ZOSTAJE w scenie
-        /// zamiast zostac zniszczony. Wywolywane przy zamknieciu menu / opuszczeniu sekcji ITEMS.
-        /// Wlacza grawitacje, taguje do world-save (#196) i zwalnia referencje BEZ Destroy.
-        /// Reset wyboru -> kolejny start nie respawnuje duplikatu, nastepny wybor jest swiezy.</summary>
-        public void ConfirmSpawn()
-        {
-            if (_spawnedPreview == null) return;
-
-            var rb = _spawnedPreview.GetComponent<Rigidbody>();
-            if (rb != null) rb.useGravity = true; // przestaje "wisiec", staje sie normalnym obiektem
-
-            if (!string.IsNullOrEmpty(_spawnedPrefabName))
-            {
-                SaveableObject.Tag(_spawnedPreview, $"{ItemsResourceFolder}/{_spawnedPrefabName}");
-                _spawnedPreview.name = _spawnedPrefabName; // zdejmij prefiks "ItemPreview_"
-            }
-
-            _spawnedPreview = null;
-            _spawnedPrefabName = null;
-
-            _selectedIndex = 0;
-            PlayerPrefs.SetInt(PrefsKey, 0);
-            Debug.Log($"{LOG} ConfirmSpawn -- item pozostaje w scenie");
-        }
-
-        private Vector3 GetSpawnPosition()
-        {
-            Transform head = FindHead();
-            if (head == null) return Vector3.forward * spawnDistance;
-
-            Vector3 fwd = head.forward;
-            fwd.y = 0f;
-            if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
-            fwd.Normalize();
-
-            return head.position + fwd * spawnDistance + Vector3.up * spawnHeightOffset;
-        }
-
-        private Quaternion GetSpawnRotation()
-        {
-            Transform head = FindHead();
-            if (head == null) return Quaternion.identity;
-
-            Vector3 fwd = head.forward;
-            fwd.y = 0f;
-            if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
-            fwd.Normalize();
-
-            // Item faces player
-            return Quaternion.LookRotation(-fwd, Vector3.up);
-        }
-
-        private Transform FindHead()
-        {
-            var rig = GameObject.Find(OvrRigName);
-            if (rig == null) return Camera.main?.transform;
-            var tracking = rig.transform.Find("TrackingSpace");
-            if (tracking == null) return rig.transform;
-            var eye = tracking.Find("CenterEyeAnchor");
-            return eye != null ? eye : tracking;
         }
     }
 }

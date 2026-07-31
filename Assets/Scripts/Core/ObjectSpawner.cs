@@ -2,7 +2,8 @@
 // ObjectSpawner.cs
 // CYBERNOMAD -- Runtime spawner obiektow w scenie.
 // Spawnuje itemy z Resources/ z pelnym setupem fizyki i interakcji VR.
-// Auto-wires: Rigidbody, Collider, PlagaGrabbable, HapticOnGrab.
+// Auto-wires: Rigidbody, Collider, HapticOnGrab. ISDK grab (HandGrabInteractable +
+// DistanceHandGrabInteractable) dziedziczony z prefaba (ItemGrabSetup, Bootstrap 7b).
 //
 // Auto-boot via [RuntimeInitializeOnLoadMethod]. Konfigurowalny z inspektora
 // (gdy GO istnieje w scenie) lub przez BootstrapConfig (domyslne wartosci).
@@ -10,6 +11,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using Oculus.Interaction.HandGrab;
 using Plaga44.Feedback;
 using Plaga44.Inventory;
 
@@ -43,7 +45,7 @@ namespace Plaga44
             [Tooltip("Auto-add Collider if missing on prefab.")]
             public bool autoCollider = true;
 
-            [Tooltip("Auto-add PlagaGrabbable + HapticOnGrab if missing.")]
+            [Tooltip("Auto-add HapticOnGrab if missing + assert ISDK HandGrabInteractable present.")]
             public bool autoGrabbable = true;
 
             [Tooltip("Mass (kg) for auto-added Rigidbody.")]
@@ -250,13 +252,19 @@ namespace Plaga44
                 col.size = bounds.size;
             }
 
-            // Grabbable + Haptic
+            // Grab: ISDK. Prefab dostaje HandGrabInteractable + DistanceHandGrabInteractable w
+            // ItemGrabSetup (Bootstrap faza 7b). Instancja DZIEDZICZY je z prefaba -- ObjectSpawner
+            // NIE montuje juz starego PlagaGrabbable (rig-owy PlagaGrabber usuniety, byl sierota).
             if (entry.autoGrabbable)
             {
                 if (instance.GetComponent<HapticOnGrab>() == null)
                     instance.AddComponent<HapticOnGrab>();
-                if (instance.GetComponent<PlagaGrabbable>() == null)
-                    instance.AddComponent<PlagaGrabbable>();
+
+                // ZERO FALLBACK: item MUSI miec ISDK grab z prefaba. Brak -> LogError i NIE dodajemy
+                // niczego (nie zgadujemy, nie wracamy do starego grabu). Item bez grabu = widoczny bug.
+                if (instance.GetComponentInChildren<HandGrabInteractable>() == null)
+                    Debug.LogError($"{LOG} '{instance.name}' spawniony BEZ HandGrabInteractable (ISDK) -- " +
+                                   $"prefab '{entry.resourcePath}' nie przeszedl ItemGrabSetup. Item NIE bedzie grabowalny.");
             }
 
             // Float-at-eye-level: attach hover which kills gravity on Awake and re-enables

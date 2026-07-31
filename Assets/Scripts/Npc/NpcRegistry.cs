@@ -1,7 +1,7 @@
 // =============================================================================
 // NpcRegistry.cs
 // Rejestr NPC dostepnych w NPC gallery. Budowany przez editor tool
-// (NpcRegistrySetup) skanem Resources/Npc/*_NPC.prefab -- dodanie NPC = wrzucenie
+// (DefaultMaleNpcSetup) skanem Resources/Npc/*_NPC.prefab -- dodanie NPC = wrzucenie
 // prefaba do Resources/Npc/, zero recznej edycji listy.
 // Asset zyje w Assets/Resources/Npc/NpcRegistry.asset -> Resources.Load w runtime.
 // Wzor: Plaga44.AvatarRegistry.
@@ -18,7 +18,7 @@ namespace Plaga44.Npc
         [System.Serializable]
         public class Entry
         {
-            public string name;      // czytelna nazwa (np. "Ethan", "Pinea")
+            public string name;      // czytelna nazwa (np. "Pinea", "DefaultMale")
             public GameObject prefab; // prefab NPC z Resources/Npc/
         }
 

@@ -122,7 +122,9 @@ namespace Plaga44
             {
                 foreach (var s in SettingsRegistry.GetSettings(section))
                 {
-                    if (s.step <= 0f) continue; // skip read-only / action buttons
+                    // Ten sam kontrakt co SettingsRegistry -- pomija read-only/akcje,
+                    // GAME STATE (runtime, nie ustawienie) i baseline-forced (Eye Tex).
+                    if (!SettingsRegistry.IsPersistable(section, s)) continue;
                     save.settings.Add(new SavedSetting { key = section + "/" + s.name, value = s.get() });
                 }
             }
@@ -183,7 +185,9 @@ namespace Plaga44
             {
                 foreach (var s in SettingsRegistry.GetSettings(section))
                 {
-                    if (s.step <= 0f) continue;
+                    // Ten sam kontrakt co Capture/SettingsRegistry -- NIE przywracaj
+                    // GAME STATE/Phase (blokowalo ruch na boot) ani Eye Tex baseline.
+                    if (!SettingsRegistry.IsPersistable(section, s)) continue;
                     if (map.TryGetValue(section + "/" + s.name, out float v))
                         s.set(Mathf.Clamp(v, s.min, s.max));
                 }
