@@ -16,11 +16,8 @@ namespace Plaga44.Editor
 
         static Bootstrap() => EditorApplication.update += WaitForReady;
 
-        private static int _waitTicks;
-
         private static void WaitForReady()
         {
-            _waitTicks++;
             if (EditorApplication.isCompiling || EditorApplication.isUpdating) return;
 
             EditorApplication.update -= WaitForReady;
@@ -67,13 +64,10 @@ namespace Plaga44.Editor
 
             changed |= LogStep("0-ClearScene", () => ClearScene(scene));
 
-            // Migracja V6 -> V7. Fazy w kolejnosci hierarchii V6.
-            // changed |= LogStep("1-Terrain",            () => TerrainSetup.Run(cfg)); // WYLACZONE -- na razie tylko WODA
-            changed |= LogStep("2-Water",              () => WaterSetup.Run(cfg));
-            changed |= LogStep("2b-WaterBottom",       () => WaterBottomSetup.Run(cfg));
-            changed |= LogStep("3-Skybox",             () => SkyboxSetup.Run(cfg));
+            // WHITEBOXING (2026-07-31): bialy zamkniety pokoj (konstruktor z Matrixa)
+            // zamiast environmentu. Woda/teren/skybox/bounce-light USUNIETE.
+            changed |= LogStep("1-WhiteRoom",          () => WhiteRoomSetup.Run(cfg));
             changed |= LogStep("3b-PostProcess",       () => PostProcessSetup.Run(cfg));
-            changed |= LogStep("4-BounceLight",        () => BounceLightSetup.Run(cfg));
             LogStepVoid("5-BuildRig",                  () => BuildPlayerRigSetup.Run());
             changed |= LogStep("6-PlayerRig",          () => PlayerRigSetup.Run(cfg));
             changed |= LogStep("7-Inventory",          () => InventorySetup.Run(cfg));
@@ -94,8 +88,6 @@ namespace Plaga44.Editor
             {
                 Debug.Log($"{LOG} === Setup OK, no changes === ({sw.ElapsedMilliseconds}ms)");
             }
-
-            FocusTerrain();
         }
 
         private static bool LogStep(string name, System.Func<bool> step)
@@ -138,14 +130,6 @@ namespace Plaga44.Editor
             return true;
         }
 
-        private static void FocusTerrain()
-        {
-            var terrain = Object.FindFirstObjectByType<Terrain>();
-            if (terrain == null) return;
-            Selection.activeGameObject = terrain.gameObject;
-            try { SceneView.lastActiveSceneView?.FrameSelected(); }
-            catch { }
-        }
     }
 }
 #endif

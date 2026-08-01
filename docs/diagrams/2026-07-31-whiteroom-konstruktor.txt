@@ -1,0 +1,56 @@
+=============================================================================
+WHITEBOXING -- konstruktor z Matrixa zamiast environmentu       (2026-07-31)
+=============================================================================
+
+BOOTSTRAP -- FAZY PO CIECIU
+-------------------------------------------------------------------------
+  PRZED                              PO
+  0-ClearScene                       0-ClearScene
+  2-Water          [USUNIETE]        1-WhiteRoom   <-- NOWE
+  2b-WaterBottom   [USUNIETE]        3b-PostProcess
+  3-Skybox         [USUNIETE]        5-BuildRig
+  3b-PostProcess                     6-PlayerRig
+  4-BounceLight    [USUNIETE]        7-Inventory
+  5-BuildRig                         7b-ItemGrab
+  6-PlayerRig                        8-Singletons (bez SkyRotatora)
+  7-Inventory                        9-ObjectSpawner
+  7b-ItemGrab                        10-NpcSpawner
+  8-Singletons                       10b-NpcGrab
+  9-ObjectSpawner                    11-AvatarRegistry
+  10-NpcSpawner
+  10b-NpcGrab          FICZERY NIETKNIETE: rig+robot AVATAR, menu 5-grup,
+  11-AvatarRegistry    grab/spawn SHOTGUN, NPC (Pinea), ITEM GRIP, world-save.
+
+WHITEROOM -- GEOMETRIA (przekroj)
+-------------------------------------------------------------------------
+        Y=31 ___________________________ Ceiling (100x1x100)
+            |                           |
+            |                           |  4x Wall (100x30x1)
+            |         [gracz]           |  material: WhiteRoom.mat
+            |         (0,0,0)           |  (URP/Lit, bialy, matowy)
+        Y=0 |___________________________|
+            |___________________________| Floor (100x1x100, TOP=Y0)
+          X=-50                       X=+50
+
+  Swiatlo: Directional Light z configa (sun*) + ambient FLAT 0.85 bialy.
+  RenderSettings: skybox=NULL, fog=OFF.
+  Rig: (0, 0+stratoJumpHeight, 0) po TOPie podlogi WhiteRoom/Floor.
+       ZERO FALLBACK: brak Floor -> LogError, rig niepozycjonowany.
+
+SKASOWANE PLIKI
+-------------------------------------------------------------------------
+  Setup:   WaterSetup, WaterBottomSetup, TerrainSetup, BounceLightSetup,
+           SkyboxSetup (+ .meta) -- sun przejal WhiteRoomSetup.EnsureSun
+  Mat:     WaterTransparent.mat, WaterBottom.mat (+ .meta)
+  Config:  skyboxMatPath, skyRotationSpeed, bounceLight* (4 pola) -- zero uzyc
+  Inne:    SkyRotator nie jest juz tworzony (klasa zostaje -- ref w GameState);
+           Bootstrap.FocusTerrain + _waitTicks (martwe) -- precz
+  Asset:   savePlayerPosition 1->0 (stara pozycja ze swiata wody Y~20 =
+           w powietrzu nad pokojem; whitebox startuje zawsze w srodku)
+
+MENU -- CO ZNIKA SAMO (guardy nullowe, zero zmian w kodzie menu)
+-------------------------------------------------------------------------
+  ENVIRONMENT/SKYBOX  -> sky==null  -> podgrupa niewidoczna
+  ENVIRONMENT/SUN     -> zostaje (WhiteRoom tworzy Directional Light)
+  ENVIRONMENT/FOG+AMBIENT -> zostaja (RenderSettings zawsze istnieja)
+=============================================================================

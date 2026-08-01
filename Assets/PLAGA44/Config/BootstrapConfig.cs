@@ -11,9 +11,6 @@ namespace Plaga44
     [CreateAssetMenu(menuName = "PLAGA44/Bootstrap Config", fileName = "BootstrapConfig")]
     public class BootstrapConfig : ScriptableObject
     {
-        [Header("Skybox")]
-        public string skyboxMatPath = "Assets/Potok/Skybox/BGR_Sky1.mat";
-
         [Header("Directional Light")]
         public Color sunColor = new Color(1f, 0.95f, 0.84f);
         public float sunIntensity = 1f;
@@ -33,22 +30,11 @@ namespace Plaga44
         public float turnSpeed = 120f;
         public float turnDeadZone = 0.15f;
 
-        [Header("Sky Rotator")]
-        public float skyRotationSpeed = 0.5f;
-
         [Header("Player Spawn")]
         [Tooltip("StratoJump height (meters above ground). 0 = snap to ground. >0 = spawn at this altitude (fun drop). Overrides savePlayerPosition.")]
         public float stratoJumpHeight = 1000f;
         [Tooltip("If true AND stratoJumpHeight=0 -- restore last session position from PlayerPrefs.")]
         public bool savePlayerPosition = false;
-
-        [Header("Bounce Light")]
-        [Tooltip("Fill light pointing straight up (ground bounce simulation).")]
-        public Color bounceLightColor = new Color(0.6f, 0.65f, 0.75f);
-        public float bounceLightIntensity = 0.35f;
-        [Tooltip("Rotation X=-90 = straight up. Adjust for angle.")]
-        public Vector3 bounceLightRotation = new Vector3(-90f, 0f, 0f);
-        public LightShadows bounceLightShadows = LightShadows.None;
 
         [Header("Object Spawner")]
         [Tooltip("Spawn offset relative to HEAD (eye level). x=right, y=up from eyes (negative=table level), z=forward.")]

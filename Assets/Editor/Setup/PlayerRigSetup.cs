@@ -85,70 +85,37 @@ namespace Plaga44.Editor.Setup
             return false;
         }
 
-        // Position rig: StratoJump (spawn 1km above ground) OR snap to ground.
-        // Controlled by cfg.stratoJumpHeight:
-        //   > 0: spawn at terrain ground + stratoJumpHeight (fun free-fall)
-        //   = 0: snap to terrain ground (instant landing)
-        // Sadza gracza na SRODKU mapy (laczny srodek wszystkich kafli terenu),
-        // na wysokosci gruntu z kafla pod tym punktem. Dziala dla 1 terenu i siatki 3x3.
+        // Position rig: srodek WhiteRoom, na podlodze (TOP podlogi = Y0 pokoju).
+        // cfg.stratoJumpHeight > 0 -> spawn tyle metrow nad podloga (free-fall).
+        // ZERO FALLBACK: brak WhiteRoom/Floor -> LogError + nie pozycjonuje
+        // (caller widzi blad, nie zgadujemy gruntu).
         private static bool PositionRig(GameObject rig, BootstrapConfig cfg)
         {
-            var terrains = Object.FindObjectsByType<Terrain>(FindObjectsSortMode.None);
-            if (terrains.Length == 0)
+            var room = GameObject.Find("WhiteRoom");
+            var floor = room != null ? room.transform.Find("Floor") : null;
+            if (floor == null)
             {
-                Debug.LogWarning($"{LOG} [SKIP] No terrain -- cannot position rig");
+                Debug.LogError($"{LOG} [FAIL] brak WhiteRoom/Floor w scenie -- nie pozycjonuje rigu (faza 1-WhiteRoom przed 6-PlayerRig?)");
                 return false;
             }
 
-            Bounds area = TerrainWorldBounds(terrains[0]);
-            for (int i = 1; i < terrains.Length; i++) area.Encapsulate(TerrainWorldBounds(terrains[i]));
-
-            Vector3 pos = rig.transform.position;
-            pos.x = area.center.x;
-            pos.z = area.center.z;
-
-            var ground = TerrainAt(terrains, pos);
-            if (ground == null)
-            {
-                Debug.LogWarning($"{LOG} [SKIP] srodek ({pos.x:F0},{pos.z:F0}) poza kaflami -- nie pozycjonuje");
-                return false;
-            }
-
-            float groundY = ground.SampleHeight(pos) + ground.transform.position.y;
+            // TOP podlogi = srodek + polowa grubosci (scale.y).
+            float groundY = floor.position.y + floor.lossyScale.y / 2f;
             float targetY = groundY + cfg.stratoJumpHeight;
+            Vector3 target = new Vector3(floor.position.x, targetY, floor.position.z);
             string mode = cfg.stratoJumpHeight > 0f ? $"StratoJump +{cfg.stratoJumpHeight:F0}m" : "Ground snap";
 
             var cur = rig.transform.position;
-            if (Mathf.Abs(cur.y - targetY) < 0.01f
-                && Mathf.Approximately(cur.x, pos.x) && Mathf.Approximately(cur.z, pos.z))
+            if ((cur - target).sqrMagnitude < 0.0001f)
             {
                 Debug.Log($"{LOG} [OK] Rig already at target ({mode})");
                 return false;
             }
 
             Undo.RecordObject(rig.transform, "PlayerRigSetup position rig");
-            rig.transform.position = new Vector3(pos.x, targetY, pos.z);
-            Debug.Log($"{LOG} [FIX] Rig -> ({pos.x:F0},{targetY:F2},{pos.z:F0}) ground={groundY:F2} kafli={terrains.Length} {mode}");
+            rig.transform.position = target;
+            Debug.Log($"{LOG} [FIX] Rig -> ({target.x:F0},{target.y:F2},{target.z:F0}) ground={groundY:F2} (WhiteRoom) {mode}");
             return true;
-        }
-
-        private static Bounds TerrainWorldBounds(Terrain t)
-        {
-            var size = t.terrainData.size;
-            return new Bounds(t.transform.position + size * 0.5f, size);
-        }
-
-        // Kafel zawierajacy punkt XZ. Null gdy poza wszystkimi -- caller decyduje (bez zgadywania).
-        private static Terrain TerrainAt(Terrain[] terrains, Vector3 p)
-        {
-            foreach (var t in terrains)
-            {
-                var o = t.transform.position;
-                var s = t.terrainData.size;
-                if (p.x >= o.x && p.x <= o.x + s.x && p.z >= o.z && p.z <= o.z + s.z)
-                    return t;
-            }
-            return null;
         }
 
         private static bool SetupCharacterController(GameObject rig, BootstrapConfig cfg)

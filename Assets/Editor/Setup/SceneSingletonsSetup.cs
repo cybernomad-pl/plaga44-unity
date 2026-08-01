@@ -18,7 +18,7 @@ namespace Plaga44.Editor.Setup
         {
             bool changed = false;
             changed |= EnsureSingleton<HamburgerMenu>("_HamburgerMenu", "HamburgerMenu", null);
-            changed |= EnsureSingleton<SkyRotator>("_SkyRotator", "SkyRotator", sr => sr.rotationSpeed = cfg.skyRotationSpeed);
+            // SkyRotator USUNIETY (2026-07-31): whiteboxing bez skyboxa -- nie ma czego obracac.
             changed |= EnsureSingleton<AvatarGallery>("_AvatarGallery", "AvatarGallery", null);
             changed |= EnsureSingleton<ItemBrowser>("_ItemGallery", "Item Gallery", null);
             return changed;
