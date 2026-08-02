@@ -7,30 +7,28 @@ using Plaga44.Editor.Setup;
 
 namespace Plaga44.Editor
 {
-    [InitializeOnLoad]
+    // BOOTSTRAP DISABLED (2026-08-02, decyzja Borysa):
+    // Nowe podejscie -- praca na TESTBED_BASE (klon Meta sampla), scena ma
+    // zostac NIETKNIETA. Auto-run ([InitializeOnLoad] + static ctor) USUNIETY:
+    // krok 0-ClearScene kasowal wszystkie root GO aktywnej sceny przy kazdym
+    // starcie edytora. Bootstrap odpala sie TYLKO recznie z menu CYBERNOMAD.
     public static class Bootstrap
     {
         private const string LOG = "[PLAGA44][Bootstrap]";
         private const string ConfigPath = "Assets/PLAGA44/Config/BootstrapConfig.asset";
-        private const string SessionKey = "Plaga44.Bootstrap.Done";
 
-        static Bootstrap() => EditorApplication.update += WaitForReady;
-
-        private static void WaitForReady()
-        {
-            if (EditorApplication.isCompiling || EditorApplication.isUpdating) return;
-
-            EditorApplication.update -= WaitForReady;
-
-            if (SessionState.GetBool(SessionKey, false)) return;
-            SessionState.SetBool(SessionKey, true);
-
-            Run();
-        }
-
-        [MenuItem("CYBERNOMAD/Bootstrap", false, 1)]
+        [MenuItem("CYBERNOMAD/Bootstrap (DISABLED -- manual only)", false, 1)]
         public static void Run()
         {
+            if (!EditorUtility.DisplayDialog("Bootstrap DISABLED",
+                "Bootstrap jest wylaczony (praca na TESTBED_BASE).\n" +
+                "Uruchomienie WYCZYSCI i przebuduje aktywna scene:\n" +
+                SceneManager.GetActiveScene().name + "\n\nNa pewno?",
+                "TAK, przebuduj scene", "Anuluj"))
+            {
+                Debug.Log($"{LOG} Anulowano (bootstrap disabled).");
+                return;
+            }
             var cfg = LoadConfig();
             if (cfg == null) return;
             EditorApplication.delayCall += () => RunSetup(cfg);

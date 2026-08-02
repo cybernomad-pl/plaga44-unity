@@ -1,0 +1,76 @@
+================================================================================
+2026-08-02 -- TESTBED_BASE: nowe podejscie + PlagaMenu (hamburger + lusterko)
+================================================================================
+
+KONTEKST
+--------
+Nowe podejscie: praca na TESTBED_BASE.unity (klon Meta ISDKLocomotion sample,
+Movement SDK 83) zamiast bootstrapowanej sceny. Sample daje gotowe: avatar
+z retargetingiem, locomotion, grab, mirror. Dostosowujemy minimalnie.
+
+ZMIANA 1: Bootstrap ROZBROJONY (Assets/Editor/Bootstrap.cs)
+-----------------------------------------------------------
+PRZED:  [InitializeOnLoad] static ctor -> EditorApplication.update
+        -> auto-run przy KAZDYM starcie edytora
+        -> krok 0-ClearScene KASOWAL wszystkie root GO aktywnej sceny (!)
+
+PO:     auto-run USUNIETY w calosci
+        menu "CYBERNOMAD/Bootstrap (DISABLED -- manual only)"
+        -> dialog potwierdzenia (pokazuje nazwe sceny ktora przebuduje)
+        -> dopiero po TAK leci stary pipeline
+
+ZMIANA 2: PlagaMenu (Assets/Scripts/UI/PlagaMenu.cs -- NOWY, zero zaleznosci
+od starego stacku: GameState/SettingsRegistry/HapticManager nietykane)
+---------------------------------------------------------------------------
+
+  scena TESTBED_BASE (edytor):  MirroredObjects AKTYWNE (scena nietknieta
+                                logika runtime -- chowa dopiero play mode)
+
+  play mode Start():
+      MirroredObjects.SetActive(false)     <- lusterko ukryte w grze
+      zapamietaj home pos/rot lusterka
+
+  lewy wklesly przycisk (OVRInput.Button.Start) = toggle:
+
+  OPEN                                     CLOSE
+  ----                                     -----
+  canvas "PLAGA '44                        canvas OFF
+    pre-alpha 0.0.3"                       MirroredObjects OFF
+    1.4m przed graczem,                      + powrot na home pos/rot
+    0.55m W GORE (nie                      Locomotor: przywroc stan
+    zaslania postaci)                      timeScale: przywroc
+  MirroredObjects ON
+    1.8m przed graczem
+    y = podloga riga
+    LookRotation(fwd) = TWARZA do gracza
+  Locomotor OFF (zero teleportu w pauzie)
+  timeScale = 0 (pauza swiata)
+
+  LUSTERKO -- geometria:
+
+        [ PLAGA '44 pre-alpha 0.0.3 ]      <- canvas, +0.55m nad linia wzroku
+                     O
+                    /|\    <- mirrored avatar: 1.8m, twarza do gracza,
+                    / \       odbicie L/P (MirrorTransforms, parowanie kosci),
+                              poza zyje z body trackingu (timeScale=0 nie mrozi
+   GRACZ ----------------->   LateUpdate MirrorTransforms)
+
+  Kierunek twarzy -- wyprowadzenie ze sceny sampla:
+    spawn = origin, patrzy +Z; lustro sampla na (0,0,0.5) identity rotation
+    i jest frontem do gracza => postac przy identity patrzy w -Z
+    => LookRotation(fwd gracza) = front do gracza w dowolnym miejscu.
+
+ZMIANA 3: TESTBED_BASE.unity -- chirurgiczny wpis YAML
+------------------------------------------------------
+  +GameObject "PlagaMenu" (root)   fileID 2000000001
+  +Transform                       fileID 2000000002  (m_Father: 0)
+  +MonoBehaviour -> PlagaMenu.cs   fileID 2000000003  (guid 9366067a...)
+  +SceneRoots.m_Roots += {2000000002}
+  Walidacja: 0 kolizji fileID. Nic wiecej w scenie nie ruszone.
+
+ZNANE RYZYKO (do 1. testu)
+--------------------------
+Jesli zrodlowy avatar (StylizedCharacterLocomotion) nie podaza rootem za
+rigiem przy teleportach, odbicie moze stanac z offsetem daleko od spawnu.
+W strefie startowej OK. Fix ewentualny: kompensacja offsetem bioder.
+================================================================================
